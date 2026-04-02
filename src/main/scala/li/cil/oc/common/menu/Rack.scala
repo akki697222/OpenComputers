@@ -51,7 +51,7 @@ class Rack(id: Int, playerInventory: Inventory, val rack: Container)
         (Seq(true) ++ (0 until math.min(MaxConnections - 1, mountable.getConnectableCount))
           .map(index => mountable.getConnectableAt(index) != null))
           .padTo(MaxConnections, false)
-      case _ => Seq.fill(MaxConnections)(false)
+      case _ => Array.fill(MaxConnections)(false)
       }).toArray)
         nbt.putBoolean("isRelayEnabled", te.isRelayEnabled)
       }

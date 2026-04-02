@@ -14,7 +14,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.gui.components.Button
 
 class Server(state: menu.Server, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name)
+  extends DynamicContainerScreen(state, playerInventory, name)
   with traits.LockedHotbar[menu.Server] {
 
   protected var powerButton: ImageButton = _

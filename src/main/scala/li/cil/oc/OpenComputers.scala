@@ -34,9 +34,9 @@ object OpenComputers {
 
   final val Name = "OpenComputers"
 
-  final val McVersion = "@MCVERSION@-forge"
+  final val McVersion = "1.18.2-forge"
 
-  final val Version = "@VERSION@"
+  final val Version = "1.9-snapshot"
 
   final val log: Logger = LogManager.getLogger(Name)
 
@@ -69,7 +69,7 @@ class OpenComputers {
 
   MinecraftForge.EVENT_BUS.register(OpenComputers.proxy)
   modBus.register(OpenComputers.proxy)
-  Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
+  Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile)
   OpenComputers.proxy.preInit()
   MinecraftForge.EVENT_BUS.register(ThreadPoolFactory)
   Mods.preInit() // Must happen after loading Settings but before registry events are fired.

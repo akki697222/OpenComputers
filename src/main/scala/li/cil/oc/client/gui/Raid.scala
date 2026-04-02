@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Inventory
 import com.mojang.blaze3d.vertex.PoseStack
 
 class Raid(state: menu.Raid, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   override def renderBg(stack: PoseStack, dt: Float, mouseX: Int, mouseY: Int) = {
     RenderSystem.setShaderColor(1, 1, 1, 1) // Required under Linux.

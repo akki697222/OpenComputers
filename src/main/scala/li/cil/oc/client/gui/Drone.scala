@@ -24,7 +24,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexFormat
 
 class Drone(state: menu.Drone, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name)
+  extends DynamicContainerScreen(state, playerInventory, name)
   with traits.DisplayBuffer {
 
   imageWidth = 176
@@ -139,10 +139,10 @@ class Drone(state: menu.Drone, playerInventory: Inventory, name: Component)
       val t = Tesselator.getInstance
       val r = t.getBuilder
       r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-      r.vertex(stack.last.pose, x, y, getBlitOffset).uv(0, offsetV).endVertex()
-      r.vertex(stack.last.pose, x, y + selectionSize, getBlitOffset).uv(0, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y + selectionSize, getBlitOffset).uv(1, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y, getBlitOffset).uv(1, offsetV).endVertex()
+      r.vertex(stack.last.pose, x, y, 0).uv(0, offsetV).endVertex()
+      r.vertex(stack.last.pose, x, y + selectionSize, 0).uv(0, offsetV + selectionStepV).endVertex()
+      r.vertex(stack.last.pose, x + selectionSize, y + selectionSize, 0).uv(1, offsetV + selectionStepV).endVertex()
+      r.vertex(stack.last.pose, x + selectionSize, y, 0).uv(1, offsetV).endVertex()
       t.end()
     }
   }

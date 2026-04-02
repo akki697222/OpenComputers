@@ -18,9 +18,10 @@ import com.mojang.blaze3d.vertex.VertexFormat
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.renderer.GameRenderer
 
 class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   imageHeight = 210
 
@@ -121,9 +122,7 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
   override protected def init(): Unit = {
     super.init()
 
-    relayButton = new ImageButton(leftPos + 101, topPos + 96, 65, 18, new Button.OnPress {
-      override def onPress(b: Button) = ClientPacketSender.sendRackRelayState(inventoryContainer, !inventoryContainer.isRelayEnabled)
-    }, Textures.GUI.ButtonRelay, new TextComponent(Localization.Rack.RelayDisabled), textIndent = 18)
+    relayButton = new ImageButton(leftPos + 101, topPos + 96, 65, 18, (_: Button) => ClientPacketSender.sendRackRelayState(inventoryContainer, !inventoryContainer.isRelayEnabled), Textures.GUI.ButtonRelay, new TextComponent(Localization.Rack.RelayDisabled), textIndent = 18)
     addRenderableWidget(relayButton)
 
     val (mw, mh) = hoverMasterSize
@@ -136,17 +135,13 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
         val (bx, by) = busStart(bus)
 
         {
-          val button = new ImageButton(leftPos + bx, topPos + by + offset + 1, mw, mh, new Button.OnPress {
-            override def onPress(b: Button) = onRackButton(mountable, 0, bus)
-          })
+          val button = new ImageButton(leftPos + bx, topPos + by + offset + 1, mw, mh, (_: Button) => onRackButton(mountable, 0, bus))
           addRenderableWidget(button)
           wireButtons(mountable)(0)(bus) = button
         }
 
         for (connectable <- 0 until 3) {
-          val button = new ImageButton(leftPos + bx, topPos + by + offset + 1 + mbh + sbh * connectable, sw, sh, new Button.OnPress {
-            override def onPress(b: Button) = onRackButton(mountable, connectable + 1, bus)
-          })
+          val button = new ImageButton(leftPos + bx, topPos + by + offset + 1 + mbh + sbh * connectable, sw, sh, (_: Button) => onRackButton(mountable, connectable + 1, bus))
           addRenderableWidget(button)
           wireButtons(mountable)(connectable + 1)(bus) = button
         }
@@ -154,9 +149,9 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
     }
   }
 
-  override def drawSecondaryForegroundLayer(stack: PoseStack, mouseX: Int, mouseY: Int) = {
+  override def drawSecondaryForegroundLayer(stack: PoseStack, mouseX: Int, mouseY: Int): Unit = {
     super.drawSecondaryForegroundLayer(stack, mouseX, mouseY)
-    RenderState.pushAttrib() // Prevents NEI render glitch.
+    RenderState.pushAttrib()
 
     RenderSystem.setShaderColor(1, 1, 1, 1)
     RenderState.makeItBlend()
@@ -178,7 +173,6 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
     for (mountable <- 0 until inventoryContainer.otherInventory.getContainerSize) {
       val presence = inventoryContainer.nodePresence(mountable)
 
-      // Draw connectable indicators next to item slots.
       val (cx, cy) = connectorStart(mountable)
       if (presence(0)) {
         drawRect(stack, cx, cy, mcw, mch, mcx, mcy)
@@ -213,7 +207,6 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
         }
       }
 
-      // Draw connection points on buses.
       val yOffset = mountable * (mbh + sbh * 3 + busGap)
       for (bus <- 0 until 5) {
         val (bx, by) = busStart(bus)
@@ -259,7 +252,7 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
   }
 
   override def drawSecondaryBackgroundLayer(stack: PoseStack): Unit = {
-    RenderSystem.setShaderColor(1, 1, 1, 1) // Required under Linux.
+    RenderSystem.setShaderColor(1, 1, 1, 1)
     RenderSystem.setShaderTexture(0, Textures.GUI.Rack)
     blit(stack, leftPos, topPos, 0, 0, imageWidth, imageHeight)
   }
@@ -269,13 +262,15 @@ class Rack(state: menu.Rack, playerInventory: Inventory, name: Component)
     val v0 = v / 256f
     val u1 = u0 + w / 256f
     val v1 = v0 + h / 256f
+    RenderSystem.setShader(() => GameRenderer.getPositionTexShader)
+    RenderSystem.setShaderTexture(0, Textures.GUI.Rack)
     val t = Tesselator.getInstance()
     val r = t.getBuilder
     r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-    r.vertex(stack.last.pose, x, y, windowZ).uv(u0, v0).endVertex()
-    r.vertex(stack.last.pose, x, y + h, windowZ).uv(u0, v1).endVertex()
-    r.vertex(stack.last.pose, x + w, y + h, windowZ).uv(u1, v1).endVertex()
-    r.vertex(stack.last.pose, x + w, y, windowZ).uv(u1, v0).endVertex()
+    r.vertex(stack.last.pose, x.toFloat,       y.toFloat,       windowZ).uv(u0, v0).endVertex() // 左上
+    r.vertex(stack.last.pose, x.toFloat,       (y + h).toFloat, windowZ).uv(u0, v1).endVertex() // 左下
+    r.vertex(stack.last.pose, (x + w).toFloat, (y + h).toFloat, windowZ).uv(u1, v1).endVertex() // 右下
+    r.vertex(stack.last.pose, (x + w).toFloat, y.toFloat,       windowZ).uv(u1, v0).endVertex() // 右上
     t.end()
   }
 }

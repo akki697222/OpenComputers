@@ -32,8 +32,22 @@ trait TextBuffer extends Environment with Tickable {
 
   // ----------------------------------------------------------------------- //
 
+  private def reapplyTierToBuffer(): Unit = {
+    // Re-apply tier-based limits before loading data. This guards against the
+    // case where the `buffer` lazy val was forced before `load(nbt)` ran
+    // (e.g. during network join scheduled by initialize()), which would leave
+    // it initialised with the default tier-0 (OneBit) depth even for a
+    // higher-tier screen.  setMaximumColorDepth only updates the `maxDepth`
+    // field; it does NOT touch the already-constructed data buffer, so calling
+    // it again here is safe and idempotent.
+    val (maxWidth, maxHeight) = Settings.screenResolutionsByTier(tier)
+    buffer.setMaximumResolution(maxWidth, maxHeight)
+    buffer.setMaximumColorDepth(Settings.screenDepthsByTier(tier))
+  }
+
   override def loadForServer(nbt: CompoundTag): Unit = {
     super.loadForServer(nbt)
+    reapplyTierToBuffer()
     buffer.loadData(nbt)
   }
 
@@ -45,6 +59,7 @@ trait TextBuffer extends Environment with Tickable {
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag): Unit = {
     super.loadForClient(nbt)
+    reapplyTierToBuffer()
     buffer.loadData(nbt)
   }
 

@@ -47,9 +47,6 @@ object ModelInitialization {
     registerModel(Constants.BlockName.RobotAfterimage, RobotAfterimageBlockLocation, null)
   }
 
-  // 1.18.2: ModelRegistryEvent → FMLClientSetupEvent
-  // 旧: onModelRegistration(event: ModelRegistryEvent) で登録していたアイテムモデルの
-  // ItemModelShaper 登録処理を FMLClientSetupEvent に移動した。
   @SubscribeEvent
   def onClientSetup(event: FMLClientSetupEvent): Unit = {
     val shaper = Minecraft.getInstance.getItemRenderer.getItemModelShaper
@@ -69,7 +66,6 @@ object ModelInitialization {
 
   // ----------------------------------------------------------------------- //
 
-  // 1.18.2: IItemProvider → ItemLike
   def registerModel(instance: ItemLike, id: String): Unit = {
     meshableItems += instance.asItem
   }
@@ -94,11 +90,7 @@ object ModelInitialization {
   }
 
   // ---------------------------------------------------------------------------
-  // BlockModelShapes.stateToModelLocation の手動実装。
-  // BlockState のプロパティをアルファベット順に "key=value,..." に並べ、
-  // ModelResourceLocation のバリアント文字列として使用する。
-  // これは Minecraft 本体と同一のロジック。
-  // ---------------------------------------------------------------------------
+
   private def stateToModelLocation(state: BlockState): ModelResourceLocation = {
     import scala.jdk.CollectionConverters._
     val blockKey = Registry.BLOCK.getKey(state.getBlock)
@@ -136,20 +128,14 @@ object ModelInitialization {
         registry.get(originalLocation) match {
           case original: BakedModel =>
             val overrides = new ItemOverrides {
-              // 1.18.2: resolve に seed: Int が追加された
               override def resolve(base: BakedModel, stack: ItemStack, world: ClientLevel, holder: LivingEntity, seed: Int): BakedModel =
                 Option(custom.getModelLocation(stack)).map(registry.get).getOrElse(original)
             }
-            // 1.18.2: IDynamicBakedModel は廃止。SmartBlockModelBase（BakedModel の実装）を使う。
-            // IModelData 対応 getQuads を override して original に委譲する匿名クラスを生成。
             val fake = new SmartBlockModelBase {
-              // 3引数版（@Deprecated）
               @Deprecated
               override def getQuads(state: BlockState, dir: Direction, rand: Random): java.util.List[net.minecraft.client.renderer.block.model.BakedQuad] =
                 original.getQuads(state, dir, rand)
 
-              // 4引数版（IModelData付き）— SmartBlockModelBase では定義されていないため、
-              // Forge の BakedModel デフォルト実装が呼ぶ。必要なら override する。
               override def getQuads(state: BlockState, dir: Direction, rand: Random, data: IModelData): java.util.List[net.minecraft.client.renderer.block.model.BakedQuad] =
                 original.getQuads(state, dir, rand, data)
 

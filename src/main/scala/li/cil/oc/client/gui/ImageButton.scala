@@ -1,7 +1,6 @@
 package li.cil.oc.client.gui
 
 import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.Tesselator
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
@@ -10,13 +9,12 @@ import li.cil.oc.client.Textures
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiComponent
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.TextComponent
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
-import com.mojang.blaze3d.vertex.BufferBuilder
-import com.mojang.blaze3d.vertex.Tesselator
 
 @OnlyIn(Dist.CLIENT)
 class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
@@ -34,7 +32,7 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
   var toggled = false
   var hoverOverride = false
 
-  override def renderButton(stack: PoseStack, mouseX: Int, mouseY: Int, partialTicks: Float) = {
+  override def renderButton(stack: PoseStack, mouseX: Int, mouseY: Int, partialTicks: Float): Unit = {
     if (visible) {
       if (image != null) {
         RenderSystem.setShaderTexture(0, image)
@@ -42,24 +40,17 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
       RenderSystem.setShaderColor(1, 1, 1, 1)
       isHovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height
 
-      val x0 = x
-      val x1 = x + width
-      val y0 = y
-      val y1 = y + height
+      val x0 = x.toFloat
+      val x1 = (x + width).toFloat
+      val y0 = y.toFloat
+      val y1 = (y + height).toFloat
 
       val drawHover = hoverOverride || (isHovered && active)
 
       val t = Tesselator.getInstance
       val r = t.getBuilder
+
       if (image != null) {
-        val texW = if (textureWidth > 0) textureWidth else w * (if (canToggle) 2 else 1)
-        val texH = if (textureHeight > 0) textureHeight else h * 2
-
-        val u0 = if (toggled) 0.5f else 0f
-        val u1 = u0 + (if (canToggle) 0.5f else 1f)
-        val v0 = if (drawHover) 0.5f else 0f
-        val v1 = v0 + 0.5f
-
         val (ru0, ru1, rv0, rv1) = if (textureWidth > 0 && textureHeight > 0) {
           val texW = textureWidth.toFloat
           val texH = textureHeight.toFloat
@@ -69,25 +60,30 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
           val tv1 = tv0 + h.toFloat / texH
           (tu0, tu1, tv0, tv1)
         } else {
+          val u0 = if (toggled) 0.5f else 0f
+          val u1 = u0 + (if (canToggle) 0.5f else 1f)
+          val v0 = if (drawHover) 0.5f else 0f
+          val v1 = v0 + 0.5f
           (u0, u1, v0, v1)
         }
 
+        RenderSystem.setShader(() => GameRenderer.getPositionTexShader)
         r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-        r.vertex(stack.last.pose, x0.toFloat, y1.toFloat, getBlitOffset.toFloat).uv(ru0, rv1).endVertex()
-        r.vertex(stack.last.pose, x1.toFloat, y1.toFloat, getBlitOffset.toFloat).uv(ru1, rv1).endVertex()
-        r.vertex(stack.last.pose, x1.toFloat, y0.toFloat, getBlitOffset.toFloat).uv(ru1, rv0).endVertex()
-        r.vertex(stack.last.pose, x0.toFloat, y0.toFloat, getBlitOffset.toFloat).uv(ru0, rv0).endVertex()
+        r.vertex(stack.last.pose, x0, y0, 0f).uv(ru0, rv0).endVertex() // 左上
+        r.vertex(stack.last.pose, x1, y0, 0f).uv(ru1, rv0).endVertex() // 右上
+        r.vertex(stack.last.pose, x1, y1, 0f).uv(ru1, rv1).endVertex() // 右下
+        r.vertex(stack.last.pose, x0, y1, 0f).uv(ru0, rv1).endVertex() // 左下
         t.end()
-      }
-      else {
+      } else {
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()
         val alpha = if (drawHover) 0.8f else 0.4f
+        RenderSystem.setShader(() => GameRenderer.getPositionColorShader)
         r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-        r.vertex(stack.last.pose, x0.toFloat, y1.toFloat, getBlitOffset.toFloat).color(1f, 1f, 1f, alpha).endVertex()
-        r.vertex(stack.last.pose, x1.toFloat, y1.toFloat, getBlitOffset.toFloat).color(1f, 1f, 1f, alpha).endVertex()
-        r.vertex(stack.last.pose, x1.toFloat, y0.toFloat, getBlitOffset.toFloat).color(1f, 1f, 1f, alpha).endVertex()
-        r.vertex(stack.last.pose, x0.toFloat, y0.toFloat, getBlitOffset.toFloat).color(1f, 1f, 1f, alpha).endVertex()
+        r.vertex(stack.last.pose, x0, y0, 0f).color(1f, 1f, 1f, alpha).endVertex() // 左上
+        r.vertex(stack.last.pose, x1, y0, 0f).color(1f, 1f, 1f, alpha).endVertex() // 右上
+        r.vertex(stack.last.pose, x1, y1, 0f).color(1f, 1f, 1f, alpha).endVertex() // 右下
+        r.vertex(stack.last.pose, x0, y1, 0f).color(1f, 1f, 1f, alpha).endVertex() // 左下
         t.end()
         RenderSystem.disableBlend()
       }

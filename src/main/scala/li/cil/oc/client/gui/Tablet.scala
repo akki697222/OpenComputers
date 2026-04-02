@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 
 class Tablet(state: menu.Tablet, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name)
+  extends DynamicContainerScreen(state, playerInventory, name)
   with traits.LockedHotbar[menu.Tablet] {
 
   override def lockedStack = inventoryContainer.stack

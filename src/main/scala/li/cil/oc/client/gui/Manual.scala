@@ -1,27 +1,18 @@
 package li.cil.oc.client.gui
 
-import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.Localization
-import li.cil.oc.api
-import li.cil.oc.client.Textures
+import com.mojang.blaze3d.platform.InputConstants
+import com.mojang.blaze3d.vertex.PoseStack
+import li.cil.oc.{Localization, api}
 import li.cil.oc.client.renderer.markdown.Document
-import li.cil.oc.client.renderer.markdown.segment.InteractiveSegment
-import li.cil.oc.client.renderer.markdown.segment.Segment
-import li.cil.oc.client.{Manual => ManualAPI}
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.screens
+import li.cil.oc.client.renderer.markdown.segment.{InteractiveSegment, Segment}
+import li.cil.oc.client.{Textures, Manual => ManualAPI}
+import net.minecraft.client.KeyMapping
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens
+import net.minecraft.network.chat.{Component, TextComponent}
 import org.lwjgl.glfw.GLFW
 
 import scala.jdk.CollectionConverters._
-import scala.collection.JavaConverters.{asJavaIterable, seqAsJavaList}
-import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraft.network.chat.TextComponent
-import net.minecraft.client.KeyMapping
-import com.mojang.blaze3d.vertex.PoseStack
-import net.minecraft.network.chat.FormattedText
-import com.mojang.blaze3d.platform.InputConstants
-import net.minecraft.network.chat.Component
 
 class Manual extends screens.Screen(TextComponent.EMPTY) with traits.Window {
   final val documentMaxWidth = 230
@@ -64,7 +55,7 @@ class Manual extends screens.Screen(TextComponent.EMPTY) with traits.Window {
   def refreshPage(): Unit = {
     val content = Option(api.Manual.contentFor(ManualAPI.history.top.path)).
       getOrElse(Iterable("Document not found: " + ManualAPI.history.top.path).asJava)
-    document = Document.parse(content)
+    document = Document.parse(content.asScala)
     documentHeight = Document.height(document, documentMaxWidth, font)
     scrollTo(offset)
   }
@@ -116,7 +107,7 @@ class Manual extends screens.Screen(TextComponent.EMPTY) with traits.Window {
     for ((tab, i) <- ManualAPI.tabs.zipWithIndex if i < maxTabsPerSide) {
       val button = renderables.get(i).asInstanceOf[ImageButton]
       stack.pushPose()
-      stack.translate(button.x + 5, button.y + 5, getBlitOffset)
+      stack.translate(button.x + 5, button.y + 5, 0)
       tab.renderer.render(stack)
       stack.popPose()
     }
@@ -143,7 +134,7 @@ class Manual extends screens.Screen(TextComponent.EMPTY) with traits.Window {
     }
 
     if (canScroll && (isCoordinateOverScrollBar(mouseX - leftPos, mouseY - topPos) || isScrolling)) {
-      val lines = seqAsJavaList(Seq(new TextComponent(s"${100 * offset / maxOffset}%")))
+      val lines = Seq(new TextComponent(s"${100 * offset / maxOffset}%")).asJava
       renderComponentTooltip(stack, lines, leftPos + scrollPosX + scrollWidth, scrollButton.y + scrollButton.getHeight + 1, font)
     }
   }

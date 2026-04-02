@@ -2,12 +2,10 @@ package li.cil.oc.client.gui
 
 import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.Localization
 import li.cil.oc.client.Textures
 import li.cil.oc.common
 import li.cil.oc.common.menu.ComponentSlot
 import li.cil.oc.common.menu.AbstractMenu
-import li.cil.oc.integration.Mods
 import li.cil.oc.integration.util.ItemSearch
 import li.cil.oc.util.RenderState
 import li.cil.oc.util.StackOption
@@ -16,14 +14,11 @@ import net.minecraft.client.gui.GuiComponent
 import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.inventory.{AbstractContainerMenu, Slot}
-import org.lwjgl.opengl.GL11
 
-import scala.collection.convert.ImplicitConversionsToJava._
-import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.network.chat.Component
 
-abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv: Inventory, title: Component)
-  extends CustomGuiContainer(container, inv, title) {
+abstract class DynamicContainerScreen[C <: AbstractContainerMenu](container: C, inv: Inventory, title: Component)
+  extends CustomContainerScreen(container, inv, title) {
 
   protected var hoveredStackNEI: StackOption = EmptyStack
 
@@ -89,7 +84,8 @@ abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv
           drawDisabledSlot(stack, component)
         }
       case _ =>
-        setBlitOffset(getBlitOffset + 1)
+        stack.pushPose()
+        stack.translate(0, 0, 1)
         if (!isInPlayerInventory(slot)) {
           drawSlotBackground(stack, slot.x - 1, slot.y - 1)
         }
@@ -97,20 +93,20 @@ abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv
           case component: ComponentSlot if !slot.hasItem =>
             if (component.tierIcon != null) {
               Textures.bind(component.tierIcon)
-              GuiComponent.blit(stack, slot.x, slot.y, getBlitOffset, 0, 0, 16, 16, 16, 16)
+              GuiComponent.blit(stack, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16)
             }
             if (component.hasBackground) {
               Textures.bind(component.getBackgroundLocation)
-              GuiComponent.blit(stack, slot.x, slot.y, getBlitOffset, 0, 0, 16, 16, 16, 16)
+              GuiComponent.blit(stack, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16)
             }
           case _ =>
         }
-        setBlitOffset(getBlitOffset - 1)
+        stack.popPose()
     }
     RenderSystem.disableBlend()
   }
 
-  protected def drawSlotHighlight(matrix: PoseStack, slot: Slot): Unit = {
+  protected def drawSlotHighlight(stack: PoseStack, slot: Slot): Unit = {
     if (minecraft.player.containerMenu.getCarried.isEmpty) slot match {
       case component: ComponentSlot if component.slot == common.Slot.None || component.tier == common.Tier.None => // Ignore.
       case _ =>
@@ -127,12 +123,13 @@ abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv
           }
         }
         if (drawHighlight) {
-          setBlitOffset(getBlitOffset + 100)
-          fillGradient(matrix,
+          stack.pushPose()
+          stack.translate(0, 0, 100)
+          fillGradient(stack,
             slot.x, slot.y,
             slot.x + 16, slot.y + 16,
             0x80FFFFFF, 0x80FFFFFF)
-          setBlitOffset(getBlitOffset - 100)
+          stack.popPose()
         }
     }
   }
@@ -145,7 +142,7 @@ abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv
   protected def drawDisabledSlot(stack: PoseStack, slot: ComponentSlot): Unit = {
     RenderSystem.setShaderColor(1, 1, 1, 1)
     Textures.bind(slot.tierIcon)
-    GuiComponent.blit(stack, slot.x, slot.y, getBlitOffset, 0, 0, 16, 16, 16, 16)
+    GuiComponent.blit(stack, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16)
   }
 
   protected def drawSlotBackground(stack: PoseStack, x: Int, y: Int): Unit = {
@@ -154,10 +151,10 @@ abstract class DynamicGuiContainer[C <: AbstractContainerMenu](container: C, inv
     val t = Tesselator.getInstance
     val r = t.getBuilder
     r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-    r.vertex(stack.last.pose, x, y + 18, getBlitOffset + 1).uv(0, 1).endVertex()
-    r.vertex(stack.last.pose, x + 18, y + 18, getBlitOffset + 1).uv(1, 1).endVertex()
-    r.vertex(stack.last.pose, x + 18, y, getBlitOffset + 1).uv(1, 0).endVertex()
-    r.vertex(stack.last.pose, x, y, getBlitOffset + 1).uv(0, 0).endVertex()
+    r.vertex(stack.last.pose, x, y + 18, 1).uv(0, 1).endVertex()
+    r.vertex(stack.last.pose, x + 18, y + 18, 1).uv(1, 1).endVertex()
+    r.vertex(stack.last.pose, x + 18, y, 1).uv(1, 0).endVertex()
+    r.vertex(stack.last.pose, x, y, 1).uv(0, 0).endVertex()
     t.end()
   }
 

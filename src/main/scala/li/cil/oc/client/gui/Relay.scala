@@ -17,7 +17,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
 
 class Relay(state: menu.Relay, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   private val format = new DecimalFormat("#.##hz")
 
@@ -36,10 +36,10 @@ class Relay(state: menu.Relay, playerInventory: Inventory, name: Component)
     val t = Tesselator.getInstance
     val r = t.getBuilder
     r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-    r.vertex(stack.last.pose, x, y + h, getBlitOffset).uv(0, 1).endVertex()
-    r.vertex(stack.last.pose, x + w, y + h, getBlitOffset).uv(1, 1).endVertex()
-    r.vertex(stack.last.pose, x + w, y, getBlitOffset).uv(1, 0).endVertex()
-    r.vertex(stack.last.pose, x, y, getBlitOffset).uv(0, 0).endVertex()
+    r.vertex(stack.last.pose, x, y + h, 0).uv(0, 1).endVertex()
+    r.vertex(stack.last.pose, x + w, y + h, 0).uv(1, 1).endVertex()
+    r.vertex(stack.last.pose, x + w, y, 0).uv(1, 0).endVertex()
+    r.vertex(stack.last.pose, x, y, 0).uv(0, 0).endVertex()
     t.end()
   }
 

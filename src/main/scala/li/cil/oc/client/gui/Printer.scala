@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory
 import com.mojang.blaze3d.vertex.PoseStack
 
 class Printer(state: menu.Printer, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   imageWidth = 176
   imageHeight = 166

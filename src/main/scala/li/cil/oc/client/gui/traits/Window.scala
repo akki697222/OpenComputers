@@ -34,7 +34,7 @@ trait Window extends Screen {
   override def render(stack: PoseStack, mouseX: Int, mouseY: Int, dt: Float): Unit = {
     RenderSystem.setShaderTexture(0, backgroundImage)
     // Texture width and height are intentionally backwards.
-    GuiComponent.blit(stack, leftPos, topPos, getBlitOffset, 0, 0, imageWidth, imageHeight, windowHeight, windowWidth)
+    GuiComponent.blit(stack, leftPos, topPos, 0, 0, 0, imageWidth, imageHeight, imageWidth, imageHeight)
 
     super.render(stack, mouseX, mouseY, dt)
   }

@@ -1,6 +1,6 @@
 package li.cil.oc.client.renderer.markdown.segment
 
-import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.math.Vector4f
 import li.cil.oc.api.manual.ImageRenderer
@@ -51,28 +51,23 @@ private[markdown] class RenderSegment(val parent: Segment, val title: String, va
     stack.scale(s, s, s)
 
     RenderSystem.enableBlend()
-    //RenderSystem.enableAlphaTest()
-    // Disabled by text rendering above it (default state is disabled).
     RenderSystem.enableDepthTest()
 
     if (hovered.isDefined) {
       RenderSystem.setShaderColor(1, 1, 1, 0.15f)
       RenderSystem.disableTexture()
-      GL11.glBegin(GL11.GL_QUADS)
+
       val matrix = stack.last.pose
-      val vec = new Vector4f(0, 0, 0, 1)
-      vec.transform(matrix)
-      GL11.glVertex3f(vec.x, vec.y, vec.z)
-      vec.set(0, imageRenderer.getHeight, 0, 1)
-      vec.transform(matrix)
-      GL11.glVertex3f(vec.x, vec.y, vec.z)
-      vec.set(imageRenderer.getWidth, imageRenderer.getHeight, 0, 1)
-      vec.transform(matrix)
-      GL11.glVertex3f(vec.x, vec.y, vec.z)
-      vec.set(imageRenderer.getWidth, 0, 0, 1)
-      vec.transform(matrix)
-      GL11.glVertex3f(vec.x, vec.y, vec.z)
-      GL11.glEnd()
+      val tesselator = Tesselator.getInstance()
+      val buffer = tesselator.getBuilder
+
+      buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION)
+      buffer.vertex(matrix, 0, 0, 0).endVertex()
+      buffer.vertex(matrix, 0, imageRenderer.getHeight, 0).endVertex()
+      buffer.vertex(matrix, imageRenderer.getWidth, imageRenderer.getHeight, 0).endVertex()
+      buffer.vertex(matrix, imageRenderer.getWidth, 0, 0).endVertex()
+      tesselator.end()
+
       RenderSystem.enableTexture()
     }
 
@@ -81,8 +76,6 @@ private[markdown] class RenderSegment(val parent: Segment, val title: String, va
     imageRenderer.render(stack, mouseX - x, mouseY - y)
 
     RenderSystem.disableBlend()
-    //RenderSystem.disableAlphaTest()
-    //RenderSystem.disableLighting()
 
     stack.popPose()
 

@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.Button
 import com.mojang.blaze3d.vertex.PoseStack
 
 class Case(state: menu.Case, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   protected var powerButton: ImageButton = _
 

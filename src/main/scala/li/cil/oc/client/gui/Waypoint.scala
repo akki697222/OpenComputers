@@ -27,7 +27,7 @@ class Waypoint(val waypoint: tileentity.Waypoint) extends Screen(TextComponent.E
     }
   }
 
-  override def isPauseScreen(): Boolean = false
+  override def isPauseScreen: Boolean = false
 
   override protected def init(): Unit = {
     super.init()

@@ -428,6 +428,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   private final val HasPowerTag = Settings.namespace + "hasPower"
   private final val MaxWidthTag = Settings.namespace + "maxWidth"
   private final val MaxHeightTag = Settings.namespace + "maxHeight"
+  private final val MaxDepthTag = Settings.namespace + "maxDepth"
   private final val PreciseTag = Settings.namespace + "precise"
   private final val ViewportWidthTag = Settings.namespace + "viewportWidth"
   private final val ViewportHeightTag = Settings.namespace + "viewportHeight"
@@ -458,6 +459,14 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
       val maxWidth = nbt.getInt(MaxWidthTag)
       val maxHeight = nbt.getInt(MaxHeightTag)
       maxResolution = (maxWidth, maxHeight)
+    }
+    // Restore maxDepth so that getMaximumColorDepth() returns the correct tier
+    // even if setMaximumColorDepth() was not called after construction (e.g.
+    // when the buffer lazy val was initialised before load(nbt) ran).
+    if (nbt.contains(MaxDepthTag)) {
+      val depthValues = api.internal.TextBuffer.ColorDepth.values
+      val ordinal = nbt.getInt(MaxDepthTag) min (depthValues.length - 1) max 0
+      maxDepth = depthValues(ordinal)
     }
     precisionMode = nbt.getBoolean(PreciseTag)
 
@@ -495,6 +504,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
     nbt.putBoolean(HasPowerTag, hasPower)
     nbt.putInt(MaxWidthTag, maxResolution._1)
     nbt.putInt(MaxHeightTag, maxResolution._2)
+    nbt.putInt(MaxDepthTag, maxDepth.ordinal)
     nbt.putBoolean(PreciseTag, precisionMode)
     nbt.putInt(ViewportWidthTag, viewport._1)
     nbt.putInt(ViewportHeightTag, viewport._2)

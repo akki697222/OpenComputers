@@ -13,13 +13,11 @@ import net.minecraft.core.Direction
 import com.mojang.math.Vector3f
 import net.minecraftforge.common.MinecraftForge
 
-// 1.18.2: BlockEntityRendererProvider[T] に変更
 object RackRenderer extends BlockEntityRendererProvider[Rack] {
   override def create(ctx: BlockEntityRendererProvider.Context): RackRenderer =
     new RackRenderer()
 }
 
-// 1.18.2: コンストラクタ引数なし
 class RackRenderer extends TileEntityRenderer[Rack] {
   private final val vOffset = 2 / 16f
   private final val vSize   = 3 / 16f

@@ -19,14 +19,14 @@ import net.minecraft.client.renderer.Sheets
 import com.mojang.blaze3d.vertex.Tesselator
 import net.minecraft.network.chat.TextComponent
 
-abstract class CustomGuiContainer[C <: AbstractContainerMenu](val inventoryContainer: C, inv: Inventory, title: Component)
+abstract class CustomContainerScreen[C <: AbstractContainerMenu](val inventoryContainer: C, inv: Inventory, title: Component)
   extends AbstractContainerScreen[C](inventoryContainer, inv, title) with WidgetContainer {
 
   override def windowX = leftPos
 
   override def windowY = topPos
 
-  override def windowZ = getBlitOffset
+  override def windowZ = 0
 
   override def isPauseScreen = false
 

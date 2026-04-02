@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component
 import com.mojang.blaze3d.vertex.PoseStack
 
 class Disassembler(state: menu.Disassembler, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   val progress = addCustomWidget(new ProgressBar(18, 65))
 

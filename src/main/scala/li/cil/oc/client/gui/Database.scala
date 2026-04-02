@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
 
 class Database(state: menu.Database, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name)
+  extends DynamicContainerScreen(state, playerInventory, name)
   with traits.LockedHotbar[menu.Database] {
 
   imageHeight = 256

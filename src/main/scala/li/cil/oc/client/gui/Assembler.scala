@@ -16,7 +16,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import scala.jdk.CollectionConverters._
 
 class Assembler(val state: menu.Assembler, playerInventory: Inventory, name: Component)
-  extends DynamicGuiContainer(state, playerInventory, name) {
+  extends DynamicContainerScreen(state, playerInventory, name) {
 
   imageWidth = 176
   imageHeight = 192
