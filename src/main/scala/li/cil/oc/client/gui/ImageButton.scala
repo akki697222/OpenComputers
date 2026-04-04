@@ -67,23 +67,31 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
           (u0, u1, v0, v1)
         }
 
+        val z = this.getBlitOffset().toFloat
         RenderSystem.setShader(() => GameRenderer.getPositionTexShader)
+        RenderSystem.enableBlend()
+        RenderSystem.defaultBlendFunc()
+        RenderSystem.enableDepthTest()
+        
         r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-        r.vertex(stack.last.pose, x0, y0, 0f).uv(ru0, rv0).endVertex() // 左上
-        r.vertex(stack.last.pose, x1, y0, 0f).uv(ru1, rv0).endVertex() // 右上
-        r.vertex(stack.last.pose, x1, y1, 0f).uv(ru1, rv1).endVertex() // 右下
-        r.vertex(stack.last.pose, x0, y1, 0f).uv(ru0, rv1).endVertex() // 左下
+        r.vertex(stack.last.pose, x0, y1, z).uv(ru0, rv1).endVertex() // 左下 (LB)
+        r.vertex(stack.last.pose, x1, y1, z).uv(ru1, rv1).endVertex() // 右下 (RB)
+        r.vertex(stack.last.pose, x1, y0, z).uv(ru1, rv0).endVertex() // 右上 (RT)
+        r.vertex(stack.last.pose, x0, y0, z).uv(ru0, rv0).endVertex() // 左上 (LT)
         t.end()
+        RenderSystem.disableBlend()
       } else {
         RenderSystem.enableBlend()
         RenderSystem.defaultBlendFunc()
+        RenderSystem.enableDepthTest()
         val alpha = if (drawHover) 0.8f else 0.4f
+        val z = this.getBlitOffset().toFloat
         RenderSystem.setShader(() => GameRenderer.getPositionColorShader)
         r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-        r.vertex(stack.last.pose, x0, y0, 0f).color(1f, 1f, 1f, alpha).endVertex() // 左上
-        r.vertex(stack.last.pose, x1, y0, 0f).color(1f, 1f, 1f, alpha).endVertex() // 右上
-        r.vertex(stack.last.pose, x1, y1, 0f).color(1f, 1f, 1f, alpha).endVertex() // 右下
-        r.vertex(stack.last.pose, x0, y1, 0f).color(1f, 1f, 1f, alpha).endVertex() // 左下
+        r.vertex(stack.last.pose, x0, y1, z).color(1f, 1f, 1f, alpha).endVertex() // 左下
+        r.vertex(stack.last.pose, x1, y1, z).color(1f, 1f, 1f, alpha).endVertex() // 右下
+        r.vertex(stack.last.pose, x1, y0, z).color(1f, 1f, 1f, alpha).endVertex() // 右上
+        r.vertex(stack.last.pose, x0, y0, z).color(1f, 1f, 1f, alpha).endVertex() // 左上
         t.end()
         RenderSystem.disableBlend()
       }

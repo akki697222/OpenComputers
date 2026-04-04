@@ -22,6 +22,8 @@ public class ItemStackTabIconRenderer implements TabIconRenderer {
     @OnlyIn(Dist.CLIENT)
     @Override
     public void render(PoseStack matrix) {
-        
+        com.mojang.math.Vector4f vec = new com.mojang.math.Vector4f(0, 0, 0, 1);
+        vec.transform(matrix.last().pose());
+        net.minecraft.client.Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, (int) vec.x(), (int) vec.y());
     }
 }
