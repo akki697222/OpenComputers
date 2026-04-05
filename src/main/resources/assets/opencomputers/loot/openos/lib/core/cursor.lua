@@ -150,9 +150,6 @@ function core_cursor.vertical:handle(name, char, code)
     self:update(remainder, false)
   elseif name == "touch" or name == "drag" then
     core_cursor.touch(self, char, code)
-  elseif name == "text_input" then
-    self.cache = nil
-    self:update(char)
   elseif name == "interrupted" then
     self:echo("^C\n")
     return false, name
@@ -224,7 +221,6 @@ function core_cursor.read(cursor)
   {
     key_down = tty.keyboard,
     clipboard = tty.keyboard,
-    text_input = tty.keyboard,
     touch = tty.screen,
     drag = tty.screen,
     drop = tty.screen

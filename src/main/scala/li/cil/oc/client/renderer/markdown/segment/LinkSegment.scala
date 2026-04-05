@@ -1,7 +1,6 @@
 package li.cil.oc.client.renderer.markdown.segment
 
-import java.net.URI
-
+import java.net.{MalformedURLException, URI, URL}
 import li.cil.oc.Localization
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
@@ -45,16 +44,16 @@ private[markdown] class LinkSegment(parent: Segment, text: String, val url: Stri
     (r << 16) | (g << 8) | b
   }
 
-  private def handleUrl(url: String): Unit = {
+  private def handleUrl(urlStr: String): Unit = {
     // Pretty much copy-paste from GuiChat.
+    var url: URL = null
     try {
-      val desktop = Class.forName("java.awt.Desktop")
-      val instance = desktop.getMethod("getDesktop").invoke(null)
-      desktop.getMethod("browse", classOf[URI]).invoke(instance, new URI(url))
+      url = new URL(urlStr)
+    } catch {
+      case _: MalformedURLException =>
+        Minecraft.getInstance.player.sendMessage(Localization.Chat.WarningLink("Malformed URL"), Util.NIL_UUID)
     }
-    catch {
-      case t: Throwable => Minecraft.getInstance.player.sendMessage(Localization.Chat.WarningLink(t.toString), Util.NIL_UUID)
-    }
+    Util.getPlatform.openUrl(url)
   }
 
   override def toString(format: MarkupFormat.Value): String = format match {
