@@ -34,6 +34,8 @@ import net.minecraftforge.common.extensions.IForgeBlock
 class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.StateAware with traits.Tickable {
   val shape = VoxelShapes.box(0.1, 0.1, 0.1, 0.9, 0.9, 0.9)
 
+  override def getRenderShape(state: BlockState): net.minecraft.world.level.block.RenderShape = net.minecraft.world.level.block.RenderShape.ENTITYBLOCK_ANIMATED
+
   override val getDescriptionId = "robot"
 
   var moving = new ThreadLocal[Option[tileentity.Robot]] {

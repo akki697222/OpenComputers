@@ -127,7 +127,7 @@ trait VirtualFileSystem extends OutputStreamFileSystem {
   // ----------------------------------------------------------------------- //
 
   override def loadData(nbt: CompoundTag): Unit = {
-    println(s"Loading file data, NBT contains root: ${nbt.contains("root")}")
+    //println(s"Loading file data, NBT contains root: ${nbt.contains("root")}")
     if (nbt.contains("root", 10)) {
       root.loadData(nbt.getCompound("root"))
     }

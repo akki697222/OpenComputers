@@ -17,7 +17,7 @@ public class RenderTypes extends RenderType {
 
     public static final RenderType ROBOT_CHASSIS = create(OpenComputers.ID() + ":robot_chassis",
             DefaultVertexFormat.BLOCK, VertexFormat.Mode.TRIANGLES, 1024, true, false, CompositeState.builder()
-                    .setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
+                    .setShaderState(RENDERTYPE_CUTOUT_SHADER)
                     .setTextureState(ROBOT_CHASSIS_TEXTURE)
                     .setLightmapState(LIGHTMAP)
                     .createCompositeState(true));
@@ -32,7 +32,7 @@ public class RenderTypes extends RenderType {
     private static RenderType createUpgrade(String name, ResourceLocation texture) {
         return create(OpenComputers.ID() + ":upgrade_" + name,
                 DefaultVertexFormat.BLOCK, VertexFormat.Mode.QUADS, 2048, true, false, CompositeState.builder()
-                        .setShaderState(RENDERTYPE_ENTITY_CUTOUT_SHADER)
+                        .setShaderState(RENDERTYPE_CUTOUT_SHADER)
                         .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
                         .setLightmapState(LIGHTMAP)
                         .createCompositeState(true));

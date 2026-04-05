@@ -22,6 +22,8 @@ import net.minecraft.world.{InteractionHand, InteractionResult => ActionResultTy
 import java.util.Random
 
 class RobotAfterimage(props: Properties) extends SimpleBlock(props) with traits.Tickable {
+  override def getRenderShape(state: BlockState): net.minecraft.world.level.block.RenderShape = net.minecraft.world.level.block.RenderShape.INVISIBLE
+
   override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
     findMovingRobot(world, pos) match {
       case Some(robot) => robot.info.createItemStack()

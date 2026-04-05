@@ -77,6 +77,8 @@ class Robot(pos: BlockPos, state: BlockState)
 
   val info = new RobotData()
 
+  override def getBlockPos: BlockPos = if (proxy != null) proxy.getBlockPos else super.getBlockPos
+
   val bot: component.Robot = if (isServer) new component.Robot(this) else null
 
   val fluidCap: LazyOptional[IFluidHandler] = LazyOptional.of(new NonNullSupplier[IFluidHandler] {

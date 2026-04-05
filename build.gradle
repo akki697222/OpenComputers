@@ -164,9 +164,9 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compileOnly(group: 'org.scala-lang', name: 'scala-library', version: "2.13.10")
-    compileOnly(group: 'org.typelevel', name: "cats-core_2.13", version: '2.8.1-kotori')
-    runtimeOnly(group: "com.kotori316", name: "ScalableCatsForce".toLowerCase(), version: "2.13.10-build-12", classifier: "with-library") {
+    compileOnly("org.scala-lang:scala-library:2.13.10")
+    compileOnly("org.typelevel:cats-core_2.13:2.8.1-kotori")
+    runtimeOnly("com.kotori316:${"ScalableCatsForce".toLowerCase()}:2.13.10-build-12:with-library") {
         transitive(false)
     }
 
