@@ -5,7 +5,7 @@ import li.cil.oc.api
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.template.DisassemblerTemplates
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.ItemUtils
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.Container
@@ -18,7 +18,7 @@ class Disassembler(id: Int, playerInventory: Inventory, val disassembler: Contai
 
   private def allowDisassembling(stack: ItemStack) = !stack.isEmpty && (!stack.hasTag || !stack.getTag.getBoolean(Settings.namespace + "undisassemblable"))
 
-  override protected def getHostClass = classOf[tileentity.Disassembler]
+  override protected def getHostClass = classOf[blockentity.Disassembler]
 
   addSlot(new StaticComponentSlot(this, otherInventory, slots.size, 80, 35, getHostClass, "ocitem", Tier.Any) {
     override def mayPlace(stack: ItemStack): Boolean = {
@@ -35,7 +35,7 @@ class Disassembler(id: Int, playerInventory: Inventory, val disassembler: Contai
 
   override protected def detectCustomDataChanges(nbt: CompoundTag): Unit = {
     disassembler match {
-      case te: tileentity.Disassembler => synchronizedData.putDouble("disassemblyProgress", te.progress)
+      case te: blockentity.Disassembler => synchronizedData.putDouble("disassemblyProgress", te.progress)
       case _ =>
     }
     super.detectCustomDataChanges(nbt)

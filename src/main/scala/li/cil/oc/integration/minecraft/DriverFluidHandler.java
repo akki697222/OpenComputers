@@ -5,7 +5,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.integration.ManagedTileEntityEnvironment;
+import li.cil.oc.integration.ManagedBlockEntityEnvironment;
 import li.cil.oc.util.ExtendedArguments.TankProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,16 +29,16 @@ public final class DriverFluidHandler implements DriverBlock {
         return new Environment(level.getBlockEntity(pos).getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, side).orElse(null));
     }
 
-    public static final class Environment extends ManagedTileEntityEnvironment<IFluidHandler> {
+    public static final class Environment extends ManagedBlockEntityEnvironment<IFluidHandler> {
         public Environment(final IFluidHandler tileEntity) {
             super(tileEntity, "fluid_handler");
         }
 
         @Callback(doc = "function():table -- Get some information about the tank accessible from the specified side.")
         public Object[] getTankInfo(final Context context, final Arguments args) {
-            TankProperties[] props = new TankProperties[tileEntity.getTanks()];
+            TankProperties[] props = new TankProperties[blockEntity.getTanks()];
             for (int i = 0; i < props.length; i++) {
-                props[i] = new TankProperties(tileEntity.getTankCapacity(i), tileEntity.getFluidInTank(i));
+                props[i] = new TankProperties(blockEntity.getTankCapacity(i), blockEntity.getFluidInTank(i));
             }
             return props;
         }

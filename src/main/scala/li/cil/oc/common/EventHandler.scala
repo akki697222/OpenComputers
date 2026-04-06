@@ -29,8 +29,8 @@ import li.cil.oc.common.item.data.MicrocontrollerData
 import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.common.item.data.TabletData
 import li.cil.oc.common.item.traits
-import li.cil.oc.common.tileentity.Robot
-import li.cil.oc.common.tileentity.traits.power
+import li.cil.oc.common.blockentity.Robot
+import li.cil.oc.common.blockentity.traits.power
 import li.cil.oc.integration.Mods
 import li.cil.oc.integration.util
 import li.cil.oc.server.component.Keyboard
@@ -282,11 +282,11 @@ object EventHandler {
   @SubscribeEvent
   def onBlockBreak(e: BlockEvent.BreakEvent): Unit = {
     e.getWorld.getBlockEntity(e.getPos) match {
-      case c: tileentity.Case =>
+      case c: blockentity.Case =>
         if (c.isCreative && (!e.getPlayer.isCreative || !c.canInteract(e.getPlayer.getName.getString))) {
           e.setCanceled(true)
         }
-      case r: tileentity.RobotProxy =>
+      case r: blockentity.RobotProxy =>
         val robot = r.robot
         if (robot.isCreative && (!e.getPlayer.isCreative || !robot.canInteract(e.getPlayer.getName.getString))) {
           e.setCanceled(true)
@@ -445,7 +445,7 @@ object EventHandler {
         val chunk = holder.getTickingChunk
         if (chunk != null) {
           chunk.getBlockEntities.values().asScala.foreach {
-            case te: tileentity.traits.TileEntity => te.dispose()
+            case te: blockentity.traits.TileEntity => te.dispose()
             case _ =>
           }
         }

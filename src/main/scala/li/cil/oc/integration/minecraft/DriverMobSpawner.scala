@@ -7,7 +7,7 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.prefab.DriverSidedTileEntity
-import li.cil.oc.integration.ManagedTileEntityEnvironment
+import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
@@ -24,7 +24,7 @@ object DriverMobSpawner extends DriverSidedTileEntity {
   override def createEnvironment(world: Level, pos: BlockPos, side: Direction): ManagedEnvironment =
     new Environment(world.getBlockEntity(pos).asInstanceOf[SpawnerBlockEntity])
 
-  final class Environment(tileEntity: SpawnerBlockEntity) extends ManagedTileEntityEnvironment[SpawnerBlockEntity](tileEntity, "mob_spawner") with NamedBlock {
+  final class Environment(tileEntity: SpawnerBlockEntity) extends ManagedBlockEntityEnvironment[SpawnerBlockEntity](tileEntity, "mob_spawner") with NamedBlock {
     override def preferredName = "mob_spawner"
 
     override def priority = 0

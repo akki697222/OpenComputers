@@ -8,8 +8,8 @@ import li.cil.oc.client.KeyBindings
 import li.cil.oc.common.Tier
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.item.data.MicrocontrollerData
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.InventoryUtils
@@ -48,7 +48,7 @@ class Microcontroller(props: Properties)
 
   override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
     world.getBlockEntity(pos) match {
-      case mcu: tileentity.Microcontroller => mcu.info.copyItemStack()
+      case mcu: blockentity.Microcontroller => mcu.info.copyItemStack()
       case _ => ItemStack.EMPTY
     }
 
@@ -68,7 +68,7 @@ class Microcontroller(props: Properties)
 
   override def energyThroughput: Double = Settings.get.caseRate(Tier.One)
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Microcontroller(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Microcontroller(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -77,7 +77,7 @@ class Microcontroller(props: Properties)
       if (!player.isCrouching) {
         if (!world.isClientSide) {
           world.getBlockEntity(pos) match {
-            case mcu: tileentity.Microcontroller =>
+            case mcu: blockentity.Microcontroller =>
               if (mcu.machine.isRunning) mcu.machine.stop()
               else mcu.machine.start()
             case _ =>
@@ -88,7 +88,7 @@ class Microcontroller(props: Properties)
       else if (api.Items.get(heldItem) == api.Items.get(Constants.ItemName.EEPROM)) {
         if (!world.isClientSide) {
           world.getBlockEntity(pos) match {
-            case mcu: tileentity.Microcontroller =>
+            case mcu: blockentity.Microcontroller =>
               val newEeprom = player.getInventory.removeItem(player.getInventory.selected, 1)
               mcu.changeEEPROM(newEeprom) match {
                 case SomeStack(oldEeprom) => InventoryUtils.addToPlayerInventory(oldEeprom, player)
@@ -106,7 +106,7 @@ class Microcontroller(props: Properties)
   override def setPlacedBy(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity, stack: ItemStack): Unit = {
     super.setPlacedBy(world, pos, state, placer, stack)
     world.getBlockEntity(pos) match {
-      case tileEntity: tileentity.Microcontroller if !world.isClientSide => {
+      case tileEntity: blockentity.Microcontroller if !world.isClientSide => {
         tileEntity.info.loadData(stack)
         tileEntity.snooperNode.changeBuffer(tileEntity.info.storedEnergy - tileEntity.snooperNode.localBuffer)
       }
@@ -117,7 +117,7 @@ class Microcontroller(props: Properties)
   override def getDrops(state: BlockState, ctx: LootContext.Builder): util.List[ItemStack] = {
     val newCtx = ctx.withDynamicDrop(LootFunctions.DYN_ITEM_DATA, (c, f) => {
       c.getParamOrNull(LootParameters.BLOCK_ENTITY) match {
-        case tileEntity: tileentity.Microcontroller => {
+        case tileEntity: blockentity.Microcontroller => {
           tileEntity.saveComponents()
           tileEntity.info.storedEnergy = tileEntity.snooperNode.localBuffer.toInt
           f.accept(tileEntity.info.createItemStack())
@@ -131,7 +131,7 @@ class Microcontroller(props: Properties)
   override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity): Unit = {
     if (!world.isClientSide && player.isCreative) {
       world.getBlockEntity(pos) match {
-        case tileEntity: tileentity.Microcontroller =>
+        case tileEntity: blockentity.Microcontroller =>
           Block.dropResources(state, world, pos, tileEntity, player, player.getMainHandItem)
         case _ =>
       }

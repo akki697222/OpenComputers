@@ -7,7 +7,7 @@ import li.cil.oc.api.component.RackMountable
 import li.cil.oc.api.event.RackMountableRenderEvent
 import li.cil.oc.client.Textures
 import li.cil.oc.common.block
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.block.model.BakedQuad
@@ -28,7 +28,7 @@ class ServerRackModel(val parent: BakedModel) extends SmartBlockModelBase {
 
   override def getQuads(state: BlockState, side: Direction, rand: util.Random, data: IModelData): util.List[BakedQuad] =
     data match {
-      case rack: tileentity.Rack =>
+      case rack: blockentity.Rack =>
         val facing = rack.facing
         val faces = mutable.ArrayBuffer.empty[BakedQuad]
 

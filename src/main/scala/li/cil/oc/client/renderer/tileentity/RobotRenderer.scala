@@ -8,7 +8,7 @@ import li.cil.oc.api.driver.item.UpgradeRenderer.MountPointName
 import li.cil.oc.api.event.RobotRenderEvent
 import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.common.EventHandler
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.RenderState
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
@@ -35,7 +35,7 @@ import scala.collection.mutable
 import scala.jdk.CollectionConverters._
 import scala.language.implicitConversions
 
-object RobotRenderer extends BlockEntityRendererProvider[tileentity.RobotProxy] {
+object RobotRenderer extends BlockEntityRendererProvider[blockentity.RobotProxy] {
   override def create(ctx: BlockEntityRendererProvider.Context): RobotRenderer =
     new RobotRenderer()
 
@@ -52,7 +52,7 @@ object RobotRenderer extends BlockEntityRendererProvider[tileentity.RobotProxy] 
 }
 
 // 1.18.2: BlockEntityRenderer はインターフェースになったためコンストラクタ引数不要
-class RobotRenderer extends TileEntityRenderer[tileentity.RobotProxy] {
+class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
   private val mountPoints = new Array[RobotRenderEvent.MountPoint](7)
 
   private val slotNameMapping = Map(
@@ -190,9 +190,9 @@ class RobotRenderer extends TileEntityRenderer[tileentity.RobotProxy] {
 
   def renderChassis(
                      stack: PoseStack,
-                     buffer: MultiBufferSource,  // 1.18.2: IRenderTypeBuffer → MultiBufferSource
+                     buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
                      light: Int,
-                     robot: tileentity.Robot = null,
+                     robot: blockentity.Robot = null,
                      offset: Double = 0,
                      isRunningOverride: Boolean = false
                    ): Unit = {
@@ -255,10 +255,10 @@ class RobotRenderer extends TileEntityRenderer[tileentity.RobotProxy] {
   }
 
   override def render(
-                       proxy: tileentity.RobotProxy,
+                       proxy: blockentity.RobotProxy,
                        f: Float,
-                       matrix: PoseStack,          // 1.18.2: MatrixStack → PoseStack
-                       buffer: MultiBufferSource,  // 1.18.2: IRenderTypeBuffer → MultiBufferSource
+                       matrix: PoseStack, // 1.18.2: MatrixStack → PoseStack
+                       buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
                        light: Int,
                        overlay: Int
                      ): Unit = {

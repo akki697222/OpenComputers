@@ -3,7 +3,7 @@ package li.cil.oc.integration.computercraft
 import dan200.computercraft.api.ComputerCraftAPI
 import dan200.computercraft.api.peripheral.IPeripheral
 import dan200.computercraft.api.peripheral.IPeripheralProvider
-import li.cil.oc.common.tileentity.Relay
+import li.cil.oc.common.blockentity.Relay
 import net.minecraft.core.Direction
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.Level

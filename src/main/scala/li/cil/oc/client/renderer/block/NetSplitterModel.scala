@@ -7,7 +7,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.client.Textures
 import li.cil.oc.common.block
 import li.cil.oc.common.item.data.PrintData
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.level.block.state.BlockState                    // 1.18.2
 import net.minecraft.client.multiplayer.ClientLevel                         // 1.18.2: ClientWorld → ClientLevel
 import net.minecraft.client.renderer.block.model.BakedQuad                 // 1.18.2
@@ -33,7 +33,7 @@ object NetSplitterModel extends SmartBlockModelBase {
 
   override def getQuads(state: BlockState, side: Direction, rand: util.Random, data: IModelData): util.List[BakedQuad] =
     data match {
-      case t: tileentity.NetSplitter =>
+      case t: blockentity.NetSplitter =>
         val faces = mutable.ArrayBuffer.empty[BakedQuad]
         faces ++= BaseModel
         addSideQuads(faces, Direction.values().map(t.isSideOpen))

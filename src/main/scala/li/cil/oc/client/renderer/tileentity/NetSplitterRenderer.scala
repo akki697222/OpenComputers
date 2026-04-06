@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
-import li.cil.oc.common.tileentity.NetSplitter
+import li.cil.oc.common.blockentity.NetSplitter
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer

@@ -8,7 +8,7 @@ import li.cil.oc.common.block
 import li.cil.oc.common.item.data.MicrocontrollerData
 import li.cil.oc.common.item.data.PrintData
 import li.cil.oc.common.item.data.RobotData
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.Color
 import li.cil.oc.util.ItemColorizer
 import li.cil.oc.util.Rarity
@@ -66,13 +66,13 @@ class Item(value: Block, props: Properties) extends BlockItem(value, props) {
     if (super.placeBlock(ctxToUse, newState)) {
       // If it's a rotatable block try to make it face the player.
       ctx.getLevel.getBlockEntity(ctxToUse.getClickedPos) match {
-        case keyboard: tileentity.Keyboard => // Ignore.
-        case rotatable: tileentity.traits.Rotatable =>
+        case keyboard: blockentity.Keyboard => // Ignore.
+        case rotatable: blockentity.traits.Rotatable =>
           rotatable.setFromEntityPitchAndYaw(ctxToUse.getPlayer)
           if (!rotatable.validFacings.contains(rotatable.pitch)) {
             rotatable.pitch = rotatable.validFacings.headOption.getOrElse(Direction.NORTH)
           }
-          if (!rotatable.isInstanceOf[tileentity.RobotProxy]) {
+          if (!rotatable.isInstanceOf[blockentity.RobotProxy]) {
             rotatable.invertRotation()
           }
         case _ => // Ignore.

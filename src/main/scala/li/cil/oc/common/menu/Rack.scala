@@ -2,7 +2,7 @@ package li.cil.oc.common.menu
 
 import li.cil.oc.api.component.RackMountable
 import li.cil.oc.common.Slot
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.RotationHelper
 import net.minecraft.core.Direction
@@ -16,7 +16,7 @@ import net.minecraft.nbt.Tag
 class Rack(id: Int, playerInventory: Inventory, val rack: Container)
   extends AbstractMenu(MenuTypes.RACK.get(), id, playerInventory, rack) {
 
-  override protected def getHostClass = classOf[tileentity.Rack]
+  override protected def getHostClass = classOf[blockentity.Rack]
 
   addSlotToContainer(20, 23, Slot.RackMountable)
   addSlotToContainer(20, 43, Slot.RackMountable)
@@ -41,7 +41,7 @@ class Rack(id: Int, playerInventory: Inventory, val rack: Container)
   override protected def detectCustomDataChanges(nbt: CompoundTag): Unit = {
     super.detectCustomDataChanges(nbt)
     rack match {
-      case te: tileentity.Rack => {
+      case te: blockentity.Rack => {
         nbt.setNewTagList("nodeMapping", te.nodeMapping.map(sides => toNbt(sides.map {
           case Some(side) => side.ordinal()
           case _ => -1

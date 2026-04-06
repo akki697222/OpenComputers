@@ -1,6 +1,6 @@
 package li.cil.oc.integration.projectred
 
-import li.cil.oc.common.tileentity.traits.BundledRedstoneAware
+import li.cil.oc.common.blockentity.traits.BundledRedstoneAware
 import mrtjp.projectred.api.IBundledTileInteraction
 import mrtjp.projectred.api.ProjectRedAPI
 import net.minecraft.core.Direction

@@ -3,8 +3,8 @@ package li.cil.oc.common.block
 import li.cil.oc.Settings
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.util.Tooltip
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent, TextComponent => StringTextComponent}
@@ -47,18 +47,18 @@ class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with t
   override def energyThroughput = Settings.get.caseRate(tier)
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Case if te.stillValid(player) => MenuTypes.openCaseGui(player, te)
+    case te: blockentity.Case if te.stillValid(player) => MenuTypes.openCaseGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Case(pos, state, tier)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Case(pos, state, tier)
 
   // ----------------------------------------------------------------------- //
 
   override def localOnBlockActivated(world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, heldItem: ItemStack, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = {
     if (player.isCrouching) {
       if (!world.isClientSide) world.getBlockEntity(pos) match {
-        case computer: tileentity.Case if !computer.machine.isRunning && computer.stillValid(player) => computer.machine.start()
+        case computer: blockentity.Case if !computer.machine.isRunning && computer.stillValid(player) => computer.machine.start()
         case _ =>
       }
       true
@@ -74,7 +74,7 @@ class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with t
                                fluid: FluidState
                               ): Boolean = {
     Option(world.getBlockEntity(pos)) match {
-      case Some(c: tileentity.Case) =>
+      case Some(c: blockentity.Case) =>
         val playerName = player.getName.getString
         if (c.isCreative && (!player.isCreative || !c.canInteract(playerName))) {
           false

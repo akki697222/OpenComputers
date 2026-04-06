@@ -10,7 +10,7 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
-import li.cil.oc.common.tileentity.traits.BundledRedstoneAware
+import li.cil.oc.common.blockentity.traits.BundledRedstoneAware
 import net.minecraft.core.Direction
 
 import scala.collection.convert.ImplicitConversionsToJava._

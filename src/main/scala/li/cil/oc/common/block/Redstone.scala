@@ -1,7 +1,7 @@
 package li.cil.oc.common.block
 
 import java.util
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.integration.Mods
 import li.cil.oc.util.Tooltip
 import net.minecraft.core.BlockPos
@@ -28,5 +28,5 @@ class Redstone(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Redstone(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Redstone(pos, state)
 }

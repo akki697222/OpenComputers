@@ -4,24 +4,24 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.systems.RenderSystem
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer => TileEntityRenderer}
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 
 // 1.18.2: BlockEntityRendererProvider[T] に変更
-object TransposerRenderer extends BlockEntityRendererProvider[tileentity.Transposer] {
+object TransposerRenderer extends BlockEntityRendererProvider[blockentity.Transposer] {
   override def create(ctx: BlockEntityRendererProvider.Context): TransposerRenderer =
     new TransposerRenderer()
 }
 
 // 1.18.2: コンストラクタ引数なし
-class TransposerRenderer extends TileEntityRenderer[tileentity.Transposer] {
+class TransposerRenderer extends TileEntityRenderer[blockentity.Transposer] {
   override def render(
-                       transposer: tileentity.Transposer,
+                       transposer: blockentity.Transposer,
                        dt: Float,
-                       stack: PoseStack,          // 1.18.2: MatrixStack → PoseStack
+                       stack: PoseStack, // 1.18.2: MatrixStack → PoseStack
                        buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
                        light: Int,
                        overlay: Int

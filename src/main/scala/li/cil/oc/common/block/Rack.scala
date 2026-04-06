@@ -4,8 +4,8 @@ import li.cil.oc.Settings
 import li.cil.oc.api.component.RackMountable
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -32,17 +32,17 @@ class Rack(props: Properties) extends RedstoneAware(props) with traits.PowerAcce
   override def energyThroughput = Settings.get.serverRackRate
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Rack => MenuTypes.openRackGui(player, te)
+    case te: blockentity.Rack => MenuTypes.openRackGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Rack(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Rack(pos, state)
   
   // ----------------------------------------------------------------------- //
 
   override def localOnBlockActivated(world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, heldItem: ItemStack, side: Direction, hitX: Float, hitY: Float, hitZ: Float): Boolean = {
     world.getBlockEntity(pos) match {
-      case rack: tileentity.Rack => rack.slotAt(side, hitX, hitY, hitZ) match {
+      case rack: blockentity.Rack => rack.slotAt(side, hitX, hitY, hitZ) match {
         case Some(slot) =>
           // Snap to grid to get same behavior on client and server...
           val hitVec = new Vector3d((hitX * 16f).toInt / 16f, (hitY * 16f).toInt / 16f, (hitZ * 16f).toInt / 16f)

@@ -8,7 +8,7 @@ import li.cil.oc.client.Textures
 import li.cil.oc.common.Tier
 import li.cil.oc.common.block
 import li.cil.oc.common.block.Screen
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.Color
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.client.multiplayer.ClientLevel
@@ -29,7 +29,7 @@ object ScreenModel extends SmartBlockModelBase {
   override def getQuads(state: BlockState, side: Direction, rand: util.Random, data: IModelData): util.List[BakedQuad] = {
     val safeSide = if (side != null) side else Direction.SOUTH
     data match {
-      case screen: tileentity.Screen =>
+      case screen: blockentity.Screen =>
         val facing = screen.toLocal(safeSide)
 
         val (x, y) = screen.localPosition

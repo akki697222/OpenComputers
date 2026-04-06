@@ -7,8 +7,8 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Node
 import li.cil.oc.common._
 import li.cil.oc.common.nanomachines.ControllerImpl
-import li.cil.oc.common.tileentity.Waypoint
-import li.cil.oc.common.tileentity.traits._
+import li.cil.oc.common.blockentity.Waypoint
+import li.cil.oc.common.blockentity.traits._
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.PackedColor
 import net.minecraft.world.item.ItemStack
@@ -31,7 +31,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.sounds.SoundSource
 
 object PacketSender {
-  def sendAdapterState(t: tileentity.Adapter): Unit = {
+  def sendAdapterState(t: blockentity.Adapter): Unit = {
     val pb = new SimplePacketBuilder(PacketType.AdapterState)
 
     pb.writeTileEntity(t)
@@ -48,7 +48,7 @@ object PacketSender {
     pb.sendToPlayer(player)
   }
 
-  def sendChargerState(t: tileentity.Charger): Unit = {
+  def sendChargerState(t: blockentity.Charger): Unit = {
     val pb = new SimplePacketBuilder(PacketType.ChargerState)
 
     pb.writeTileEntity(t)
@@ -123,7 +123,7 @@ object PacketSender {
     }
   }
 
-  def sendDisassemblerActive(t: tileentity.Disassembler, active: Boolean): Unit = {
+  def sendDisassemblerActive(t: blockentity.Disassembler, active: Boolean): Unit = {
     val pb = new SimplePacketBuilder(PacketType.DisassemblerActiveChange)
 
     pb.writeTileEntity(t)
@@ -202,7 +202,7 @@ object PacketSender {
     }
   }
 
-  def sendFloppyChange(t: tileentity.DiskDrive, stack: ItemStack = ItemStack.EMPTY): Unit = {
+  def sendFloppyChange(t: blockentity.DiskDrive, stack: ItemStack = ItemStack.EMPTY): Unit = {
     val pb = new SimplePacketBuilder(PacketType.FloppyChange)
 
     pb.writeTileEntity(t)
@@ -211,7 +211,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramClear(t: tileentity.Hologram): Unit = {
+  def sendHologramClear(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramClear)
 
     pb.writeTileEntity(t)
@@ -219,7 +219,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramColor(t: tileentity.Hologram, index: Int, value: Int): Unit = {
+  def sendHologramColor(t: blockentity.Hologram, index: Int, value: Int): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramColor)
 
     pb.writeTileEntity(t)
@@ -229,7 +229,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramPowerChange(t: tileentity.Hologram): Unit = {
+  def sendHologramPowerChange(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramPowerChange)
 
     pb.writeTileEntity(t)
@@ -238,7 +238,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramScale(t: tileentity.Hologram): Unit = {
+  def sendHologramScale(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramScale)
 
     pb.writeTileEntity(t)
@@ -247,7 +247,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramArea(t: tileentity.Hologram): Unit = {
+  def sendHologramArea(t: blockentity.Hologram): Unit = {
     val pb = new CompressedPacketBuilder(PacketType.HologramArea)
 
     pb.writeTileEntity(t)
@@ -265,7 +265,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramValues(t: tileentity.Hologram): Unit = {
+  def sendHologramValues(t: blockentity.Hologram): Unit = {
     val pb = new CompressedPacketBuilder(PacketType.HologramValues)
 
     pb.writeTileEntity(t)
@@ -283,7 +283,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramOffset(t: tileentity.Hologram): Unit = {
+  def sendHologramOffset(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramTranslation)
 
     pb.writeTileEntity(t)
@@ -294,7 +294,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramRotation(t: tileentity.Hologram): Unit = {
+  def sendHologramRotation(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramRotation)
 
     pb.writeTileEntity(t)
@@ -306,7 +306,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendHologramRotationSpeed(t: tileentity.Hologram): Unit = {
+  def sendHologramRotationSpeed(t: blockentity.Hologram): Unit = {
     val pb = new SimplePacketBuilder(PacketType.HologramRotationSpeed)
 
     pb.writeTileEntity(t)
@@ -382,7 +382,7 @@ object PacketSender {
     }
   }
 
-  def sendNetSplitterState(t: tileentity.NetSplitter): Unit = {
+  def sendNetSplitterState(t: blockentity.NetSplitter): Unit = {
     val pb = new SimplePacketBuilder(PacketType.NetSplitterState)
 
     pb.writeTileEntity(t)
@@ -439,7 +439,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendPrinting(t: tileentity.Printer, printing: Boolean): Unit = {
+  def sendPrinting(t: blockentity.Printer, printing: Boolean): Unit = {
     val pb = new SimplePacketBuilder(PacketType.PrinterState)
 
     pb.writeTileEntity(t)
@@ -448,7 +448,7 @@ object PacketSender {
     pb.sendToPlayersNearHost(t)
   }
 
-  def sendRackInventory(t: tileentity.Rack): Unit = {
+  def sendRackInventory(t: blockentity.Rack): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RackInventory)
 
     pb.writeTileEntity(t)
@@ -461,7 +461,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRackInventory(t: tileentity.Rack, slot: Int): Unit = {
+  def sendRackInventory(t: blockentity.Rack, slot: Int): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RackInventory)
 
     pb.writeTileEntity(t)
@@ -472,7 +472,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRackMountableData(t: tileentity.Rack, mountable: Int): Unit = {
+  def sendRackMountableData(t: blockentity.Rack, mountable: Int): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RackMountableData)
 
     pb.writeTileEntity(t)
@@ -482,7 +482,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRaidChange(t: tileentity.Raid): Unit = {
+  def sendRaidChange(t: blockentity.Raid): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RaidStateChange)
 
     pb.writeTileEntity(t)
@@ -505,7 +505,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRobotAssembling(t: tileentity.Assembler, assembling: Boolean): Unit = {
+  def sendRobotAssembling(t: blockentity.Assembler, assembling: Boolean): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotAssemblingState)
 
     pb.writeTileEntity(t)
@@ -514,7 +514,7 @@ object PacketSender {
     pb.sendToPlayersNearHost(t)
   }
 
-  def sendRobotMove(t: tileentity.Robot, position: BlockPos, direction: Direction): Unit = {
+  def sendRobotMove(t: blockentity.Robot, position: BlockPos, direction: Direction): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotMove)
 
     // Custom pb.writeTileEntity() with fake coordinates (valid for the client).
@@ -527,7 +527,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRobotAnimateSwing(t: tileentity.Robot): Unit = {
+  def sendRobotAnimateSwing(t: blockentity.Robot): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotAnimateSwing)
 
     pb.writeTileEntity(t.proxy)
@@ -536,7 +536,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t, Option(Settings.get.maxNetworkClientEffectPacketDistance))
   }
 
-  def sendRobotAnimateTurn(t: tileentity.Robot): Unit = {
+  def sendRobotAnimateTurn(t: blockentity.Robot): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotAnimateTurn)
 
     pb.writeTileEntity(t.proxy)
@@ -546,7 +546,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t, Option(Settings.get.maxNetworkClientEffectPacketDistance))
   }
 
-  def sendRobotInventory(t: tileentity.Robot, slot: Int, stack: ItemStack): Unit = {
+  def sendRobotInventory(t: blockentity.Robot, slot: Int, stack: ItemStack): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotInventoryChange)
 
     pb.writeTileEntity(t.proxy)
@@ -556,7 +556,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRobotLightChange(t: tileentity.Robot): Unit = {
+  def sendRobotLightChange(t: blockentity.Robot): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotLightChange)
 
     pb.writeTileEntity(t.proxy)
@@ -565,7 +565,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRobotNameChange(t: tileentity.Robot): Unit = {
+  def sendRobotNameChange(t: blockentity.Robot): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotNameChange)
 
     pb.writeTileEntity(t.proxy)
@@ -579,7 +579,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendRobotSelectedSlotChange(t: tileentity.Robot): Unit = {
+  def sendRobotSelectedSlotChange(t: blockentity.Robot): Unit = {
     val pb = new SimplePacketBuilder(PacketType.RobotSelectedSlotChange)
 
     pb.writeTileEntity(t.proxy)
@@ -598,7 +598,7 @@ object PacketSender {
     pb.sendToPlayersNearTileEntity(t)
   }
 
-  def sendSwitchActivity(t: tileentity.Relay): Unit = {
+  def sendSwitchActivity(t: blockentity.Relay): Unit = {
     val pb = new SimplePacketBuilder(PacketType.SwitchActivity)
 
     pb.writeTileEntity(t)
@@ -769,7 +769,7 @@ object PacketSender {
     pb.sendToPlayersNearHost(host)
   }
 
-  def sendScreenTouchMode(t: tileentity.Screen, value: Boolean): Unit = {
+  def sendScreenTouchMode(t: blockentity.Screen, value: Boolean): Unit = {
     val pb = new SimplePacketBuilder(PacketType.ScreenTouchMode)
 
     pb.writeTileEntity(t)
@@ -819,7 +819,7 @@ object PacketSender {
     pb.sendToNearbyPlayers(level, x, y, z, Option(Settings.get.maxNetworkClientSoundPacketDistance))
   }
 
-  def sendTransposerActivity(t: tileentity.Transposer): Unit = {
+  def sendTransposerActivity(t: blockentity.Transposer): Unit = {
     val pb = new SimplePacketBuilder(PacketType.TransposerActivity)
 
     pb.writeTileEntity(t)

@@ -5,20 +5,20 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 
-object DisassemblerRenderer extends BlockEntityRendererProvider[tileentity.Disassembler] {
+object DisassemblerRenderer extends BlockEntityRendererProvider[blockentity.Disassembler] {
   override def create(ctx: BlockEntityRendererProvider.Context): DisassemblerRenderer =
     new DisassemblerRenderer()
 }
 
-class DisassemblerRenderer extends BlockEntityRenderer[tileentity.Disassembler] {
+class DisassemblerRenderer extends BlockEntityRenderer[blockentity.Disassembler] {
 
-  override def render(disassembler: tileentity.Disassembler, dt: Float, stack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int): Unit = {
+  override def render(disassembler: blockentity.Disassembler, dt: Float, stack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int): Unit = {
     RenderState.checkError(getClass.getName + ".render: entering")
 
     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F)

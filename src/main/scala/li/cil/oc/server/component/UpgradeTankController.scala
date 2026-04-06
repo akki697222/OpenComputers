@@ -13,7 +13,7 @@ import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.network._
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedArguments._
 
@@ -66,7 +66,7 @@ object UpgradeTankController {
     override protected def checkSideForAction(args: Arguments, n: Int) = args.checkSideAny(n)
   }
 
-  class Robot(val host: EnvironmentHost with tileentity.Robot) extends AbstractManagedEnvironment with traits.TankContainerControl with traits.LevelTankAnalytics with Common {
+  class Robot(val host: EnvironmentHost with blockentity.Robot) extends AbstractManagedEnvironment with traits.TankContainerControl with traits.LevelTankAnalytics with Common {
     override val node = Network.newNode(this, Visibility.Network).
       withComponent("tank_controller", Visibility.Neighbors).
       create()

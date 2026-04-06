@@ -3,8 +3,8 @@ package li.cil.oc.common.block
 import java.util
 import li.cil.oc.Settings
 import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.state.BlockState
@@ -33,11 +33,11 @@ class Disassembler(props: Properties) extends SimpleBlock(props) with traits.Pow
   override def energyThroughput = Settings.get.disassemblerRate
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Disassembler => MenuTypes.openDisassemblerGui(player, te)
+    case te: blockentity.Disassembler => MenuTypes.openDisassemblerGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Disassembler(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Disassembler(pos, state)
 
   override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.DISASSEMBLER.get()
 }

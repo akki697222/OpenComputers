@@ -4,7 +4,7 @@ import li.cil.oc.api
 import li.cil.oc.client.Textures
 import li.cil.oc.common
 import li.cil.oc.common.ComponentTracker
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.integration.opencomputers.DriverKeyboard
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.SideTracker
@@ -19,11 +19,11 @@ import net.minecraft.world.inventory.DataSlot
 import net.minecraft.resources.ResourceLocation
 
 object RobotInfo {
-  def getScreenBuffer(robot: tileentity.Robot): Option[String] = robot.components.collectFirst {
+  def getScreenBuffer(robot: blockentity.Robot): Option[String] = robot.components.collectFirst {
     case Some(buffer: api.internal.TextBuffer) if buffer.node != null => buffer.node.address
   }
 
-  def hasKeyboard(robot: tileentity.Robot) = robot.info.components.map(api.Driver.driverFor(_, robot.getClass)).contains(DriverKeyboard)
+  def hasKeyboard(robot: blockentity.Robot) = robot.info.components.map(api.Driver.driverFor(_, robot.getClass)).contains(DriverKeyboard)
 
   def readRobotInfo(buff: FriendlyByteBuf): RobotInfo = {
     val mainInvSize = buff.readVarInt()
@@ -64,7 +64,7 @@ class RobotInfo(val mainInvSize: Int, val slot1: String, val tier1: Int,
     val slot2: String, val tier2: Int, val slot3: String, val tier3: Int,
     val screenBuffer: Option[String], val hasKeyboard: Boolean) {
 
-  def this(robot: tileentity.Robot) = this(robot.mainInventory.getContainerSize, robot.containerSlotType(1), robot.containerSlotTier(1),
+  def this(robot: blockentity.Robot) = this(robot.mainInventory.getContainerSize, robot.containerSlotType(1), robot.containerSlotTier(1),
     robot.containerSlotType(2), robot.containerSlotTier(2), robot.containerSlotType(3), robot.containerSlotTier(3),
     RobotInfo.getScreenBuffer(robot), RobotInfo.hasKeyboard(robot))
 }
@@ -76,7 +76,7 @@ class Robot(id: Int, playerInventory: Inventory, robot: Container, val info: Rob
   private val noScreenHeight = 108
   val deltaY: Int = if (info.screenBuffer.isDefined) 0 else withScreenHeight - noScreenHeight
 
-  override protected def getHostClass = classOf[tileentity.Robot]
+  override protected def getHostClass = classOf[blockentity.Robot]
 
   addSlotToContainer(170 + 0 * slotSize, 232 - deltaY, common.Slot.Tool)
   addSpecialSlot(170 + 1 * slotSize, 232 - deltaY, info.slot1, info.tier1)
@@ -120,7 +120,7 @@ class Robot(id: Int, playerInventory: Inventory, robot: Container, val info: Rob
   private val factor = 100
 
   private val globalBufferData = robot match {
-    case te: tileentity.Robot => {
+    case te: blockentity.Robot => {
       addDataSlot(new DataSlot {
         override def get(): Int = te.globalBuffer.toInt / factor
 
@@ -132,7 +132,7 @@ class Robot(id: Int, playerInventory: Inventory, robot: Container, val info: Rob
   def globalBuffer = globalBufferData.get * factor
 
   private val globalBufferSizeData = robot match {
-    case te: tileentity.Robot => {
+    case te: blockentity.Robot => {
       addDataSlot(new DataSlot {
         override def get(): Int = te.globalBufferSize.toInt / factor
 
@@ -144,7 +144,7 @@ class Robot(id: Int, playerInventory: Inventory, robot: Container, val info: Rob
   def globalBufferSize = globalBufferSizeData.get * factor
 
   private val runningData = robot match {
-    case te: tileentity.Robot => {
+    case te: blockentity.Robot => {
       addDataSlot(new DataSlot {
         override def get(): Int = if (te.isRunning) 1 else 0
 
@@ -156,7 +156,7 @@ class Robot(id: Int, playerInventory: Inventory, robot: Container, val info: Rob
   def isRunning = runningData.get != 0
 
   private val selectedSlotData = robot match {
-    case te: tileentity.Robot => {
+    case te: blockentity.Robot => {
       addDataSlot(new DataSlot {
         override def get(): Int = te.selectedSlot
 

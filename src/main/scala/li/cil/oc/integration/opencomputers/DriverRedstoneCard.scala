@@ -8,8 +8,8 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item
-import li.cil.oc.common.tileentity.traits.BundledRedstoneAware
-import li.cil.oc.common.tileentity.traits.RedstoneAware
+import li.cil.oc.common.blockentity.traits.BundledRedstoneAware
+import li.cil.oc.common.blockentity.traits.RedstoneAware
 import li.cil.oc.integration.util.BundledRedstone
 import li.cil.oc.integration.util.WirelessRedstone
 import li.cil.oc.server.component

@@ -9,7 +9,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.client.gui
 import li.cil.oc.common.component
-import li.cil.oc.common.tileentity.traits.TileEntity
+import li.cil.oc.common.blockentity.traits.TileEntity
 import li.cil.oc.util.Tooltip
 import net.minecraft.client.Minecraft
 import net.minecraftforge.api.distmarker.Dist

@@ -5,8 +5,8 @@ import li.cil.oc.client.KeyBindings
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.item.data.RaidData
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
@@ -49,11 +49,11 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
   // ----------------------------------------------------------------------- //
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Raid => MenuTypes.openRaidGui(player, te)
+    case te: blockentity.Raid => MenuTypes.openRaidGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Raid(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Raid(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -61,14 +61,14 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
 
   override def getAnalogOutputSignal(state: BlockState, world: World, pos: BlockPos): Int =
     world.getBlockEntity(pos) match {
-      case raid: tileentity.Raid if raid.presence.forall(ok => ok) => 15
+      case raid: blockentity.Raid if raid.presence.forall(ok => ok) => 15
       case _ => 0
     }
 
   override def setPlacedBy(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity, stack: ItemStack): Unit = {
     super.setPlacedBy(world, pos, state, placer, stack)
     world.getBlockEntity(pos) match {
-      case tileEntity: tileentity.Raid if !world.isClientSide => {
+      case tileEntity: blockentity.Raid if !world.isClientSide => {
         val data = new RaidData(stack)
         for (i <- 0 until math.min(data.disks.length, tileEntity.getContainerSize)) {
           tileEntity.setItem(i, data.disks(i))
@@ -86,7 +86,7 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
   override def getDrops(state: BlockState, ctx: LootContext.Builder): util.List[ItemStack] = {
     val newCtx = ctx.withDynamicDrop(LootFunctions.DYN_ITEM_DATA, (c, f) => {
       c.getParamOrNull(LootParameters.BLOCK_ENTITY) match {
-        case tileEntity: tileentity.Raid => {
+        case tileEntity: blockentity.Raid => {
           val stack = createItemStack()
           if (tileEntity.items.exists(!_.isEmpty)) {
             val data = new RaidData()
@@ -106,7 +106,7 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
   override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity): Unit = {
     if (!world.isClientSide && player.isCreative) {
       world.getBlockEntity(pos) match {
-        case tileEntity: tileentity.Raid if tileEntity.items.exists(!_.isEmpty) =>
+        case tileEntity: blockentity.Raid if tileEntity.items.exists(!_.isEmpty) =>
           Block.dropResources(state, world, pos, tileEntity, player, player.getMainHandItem)
         case _ =>
       }

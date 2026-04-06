@@ -96,22 +96,22 @@ public final class MenuTypes {
                 return new Tablet(id, plr, containerStack, new SimpleContainer(invSize), slot1, tier1);
             }));
 
-    public static void openAdapterGui(ServerPlayer player, li.cil.oc.common.tileentity.Adapter adapter) {
+    public static void openAdapterGui(ServerPlayer player, li.cil.oc.common.blockentity.Adapter adapter) {
         NetworkHooks.openGui(player, adapter);
     }
 
-    public static void openAssemblerGui(ServerPlayer player, li.cil.oc.common.tileentity.Assembler assembler) {
+    public static void openAssemblerGui(ServerPlayer player, li.cil.oc.common.blockentity.Assembler assembler) {
         NetworkHooks.openGui(player, assembler);
     }
 
-    public static void openCaseGui(ServerPlayer player, li.cil.oc.common.tileentity.Case computer) {
+    public static void openCaseGui(ServerPlayer player, li.cil.oc.common.blockentity.Case computer) {
         NetworkHooks.openGui(player, computer, buff -> {
             buff.writeVarInt(computer.getContainerSize());
             buff.writeVarInt(computer.tier());
         });
     }
 
-    public static void openChargerGui(ServerPlayer player, li.cil.oc.common.tileentity.Charger charger) {
+    public static void openChargerGui(ServerPlayer player, li.cil.oc.common.blockentity.Charger charger) {
         NetworkHooks.openGui(player, charger);
     }
 
@@ -123,11 +123,11 @@ public final class MenuTypes {
         });
     }
 
-    public static void openDisassemblerGui(ServerPlayer player, li.cil.oc.common.tileentity.Disassembler disassembler) {
+    public static void openDisassemblerGui(ServerPlayer player, li.cil.oc.common.blockentity.Disassembler disassembler) {
         NetworkHooks.openGui(player, disassembler);
     }
 
-    public static void openDiskDriveGui(ServerPlayer player, li.cil.oc.common.tileentity.DiskDrive diskDrive) {
+    public static void openDiskDriveGui(ServerPlayer player, li.cil.oc.common.blockentity.DiskDrive diskDrive) {
         NetworkHooks.openGui(player, diskDrive);
     }
 
@@ -145,23 +145,23 @@ public final class MenuTypes {
         });
     }
 
-    public static void openPrinterGui(ServerPlayer player, li.cil.oc.common.tileentity.Printer printer) {
+    public static void openPrinterGui(ServerPlayer player, li.cil.oc.common.blockentity.Printer printer) {
         NetworkHooks.openGui(player, printer);
     }
 
-    public static void openRackGui(ServerPlayer player, li.cil.oc.common.tileentity.Rack rack) {
+    public static void openRackGui(ServerPlayer player, li.cil.oc.common.blockentity.Rack rack) {
         NetworkHooks.openGui(player, rack);
     }
 
-    public static void openRaidGui(ServerPlayer player, li.cil.oc.common.tileentity.Raid raid) {
+    public static void openRaidGui(ServerPlayer player, li.cil.oc.common.blockentity.Raid raid) {
         NetworkHooks.openGui(player, raid);
     }
 
-    public static void openRelayGui(ServerPlayer player, li.cil.oc.common.tileentity.Relay relay) {
+    public static void openRelayGui(ServerPlayer player, li.cil.oc.common.blockentity.Relay relay) {
         NetworkHooks.openGui(player, relay);
     }
 
-    public static void openRobotGui(ServerPlayer player, li.cil.oc.common.tileentity.Robot robot) {
+    public static void openRobotGui(ServerPlayer player, li.cil.oc.common.blockentity.Robot robot) {
         NetworkHooks.openGui(player, robot, buff -> {
             RobotInfo$.MODULE$.writeRobotInfo(buff, new RobotInfo(robot));
         });

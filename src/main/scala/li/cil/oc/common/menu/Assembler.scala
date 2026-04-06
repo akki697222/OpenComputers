@@ -4,7 +4,7 @@ import li.cil.oc.client.Textures
 import li.cil.oc.common
 import li.cil.oc.common.InventorySlots.InventorySlot
 import li.cil.oc.common.template.AssemblerTemplates
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraft.world.entity.player.Inventory
@@ -16,7 +16,7 @@ import net.minecraft.nbt.CompoundTag
 class Assembler(id: Int, playerInventory: Inventory, val assembler: Container)
   extends AbstractMenu(MenuTypes.ASSEMBLER.get(), id, playerInventory, assembler) {
 
-  override protected def getHostClass = classOf[tileentity.Assembler]
+  override protected def getHostClass = classOf[blockentity.Assembler]
 
   // Computer case.
   {
@@ -109,7 +109,7 @@ class Assembler(id: Int, playerInventory: Inventory, val assembler: Container)
 
   override protected def detectCustomDataChanges(nbt: CompoundTag): Unit = {
     assembler match {
-      case te: tileentity.Assembler => {
+      case te: blockentity.Assembler => {
         synchronizedData.putBoolean("isAssembling", te.isAssembling)
         synchronizedData.putDouble("assemblyProgress", te.progress)
         synchronizedData.putInt("assemblyRemainingTime", te.timeRemaining)

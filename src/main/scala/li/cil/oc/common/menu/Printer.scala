@@ -3,7 +3,7 @@ package li.cil.oc.common.menu
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item.data.PrintData
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.inventory.{Slot => BaseSlot}
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.entity.player.Inventory
@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack
 class Printer(id: Int, playerInventory: Inventory, val printer: Container)
   extends AbstractMenu(MenuTypes.PRINTER.get(), id, playerInventory, printer) {
 
-  override protected def getHostClass = classOf[tileentity.Printer]
+  override protected def getHostClass = classOf[blockentity.Printer]
 
   addSlot(new StaticComponentSlot(this, otherInventory, slots.size, 18, 19, getHostClass, Slot.Filtered, Tier.Any) {
     override def mayPlace(stack: ItemStack): Boolean = {
@@ -47,7 +47,7 @@ class Printer(id: Int, playerInventory: Inventory, val printer: Container)
 
   override protected def detectCustomDataChanges(nbt: CompoundTag): Unit = {
     printer match {
-      case te: tileentity.Printer => {
+      case te: blockentity.Printer => {
         synchronizedData.putDouble("progress", if (te.isPrinting) te.progress / 100.0 else 0)
         synchronizedData.putInt("maxAmountMaterial", te.maxAmountMaterial)
         synchronizedData.putInt("amountMaterial", te.amountMaterial)

@@ -11,7 +11,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.Component
-import li.cil.oc.common.tileentity.Relay
+import li.cil.oc.common.blockentity.Relay
 import li.cil.oc.util.ResultWrapper._
 import net.minecraft.core.Direction
 

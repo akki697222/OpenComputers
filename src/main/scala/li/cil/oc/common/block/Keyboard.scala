@@ -3,7 +3,7 @@ package li.cil.oc.common.block
 import com.mojang.blaze3d.systems.RenderSystem
 import li.cil.oc.{Constants, api}
 import li.cil.oc.common.block.property.PropertyRotatable
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.ExtendedEnumFacing._
 import li.cil.oc.util.{BlockPosHelper, BlockPosition, InventoryUtils, RotationHelper}
 import net.minecraft.core.{BlockPos, Direction, Vec3i}
@@ -57,7 +57,7 @@ class Keyboard(props: Properties) extends SimpleBlock(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Keyboard(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Keyboard(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -69,7 +69,7 @@ class Keyboard(props: Properties) extends SimpleBlock(props) {
 
   override def tick(state: BlockState, world: ServerWorld, pos: BlockPos, rand: Random) = {
     world.getBlockEntity(pos) match {
-      case keyboard: tileentity.Keyboard => api.Network.joinOrCreateNetwork(keyboard)
+      case keyboard: blockentity.Keyboard => api.Network.joinOrCreateNetwork(keyboard)
       case _ =>
     }
     world.getBlockTicks.schedule(new ScheduledTick[Block](this, pos, 10, world.nextSubTickCount))
@@ -92,7 +92,7 @@ class Keyboard(props: Properties) extends SimpleBlock(props) {
     val sidePos = BlockPosHelper.relative(pos, side.getOpposite)
     world.getBlockState(sidePos).isFaceSturdy(world, sidePos, side) &&
       (world.getBlockEntity(BlockPosHelper.relative(pos, side.getOpposite)) match {
-        case screen: tileentity.Screen => screen.facing != side
+        case screen: blockentity.Screen => screen.facing != side
         case _ => true
       })
   }
@@ -110,9 +110,9 @@ class Keyboard(props: Properties) extends SimpleBlock(props) {
       case _ => false
     }
 
-  def adjacencyInfo(world: World, pos: BlockPos): Option[(tileentity.Keyboard, Screen, BlockPos, Direction)] =
+  def adjacencyInfo(world: World, pos: BlockPos): Option[(blockentity.Keyboard, Screen, BlockPos, Direction)] =
     world.getBlockEntity(pos) match {
-      case keyboard: tileentity.Keyboard =>
+      case keyboard: blockentity.Keyboard =>
         val blockPos = BlockPosHelper.relative(pos, keyboard.facing.getOpposite)
         world.getBlockState(blockPos).getBlock match {
           case screen: Screen => Some((keyboard, screen, blockPos, keyboard.facing.getOpposite))

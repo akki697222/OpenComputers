@@ -7,7 +7,7 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.prefab.DriverSidedTileEntity
-import li.cil.oc.integration.ManagedTileEntityEnvironment
+import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
@@ -23,7 +23,7 @@ object DriverFurnace extends DriverSidedTileEntity {
   override def createEnvironment(world: Level, pos: BlockPos, side: Direction): ManagedEnvironment =
     new Environment(world.getBlockEntity(pos).asInstanceOf[FurnaceBlockEntity])
 
-  final class Environment(tileEntity: FurnaceBlockEntity) extends ManagedTileEntityEnvironment[FurnaceBlockEntity](tileEntity, "furnace") with NamedBlock {
+  final class Environment(tileEntity: FurnaceBlockEntity) extends ManagedBlockEntityEnvironment[FurnaceBlockEntity](tileEntity, "furnace") with NamedBlock {
     override def preferredName = "furnace"
 
     override def priority = 0

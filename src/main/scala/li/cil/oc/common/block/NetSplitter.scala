@@ -1,6 +1,6 @@
 package li.cil.oc.common.block
 
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.integration.util.Wrench
 import net.minecraft.world.level.block.state.BlockBehaviour.{Properties => Properties}
 import net.minecraft.world.level.block.state.BlockState
@@ -15,7 +15,7 @@ import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
 
 class NetSplitter(props: Properties) extends RedstoneAware(props) {
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.NetSplitter(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.NetSplitter(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -25,7 +25,7 @@ class NetSplitter(props: Properties) extends RedstoneAware(props) {
       val side = trace.getDirection
       val sideToToggle = if (player.isCrouching) side.getOpposite else side
       world.getBlockEntity(pos) match {
-        case splitter: tileentity.NetSplitter =>
+        case splitter: blockentity.NetSplitter =>
           if (!world.isClientSide) {
             val oldValue = splitter.openSides(sideToToggle.ordinal())
             splitter.setSideOpen(sideToToggle, !oldValue)

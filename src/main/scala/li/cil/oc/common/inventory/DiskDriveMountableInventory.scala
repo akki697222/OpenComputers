@@ -4,7 +4,7 @@ import li.cil.oc.api.Driver
 import li.cil.oc.common.Slot
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.menu.{DiskDrive => DiskDriveContainer}
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.Inventory
@@ -21,7 +21,7 @@ trait DiskDriveMountableInventory extends ItemStackInventory with MenuProvider {
 
   override def getMaxStackSize = 1
 
-  override def canPlaceItem(slot: Int, stack: ItemStack): Boolean = (slot, Option(Driver.driverFor(stack, classOf[tileentity.DiskDrive]))) match {
+  override def canPlaceItem(slot: Int, stack: ItemStack): Boolean = (slot, Option(Driver.driverFor(stack, classOf[blockentity.DiskDrive]))) match {
     case (0, Some(driver)) => driver.slot(stack) == Slot.Floppy
     case _ => false
   }

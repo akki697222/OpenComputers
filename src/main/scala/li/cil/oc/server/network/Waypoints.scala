@@ -1,7 +1,7 @@
 package li.cil.oc.server.network
 
 import li.cil.oc.Settings
-import li.cil.oc.common.tileentity.Waypoint
+import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.RTree
 import net.minecraftforge.event.world.ChunkEvent

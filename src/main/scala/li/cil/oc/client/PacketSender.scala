@@ -6,8 +6,8 @@ import li.cil.oc.common.PacketType
 import li.cil.oc.common.SimplePacketBuilder
 import li.cil.oc.common.menu
 import li.cil.oc.common.entity.Drone
-import li.cil.oc.common.tileentity._
-import li.cil.oc.common.tileentity.traits.Computer
+import li.cil.oc.common.blockentity._
+import li.cil.oc.common.blockentity.traits.Computer
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.world.item.ItemStack

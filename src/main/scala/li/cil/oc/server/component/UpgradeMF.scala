@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.phys.Vec3
 
 /**
-  * Mostly stolen from {@link li.cil.oc.common.tileentity.Adapter}
+  * Mostly stolen from {@link li.cil.oc.common.blockentity.Adapter}
   *
   * @author Sangar, Vexatos
   */

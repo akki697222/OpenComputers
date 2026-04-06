@@ -2,7 +2,7 @@ package li.cil.oc.client.renderer.tileentity
 
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.RenderState
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.systems.RenderSystem
@@ -11,17 +11,17 @@ import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer => TileEnt
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 
 // 1.18.2: BlockEntityRendererProvider[T] に変更
-object RelayRenderer extends BlockEntityRendererProvider[tileentity.Relay] {
+object RelayRenderer extends BlockEntityRendererProvider[blockentity.Relay] {
   override def create(ctx: BlockEntityRendererProvider.Context): RelayRenderer =
     new RelayRenderer()
 }
 
 // 1.18.2: コンストラクタ引数なし
-class RelayRenderer extends TileEntityRenderer[tileentity.Relay] {
+class RelayRenderer extends TileEntityRenderer[blockentity.Relay] {
   override def render(
-                       switch: tileentity.Relay,
+                       switch: blockentity.Relay,
                        dt: Float,
-                       stack: PoseStack,          // 1.18.2: MatrixStack → PoseStack
+                       stack: PoseStack, // 1.18.2: MatrixStack → PoseStack
                        buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
                        light: Int,
                        overlay: Int

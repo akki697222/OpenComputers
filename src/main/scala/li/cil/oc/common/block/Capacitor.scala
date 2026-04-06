@@ -2,7 +2,7 @@ package li.cil.oc.common.block
 
 import java.util.Random
 
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.level.block.state.BlockBehaviour.{Properties => Properties}
 import net.minecraft.world.level.block.{Block => Block}
 import net.minecraft.world.level.block.state.{BlockState => BlockState}
@@ -17,7 +17,7 @@ class Capacitor(props: Properties) extends SimpleBlock(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Capacitor(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Capacitor(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -25,7 +25,7 @@ class Capacitor(props: Properties) extends SimpleBlock(props) {
 
   override def getAnalogOutputSignal(state: BlockState, world: World, pos: BlockPos): Int =
     world.getBlockEntity(pos) match {
-      case capacitor: tileentity.Capacitor if !world.isClientSide =>
+      case capacitor: blockentity.Capacitor if !world.isClientSide =>
         math.round(15 * capacitor.node.localBuffer / capacitor.node.localBufferSize).toInt
       case _ => 0
     }
@@ -37,7 +37,7 @@ class Capacitor(props: Properties) extends SimpleBlock(props) {
   @Deprecated
   override def neighborChanged(state: BlockState, world: World, pos: BlockPos, block: Block, fromPos: BlockPos, b: Boolean): Unit =
     world.getBlockEntity(pos) match {
-      case capacitor: tileentity.Capacitor => capacitor.recomputeCapacity()
+      case capacitor: blockentity.Capacitor => capacitor.recomputeCapacity()
       case _ =>
     }
 }

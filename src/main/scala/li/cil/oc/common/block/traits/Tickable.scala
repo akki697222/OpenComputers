@@ -1,7 +1,7 @@
 package li.cil.oc.common.block.traits
 
-import li.cil.oc.common.tileentity.traits.TileEntity
-import li.cil.oc.common.tileentity.traits.{Tickable => TileEntityTickable}
+import li.cil.oc.common.blockentity.traits.TileEntity
+import li.cil.oc.common.blockentity.traits.{Tickable => TileEntityTickable}
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.EntityBlock

@@ -3,9 +3,9 @@ package li.cil.oc.common.event
 import li.cil.oc.Settings
 import li.cil.oc.api.event.FileSystemAccessEvent
 import li.cil.oc.api.internal.Rack
-import li.cil.oc.common.tileentity.Case
-import li.cil.oc.common.tileentity.DiskDrive
-import li.cil.oc.common.tileentity.Raid
+import li.cil.oc.common.blockentity.Case
+import li.cil.oc.common.blockentity.DiskDrive
+import li.cil.oc.common.blockentity.Raid
 import li.cil.oc.server.component.DiskDriveMountable
 import li.cil.oc.server.component.Server
 import net.minecraft.resources.ResourceLocation

@@ -202,7 +202,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   def getKeyboards(context: Context, args: Arguments): Array[AnyRef] = {
     context.pause(0.25)
     host match {
-      case screen: tileentity.Screen =>
+      case screen: blockentity.Screen =>
         Array(screen.screens.map(_.node).flatMap(_.neighbors.filter(_.host.isInstanceOf[Keyboard]).map(_.address)).toArray)
       case _ =>
         Array(node.neighbors.filter(_.host.isInstanceOf[Keyboard]).map(_.address).toArray)
@@ -493,7 +493,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
     // when their update() runs).
     if (node.network != null) {
       for (node <- node.network.nodes) node.host match {
-        case computer: tileentity.traits.Computer if !computer.machine.isPaused =>
+        case computer: blockentity.traits.Computer if !computer.machine.isPaused =>
           computer.machine.pause(0.1)
         case _ =>
       }
@@ -913,7 +913,7 @@ object TextBuffer {
 
     private def sendToKeyboards(name: String, values: AnyRef*): Unit = {
       owner.host match {
-        case screen: tileentity.Screen =>
+        case screen: blockentity.Screen =>
           screen.screens.foreach(_.node.sendToNeighbors(name, values: _*))
         case _ =>
           owner.node.sendToNeighbors(name, values: _*)

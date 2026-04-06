@@ -17,8 +17,8 @@ import li.cil.oc.common.component
 import li.cil.oc.common.menu
 import li.cil.oc.common.item.{Tablet, TabletWrapper}
 import li.cil.oc.common.nanomachines.ControllerImpl
-import li.cil.oc.common.tileentity._
-import li.cil.oc.common.tileentity.traits._
+import li.cil.oc.common.blockentity._
+import li.cil.oc.common.blockentity.traits._
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
 import li.cil.oc.integration.Mods
 //import li.cil.oc.integration.jei.ModJEI

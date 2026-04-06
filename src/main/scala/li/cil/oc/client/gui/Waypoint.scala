@@ -4,14 +4,14 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.systems.RenderSystem
 import li.cil.oc.client.PacketSender
 import li.cil.oc.client.Textures
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.KeyMapping
 import net.minecraft.network.chat.TextComponent
 import org.lwjgl.glfw.GLFW
 
-class Waypoint(val waypoint: tileentity.Waypoint) extends Screen(TextComponent.EMPTY) {
+class Waypoint(val waypoint: blockentity.Waypoint) extends Screen(TextComponent.EMPTY) {
   val imageWidth = 176
   val imageHeight = 24
   var leftPos = 0

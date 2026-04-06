@@ -1,7 +1,7 @@
 package li.cil.oc.integration.minecraftforge
 
 import li.cil.oc.OpenComputers
-import li.cil.oc.common.tileentity.traits.PowerAcceptor
+import li.cil.oc.common.blockentity.traits.PowerAcceptor
 import li.cil.oc.integration.util.Power
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction

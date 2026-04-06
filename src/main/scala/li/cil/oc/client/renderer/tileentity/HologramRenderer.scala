@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.{PoseStack, VertexConsumer}
 import com.mojang.math.{Matrix4f, Vector3f}
 import li.cil.oc.Settings
 import li.cil.oc.client.Textures
-import li.cil.oc.common.tileentity.Hologram
+import li.cil.oc.common.blockentity.Hologram
 import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.{MultiBufferSource, RenderType}

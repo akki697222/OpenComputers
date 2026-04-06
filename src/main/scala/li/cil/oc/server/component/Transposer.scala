@@ -12,7 +12,7 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.server.network.{Component, Connector}
 import li.cil.oc.util.BlockPosition
@@ -47,7 +47,7 @@ object Transposer {
     }
   }
 
-  class Block(val host: tileentity.Transposer) extends Common {
+  class Block(val host: blockentity.Transposer) extends Common {
     override def position = BlockPosition(host)
 
     override def onTransferContents(): Option[String] = {

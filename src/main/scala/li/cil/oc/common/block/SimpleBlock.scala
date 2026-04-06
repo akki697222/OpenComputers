@@ -1,10 +1,10 @@
 package li.cil.oc.common.block
 
 import java.util
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.traits.Colored
-import li.cil.oc.common.tileentity.traits.Inventory
-import li.cil.oc.common.tileentity.traits.Rotatable
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.traits.Colored
+import li.cil.oc.common.blockentity.traits.Inventory
+import li.cil.oc.common.blockentity.traits.Rotatable
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.Color
 import li.cil.oc.util.Tooltip
@@ -138,7 +138,7 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
   @Deprecated
   def rotateBlock(world: World, pos: BlockPos, axis: Direction): Boolean =
     world.getBlockEntity(pos) match {
-      case rotatable: tileentity.traits.Rotatable if rotatable.rotate(axis) =>
+      case rotatable: blockentity.traits.Rotatable if rotatable.rotate(axis) =>
         world.sendBlockUpdated(pos, world.getBlockState(pos), world.getBlockState(pos), 3)
         true
       case _ => false

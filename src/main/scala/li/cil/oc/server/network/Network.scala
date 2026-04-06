@@ -7,7 +7,7 @@ import li.cil.oc.api.network
 import li.cil.oc.api.network._
 import li.cil.oc.api.network.{Node => ImmutableNode}
 import li.cil.oc.common.capabilities.Capabilities
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.server.network.Component
 import li.cil.oc.server.network.ComponentConnector
 import li.cil.oc.server.network.Connector
@@ -526,7 +526,7 @@ object Network extends api.detail.NetworkAPI {
 
   private def canConnectFromSideIM(tileEntity: BlockEntity, side: Direction) =
     tileEntity match {
-      case im: tileentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
+      case im: blockentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
       case _ => true
     }
 

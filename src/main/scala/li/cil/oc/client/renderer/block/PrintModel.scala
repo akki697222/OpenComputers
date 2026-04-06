@@ -9,7 +9,7 @@ import li.cil.oc.client.KeyBindings
 import li.cil.oc.client.Textures
 import li.cil.oc.common.block
 import li.cil.oc.common.item.data.PrintData
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedAABB
 import li.cil.oc.util.ExtendedAABB._
@@ -35,7 +35,7 @@ object PrintModel extends SmartBlockModelBase {
 
   override def getQuads(state: BlockState, side: Direction, rand: util.Random, data: IModelData): util.List[BakedQuad] =
     data match {
-      case t: tileentity.Print =>
+      case t: blockentity.Print =>
         val faces = mutable.ArrayBuffer.empty[BakedQuad]
         for (shape <- t.shapes if !Strings.isNullOrEmpty(shape.texture)) {
           val bounds  = shape.bounds.rotateTowards(t.facing)

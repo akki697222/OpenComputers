@@ -4,8 +4,8 @@ import li.cil.oc.{Constants, Settings, api}
 import li.cil.oc.client.KeyBindings
 import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.server.{PacketSender, agent}
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.{BlockPosition, InventoryUtils, Tooltip}
@@ -38,7 +38,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   override val getDescriptionId = "robot"
 
-  var moving = new ThreadLocal[Option[tileentity.Robot]] {
+  var moving = new ThreadLocal[Option[blockentity.Robot]] {
     override protected def initialValue = None
   }
 
@@ -46,13 +46,13 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
     world.getBlockEntity(pos) match {
-      case proxy: tileentity.RobotProxy => proxy.robot.info.copyItemStack()
+      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack()
       case _ => ItemStack.EMPTY
     }
 
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = {
     world.getBlockEntity(pos) match {
-      case proxy: tileentity.RobotProxy =>
+      case proxy: blockentity.RobotProxy =>
         val robot = proxy.robot
         if (robot.isAnimatingMove) {
           val remaining = robot.animationTicksLeft.toDouble / robot.animationTicksTotal.toDouble
@@ -119,10 +119,10 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   // ----------------------------------------------------------------------- //
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState): tileentity.RobotProxy = {
+  override def newBlockEntity(pos: BlockPos, state: BlockState): blockentity.RobotProxy = {
     moving.get match {
-      case Some(robot) => new tileentity.RobotProxy(pos, state, robot)
-      case _ => new tileentity.RobotProxy(pos, state)
+      case Some(robot) => new blockentity.RobotProxy(pos, state, robot)
+      case _ => new blockentity.RobotProxy(pos, state)
     }
   }
 
@@ -142,7 +142,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
     // case anywhere (TE autonomous activator, CC turtles).
     val newCtx = ctx.withDynamicDrop(LootFunctions.DYN_ITEM_DATA, (c, f) => {
       c.getParamOrNull(LootParameters.BLOCK_ENTITY) match {
-        case proxy: tileentity.RobotProxy =>
+        case proxy: blockentity.RobotProxy =>
           val robot = proxy.robot
           if (robot.node != null) {
             // Update: even more special hack! As discussed here http://git.io/IcNAyg
@@ -177,7 +177,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
         // change since this player got into range he might have the wrong one,
         // so we send him the current one just in case.
         (player, world.getBlockEntity(pos)) match {
-          case (srvPlr: ServerPlayerEntity, proxy: tileentity.RobotProxy) if proxy.robot.node.network != null =>
+          case (srvPlr: ServerPlayerEntity, proxy: blockentity.RobotProxy) if proxy.robot.node.network != null =>
             PacketSender.sendRobotSelectedSlotChange(proxy.robot)
             if (proxy.stillValid(player)) {
               MenuTypes.openRobotGui(srvPlr, proxy.robot)
@@ -190,7 +190,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
     else if (heldItem.isEmpty) {
       if (!world.isClientSide) {
         world.getBlockEntity(pos) match {
-          case proxy: tileentity.RobotProxy if !proxy.machine.isRunning && proxy.stillValid(player) => proxy.machine.start()
+          case proxy: blockentity.RobotProxy if !proxy.machine.isRunning && proxy.stillValid(player) => proxy.machine.start()
           case _ =>
         }
       }
@@ -202,9 +202,9 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
   override def setPlacedBy(world: World, pos: BlockPos, state: BlockState, entity: LivingEntity, stack: ItemStack): Unit = {
     super.setPlacedBy(world, pos, state, entity, stack)
     if (!world.isClientSide) ((entity, world.getBlockEntity(pos)) match {
-      case (player: agent.Player, proxy: tileentity.RobotProxy) =>
+      case (player: agent.Player, proxy: blockentity.RobotProxy) =>
         Some((proxy.robot, player.agent.ownerName, player.agent.ownerUUID))
-      case (player: PlayerEntity, proxy: tileentity.RobotProxy) =>
+      case (player: PlayerEntity, proxy: blockentity.RobotProxy) =>
         Some((proxy.robot, player.getName.getString, player.getGameProfile.getId))
       case _ => None
     }) match {
@@ -226,7 +226,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
                                 willHarvest: Boolean,
                                 fluid: FluidState
                               ): Boolean = {
-    Option(world.getBlockEntity(pos)).collect { case proxy: tileentity.RobotProxy => proxy }.foreach { proxy =>
+    Option(world.getBlockEntity(pos)).collect { case proxy: blockentity.RobotProxy => proxy }.foreach { proxy =>
       val robot = proxy.robot
       val playerName = player.getName.getString
 

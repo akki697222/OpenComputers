@@ -4,20 +4,20 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.PoseStack
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer, BlockEntityRendererProvider}
 import net.minecraft.core.Direction
 
-object AdapterRenderer extends BlockEntityRendererProvider[tileentity.Adapter] {
+object AdapterRenderer extends BlockEntityRendererProvider[blockentity.Adapter] {
   override def create(ctx: BlockEntityRendererProvider.Context): AdapterRenderer =
     new AdapterRenderer()
 }
 
-class AdapterRenderer extends BlockEntityRenderer[tileentity.Adapter] {
+class AdapterRenderer extends BlockEntityRenderer[blockentity.Adapter] {
 
-  override def render(adapter: tileentity.Adapter, dt: Float, stack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int): Unit = {
+  override def render(adapter: blockentity.Adapter, dt: Float, stack: PoseStack, buffer: MultiBufferSource, light: Int, overlay: Int): Unit = {
     RenderState.checkError(getClass.getName + ".render: entering")
 
     RenderSystem.setShaderColor(1, 1, 1, 1)

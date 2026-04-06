@@ -9,7 +9,7 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.entity.Drone
-import li.cil.oc.common.tileentity.Robot
+import li.cil.oc.common.blockentity.Robot
 import li.cil.oc.server.component
 import net.minecraft.world.item.ItemStack
 

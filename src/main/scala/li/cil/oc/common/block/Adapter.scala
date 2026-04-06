@@ -1,8 +1,8 @@
 package li.cil.oc.common.block
 
 import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.util.Wrench
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
@@ -20,24 +20,24 @@ import net.minecraft.world.level.{Level => World}
 
 class Adapter(props: Properties) extends SimpleBlock(props) with traits.GUI with traits.Tickable {
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Adapter => MenuTypes.openAdapterGui(player, te)
+    case te: blockentity.Adapter => MenuTypes.openAdapterGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Adapter(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Adapter(pos, state)
 
   // ----------------------------------------------------------------------- //
 
   @Deprecated
   override def neighborChanged(state: BlockState, world: World, pos: BlockPos, block: Block, fromPos: BlockPos, b: Boolean): Unit =
     world.getBlockEntity(pos) match {
-      case adapter: tileentity.Adapter => adapter.neighborChanged()
+      case adapter: blockentity.Adapter => adapter.neighborChanged()
       case _ => // Ignore.
     }
 
   override def onNeighborChange(state: BlockState, world: IWorldReader, pos: BlockPos, neighbor: BlockPos) =
     world.getBlockEntity(pos) match {
-      case adapter: tileentity.Adapter =>
+      case adapter: blockentity.Adapter =>
         // TODO can we just pass the blockpos?
         val side =
           if (neighbor == (pos.below():BlockPos)) Direction.DOWN
@@ -55,7 +55,7 @@ class Adapter(props: Properties) extends SimpleBlock(props) with traits.GUI with
     if (Wrench.holdsApplicableWrench(player, pos)) {
       val sideToToggle = if (player.isCrouching) side.getOpposite else side
       world.getBlockEntity(pos) match {
-        case adapter: tileentity.Adapter =>
+        case adapter: blockentity.Adapter =>
           if (!world.isClientSide) {
             val oldValue = adapter.openSides(sideToToggle.ordinal())
             adapter.setSideOpen(sideToToggle, !oldValue)

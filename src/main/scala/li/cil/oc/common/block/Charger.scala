@@ -3,8 +3,8 @@ package li.cil.oc.common.block
 import li.cil.oc.Settings
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.PacketSender
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
@@ -30,11 +30,11 @@ class Charger(props: Properties) extends RedstoneAware(props) with traits.PowerA
   override def energyThroughput = Settings.get.chargerRate
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.Charger => MenuTypes.openChargerGui(player, te)
+    case te: blockentity.Charger => MenuTypes.openChargerGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Charger(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Charger(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -44,7 +44,7 @@ class Charger(props: Properties) extends RedstoneAware(props) with traits.PowerA
 
   override def localOnBlockActivated(world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, heldItem: ItemStack, side: Direction, hitX: Float, hitY: Float, hitZ: Float) =
     if (Wrench.holdsApplicableWrench(player, pos)) world.getBlockEntity(pos) match {
-      case charger: tileentity.Charger =>
+      case charger: blockentity.Charger =>
         if (!world.isClientSide) {
           charger.invertSignal = !charger.invertSignal
           charger.chargeSpeed = 1.0 - charger.chargeSpeed
@@ -59,7 +59,7 @@ class Charger(props: Properties) extends RedstoneAware(props) with traits.PowerA
   @Deprecated
   override def neighborChanged(state: BlockState, world: World, pos: BlockPos, block: Block, fromPos: BlockPos, b: Boolean): Unit = {
     world.getBlockEntity(pos) match {
-      case charger: tileentity.Charger => charger.onNeighborChanged()
+      case charger: blockentity.Charger => charger.onNeighborChanged()
       case _ =>
     }
     super.neighborChanged(state, world, pos, block, fromPos, b)

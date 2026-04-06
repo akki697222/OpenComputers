@@ -63,7 +63,7 @@ abstract class ComponentSlot(inventory: Container, index: Int, x: Int, y: Int, h
   override def set(stack: ItemStack): Unit = {
     super.set(stack)
     inventory match {
-      case playerAware: common.tileentity.traits.PlayerInputAware =>
+      case playerAware: common.blockentity.traits.PlayerInputAware =>
         playerAware.onSetInventorySlotContents(agentContainer.playerInventory.player, getSlotIndex, stack)
       case _ =>
     }

@@ -5,7 +5,7 @@ import java.util.Collections
 
 import li.cil.oc.client.Textures
 import li.cil.oc.common.block.property.PropertyCableConnection
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.ItemColorizer
@@ -41,7 +41,7 @@ object CableModel extends SmartBlockModelBase {
 
   override def getQuads(state: BlockState, side: Direction, rand: util.Random, data: IModelData): util.List[BakedQuad] = {
     data match {
-      case cable: tileentity.Cable if side == null =>
+      case cable: blockentity.Cable if side == null =>
         val color = cable.getColor
         val faces = mutable.ArrayBuffer.empty[BakedQuad]
 

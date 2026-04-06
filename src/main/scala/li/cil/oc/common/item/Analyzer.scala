@@ -7,7 +7,7 @@ import li.cil.oc.api
 import li.cil.oc.api.machine.Machine
 import li.cil.oc.api.network.Analyzable
 import li.cil.oc.api.network._
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
@@ -116,7 +116,7 @@ class Analyzer(props: Properties) extends Item(props) with IForgeItem with trait
   override def onItemUse(stack: ItemStack, player: Player, position: BlockPosition, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = {
     val world = player.level
     world.getBlockEntity(position) match {
-      case screen: tileentity.Screen if side == screen.facing =>
+      case screen: blockentity.Screen if side == screen.facing =>
         if (player.isCrouching) {
           screen.copyToAnalyzer(hitX, hitY, hitZ)
         }

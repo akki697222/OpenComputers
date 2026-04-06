@@ -1,7 +1,7 @@
 package li.cil.oc.common.block
 
-import li.cil.oc.common.tileentity
-import li.cil.oc.common.tileentity.TileEntityTypes
+import li.cil.oc.common.blockentity
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.util.BlockPosHelper
 import li.cil.oc.{Constants, Settings, api}
 import net.minecraft.core.{BlockPos, Direction}
@@ -91,14 +91,14 @@ class RobotAfterimage(props: Properties) extends SimpleBlock(props) with traits.
     }
   }
 
-  def findMovingRobot(world: IBlockReader, pos: BlockPos): Option[tileentity.Robot] = {
+  def findMovingRobot(world: IBlockReader, pos: BlockPos): Option[blockentity.Robot] = {
     for (side <- Direction.values) {
       val tpos = BlockPosHelper.relative(pos, side)
       if (world match {
         case world: World => world.isLoaded(tpos)
         case _ => true
       }) world.getBlockEntity(tpos) match {
-        case proxy: tileentity.RobotProxy if proxy.robot.moveFrom.contains(pos) => return Some(proxy.robot)
+        case proxy: blockentity.RobotProxy if proxy.robot.moveFrom.contains(pos) => return Some(proxy.robot)
         case _ =>
       }
     }

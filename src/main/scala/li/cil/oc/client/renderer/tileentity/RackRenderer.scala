@@ -3,7 +3,7 @@ package li.cil.oc.client.renderer.tileentity
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.systems.RenderSystem
 import li.cil.oc.api.event.RackMountableRenderEvent
-import li.cil.oc.common.tileentity.Rack
+import li.cil.oc.common.blockentity.Rack
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.client.renderer.LevelRenderer // 1.18.2: WorldRenderer → LevelRenderer

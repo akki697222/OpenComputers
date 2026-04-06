@@ -30,7 +30,7 @@ import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.common.Slot
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
 import li.cil.oc.server.driver.Registry
 import li.cil.oc.server.fs.FileSystem
@@ -561,7 +561,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
         users
       }
       host match {
-        case computer: tileentity.traits.Computer => PacketSender.sendComputerUserList(computer, list)
+        case computer: blockentity.traits.Computer => PacketSender.sendComputerUserList(computer, list)
         case _ =>
       }
     }

@@ -3,7 +3,7 @@ package li.cil.oc.common.block
 import java.util
 import li.cil.oc.common.block.property.PropertyCableConnection
 import li.cil.oc.common.capabilities.Capabilities
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.ItemColorizer
@@ -66,7 +66,7 @@ class Cable(props: Properties) extends SimpleBlock(props) with IForgeBlock {
 
   override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity) =
     world.getBlockEntity(pos) match {
-      case t: tileentity.Cable => t.createItemStack()
+      case t: blockentity.Cable => t.createItemStack()
       case _ => createItemStack()
     }
 
@@ -75,7 +75,7 @@ class Cable(props: Properties) extends SimpleBlock(props) with IForgeBlock {
   override def neighborChanged(state: BlockState, world: World, pos: BlockPos, other: Block, otherPos: BlockPos, moved: Boolean): Unit = {
     if (world.isClientSide) return
     val newState = world.getBlockEntity(pos) match {
-      case t: tileentity.Cable => {
+      case t: blockentity.Cable => {
         val fromPos = new BlockPos.MutableBlockPos()
         Direction.values.foldLeft(state)((state, fromSide) => {
           fromPos.setWithOffset(pos, fromSide)
@@ -93,14 +93,14 @@ class Cable(props: Properties) extends SimpleBlock(props) with IForgeBlock {
 
   // ----------------------------------------------------------------------- //
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.Cable(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Cable(pos, state)
 
   // ----------------------------------------------------------------------- //
 
   override def setPlacedBy(world: World, pos: BlockPos, state: BlockState, placer: LivingEntity, stack: ItemStack): Unit = {
     super.setPlacedBy(world, pos, state, placer, stack)
     world.getBlockEntity(pos) match {
-      case tileEntity: tileentity.Cable => {
+      case tileEntity: blockentity.Cable => {
         tileEntity.fromItemStack(stack)
         state.updateNeighbourShapes(world, pos, 2)
       }
@@ -167,7 +167,7 @@ object Cable {
 
   private def hasNetworkNode(tileEntity: TileEntity, side: Direction): Boolean = {
     if (tileEntity != null) {
-      if (tileEntity.isInstanceOf[tileentity.RobotProxy]) return false
+      if (tileEntity.isInstanceOf[blockentity.RobotProxy]) return false
 
       if (tileEntity.getCapability(Capabilities.SidedEnvironmentCapability, side).isPresent) {
         val host = tileEntity.getCapability(Capabilities.SidedEnvironmentCapability, side).orElse(null)
@@ -208,7 +208,7 @@ object Cable {
 
   private def canConnectFromSideIM(tileEntity: TileEntity, side: Direction) =
     tileEntity match {
-      case im: tileentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
+      case im: blockentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
       case _ => true
     }
 }

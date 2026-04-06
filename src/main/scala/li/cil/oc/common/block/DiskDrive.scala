@@ -4,7 +4,7 @@ import java.util
 
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import li.cil.oc.integration.Mods
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.level.block.state.BlockBehaviour.{Properties => Properties}
@@ -41,11 +41,11 @@ class DiskDrive(props: Properties) extends SimpleBlock(props) with traits.GUI {
   // ----------------------------------------------------------------------- //
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
-    case te: tileentity.DiskDrive => MenuTypes.openDiskDriveGui(player, te)
+    case te: blockentity.DiskDrive => MenuTypes.openDiskDriveGui(player, te)
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new tileentity.DiskDrive(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.DiskDrive(pos, state)
 
   // ----------------------------------------------------------------------- //
 
@@ -53,7 +53,7 @@ class DiskDrive(props: Properties) extends SimpleBlock(props) with traits.GUI {
 
   override def getAnalogOutputSignal(state: BlockState, world: World, pos: BlockPos): Int =
     world.getBlockEntity(pos) match {
-      case drive: tileentity.DiskDrive if !drive.getItem(0).isEmpty => 15
+      case drive: blockentity.DiskDrive if !drive.getItem(0).isEmpty => 15
       case _ => 0
     }
 
@@ -62,7 +62,7 @@ class DiskDrive(props: Properties) extends SimpleBlock(props) with traits.GUI {
   override def localOnBlockActivated(world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, heldItem: ItemStack, side: Direction, hitX: Float, hitY: Float, hitZ: Float): Boolean = {
     // Behavior: sneaking -> Insert[+Eject], not sneaking -> GUI.
     if (player.isCrouching) world.getBlockEntity(pos) match {
-      case drive: tileentity.DiskDrive =>
+      case drive: blockentity.DiskDrive =>
         val isDiskInDrive = drive.getItem(0) != null
         val isHoldingDisk = drive.canPlaceItem(0, heldItem)
         if (isDiskInDrive) {

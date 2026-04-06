@@ -19,7 +19,7 @@ import li.cil.oc.api.network.Message
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import li.cil.oc.common.tileentity.{Robot => EntityRobot, Microcontroller}
+import li.cil.oc.common.blockentity.{Robot => EntityRobot, Microcontroller}
 import li.cil.oc.common.entity.{Drone => EntityDrone}
 import li.cil.oc.common.item.TabletWrapper
 import li.cil.oc.util.BlockPosition

@@ -2,7 +2,7 @@ package li.cil.oc.common.menu
 
 import li.cil.oc.common.InventorySlots
 import li.cil.oc.common.Tier
-import li.cil.oc.common.tileentity
+import li.cil.oc.common.blockentity
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.Container
 import net.minecraft.world.entity.player.Player
@@ -12,7 +12,7 @@ import net.minecraft.world.inventory.MenuType
 class Case(id: Int, playerInventory: Inventory, computer: Container, tier: Int)
   extends AbstractMenu(MenuTypes.CASE.get(), id, playerInventory, computer) {
 
-  override protected def getHostClass = classOf[tileentity.Case]
+  override protected def getHostClass = classOf[blockentity.Case]
 
   for (i <- 0 to (if (tier >= Tier.Three) 2 else 1)) {
     val slot = InventorySlots.computer(tier)(getItems.size)
@@ -53,7 +53,7 @@ class Case(id: Int, playerInventory: Inventory, computer: Container, tier: Int)
   addPlayerInventorySlots(8, 84)
 
   private val runningData = computer match {
-    case te: tileentity.Case => {
+    case te: blockentity.Case => {
       addDataSlot(new DataSlot {
         override def get(): Int = if (te.isRunning) 1 else 0
 
@@ -66,7 +66,7 @@ class Case(id: Int, playerInventory: Inventory, computer: Container, tier: Int)
 
   override def stillValid(player: Player) =
     super.stillValid(player) && (computer match {
-      case te: tileentity.Case => te.canInteract(player.getName.getString)
+      case te: blockentity.Case => te.canInteract(player.getName.getString)
       case _ => true
     })
 }
