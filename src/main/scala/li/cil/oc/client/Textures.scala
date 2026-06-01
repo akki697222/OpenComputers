@@ -1,12 +1,13 @@
 package li.cil.oc.client
 
 import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.OpenComputers
+import li.cil.oc.{Constants, OpenComputers, Settings}
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.texture.SimpleTexture
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.resources.{ResourceManager, ResourceManagerReloadListener}
 import net.minecraft.world.inventory.InventoryMenu
@@ -92,6 +93,8 @@ object Textures {
   object Item {
     val DroneItem = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "item/drone")
     val Robot = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "item/robot")
+    val TerminalOn = new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Terminal + "_on", "inventory")
+    val TerminalOff = new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Terminal + "_off", "inventory")
   }
 
   object Block {

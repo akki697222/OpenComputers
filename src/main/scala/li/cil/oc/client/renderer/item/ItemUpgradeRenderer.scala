@@ -11,8 +11,10 @@ import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.integration.opencomputers.Item
 import li.cil.oc.util.RenderState
 import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.world.item.ItemStack 
+import net.minecraft.world.item.ItemStack
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
+@OnlyIn(Dist.CLIENT)
 object ItemUpgradeRenderer {
   lazy val craftingUpgrade   = api.Items.get(Constants.ItemName.CraftingUpgrade)
   lazy val generatorUpgrade  = api.Items.get(Constants.ItemName.GeneratorUpgrade)

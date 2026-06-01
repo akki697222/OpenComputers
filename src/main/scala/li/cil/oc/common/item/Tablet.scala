@@ -1,81 +1,61 @@
 package li.cil.oc.common.item
 
-import java.util
-import java.util.UUID
-import java.util.concurrent.Callable
-import java.util.concurrent.TimeUnit
-import com.google.common.cache.{CacheBuilder, RemovalListener, RemovalNotification}
+import com.google.common.cache.{
+  CacheBuilder,
+  RemovalListener,
+  RemovalNotification
+}
 import com.google.common.collect.ImmutableMap
-import li.cil.oc.Constants
-import li.cil.oc.Localization
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.Driver
-import li.cil.oc.api.Machine
 import li.cil.oc.api.driver.item.Container
-import li.cil.oc.api.internal
+import li.cil.oc.api.{Driver, Machine, internal}
 import li.cil.oc.api.machine.MachineHost
-import li.cil.oc.api.network.Connector
-import li.cil.oc.api.network.Message
-import li.cil.oc.api.network.Node
-import li.cil.oc.{client, server}
-import li.cil.oc.client.KeyBindings
-import li.cil.oc.client.gui
-import li.cil.oc.common.Slot
-import li.cil.oc.common.Tier
-import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.api.network.{Connector, Message, Node}
+import li.cil.oc.client.{KeyBindings, gui}
 import li.cil.oc.common.container.ComponentInventory
 import li.cil.oc.common.item.data.TabletData
+import li.cil.oc.common.{Slot, Tier, menu}
+import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.server.component
-import li.cil.oc.util.Audio
-import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedNBT._
-import li.cil.oc.util.Rarity
-import li.cil.oc.util.RotationHelper
-import li.cil.oc.util.Tooltip
+import li.cil.oc.util._
+import li.cil.oc.{
+  Constants,
+  Localization,
+  OpenComputers,
+  Settings,
+  api,
+  client,
+  server
+}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.item
-import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
-import net.minecraft.world.item.CreativeModeTab
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.world.InteractionResultHolder
-import net.minecraft.world.InteractionResult
-import net.minecraft.core.Direction
-import net.minecraft.world.InteractionHand
-import net.minecraft.core.NonNullList
-import net.minecraft.Util
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.{Entity, LivingEntity}
+import net.minecraft.world.entity.player.{Inventory, Player}
+import net.minecraft.world._
+import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.world.level.Level
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraftforge.event.TickEvent.ClientTickEvent
-import net.minecraftforge.event.TickEvent.ServerTickEvent
+import net.minecraftforge.event.TickEvent.{ClientTickEvent, ServerTickEvent}
+import net.minecraftforge.event.level.LevelEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.server.ServerLifecycleHooks
 
+import java.util
+import java.util.UUID
+import java.util.concurrent.{Callable, TimeUnit}
 import scala.collection.JavaConverters.asJavaIterable
-import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.jdk.CollectionConverters._
-import net.minecraft.nbt.Tag
-import net.minecraftforge.event.level.LevelEvent
 
-class Tablet(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem with CustomModel with traits.Chargeable {
+class Tablet(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem with traits.Chargeable {
   final val TimeToAnalyze = 10
 
   // ----------------------------------------------------------------------- //
@@ -125,22 +105,6 @@ class Tablet(props: Properties) extends Item(props) with IForgeItem with traits.
     }
     new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Tablet + suffix, "inventory")
   }
-
-  @OnlyIn(Dist.CLIENT)
-  override def getModelLocation(stack: ItemStack): ModelResourceLocation = {
-    modelLocationFromState(Tablet.Client.getWeak(stack) match {
-      case Some(tablet: TabletWrapper) => Some(tablet.data.isRunning)
-      case _ => None
-    })
-  }
-
-  //@TODO replace to ModelEvent.RegisterAdditional
-  //@OnlyIn(Dist.CLIENT)
-  //override def registerModelLocations(): Unit = {
-  //  for (state <- Seq(None, Some(true), Some(false))) {
-  //    ModelLoader.addSpecialModel(modelLocationFromState(state))
-  //  }
-  //}
 
   def canCharge(stack: ItemStack): Boolean = true
 

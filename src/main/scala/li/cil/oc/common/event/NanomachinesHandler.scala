@@ -24,11 +24,12 @@ import net.minecraft.nbt.NbtIo
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.client.event.RenderGuiOverlayEvent
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay
 
 object NanomachinesHandler {
-
+  @OnlyIn(Dist.CLIENT)
   object Client {
     val TexNanomachines = RenderTypes.createTexturedQuad("nanomachines", Textures.GUI.Nanomachines, DefaultVertexFormat.POSITION_TEX, false)
     val TexNanomachinesBar = RenderTypes.createTexturedQuad("nanomachines_bar", Textures.GUI.NanomachinesBar, DefaultVertexFormat.POSITION_TEX, false)

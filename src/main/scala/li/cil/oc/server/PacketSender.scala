@@ -31,6 +31,63 @@ import net.minecraft.world.level.Level
 import net.minecraft.sounds.SoundSource
 
 object PacketSender {
+  def sendAudioStart(host: EnvironmentHost, sessionId: Int, channel: Int, sampleRate: Int, channels: Int, format: Int, loop: Boolean, pos: BlockPosition): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioStart)
+    pb.writeInt(sessionId)
+    pb.writeInt(channel)
+    pb.writeInt(sampleRate)
+    pb.writeInt(channels)
+    pb.writeInt(format)
+    pb.writeBoolean(loop)
+    pb.writeBlockPosCoords(pos)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioChunk(host: EnvironmentHost, sessionId: Int, data: Array[Byte]): Unit = {
+    val pb = new CompressedPacketBuilder(PacketType.AudioChunk)
+    pb.writeInt(sessionId)
+    pb.writeInt(data.length)
+    pb.write(data)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioPlay(host: EnvironmentHost, sessionId: Int): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioPlay)
+    pb.writeInt(sessionId)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioPause(host: EnvironmentHost, sessionId: Int): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioPause)
+    pb.writeInt(sessionId)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioResume(host: EnvironmentHost, sessionId: Int): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioResume)
+    pb.writeInt(sessionId)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioStop(host: EnvironmentHost, sessionId: Int): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioStop)
+    pb.writeInt(sessionId)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioClose(host: EnvironmentHost, sessionId: Int): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioClose)
+    pb.writeInt(sessionId)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
+  def sendAudioSetLoop(host: EnvironmentHost, sessionId: Int, loop: Boolean): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.AudioSetLoop)
+    pb.writeInt(sessionId)
+    pb.writeBoolean(loop)
+    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  }
+
   def sendAdapterState(t: blockentity.Adapter): Unit = {
     val pb = new SimplePacketBuilder(PacketType.AdapterState)
 

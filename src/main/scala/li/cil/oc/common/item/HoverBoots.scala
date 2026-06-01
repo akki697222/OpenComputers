@@ -1,33 +1,19 @@
 package li.cil.oc.common.item
 
-import li.cil.oc.{OpenComputers, Settings}
+import li.cil.oc.Settings
 import li.cil.oc.client.renderer.item.HoverBootRenderer
-import li.cil.oc.common.init.Items
 import li.cil.oc.common.item.data.HoverBootsData
 import li.cil.oc.util.ItemColorizer
-import net.minecraft.world.item.{ArmorItem, ArmorMaterials, CreativeModeTab, CreativeModeTabs, Item, ItemStack, Rarity}
-import net.minecraft.world.item.Item.Properties
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraft.world.entity.EquipmentSlot
-import net.minecraft.core.NonNullList
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.level.Level
-import net.minecraft.client.model.HumanoidModel
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.effect.{MobEffectInstance, MobEffects}
+import net.minecraft.world.entity.{Entity, EquipmentSlot}
 import net.minecraft.world.entity.item.ItemEntity
-import net.minecraft.world.level.block.CauldronBlock
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.LayeredCauldronBlock
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.{ArmorItem, ArmorMaterials, ItemStack}
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.{Blocks, LayeredCauldronBlock}
+import net.minecraftforge.common.extensions.IForgeItem
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = OpenComputers.ID)
 class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, props) with IForgeItem with traits.SimpleItem with traits.Chargeable {
   override def maxCharge(stack: ItemStack): Double = Settings.get.bufferHoverBoots
 
@@ -48,13 +34,6 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
       data.charge += used
       data.saveData(stack)
     })
-  }
-
-  @SubscribeEvent
-  def onBuildCreativeTabContents(event: BuildCreativeModeTabContentsEvent): Unit = {
-    if (event.getTabKey == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-      event.accept(Items.createChargedHoverBoots())
-    }
   }
 
   //@TODO replace with IItemRenderProperties

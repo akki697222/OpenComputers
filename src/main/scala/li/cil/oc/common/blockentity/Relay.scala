@@ -2,53 +2,27 @@ package li.cil.oc.common.blockentity
 
 import com.google.common.base.Charsets
 import dan200.computercraft.api.peripheral.IComputerAccess
+import li.cil.oc.{Constants, Localization, Settings, api}
+import li.cil.oc.api.Driver
 import li.cil.oc.api.detail.ItemInfo
-import li.cil.oc.api.network.Component
+import li.cil.oc.api.machine.{Arguments, Callback, Context}
+import li.cil.oc.api.network._
+import li.cil.oc.common._
+import li.cil.oc.integration.Mods
+import li.cil.oc.integration.opencomputers.DriverLinkedCard
 import li.cil.oc.server.PacketSender
+import li.cil.oc.server.network.QuantumNetwork
+import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.nbt.{CompoundTag, ListTag, Tag}
+import net.minecraft.world.MenuProvider
+import net.minecraft.world.entity.player.{Inventory, Player}
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 
 import scala.collection.mutable
-import li.cil.oc.Constants
-import li.cil.oc.Localization
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.Driver
-import li.cil.oc.api.machine.Arguments
-import li.cil.oc.api.machine.Callback
-import li.cil.oc.api.machine.Context
-import li.cil.oc.api.network.Analyzable
-import li.cil.oc.api.network.Connector
-import li.cil.oc.api.network.Node
-import li.cil.oc.api.network.Packet
-import li.cil.oc.api.network.Visibility
-import li.cil.oc.api.network.WirelessEndpoint
-import li.cil.oc.common.InventorySlots
-import li.cil.oc.common.Slot
-import li.cil.oc.common.Tier
-import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.item
-import li.cil.oc.integration.Mods
-import li.cil.oc.integration.computercraft.RelayPeripheral
-import li.cil.oc.integration.opencomputers.DriverLinkedCard
-import li.cil.oc.server.network.QuantumNetwork
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.BlockPos
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.nbt.Tag
-import net.minecraft.nbt.ListTag
-import net.minecraft.Util
-import net.minecraft.world.level.Level
-import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
-import net.minecraftforge.common.util.LazyOptional
 
 class Relay(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.RELAY.get(), pos, state) with traits.Hub with traits.ComponentInventory

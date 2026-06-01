@@ -10,6 +10,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.event.FileSystemAccessEvent
 import li.cil.oc.api.event.NetworkActivityEvent
+import li.cil.oc.client.audio.AudioSession
 import li.cil.oc.client.renderer.PetRenderer
 import li.cil.oc.common.Loot
 import li.cil.oc.common.PacketType
@@ -40,6 +41,18 @@ import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.registries.ForgeRegistries
 
 object PacketHandler extends CommonPacketHandler {
+  private val audioSessions = scala.collection.mutable.Map[Int, AudioSession]()
+
+  def update(): Unit = {
+    audioSessions.synchronized {
+      val finished = audioSessions.filter { case (_, s) => s.checkFinished && !s.loop }
+      finished.foreach { case (handle, s) =>
+        s.cleanup()
+        audioSessions.remove(handle)
+      }
+    }
+  }
+
   protected override def world(player: Player, dimension: ResourceLocation): Option[Level] = {
     val world = player.level
     if (world.dimension.location.equals(dimension)) Some(world)
@@ -50,6 +63,14 @@ object PacketHandler extends CommonPacketHandler {
     p.packetType match {
       case PacketType.AdapterState => onAdapterState(p)
       case PacketType.Analyze => onAnalyze(p)
+      case PacketType.AudioStart  => onAudioStart(p)
+      case PacketType.AudioChunk  => onAudioChunk(p)
+      case PacketType.AudioPlay   => onAudioPlay(p)
+      case PacketType.AudioPause  => onAudioPause(p)
+      case PacketType.AudioResume => onAudioResume(p)
+      case PacketType.AudioStop   => onAudioStop(p)
+      case PacketType.AudioClose  => onAudioClose(p)
+      case PacketType.AudioSetLoop => onAudioSetLoop(p)
       case PacketType.ChargerState => onChargerState(p)
       case PacketType.ClientLog => onClientLog(p)
       case PacketType.Clipboard => onClipboard(p)
@@ -105,6 +126,73 @@ object PacketHandler extends CommonPacketHandler {
       case PacketType.TransposerActivity => onTransposerActivity(p)
       case PacketType.WaypointLabel => onWaypointLabel(p)
       case _ => // Invalid packet.
+    }
+  }
+
+  def onAudioStart(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    val channel = p.readInt()
+    val sampleRate = p.readInt()
+    val channels = p.readInt()
+    val format = p.readInt()
+    val loop = p.readBoolean()
+    val pos = p.readBlockPosCoords()
+
+    val s = new AudioSession(handle, channel, sampleRate, channels, format, pos)
+    s.loop = loop
+    audioSessions.synchronized {
+      audioSessions(handle) = s
+    }
+  }
+
+  def onAudioChunk(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    val data = p.readByteArray()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.append(data))
+    }
+  }
+
+  def onAudioPlay(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.play())
+    }
+  }
+
+  def onAudioPause(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.pause())
+    }
+  }
+
+  def onAudioResume(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.resume())
+    }
+  }
+
+  def onAudioStop(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.stop())
+    }
+  }
+
+  def onAudioClose(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    audioSessions.synchronized {
+      audioSessions.remove(handle).foreach(_.cleanup())
+    }
+  }
+
+  def onAudioSetLoop(p: PacketParser): Unit = {
+    val handle = p.readInt()
+    val loop = p.readBoolean()
+    audioSessions.synchronized {
+      audioSessions.get(handle).foreach(_.setLoopMode(loop))
     }
   }
 

@@ -21,6 +21,7 @@ import li.cil.oc.common.event.NanomachinesHandler
 import li.cil.oc.common.event.RackMountableRenderHandler
 import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.util.Audio
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.Item

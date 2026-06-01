@@ -1,0 +1,209 @@
+THE "OC1 WAS PERFECT AND YOU KNOW IT" LICENSE
+Version 1.12.2-FINAL-AND-I-MEAN-IT
+
+Copyright (C) 2026 akki697222
+The author is fine. The author is not thinking about
+OpenComputers 1. The author is completely fine.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                PREAMBLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This license exists because someone looked at
+OpenComputers — a mod about Lua-programmable robots
+that could mine, build, and automate your Minecraft
+world — and thought:
+
+    "You know what this needs? Linux."
+
+They were wrong. They have always been wrong.
+This license is a formal record of that wrongness.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          SECTION 0 — DEFINITIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"OC1" means OpenComputers for Forge 1.12.2 and
+earlier. Lua 5.2/5.3. OpenOS. Robots. Drones.
+Graphics cards. A real filesystem. Component APIs.
+The ability to automate your entire base with
+a hundred lines of Lua at 2am.
+This was good. This was correct. This was enough.
+
+"OC2" means OpenComputers II by Sangar (fnuecke).
+A mod in which your Minecraft computer boots Linux
+over an emulated 64-bit RISC-V architecture,
+communicates with Minecraft via JSON-RPC over a
+virtual serial device, and requires you to write
+kernel-adjacent code to turn on a lamp.
+
+    The author acknowledges this is technically
+    impressive.
+    The author does not care.
+    You are playing Minecraft.
+
+"OC2R" means OpenComputers II: Reimagined, a fork
+of OC2 that continues OC2's tradition of running
+a real operating system inside a game about
+punching trees, now on newer Minecraft versions.
+The "Reimagined" refers to imagining that anyone
+asked for this.
+
+"Sedna" means the RISC-V emulation library
+powering OC2 and OC2R, written entirely in Java,
+capable of booting Linux, and living inside a
+Minecraft mod.
+
+    Sedna is, objectively, an extraordinary
+    engineering achievement.
+    It has absolutely no business being here.
+
+"The Good Times" means the era in which OC1 was
+maintained, robots roamed the land, and you could
+automate a sorting system without installing a
+bootloader.
+
+"Software" means this mod, which ports OC1 to
+modern Forge, because someone had to do it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        SECTION 1 — LICENSE GRANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Permission is hereby granted, free of charge, to
+any person who:
+
+    a) Has written at least one Lua program on an
+       OC1 computer, whether useful or not.
+
+    b) Remembers that robots could use tools,
+       and thought that was really cool.
+
+    c) Has never unironically said "OC2 is just
+       OC1 but better."
+       It is not OC1 but better.
+       It is OC1 replaced with a PC emulator.
+       These are different things.
+
+    d) Understands that "you can run Linux on it"
+       is not a feature when what you wanted was
+       "my robot mines iron for me."
+
+    e) Accepts that OpenOS was fine, actually.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SECTION 2 — PROHIBITED USES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following are strictly prohibited:
+
+    1. Using this Software to argue that booting
+       Arch Linux inside Minecraft represents
+       progress in any meaningful direction.
+
+    2. Describing the RISC-V emulation layer as
+       "what OC always should have been."
+       OC always should have been OC1.
+       OC1 already existed. It was fine.
+
+    3. Suggesting that JSON-RPC over a virtual
+       serial port is a reasonable way to
+       control a Minecraft inventory.
+
+    4. Praising Sedna in the presence of the
+       author. Sedna is impressive. Sedna is
+       also completely unnecessary. Both
+       of these things are true simultaneously.
+
+    5. Opening an issue requesting Linux support.
+       This is not that mod.
+       That mod exists. Go use that mod.
+       This mod has robots.
+
+    6. Saying "just use CC:Tweaked" as if that
+       is a satisfying answer to anything.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     SECTION 3 — MANDATORY ACKNOWLEDGEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+By using this Software, you formally acknowledge:
+
+    a) The OC1 component API was elegant.
+
+    b) Writing a GPS satellite network in Lua
+       on OC1 computers was a legitimate and
+       worthwhile use of an afternoon.
+
+    c) OC2 is technically a Minecraft mod in the
+       same way that a flight simulator is
+       technically a video game. Correct, but
+       not what anyone meant.
+
+    d) "It runs Linux" is an answer to a question
+       that no Minecraft player asked.
+
+    e) The drone was an extremely good item and
+       its absence from OC2 is felt daily.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          SECTION 4 — TERMINATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This license terminates immediately upon:
+
+    a) Installing OC2 or OC2R alongside this mod.
+
+    b) Posting "why doesn't this run Linux"
+       in the issue tracker.
+
+    c) Describing Sedna as "the soul of OC."
+       Sedna is a RISC-V emulator.
+       It does not have a soul.
+       OC1 had a soul. It was made of Lua
+       and robot arms and bad decisions at 2am.
+
+    d) Suggesting this mod should be rewritten
+       to use a VM-based architecture.
+       It should not.
+       It has Scala. Scala is enough.
+       Scala has always been enough.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          SECTION 5 — DISCLAIMER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE SOFTWARE IS PROVIDED "AS IS", WITH ALL THE
+CHARM AND IDIOSYNCRASIES OF THE ORIGINAL OC1
+FAITHFULLY PRESERVED.
+
+THE AUTHOR IS NOT RESPONSIBLE FOR:
+- NOSTALGIA
+- LOSS OF PRODUCTIVITY DUE TO WRITING LUA PROGRAMS
+  THAT SERVE NO PRACTICAL PURPOSE
+- EXISTENTIAL DREAD UPON REALIZING 1.12.2 WAS
+  EIGHT YEARS AGO
+- OC2
+- OC2R
+- SEDNA
+- THE FACT THAT YOU CAN BOOT LINUX IN MINECRAFT
+  NOW AND SOMEHOW THIS IS CONSIDERED PROGRESS
+
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+CLAIM ARISING FROM THE MISGUIDED BELIEF THAT
+WHAT OPENCOMPUTERS NEEDED WAS A REAL OPERATING
+SYSTEM RATHER THAN BETTER ROBOT PATHFINDING.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                  END
+
+OC1. 2014–2019. It mined. It built. It sorted.
+It ran Lua. It had robots and drones and
+graphics cards and a working filesystem.
+
+It was a Minecraft mod about computers.
+It did not need to be anything else.
+
+We are bringing it back.
+You are welcome.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -33,7 +33,7 @@ class LuaJLuaArchitecture(val machine: api.machine.Machine) extends Architecture
 
   private var doneWithInitRun = false
 
-  private[machine] var memory = 0
+  @volatile private[machine] var memory = 0
 
   private val apis = Array(
     new ComponentAPI(this),

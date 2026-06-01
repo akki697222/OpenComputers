@@ -40,7 +40,7 @@ abstract class NativeLuaArchitecture(val machine: api.machine.Machine) extends A
 
   private[machine] var lua: LuaState = null
 
-  private[machine] var kernelMemory = 0
+  @volatile private[machine] var kernelMemory = 0
 
   private[machine] var ramScale: Double = 1.0
 

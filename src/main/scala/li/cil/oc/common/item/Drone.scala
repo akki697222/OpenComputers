@@ -1,37 +1,20 @@
 package li.cil.oc.common.item
 
-import java.util
-import li.cil.oc.Constants
-import li.cil.oc.Settings
 import li.cil.oc.client.KeyBindings
-import li.cil.oc.client.renderer.block.DroneModel
-import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.common.entity
+import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.server.agent
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.Rarity
-import li.cil.oc.util.Tooltip
-import net.minecraft.world.item.{CreativeModeTab, Item, ItemStack}
-import net.minecraft.world.item.Item.Properties
+import li.cil.oc.util.{BlockPosition, Rarity, Tooltip}
 import net.minecraft.core.Direction
-import net.minecraft.core.NonNullList
-import net.minecraft.world.entity.player.Player
-import net.minecraftforge.client.event.ModelEvent
-import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.{Item, ItemStack}
+import net.minecraftforge.common.extensions.IForgeItem
 
-class Drone(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem with CustomModel {
-  @OnlyIn(Dist.CLIENT)
-  override def getModelLocation(stack: ItemStack) = new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Drone, "inventory")
+import java.util
 
-  @OnlyIn(Dist.CLIENT)
-  override def bakeModels(event: ModelEvent.RegisterAdditional): Unit = {
-    event.register(getModelLocation(createItemStack()))
-  }
-
+class Drone(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem {
   override protected def tooltipExtended(stack: ItemStack, tooltip: util.List[Component]): Unit = {
     if (KeyBindings.showExtendedTooltips) {
       val info = new DroneData(stack)

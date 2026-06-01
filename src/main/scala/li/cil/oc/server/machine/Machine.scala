@@ -2,7 +2,6 @@ package li.cil.oc.server.machine
 
 import java.util
 import java.util.concurrent.TimeUnit
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api.Driver
@@ -27,6 +26,7 @@ import li.cil.oc.api.network.Node
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import li.cil.oc.client.ClientUtil
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.common.Slot
@@ -38,7 +38,6 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ResultWrapper
 import li.cil.oc.util.ResultWrapper.result
 import li.cil.oc.util.ThreadPoolFactory
-import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt._
@@ -57,6 +56,8 @@ import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.client.server.IntegratedServer
+import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.fml.DistExecutor
 
 class Machine(val host: MachineHost) extends AbstractManagedEnvironment with machine.Machine with Runnable with DeviceInfo {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Network).
@@ -825,11 +826,6 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
       onHostChanged()
       close()
     }
-
-    println(s"[OC-Debug] Machine loaded. Component count in NBT: ${components.size}")
-    components.foreach { case (addr, name) =>
-      println(s"[OC-Debug] - Component in list: $name ($addr)")
-    }
   })
 
   override def saveData(nbt: CompoundTag): Unit = Machine.this.synchronized(state.synchronized {
@@ -988,10 +984,16 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
     result
   }
 
-  private def isGamePaused =  ServerLifecycleHooks.getCurrentServer != null && !ServerLifecycleHooks.getCurrentServer.isDedicatedServer && (ServerLifecycleHooks.getCurrentServer match {
-    case integrated: IntegratedServer => Minecraft.getInstance.isPaused
-    case _ => false
-  })
+  private def isGamePaused: Boolean = {
+    val server = ServerLifecycleHooks.getCurrentServer
+
+    server != null &&
+      !server.isDedicatedServer &&
+      DistExecutor.unsafeCallWhenOn(
+        Dist.CLIENT,
+        () => () => ClientUtil.isPaused
+      )
+  }
 
   // This is a really high level lock that we only use for saving and loading.
   override def run(): Unit = Machine.this.synchronized {

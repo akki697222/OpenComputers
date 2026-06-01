@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-public class ExtendedShapelessRecipe implements Recipe<CraftingContainer> {
+public class ExtendedShapelessRecipe implements CraftingRecipe {
     private ShapelessRecipe wrapped;
 
     public ExtendedShapelessRecipe(ShapelessRecipe wrapped) {
@@ -62,7 +62,13 @@ public class ExtendedShapelessRecipe implements Recipe<CraftingContainer> {
     @Override
     @NotNull
     public RecipeType<?> getType() {
-        return Recipes.SHAPELESS_EXTENDED.getRecipeType();
+        return RecipeType.CRAFTING;
+    }
+
+    @Override
+    @NotNull
+    public CraftingBookCategory category() {
+        return CraftingBookCategory.MISC;
     }
 
     @Override

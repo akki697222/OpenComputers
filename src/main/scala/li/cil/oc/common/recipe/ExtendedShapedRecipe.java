@@ -12,7 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.IShapedRecipe;
 import org.jetbrains.annotations.NotNull;
 
-public class ExtendedShapedRecipe implements Recipe<CraftingContainer>, IShapedRecipe<CraftingContainer> {
+public class ExtendedShapedRecipe implements CraftingRecipe, IShapedRecipe<CraftingContainer> {
     private ShapedRecipe wrapped;
 
     public ExtendedShapedRecipe(ShapedRecipe wrapped) {
@@ -64,7 +64,13 @@ public class ExtendedShapedRecipe implements Recipe<CraftingContainer>, IShapedR
     @Override
     @NotNull
     public RecipeType<?> getType() {
-        return Recipes.SHAPED_EXTENDED.getRecipeType();
+        return RecipeType.CRAFTING;
+    }
+
+    @Override
+    @NotNull
+    public CraftingBookCategory category() {
+        return CraftingBookCategory.MISC;
     }
 
     @Override

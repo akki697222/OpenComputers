@@ -124,5 +124,6 @@ trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
 
   override def computePreferredMountPoint(stack: ItemStack, robot: Robot, availableMountPoints: util.Set[String]): String = ItemUpgradeRenderer.preferredMountPoint(stack, availableMountPoints)
 
+  @OnlyIn(Dist.CLIENT)
   override def render(matrix: PoseStack, buffer: MultiBufferSource, light: Int, stack: ItemStack, mountPoint: MountPoint, robot: Robot, pt: Float): Unit = ItemUpgradeRenderer.render(matrix, buffer, light, stack, mountPoint)
 }

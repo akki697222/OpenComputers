@@ -10,10 +10,10 @@ import li.cil.oc.server.component
 import net.minecraft.world.item.ItemStack
 
 object DriverMemory extends Item with api.driver.item.Memory with api.driver.item.CallBudget {
-  override def amount(stack: ItemStack) = stack.getItem match {
+  override def amount(stack: ItemStack): Double = stack.getItem match {
     case memory: item.Memory =>
       val sizes = Settings.get.ramSizes
-      Settings.get.ramSizes(memory.tier max 0 min (sizes.length - 1))
+      sizes(memory.tier max 0 min (sizes.length - 1)).toDouble
     case _ => 0.0
   }
 

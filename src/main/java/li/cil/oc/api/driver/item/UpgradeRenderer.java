@@ -5,6 +5,8 @@ import li.cil.oc.api.event.RobotRenderEvent;
 import li.cil.oc.api.internal.Robot;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Set;
 
@@ -73,6 +75,7 @@ public interface UpgradeRenderer {
      * @param robot      the robot the upgrade is rendered on.
      * @param pt         partial tick time, e.g. for animations.
      */
+    @OnlyIn(Dist.CLIENT)
     void render(PoseStack matrix, MultiBufferSource buffer, int light, ItemStack stack, RobotRenderEvent.MountPoint mountPoint, Robot robot, float pt);
 
     /**

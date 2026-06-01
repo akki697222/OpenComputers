@@ -3,7 +3,7 @@ package li.cil.oc
 import li.cil.oc.common.init.Items
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.world.item.CreativeModeTab
+import net.minecraft.world.item.{CreativeModeTab, CreativeModeTabs}
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.registries.{DeferredRegister, RegistryObject}
@@ -24,6 +24,8 @@ object CreativeTab {
   def onBuildContents(event: BuildCreativeModeTabContentsEvent): Unit = {
     if (event.getTabKey == MAIN.getKey) {
       Items.decorateCreativeTab(event, ModOpenComputers.hasRedstoneCardT2)
+    } else if (event.getTabKey == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+      event.accept(Items.createChargedHoverBoots())
     }
   }
 }

@@ -28,7 +28,7 @@ public final class CopyColor extends LootItemConditionalFunction {
     }
 
     @Override
-    public @NotNull ItemStack run(ItemStack stack, LootContext ctx) {
+    public @NotNull ItemStack run(ItemStack stack, @NotNull LootContext ctx) {
         if (stack.isEmpty()) return stack;
 
         BlockEntity be = ctx.getParamOrNull(LootContextParams.BLOCK_ENTITY);

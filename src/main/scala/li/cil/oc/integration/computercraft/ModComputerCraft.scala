@@ -12,5 +12,7 @@ object ModComputerCraft extends ModProxy {
     Driver.add(new DriverPeripheral())
 
     Driver.add(new ConverterLuaObject)
+
+    PeripheralProvider.register()
   }
 }

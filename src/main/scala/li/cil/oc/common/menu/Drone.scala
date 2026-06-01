@@ -63,7 +63,10 @@ class Drone(id: Int, playerInventory: Inventory, droneInv: Container, val mainIn
       addDataSlot(new DataSlot {
         override def get(): Int = if (droneInv.drone.isRunning) 1 else 0
 
-        override def set(value: Int): Unit = droneInv.drone.setRunning(value != 0)
+        override def set(value: Int): Unit = {
+          if (value != 0) droneInv.drone.start()
+          else droneInv.drone.stop()
+        }
       })
     }
     case _ => addDataSlot(DataSlot.standalone)

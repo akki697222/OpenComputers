@@ -461,8 +461,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
         setDeltaMovement(Vec3.ZERO)
         setPos(targetX.floatValue(), targetY.floatValue(), targetZ.floatValue())
       }
-    }
-    else {
+    } else {
       // No power, free fall: engage!
       setDeltaMovement(getDeltaMovement.subtract(0, gravity, 0))
     }

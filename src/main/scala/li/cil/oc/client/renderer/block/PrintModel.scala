@@ -50,13 +50,19 @@ object PrintModel extends SmartBlockModelBase {
       case _ => super.getQuads(state, side, rand)
     }
 
-  private def resolveTexture(name: String): TextureAtlasSprite = try {
-    val texture = Textures.getSprite(ResourceLocation.tryParse(name))
-    if (texture.contents.name == MissingTextureAtlasSprite.getLocation)
-      Textures.getSprite(ResourceLocation.withDefaultNamespace("block/" + name))
-    else texture
-  } catch {
-    case _: Throwable => Textures.getSprite(MissingTextureAtlasSprite.getLocation)
+  private def resolveTexture(name: String): TextureAtlasSprite = {
+    def isMissing(s: TextureAtlasSprite) =
+      s.contents.name == MissingTextureAtlasSprite.getLocation
+
+    def tryGet(loc: ResourceLocation): Option[TextureAtlasSprite] = {
+      val s = Textures.getSprite(loc)
+      if (!isMissing(s)) Some(s) else None
+    }
+
+    Option(ResourceLocation.tryParse(name)).flatMap(tryGet)
+      .orElse(tryGet(ResourceLocation.withDefaultNamespace("block/" + name)))
+      .orElse(tryGet(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, "block/" + name)))
+      .getOrElse(Textures.getSprite(MissingTextureAtlasSprite.getLocation))
   }
 
   class ItemModel(val stack: ItemStack) extends SmartBlockModelBase {

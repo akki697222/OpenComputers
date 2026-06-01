@@ -1,7 +1,6 @@
 package li.cil.oc.common
 
 import java.util.function.Supplier
-
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -10,6 +9,7 @@ import java.util.zip.Deflater
 import java.util.zip.DeflaterOutputStream
 import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.api.network.EnvironmentHost
+import li.cil.oc.util.BlockPosition
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.CompoundTag
@@ -73,6 +73,12 @@ abstract class PacketBuilder(stream: OutputStream) extends DataOutputStream(stre
     writeByte(v & 0xFF)
     writeByte((v >> 8) & 0xFF)
     writeByte((v >> 16) & 0xFF)
+  }
+
+  def writeBlockPosCoords(pos: BlockPosition) = {
+    writeInt(pos.x)
+    writeInt(pos.y)
+    writeInt(pos.z)
   }
 
   def writePacketType(pt: PacketType.Value) = writeByte(pt.id)

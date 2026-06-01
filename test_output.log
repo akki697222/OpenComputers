@@ -1,0 +1,45 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.8/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+MixinGradle did not locate the diffplug APT plugin, skipping eclipse task configuration
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+A problem occurred configuring root project 'opencomputers-1.18.2-forge'.
+> Failed to calculate the value of task ':compileJava' property 'javaCompiler'.
+   > Cannot find a Java installation on your machine matching this tasks requirements: {languageVersion=17, vendor=any, implementation=vendor-specific} for LINUX on x86_64.
+      > No locally installed toolchains match and toolchain download repositories have not been configured.
+
+* Try:
+> Learn more about toolchain auto-detection at https://docs.gradle.org/8.8/userguide/toolchains.html#sec:auto_detection.
+> Learn more about toolchain repositories at https://docs.gradle.org/8.8/userguide/toolchains.html#sub:download_repositories.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Failed to query the value of property 'buildFlowServiceProperty'.
+> Could not isolate value org.jetbrains.kotlin.gradle.plugin.statistics.BuildFlowService$Parameters_Decorated@262d2c42 of type BuildFlowService.Parameters
+   > A problem occurred configuring root project 'opencomputers-1.18.2-forge'.
+      > Failed to calculate the value of task ':compileJava' property 'javaCompiler'.
+         > Cannot find a Java installation on your machine matching this tasks requirements: {languageVersion=17, vendor=any, implementation=vendor-specific} for LINUX on x86_64.
+            > No locally installed toolchains match and toolchain download repositories have not been configured.
+
+* Try:
+> Learn more about toolchain auto-detection at https://docs.gradle.org/8.8/userguide/toolchains.html#sec:auto_detection.
+> Learn more about toolchain repositories at https://docs.gradle.org/8.8/userguide/toolchains.html#sub:download_repositories.
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+==============================================================================
+
+BUILD FAILED in 12s

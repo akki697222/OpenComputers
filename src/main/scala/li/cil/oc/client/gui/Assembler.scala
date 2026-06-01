@@ -69,7 +69,7 @@ class Assembler(val state: menu.Assembler, playerInventory: Inventory, name: Com
           case _ if inventoryContainer.getSlot(0).hasItem => Localization.Assembler.CollectResult
           case _ => ""
         }
-      guiGraphics.drawString(font, message, 30, 94, 0x404040)
+      guiGraphics.drawString(font, message, 30, 94, 0x404040, false)
       if (runButton.isMouseOver(mouseX, mouseY)) {
         val tooltip = new java.util.ArrayList[Component]
         tooltip.add(Component.literal(Localization.Assembler.Run))

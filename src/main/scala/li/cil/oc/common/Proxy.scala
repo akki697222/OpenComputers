@@ -115,7 +115,6 @@ class Proxy {
       else api.Machine.architectures.asScala.head
   }
 
-  @SubscribeEvent
   def init(e: FMLCommonSetupEvent): Unit = {
     e.enqueueWork((() => {
       OpenComputers.channel = NetworkRegistry.newSimpleChannel(ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "net_main"), () => "", "".equals(_), "".equals(_))

@@ -6,7 +6,7 @@ import li.cil.oc.Constants
 import li.cil.oc.Localization
 import li.cil.oc.Settings
 import li.cil.oc.api
-import li.cil.oc.client.gui
+import li.cil.oc.client.{Textures, gui}
 import li.cil.oc.common.component
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
 import net.minecraft.client.Minecraft
@@ -19,13 +19,11 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
-import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionHand
-import net.minecraftforge.client.event.ModelEvent
 
-class Terminal(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem with CustomModel {
+class Terminal(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem {
   def hasServer(stack: ItemStack) = stack.hasTag && stack.getTag.contains(Settings.namespace + "server")
 
   @OnlyIn(Dist.CLIENT)
@@ -37,27 +35,17 @@ class Terminal(props: Properties) extends Item(props) with IForgeItem with trait
     }
   }
 
-  @OnlyIn(Dist.CLIENT)
-  private def modelLocationFromState(running: Boolean) = {
-    new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Terminal + (if (running) "_on" else "_off"), "inventory")
-  }
+  //@OnlyIn(Dist.CLIENT)
+  //override def getModelLocation(stack: ItemStack) = {
+  //  if (hasServer(stack)) Textures.Item.TerminalOn else Textures.Item.TerminalOff
+  //}
 
-  @OnlyIn(Dist.CLIENT)
-  override def getModelLocation(stack: ItemStack): ModelResourceLocation = {
-    modelLocationFromState(hasServer(stack))
-  }
-
-  override def bakeModels(event: ModelEvent.RegisterAdditional): Unit = {
-    for (state <- Seq(true, false)) {
-      event.register(modelLocationFromState(state))
-    }
-  }
 
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     if (!player.isCrouching && stack.hasTag) {
       val key = stack.getTag.getString(Settings.namespace + "key")
       val server = stack.getTag.getString(Settings.namespace + "server")
-      if (key != null && !key.isEmpty && server != null && !server.isEmpty) {
+      if (key != null && key.nonEmpty && server != null && server.nonEmpty) {
         if (level.isClientSide) {
           if (stack.hasTag) {
             val address = stack.getTag.getString(Settings.namespace + "server")

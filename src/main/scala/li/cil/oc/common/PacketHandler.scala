@@ -161,6 +161,20 @@ abstract class PacketHandler {
       (c0) | (c1 << 8) | (c2 << 16)
     }
 
+    def readBlockPosCoords(): BlockPosition = {
+      val x = readInt()
+      val y = readInt()
+      val z = readInt()
+      new BlockPosition(x, y, z)
+    }
+
+    def readByteArray(): Array[Byte] = {
+      val len = readInt()
+      val arr = new Array[Byte](len)
+      readFully(arr)
+      arr
+    }
+
     def readPacketType() = PacketType(readByte())
   }
 }
