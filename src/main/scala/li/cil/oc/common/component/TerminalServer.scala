@@ -23,6 +23,7 @@ import li.cil.oc.api.util.StateAware.State
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.StringTag
@@ -34,6 +35,7 @@ import scala.collection.mutable
 import net.minecraft.world.entity.player.Player
 import net.minecraft.nbt.Tag
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.item.component.CustomData
 
 class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environment with EnvironmentHost with Analyzable with RackMountable with Lifecycle with DeviceInfo {
   val node = api.Network.newNode(this, Visibility.None).create()
@@ -54,7 +56,7 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
       override def isUsableByPlayer(keyboard: api.internal.Keyboard, player: Player) = {
         val stack = player.getItemInHand(InteractionHand.MAIN_HAND)
         stack.getItem match {
-          case t: item.Terminal if stack.hasTag => sidedKeys.contains(stack.getTag.getString(Settings.namespace + "key"))
+          case t: item.Terminal if stack.has(DataComponents.CUSTOM_DATA) => sidedKeys.contains(stack.get(DataComponents.CUSTOM_DATA).getUnsafe.getString(Settings.namespace + "key"))
           case _ => false
         }
       }
@@ -148,14 +150,14 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
     if (api.Items.get(heldItem) == api.Items.get(Constants.ItemName.Terminal)) {
       if (!getEnvironmentLevel.isClientSide) {
         val key = UUID.randomUUID().toString
-        keys -= heldItem.getOrCreateTag.getString(Settings.namespace + "key")
+        keys -= heldItem.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe.getString(Settings.namespace + "key")
         val maxSize = Settings.get.terminalsPerServer
         while (keys.length >= maxSize) {
           keys.remove(0)
         }
         keys += key
-        heldItem.getTag.putString(Settings.namespace + "key", key)
-        heldItem.getTag.putString(Settings.namespace + "server", node.address)
+        heldItem.get(DataComponents.CUSTOM_DATA).getUnsafe.putString(Settings.namespace + "key", key)
+        heldItem.get(DataComponents.CUSTOM_DATA).getUnsafe.putString(Settings.namespace + "server", node.address)
         rack.markChanged(slot)
         player.getInventory.setChanged()
       }

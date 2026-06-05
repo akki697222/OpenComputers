@@ -5,6 +5,7 @@ import li.cil.oc.integration.util.BundledRedstone
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.RotationHelper
 import li.cil.oc.integration.Mods
+import net.minecraft.core.HolderLookup
 //import mrtjp.projectred.api.IBundledTile
 import net.minecraft.core.Direction
 import java.util
@@ -150,8 +151,8 @@ trait BundledRedstoneAware extends RedstoneAware {
   private final val BundledOutputTag = Settings.namespace + "rs.bundledOutput"
   private final val RednetInputTag = Settings.namespace + "rs.rednetInput"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
 
     // Bundled Input
     nbt.getList(BundledInputTag, Tag.TAG_INT_ARRAY).asScala.zipWithIndex.foreach {
@@ -181,8 +182,8 @@ trait BundledRedstoneAware extends RedstoneAware {
     }
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
 
     nbt.setNewTagList(BundledInputTag, _bundledInput.view)
     nbt.setNewTagList(BundledOutputTag, _bundledOutput.view)

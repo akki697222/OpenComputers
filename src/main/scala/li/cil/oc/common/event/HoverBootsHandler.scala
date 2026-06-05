@@ -2,17 +2,18 @@ package li.cil.oc.common.event
 
 import li.cil.oc.Settings
 import li.cil.oc.common.item.HoverBoots
-import net.neoforged.common.util.FakePlayer
-import net.neoforged.event.entity.living.LivingEvent.LivingJumpEvent
-import net.neoforged.event.entity.living.{LivingEvent, LivingFallEvent}
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent
+import net.neoforged.neoforge.event.entity.living.{LivingEvent, LivingFallEvent}
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.player.Player
+import net.neoforged.neoforge.event.tick.EntityTickEvent
 
 object HoverBootsHandler {
   @SubscribeEvent
-  def onLivingUpdate(e: LivingEvent.LivingTickEvent): Unit = e.getEntity match {
+  def onLivingUpdate(e: EntityTickEvent): Unit = e.getEntity match {
     case player: Player if !player.isInstanceOf[FakePlayer] =>
       val nbt = player.getPersistentData
       val hadHoverBoots = nbt.getBoolean(Settings.namespace + "hasHoverBoots")

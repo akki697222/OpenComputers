@@ -118,7 +118,7 @@ trait Hub extends traits.Environment with SidedEnvironment with Tickable {
   private final val RelayCooldownTag = Settings.namespace + "relayCooldown"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     nbt.getList(PlugsTag, 10).asScala.zipWithIndex.foreach {
       case (tag, index) =>
         plugs(index).node.loadData(tag.asInstanceOf[CompoundTag], provider)
@@ -135,7 +135,7 @@ trait Hub extends traits.Environment with SidedEnvironment with Tickable {
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = queue.synchronized {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     // Side check for Waila (and other mods that may call this client side).
     if (isServer) {
       nbt.setNewTagList(PlugsTag, plugs.map(plug => {

@@ -47,26 +47,26 @@ trait TextBuffer extends Environment with Tickable {
   }
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     reapplyTierToBuffer()
     buffer.loadData(nbt, provider)
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     buffer.saveData(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt)
+    super.loadForClient(nbt, provider)
     reapplyTierToBuffer()
     buffer.loadData(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
   override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt)
+    super.saveForClient(nbt, provider)
     buffer.saveData(nbt, provider)
   }
 }

@@ -2,9 +2,8 @@ package li.cil.oc.common.item
 
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
-import net.neoforged.common.extensions.IForgeItem
 
-class Memory(props: Properties, val tier: Int) extends Item(props) with IForgeItem with traits.SimpleItem with traits.ItemTier {
+class Memory(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with traits.ItemTier {
   @Deprecated
   override def getDescriptionId = super.getDescriptionId + tier
 

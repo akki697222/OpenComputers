@@ -29,7 +29,7 @@ object Advancement {
   private def award(player: ServerPlayer, location: ResourceLocation): Unit = {
     Option(player.server.getAdvancements.get(location)).foreach { advancement =>
       val progress = player.getAdvancements.getOrStartProgress(advancement)
-      advancement.getCriteria.keySet.forEach { criterion =>
+      advancement.value().criteria().keySet.forEach { criterion =>
         if (!progress.isDone) {
           player.getAdvancements.award(advancement, criterion)
         }

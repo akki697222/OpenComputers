@@ -284,7 +284,7 @@ class Relay(pos: BlockPos, state: BlockState)
   private final val ComponentNodesTag = Settings.namespace + "componentNodes"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     for (slot <- items.indices) if (!items(slot).isEmpty) {
       updateLimits(slot, items(slot))
     }
@@ -303,7 +303,7 @@ class Relay(pos: BlockPos, state: BlockState)
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     nbt.putDouble(StrengthTag, strength)
     nbt.putBoolean(IsRepeaterTag, isRepeater)
     val componentNodesList = new ListTag()

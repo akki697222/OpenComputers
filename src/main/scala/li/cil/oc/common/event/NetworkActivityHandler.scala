@@ -4,7 +4,7 @@ import li.cil.oc.api.event.NetworkActivityEvent
 import li.cil.oc.api.internal.Rack
 import li.cil.oc.common.blockentity.Case
 import li.cil.oc.server.component.Server
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 object NetworkActivityHandler {
   @SubscribeEvent

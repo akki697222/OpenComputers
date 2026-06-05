@@ -640,7 +640,7 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
         val nbtPage = nbtPages.getCompound(i)
         val idx: Int = nbtPage.getInt(NBT_PAGE_IDX)
         val data = nbtPage.getCompound(NBT_PAGE_DATA)
-        loadBuffer(node.address, idx, data)
+        loadBuffer(node.address, idx, data, provider)
       }
     }
   }

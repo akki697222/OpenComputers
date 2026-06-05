@@ -36,7 +36,7 @@ trait RotatableBaseBlock extends Rotatable {
   private final val YawTag = Settings.namespace + "yaw"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider) = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     if (nbt.contains(PitchTag)) {
       pitch = Direction.from3DDataValue(nbt.getInt(PitchTag))
     }
@@ -47,21 +47,22 @@ trait RotatableBaseBlock extends Rotatable {
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider) = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     nbt.putInt(PitchTag, pitch.ordinal)
     nbt.putInt(YawTag, yaw.ordinal)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     pitch = Direction.from3DDataValue(nbt.getInt(PitchTag))
     yaw = Direction.from3DDataValue(nbt.getInt(YawTag))
     validatePitchAndYaw()
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
     nbt.putInt(PitchTag, pitch.ordinal)
     nbt.putInt(YawTag, yaw.ordinal)
   }

@@ -1,38 +1,24 @@
 package li.cil.oc.common.blockentity
 
-import java.util
-import com.google.common.base.Strings
-import li.cil.oc.Constants
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.common.block.{Print => PrintBlock}
-import li.cil.oc.common.item.data.PrintData
-import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
+import li.cil.oc.{Constants, Settings, api}
 import li.cil.oc.client.renderer.block.PrintModel
-import li.cil.oc.util.ExtendedAABB
+import li.cil.oc.common.block.{Print => PrintBlock}
+import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
+import li.cil.oc.common.item.data.PrintData
 import li.cil.oc.util.ExtendedAABB._
 import li.cil.oc.util.ExtendedNBT._
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
-import net.minecraft.sounds.SoundSource
-import net.minecraft.world.phys.HitResult
-import net.minecraft.world.phys.shapes.BooleanOp
-import net.minecraft.world.phys.shapes.VoxelShape
-import net.minecraft.world.phys.shapes.Shapes
-import net.minecraft.world.phys.Vec3
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.sounds.{SoundEvents, SoundSource}
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.shapes.{BooleanOp, Shapes, VoxelShape}
 import net.minecraft.world.ticks.ScheduledTick
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
-import net.neoforged.client.model.data.ModelData
-import net.neoforged.client.model.data.ModelProperty
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
-import scala.collection.Iterable
-import scala.collection.convert.ImplicitConversionsToJava._
+import java.util
 
 class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => Boolean], val scheduleUpdate: Option[Int => Unit], val onStateChange: Option[() => Unit])
   extends BlockEntity(TileEntityTypes.PRINT.get(), pos, blockState) with traits.BaseBlockEntity with traits.RedstoneAware with traits.RotatableBaseBlock {
@@ -150,7 +136,7 @@ class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => B
 
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt)
+    super.loadForClient(nbt, provider)
     data.loadData(nbt.getCompound(DataTag), provider)
     state = nbt.getBoolean(StateTag)
     updateShape()
@@ -162,7 +148,7 @@ class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => B
 
   @OnlyIn(Dist.CLIENT)
   override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt)
+    super.saveForClient(nbt, provider)
     nbt.setNewCompoundTag(DataTag, (nbt: CompoundTag) => data.saveData(nbt, provider))
     nbt.putBoolean(StateTag, state)
   }

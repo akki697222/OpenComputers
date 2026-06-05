@@ -11,7 +11,7 @@ import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.client.renderer.block.ScreenModel
 import net.minecraft.client.Minecraft
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.block.state.BlockState
@@ -24,6 +24,7 @@ import scala.language.postfixOps
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.projectile.Arrow
 import net.minecraft.world.entity.player.Player
+import net.neoforged.neoforge.client.model.data.ModelData
 
 class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntity(TileEntityTypes.SCREEN.get(), pos, state) with traits.TextBuffer with SidedEnvironment with traits.Rotatable with traits.RedstoneAware with traits.Colored with Analyzable with Ordered[Screen] {
   def this(pos: BlockPos, state: BlockState) = this(pos, state, 0)
@@ -301,32 +302,32 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
   private final val HadRedstoneInputTag = Settings.namespace + "hadRedstoneInput"
   private final val InvertTouchModeTag = Settings.namespace + "invertTouchMode"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag) max 0 min 2
     setColor(Color.rgbValues(Color.byTier(tier)))
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     hadRedstoneInput = nbt.getBoolean(HadRedstoneInputTag)
     invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putByte(TierTag, tier.toByte)
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     nbt.putBoolean(HadRedstoneInputTag, hadRedstoneInput)
     nbt.putBoolean(InvertTouchModeTag, invertTouchMode)
   }
 
-  @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
+  @OnlyIn(Dist.CLIENT) 
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag) max 0 min 2
-    super.loadForClient(nbt)
+    super.loadForClient(nbt, provider)
     requestModelDataUpdate()
     invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putByte(TierTag, tier.toByte)
-    super.saveForClient(nbt)
+    super.saveForClient(nbt, provider)
     nbt.putBoolean(InvertTouchModeTag, invertTouchMode)
   }
 

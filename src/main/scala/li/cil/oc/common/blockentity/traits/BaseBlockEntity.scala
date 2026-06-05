@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.Connection
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.client.model.data.ModelProperty
 
 trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {
   private final val IsServerDataTag = Settings.namespace + "isServerData"
@@ -66,7 +67,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, true)
-    super.saveAdditional(nbt)
+    super.saveAdditional(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
@@ -79,24 +80,23 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   // ----------------------------------------------------------------------- //
 
-  override def load(nbt: CompoundTag): Unit = {
-    super.load(nbt)
+  override def loadAdditional(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadAdditional(nbt, provider)
     if (isServer || nbt.getBoolean(IsServerDataTag)) {
-      loadForServer(nbt)
-    }
-    else {
-      loadForClient(nbt)
+      loadForServer(nbt, provider)
+    } else {
+      loadForClient(nbt, provider)
     }
   }
 
-  override def saveAdditional(nbt: CompoundTag): Unit = {
-    super.saveAdditional(nbt)
-    save(nbt)
+  override def saveAdditional(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveAdditional(nbt, provider)
+    save(nbt, provider)
   }
 
-  def save(nbt: CompoundTag): CompoundTag = {
+  def save(nbt: CompoundTag, provider: HolderLookup.Provider): CompoundTag = {
     if (isServer) {
-      saveForServer(nbt)
+      saveForServer(nbt, provider)
     }
     nbt
   }
@@ -105,13 +105,13 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     ClientboundBlockEntityDataPacket.create(this)
   }
 
-  override def getUpdateTag: CompoundTag = {
-    val nbt = super.getUpdateTag
+  override def getUpdateTag(provider: HolderLookup.Provider): CompoundTag = {
+    val nbt = super.getUpdateTag(provider)
 
     // See comment on savingForClients variable.
     SaveHandler.savingForClients = true
     try {
-      try saveForClient(nbt) catch {
+      try saveForClient(nbt, provider) catch {
         case e: Throwable => OpenComputers.log.warn("There was a problem writing a TileEntity description packet. Please report this if you see it!", e)
       }
     } finally {
@@ -121,8 +121,8 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     nbt
   }
 
-  override def onDataPacket(manager: Connection, packet: ClientboundBlockEntityDataPacket): Unit = {
-    try loadForClient(packet.getTag) catch {
+  override def onDataPacket(manager: Connection, packet: ClientboundBlockEntityDataPacket, provider: HolderLookup.Provider): Unit = {
+    try loadForClient(packet.getTag, provider) catch {
       case e: Throwable => OpenComputers.log.warn("There was a problem reading a TileEntity description packet. Please report this if you see it!", e)
     }
   }

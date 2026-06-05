@@ -28,7 +28,7 @@ import net.minecraft.nbt.{CompoundTag => CompoundNBT}
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.Util
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
@@ -178,8 +178,8 @@ class Charger(pos: BlockPos, state: BlockState)
   private final val InvertSignalTag = Settings.namespace + "invertSignal"
   private final val InvertSignalTagCompat = "invertSignal"
 
-  override def loadForServer(nbt: CompoundNBT): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     if (nbt.contains(ChargeSpeedTagCompat))
       chargeSpeed = nbt.getDouble(ChargeSpeedTagCompat) max 0 min 1
     else
@@ -194,22 +194,22 @@ class Charger(pos: BlockPos, state: BlockState)
       invertSignal = nbt.getBoolean(InvertSignalTag)
   }
 
-  override def saveForServer(nbt: CompoundNBT): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
     nbt.putDouble(ChargeSpeedTag, chargeSpeed)
     nbt.putBoolean(HasPowerTag, hasPower)
     nbt.putBoolean(InvertSignalTag, invertSignal)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundNBT): Unit = {
-    super.loadForClient(nbt)
+  override def loadForClient(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     chargeSpeed = nbt.getDouble(ChargeSpeedTag)
     hasPower = nbt.getBoolean(HasPowerTag)
   }
 
-  override def saveForClient(nbt: CompoundNBT): Unit = {
-    super.saveForClient(nbt)
+  override def saveForClient(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
     nbt.putDouble(ChargeSpeedTag, chargeSpeed)
     nbt.putBoolean(HasPowerTag, hasPower)
   }

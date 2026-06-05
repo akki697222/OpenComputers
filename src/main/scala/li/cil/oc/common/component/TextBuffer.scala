@@ -1,53 +1,37 @@
 package li.cil.oc.common.component
 
 import com.google.common.base.Strings
-import li.cil.oc.Constants
-import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
-import li.cil.oc.api.driver.DeviceInfo.DeviceClass
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
-import li.cil.oc.api
+import com.mojang.blaze3d.vertex.PoseStack
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.machine.Arguments
-import li.cil.oc.api.machine.Callback
-import li.cil.oc.api.machine.Context
-import li.cil.oc.api.network.EnvironmentHost
+import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
+import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network._
-import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.client.renderer.TextBufferRenderCache
 import li.cil.oc.client.renderer.font.TextBufferRenderData
-import li.cil.oc.client.{ComponentTracker => ClientComponentTracker}
-import li.cil.oc.client.{PacketSender => ClientPacketSender}
+import li.cil.oc.client.{ComponentTracker => ClientComponentTracker, PacketSender => ClientPacketSender}
 import li.cil.oc.common._
-import li.cil.oc.common.item.data.NodeData
-import li.cil.oc.common.component.traits.TextBufferProxy
 import li.cil.oc.common.component.traits.VideoRamRasterizer
+import li.cil.oc.common.item.data.NodeData
 import li.cil.oc.server.component.Keyboard
-import li.cil.oc.server.{ComponentTracker => ServerComponentTracker}
-import li.cil.oc.server.{PacketSender => ServerPacketSender}
-import li.cil.oc.util
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.PackedColor
-import li.cil.oc.util.SideTracker
+import li.cil.oc.server.{ComponentTracker => ServerComponentTracker, PacketSender => ServerPacketSender}
+import li.cil.oc.{Constants, OpenComputers, Settings, api, util}
+import li.cil.oc.util.{BlockPosition, PackedColor, SideTracker}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
-import net.neoforged.event.level.ChunkEvent
-import net.neoforged.event.level.LevelEvent
-import net.neoforged.eventbus.api.SubscribeEvent
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.component.CustomData
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.event.level.{ChunkEvent, LevelEvent}
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
-import com.mojang.blaze3d.vertex.PoseStack
-import net.minecraft.core.HolderLookup
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.InteractionHand
-import net.neoforged.neoforge.event.server.ServerLifecycleEvent
-import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment with traits.TextBufferProxy with VideoRamRasterizer with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).
@@ -452,10 +436,10 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
     }
     else {
       if (nbt.contains(NodeData.BufferTag)) {
-        data.loadData(nbt.getCompound(NodeData.BufferTag))
+        data.loadData(nbt.getCompound(NodeData.BufferTag), provider)
       }
       else if (!Strings.isNullOrEmpty(node.address)) {
-        data.loadData(SaveHandler.loadNBT(nbt, bufferPath))
+        data.loadData(SaveHandler.loadNBT(nbt, bufferPath), provider)
       }
     }
 
@@ -509,7 +493,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
       }
     }
 
-    SaveHandler.scheduleSave(host, nbt, bufferPath, data.saveData _)
+    SaveHandler.scheduleSave(host, nbt, bufferPath, tag => data.saveData(tag, provider))
     nbt.putBoolean(IsOnTag, isDisplaying)
     nbt.putBoolean(HasPowerTag, hasPower)
     nbt.putInt(MaxWidthTag, maxResolution._1)
@@ -895,12 +879,20 @@ object TextBuffer {
     override def copyToAnalyzer(line: Int, player: Player): Unit = {
       val stack = player.getItemInHand(InteractionHand.MAIN_HAND)
       if (!stack.isEmpty) {
-        stack.removeTagKey(Settings.namespace + "clipboard")
+        stack.update(
+          DataComponents.CUSTOM_DATA,
+          CustomData.EMPTY,
+          (customData: CustomData) => {
+            val tag = customData.copyTag()
+            tag.remove(Settings.namespace + "clipboard")
+            CustomData.of(tag)
+          }
+        )
 
         if (line >= 0 && line < owner.getViewportHeight) {
           val text = owner.data.lineToString(line)
           if (!Strings.isNullOrEmpty(text)) {
-            stack.getOrCreateTag.putString(Settings.namespace + "clipboard", text)
+            stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe.putString(Settings.namespace + "clipboard", text)
           }
         }
       }

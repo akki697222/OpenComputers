@@ -24,7 +24,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -101,16 +101,16 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
 
   private final val TierTag = Settings.namespace + "tier"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag) max 0 min 3
     setColor(Color.rgbValues(Color.byTier(tier)))
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     isSizeInventoryReady = true
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putByte(TierTag, tier.toByte)
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
   }
 
   // ----------------------------------------------------------------------- //

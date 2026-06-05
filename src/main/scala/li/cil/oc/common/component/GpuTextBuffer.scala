@@ -11,6 +11,7 @@ import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import com.mojang.blaze3d.vertex.PoseStack
+import li.cil.oc.util.ClientAccessHelper
 import net.minecraft.core.HolderLookup
 
 class GpuTextBuffer(val owner: String, val id: Int, val data: li.cil.oc.util.TextBuffer) extends traits.TextBufferProxy {
@@ -35,12 +36,12 @@ class GpuTextBuffer(val owner: String, val id: Int, val data: li.cil.oc.util.Tex
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     // the data is initially dirty because other devices don't know about it yet
-    data.loadData(nbt)
+    data.loadData(nbt, provider)
     dirty = true
   }
 
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    data.saveData(nbt)
+    data.saveData(nbt, provider)
     dirty = false
   }
 
@@ -96,9 +97,9 @@ object ClientGpuTextBufferHandler {
     }
   }
 
-  def loadBuffer(buffer: api.internal.TextBuffer, owner: String, id: Int, nbt: CompoundTag): Boolean = {
+  def loadBuffer(buffer: api.internal.TextBuffer, owner: String, id: Int, nbt: CompoundTag, provider: HolderLookup.Provider): Boolean = {
     buffer match {
-      case screen: VideoRamRasterizer => screen.loadBuffer(owner, id, nbt)
+      case screen: VideoRamRasterizer => screen.loadBuffer(owner, id, nbt, provider)
       case _ => false // ignore, not compatible with bitblts
     }
   }

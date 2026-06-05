@@ -10,6 +10,7 @@ import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.network.Node
 import li.cil.oc.api.util.Lifecycle
 import li.cil.oc.integration.opencomputers.Item
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
@@ -99,9 +100,9 @@ trait ComponentInventory extends Inventory with network.Environment {
 
   // ----------------------------------------------------------------------- //
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     saveComponents()
-    super.saveData(nbt) // Save items after updating their tags.
+    super.saveData(nbt, provider) // Save items after updating their tags.
   }
 
   def saveComponents(): Unit = {

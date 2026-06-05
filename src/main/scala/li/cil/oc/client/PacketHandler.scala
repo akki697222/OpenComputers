@@ -14,7 +14,7 @@ import li.cil.oc.common.{Loot, PacketType, component, menu, PacketHandler => Com
 import li.cil.oc.integration.Mods
 
 import java.io.{EOFException, InputStream}
-import li.cil.oc.util.Audio
+import li.cil.oc.util.{Audio, ClientAccessHelper}
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction
@@ -815,7 +815,7 @@ object PacketHandler extends CommonPacketHandler {
     val id = p.readInt()
     val nbt = p.readNBT()
 
-    component.ClientGpuTextBufferHandler.loadBuffer(buffer, owner, id, nbt)
+    component.ClientGpuTextBufferHandler.loadBuffer(buffer, owner, id, nbt, ClientAccessHelper.getClientRegistryAccess)
   }
 
   def onTextBufferBitBlt(p: PacketParser, buffer: api.internal.TextBuffer): Unit = {

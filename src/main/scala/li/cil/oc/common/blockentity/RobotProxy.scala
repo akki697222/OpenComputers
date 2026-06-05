@@ -21,11 +21,12 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.WorldlyContainer
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity
 import net.minecraft.network.chat.{Component => MCComponent}
+import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
   extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state)
@@ -34,13 +35,6 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
   def this(pos: BlockPos, state: BlockState) = this(pos, state, new Robot(pos, state))
 
   // ----------------------------------------------------------------------- //
-
-  // NeoForge 1.21.1: FluidHandler capability is registered via RegisterCapabilitiesEvent.
-  // RobotProxy itself implements IFluidHandler, so no wrapper is needed.
-
-  override def invalidateCaps(): Unit = {
-    super.invalidateCaps()
-  }
 
   override val node: Component = api.Network.newNode(this, Visibility.Network).
     withComponent("robot", Visibility.Neighbors).
@@ -184,17 +178,15 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
     robot.saveForServer(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = robot.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.saveData(nbt, provider)
 
-  override def loadData(nbt: CompoundTag): Unit = robot.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadData(nbt, provider)
 
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadForClient(nbt, provider)
 
   @OnlyIn(Dist.CLIENT)
   override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.saveForClient(nbt, provider)
-
-  override def getRenderBoundingBox: AABB = robot.getRenderBoundingBox
 
   override def setChanged(): Unit = robot.setChanged()
 

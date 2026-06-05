@@ -1,42 +1,28 @@
 package li.cil.oc.common.blockentity
 
-import java.util
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.Driver
+import li.cil.oc.{Settings, api}
 import li.cil.oc.api.component.RackMountable
-import li.cil.oc.api.internal
-import li.cil.oc.api.network.Analyzable
-import li.cil.oc.api.network.Connector
-import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.api.network.Message
-import li.cil.oc.api.network.Node
-import li.cil.oc.api.network.Packet
-import li.cil.oc.api.network.Visibility
+import li.cil.oc.api.{Driver, internal}
+import li.cil.oc.api.network._
 import li.cil.oc.api.util.StateAware
-import li.cil.oc.common.Slot
-import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.client.renderer.block.ServerRackModel
 import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
+import li.cil.oc.common.{Slot, menu}
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedInventory._
 import li.cil.oc.util.ExtendedNBT._
-import li.cil.oc.util.RotationHelper
-import li.cil.oc.client.renderer.block.ServerRackModel
-import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.core.BlockPos
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.{Container, MenuProvider}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, IntArrayTag, Tag}
 import net.minecraft.world.entity.player.{Inventory, Player}
-import net.neoforged.client.model.data.ModelData
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.{Container, MenuProvider}
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.client.model.data.ModelData
 
+import java.util
 import scala.collection.immutable.ArraySeq
 
 class Rack(pos: BlockPos, state: BlockState)
@@ -432,8 +418,8 @@ class Rack(pos: BlockPos, state: BlockState)
   private final val LastDataTag = Settings.namespace + "lastData"
   private final val RackDataTag = Settings.namespace + "rackData"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
 
     isRelayEnabled = nbt.getBoolean(IsRelayEnabledTag)
     nbt.getList(NodeMappingTag, Tag.TAG_INT_ARRAY).map((buses: IntArrayTag) =>
@@ -444,8 +430,8 @@ class Rack(pos: BlockPos, state: BlockState)
     _isOutputEnabled = hasRedstoneCard
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
 
     nbt.putBoolean(IsRelayEnabledTag, isRelayEnabled)
     nbt.setNewTagList(NodeMappingTag, nodeMapping.map(buses =>
@@ -453,23 +439,23 @@ class Rack(pos: BlockPos, state: BlockState)
   }
 
   @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     requestModelDataUpdate()
 
     val data = nbt.getList(LastDataTag, Tag.TAG_COMPOUND).
       toTagArray[CompoundTag]
     data.copyToArray(lastData)
-    loadData(nbt.getCompound(RackDataTag))
+    loadData(nbt.getCompound(RackDataTag), provider)
     connectComponents()
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
 
     val data = lastData.map(tag => if (tag == null) new CompoundTag() else tag)
     nbt.setNewTagList(LastDataTag, data)
-    nbt.setNewCompoundTag(RackDataTag, saveData)
+    nbt.setNewCompoundTag(RackDataTag, tag => saveData(tag, provider))
   }
 
   // ----------------------------------------------------------------------- //

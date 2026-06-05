@@ -37,12 +37,12 @@ class Redstone(pos: BlockPos, state: BlockState)
   private final val RedstoneTag = Settings.namespace + "redstone"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     instance.loadData(nbt.getCompound(RedstoneTag), provider)
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     nbt.setNewCompoundTag(RedstoneTag, (nbt: CompoundTag) => instance.saveData(nbt, provider))
   }
 

@@ -6,23 +6,21 @@ import li.cil.oc.api.driver.item
 import li.cil.oc.api.internal.MultiTank
 import li.cil.oc.api.machine.{Context, MachineHost}
 import li.cil.oc.api.network._
-import li.cil.oc.api.{Driver, Machine, internal, machine}
+import li.cil.oc.api.{Driver, Machine, internal}
 import li.cil.oc.common.container.{ComponentInventory, Inventory}
 import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.{EventHandler, menu}
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.{agent, component}
-import li.cil.oc.server.agent
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.{BlockPosition, InventoryUtils}
-import net.minecraft.core.{BlockPos, Direction, HolderLookup}
+import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.{EntityDataAccessor, EntityDataSerializers, SynchedEntityData}
 import net.minecraft.server.level.{ServerLevel, ServerPlayer}
-import net.minecraft.tags.FluidTags
 import net.minecraft.world.entity._
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
@@ -33,32 +31,12 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.{InteractionHand, InteractionResult, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
-import net.neoforged.fluids.IFluidTank
-import net.neoforged.network.NetworkHooks
+import net.neoforged.neoforge.fluids.IFluidTank
 
 import java.lang
-import java.lang.Iterable
 import java.util.UUID
-/*
-Player → Player
-ServerPlayer → ServerPlayer
-PlayerInventory → Inventory
-MenuProvider → MenuProvider
-CompoundTag → CompoundTag
-EntityDataAccessor → EntityDataAccessor
-EntityDataSerializers → EntityEntityDataSerializers
-SynchedEntityData → SynchedEntityData
-InteractionResult → InteractionResult
-Hand → InteractionHand
-Vec3 → Vec3
-Component → Component
-TextComponent → TextComponent
-World → Level
-ServerLevel → ServerLevel
-EntitySize → EntityDimensions
-*/
 
-import scala.collection.JavaConverters.asJavaIterable
+import scala.jdk.CollectionConverters._
 
 object Drone {
   val DataRunning: EntityDataAccessor[lang.Boolean] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.BOOLEAN)
@@ -262,7 +240,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   // ----------------------------------------------------------------------- //
 
-  override def internalComponents(): Iterable[ItemStack] = asJavaIterable(info.components)
+  override def internalComponents(): Iterable[ItemStack] = info.components
 
   override def componentSlot(address: String): Int = components.components.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 

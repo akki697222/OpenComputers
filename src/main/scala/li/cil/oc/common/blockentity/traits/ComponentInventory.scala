@@ -10,7 +10,7 @@ import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
 
@@ -151,16 +151,16 @@ trait ComponentInventory extends Environment with Inventory with container.Compo
     }
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     connectComponents()
-    super.saveForClient(nbt)
-    saveData(nbt)
+    super.saveForClient(nbt, provider)
+    saveData(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
-    loadData(nbt)
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
+    loadData(nbt, provider)
     connectComponents()
   }
 }

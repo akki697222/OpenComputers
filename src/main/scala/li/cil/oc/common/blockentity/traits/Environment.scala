@@ -9,7 +9,7 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.world.level.Level
-import net.neoforged.client.model.data.{ModelData, ModelProperty}
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
 trait Environment extends BaseBlockEntity with network.Environment with network.EnvironmentHost {
   protected var isChangeScheduled = false

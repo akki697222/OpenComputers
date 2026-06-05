@@ -3,7 +3,7 @@ package li.cil.oc.common.blockentity
 import li.cil.oc.server.component
 import net.minecraft.core.{BlockPos, HolderLookup}
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 
 class Transposer(pos: BlockPos, state: BlockState) 
@@ -16,12 +16,12 @@ class Transposer(pos: BlockPos, state: BlockState)
   var lastOperation = 0L
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     transposer.loadData(nbt, provider)
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     transposer.saveData(nbt, provider)
   }
 }

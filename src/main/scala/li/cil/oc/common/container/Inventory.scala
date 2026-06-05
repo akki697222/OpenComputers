@@ -3,6 +3,7 @@ package li.cil.oc.common.container
 import li.cil.oc.Settings
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.StackOption
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
@@ -60,18 +61,18 @@ trait Inventory extends SimpleInventory {
   private final val SlotTag = "slot"
   private final val ItemTag = "item"
 
-  def loadData(nbt: CompoundTag): Unit = {
+  def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.getList(ItemsTag, Tag.TAG_COMPOUND).foreach((tag: CompoundTag) => {
       if (tag.contains(SlotTag)) {
         val slot = tag.getByte(SlotTag).toInt
         if (slot >= 0 && slot < items.length) {
-          updateItems(slot, ItemStack.of(tag.getCompound(ItemTag)))
+          updateItems(slot, ItemStack.parseOptional(provider, tag.getCompound(ItemTag)))
         }
       }
     })
   }
 
-  def saveData(nbt: CompoundTag): Unit = {
+  def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.setNewTagList(ItemsTag,
       items.zipWithIndex collect {
         case (stack, slot) if !stack.isEmpty => (stack, slot)
@@ -79,7 +80,7 @@ trait Inventory extends SimpleInventory {
         case (stack, slot) =>
           val slotNbt = new CompoundTag()
           slotNbt.putByte(SlotTag, slot.toByte)
-          slotNbt.setNewCompoundTag(ItemTag, stack.save)
+          slotNbt.setNewCompoundTag(ItemTag, _ => stack.save(provider))
       })
   }
 

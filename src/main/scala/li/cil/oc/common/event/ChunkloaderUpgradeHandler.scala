@@ -8,14 +8,15 @@ import li.cil.oc.util.BlockPosition
 import net.neoforged.common.world.ForgeChunkManager
 import net.neoforged.common.world.ForgeChunkManager.LoadingValidationCallback
 import net.neoforged.common.world.ForgeChunkManager.TicketHelper
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.immutable
 import scala.collection.mutable
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
-import net.neoforged.event.level.LevelEvent
+import net.neoforged.neoforge.common.world.chunk.{ForcedChunkManager, LoadingValidationCallback, TicketHelper}
+import net.neoforged.neoforge.event.level.LevelEvent
 
 object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
   private val restoredTickets = mutable.Map.empty[UUID, ChunkPos]
@@ -104,12 +105,14 @@ object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
   }
 
   def releaseTicket(level: ServerLevel, addr: String, pos: ChunkPos): Unit = parseAddress(addr) match {
-    case Some(uuid) => {
+    case Some(uuid) =>
       for (x <- -1 to 1; z <- -1 to 1) {
-        ForgeChunkManager.forceChunk(level, OpenComputers.ID, uuid, pos.x + x, pos.z + z, false, true)
+        val targetChunkX = pos.x + x
+        val targetChunkZ = pos.z + z
+
+        level.setChunkForced(targetChunkX, targetChunkZ, false)
       }
-    }
-    case _ => OpenComputers.log.warn("Address '$addr' could not be parsed")
+    case _ => OpenComputers.log.warn(s"Address '$addr' could not be parsed")
   }
 
   def updateLoadedChunk(loader: UpgradeChunkloader): Unit = {
@@ -125,10 +128,10 @@ object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
             case None => immutable.Set.empty[ChunkPos]
           }
           for (toRemove <- existingChunks if !robotChunks.contains(toRemove)) {
-            ForgeChunkManager.forceChunk(level, OpenComputers.ID, owner, toRemove.x, toRemove.z, false, true)
+            ForcedChunkManager.forceChunk(level, OpenComputers.ID, owner, toRemove.x, toRemove.z, false, true)
           }
           for (toAdd <- robotChunks if !existingChunks.contains(toAdd)) {
-            ForgeChunkManager.forceChunk(level, OpenComputers.ID, owner, toAdd.x, toAdd.z, true, true)
+            ForcedChunkManager.forceChunk(level, OpenComputers.ID, owner, toAdd.x, toAdd.z, true, true)
           }
           loader.ticket = Some(centerChunk)
         }

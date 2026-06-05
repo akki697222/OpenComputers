@@ -30,6 +30,7 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.StackOption._
 import net.minecraft.client.Minecraft
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -50,7 +51,11 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.network.chat
+import net.minecraft.world.item.component.ItemAttributeModifiers
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 // Implementation note: this tile entity is never directly added to the world.
 // It is always wrapped by a `RobotProxy` tile entity, which forwards any
@@ -193,7 +198,7 @@ class Robot(pos: BlockPos, state: BlockState)
   override def onAnalyze(player: entity.player.Player, side: Direction, hitX: Float, hitY: Float, hitZ: Float): Array[Node] = {
     player.sendSystemMessage(Localization.Analyzer.RobotOwner(ownerName))
     player.sendSystemMessage(Localization.Analyzer.RobotName(player_.getName.getString))
-    MinecraftForge.EVENT_BUS.post(new RobotAnalyzeEvent(this, player))
+    NeoForge.EVENT_BUS.post(new RobotAnalyzeEvent(this, player))
     super.onAnalyze(player, side, hitX, hitY, hitZ)
   }
 
@@ -206,7 +211,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
     if (isServer) {
       val event = new RobotMoveEvent.Pre(this, direction)
-      MinecraftForge.EVENT_BUS.post(event)
+      NeoForge.EVENT_BUS.post(event)
       if (event.isCanceled) return false
     }
 
@@ -243,7 +248,7 @@ class Robot(pos: BlockPos, state: BlockState)
         if (isServer) {
           ServerPacketSender.sendRobotMove(this, oldPosition, direction)
           checkRedstoneInputChanged()
-          MinecraftForge.EVENT_BUS.post(new RobotMoveEvent.Post(this, direction))
+          NeoForge.EVENT_BUS.post(new RobotMoveEvent.Post(this, direction))
         }
         else {
           // If we broke some replaceable block (like grass) play its break sound.
@@ -342,7 +347,19 @@ class Robot(pos: BlockPos, state: BlockState)
       if (!appliedToolEnchantments) {
         appliedToolEnchantments = true
         StackOption(getItem(0)) match {
-          case SomeStack(item) => player_.getAttributes.addTransientAttributeModifiers(item.getAttributeModifiers(EquipmentSlot.MAINHAND))
+          case SomeStack(stack) =>
+            val modifiers: ItemAttributeModifiers = stack.getOrDefault(
+              DataComponents.ATTRIBUTE_MODIFIERS,
+              ItemAttributeModifiers.EMPTY
+            )
+
+            modifiers.forEach(EquipmentSlot.MAINHAND, (attributeHolder, attributeModifier) => {
+              val attributeInstance = player_.getAttributes.getInstance(attributeHolder)
+              if (attributeInstance != null) {
+                attributeInstance.removeModifier(attributeModifier.id())
+                attributeInstance.addTransientModifier(attributeModifier)
+              }
+            })
           case _ =>
         }
       }
@@ -468,8 +485,8 @@ class Robot(pos: BlockPos, state: BlockState)
 
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt)
-    loadData(nbt)
+    super.loadForClient(nbt, provider)
+    loadData(nbt, provider)
     info.loadData(nbt, provider)
 
     updateInventorySize()
@@ -492,8 +509,8 @@ class Robot(pos: BlockPos, state: BlockState)
 
   @OnlyIn(Dist.CLIENT)
   override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
-    super.saveForClient(nbt)
-    saveData(nbt)
+    super.saveForClient(nbt, provider)
+    saveData(nbt, provider)
     info.saveData(nbt, provider)
 
     nbt.putInt(SelectedSlotTag, selectedSlot)
@@ -538,7 +555,19 @@ class Robot(pos: BlockPos, state: BlockState)
   override protected def onItemAdded(slot: Int, stack: ItemStack): Unit = {
     if (isServer) {
       if (isToolSlot(slot)) {
-        player_.getAttributes.addTransientAttributeModifiers(stack.getAttributeModifiers(EquipmentSlot.MAINHAND))
+        val modifiers: ItemAttributeModifiers = stack.getOrDefault(
+          DataComponents.ATTRIBUTE_MODIFIERS,
+          ItemAttributeModifiers.EMPTY
+        )
+
+        modifiers.forEach(EquipmentSlot.MAINHAND, (attributeHolder, attributeModifier) => {
+          val attributeInstance = player_.getAttributes.getInstance(attributeHolder)
+          if (attributeInstance != null) {
+            attributeInstance.removeModifier(attributeModifier.id())
+            attributeInstance.addTransientModifier(attributeModifier)
+          }
+        })
+        
         ServerPacketSender.sendRobotInventory(this, slot, stack)
       }
       if (isUpgradeSlot(slot)) {
@@ -562,7 +591,18 @@ class Robot(pos: BlockPos, state: BlockState)
     super.onItemRemoved(slot, stack)
     if (isServer) {
       if (isToolSlot(slot)) {
-        player_.getAttributes.removeAttributeModifiers(stack.getAttributeModifiers(EquipmentSlot.MAINHAND))
+        val modifiers: ItemAttributeModifiers = stack.getOrDefault(
+          DataComponents.ATTRIBUTE_MODIFIERS,
+          ItemAttributeModifiers.EMPTY
+        )
+
+        modifiers.forEach(EquipmentSlot.MAINHAND, (attributeHolder, attributeModifier) => {
+          val attributeInstance = player_.getAttributes.getInstance(attributeHolder)
+          if (attributeInstance != null) {
+            attributeInstance.removeModifier(attributeModifier.id())
+            attributeInstance.addTransientModifier(attributeModifier)
+          }
+        })
         ServerPacketSender.sendRobotInventory(this, slot, ItemStack.EMPTY)
       }
       if (isUpgradeSlot(slot)) {

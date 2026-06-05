@@ -18,7 +18,6 @@ import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Sound
 import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.InventoryUtils
@@ -28,8 +27,7 @@ import net.minecraft.world.MenuProvider
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -145,16 +143,17 @@ class DiskDrive(pos: BlockPos, state: BlockState)
 
   private final val DiskTag = Settings.namespace + "disk"
 
-  @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  @OnlyIn(Dist.CLIENT) 
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     if (nbt.contains(DiskTag)) {
-      setItem(0, ItemStack.of(nbt.getCompound(DiskTag)))
+      setItem(0, ItemStack.parseOptional(provider, nbt.getCompound(DiskTag)))
     }
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
-    if (!items(0).isEmpty) nbt.setNewCompoundTag(DiskTag, items(0).save)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
+    if (!items(0).isEmpty) nbt.setNewCompoundTag(DiskTag, _ => items(0).save(provider))
   }
 }

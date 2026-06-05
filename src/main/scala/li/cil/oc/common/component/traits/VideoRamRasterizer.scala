@@ -2,6 +2,7 @@ package li.cil.oc.common.component.traits
 
 import li.cil.oc.common.component
 import li.cil.oc.common.component.GpuTextBuffer
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.mutable
@@ -66,9 +67,9 @@ trait VideoRamRasterizer {
     count
   }
 
-  def loadBuffer(owner: String, id: Int, nbt: CompoundTag): Boolean = {
+  def loadBuffer(owner: String, id: Int, nbt: CompoundTag, provider: HolderLookup.Provider): Boolean = {
     val src = new li.cil.oc.util.TextBuffer(width = 1, height = 1, li.cil.oc.util.PackedColor.SingleBitFormat)
-    src.loadData(nbt)
+    src.loadData(nbt, provider)
     addBuffer(component.GpuTextBuffer.wrap(owner, id, src))
   }
 

@@ -6,7 +6,6 @@ import li.cil.oc.api.network._
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
@@ -35,7 +34,7 @@ class PowerDistributor(pos: BlockPos, state: BlockState)
   private final val ConnectorTag = Settings.namespace + "connector"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt)
+    super.loadForServer(nbt, provider)
     nbt.getList(ConnectorTag, Tag.TAG_COMPOUND).toTagArray[CompoundTag].
       zipWithIndex.foreach {
       case (tag, index) => nodes(index).loadData(tag, provider)
@@ -43,7 +42,7 @@ class PowerDistributor(pos: BlockPos, state: BlockState)
   }
 
   override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt)
+    super.saveForServer(nbt, provider)
     // Side check for Waila (and other mods that may call this client side).
     if (isServer) {
       nbt.setNewTagList(ConnectorTag, nodes.map(connector => {

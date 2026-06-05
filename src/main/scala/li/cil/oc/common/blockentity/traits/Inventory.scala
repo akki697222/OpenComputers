@@ -1,13 +1,12 @@
 package li.cil.oc.common.blockentity.traits
 
 import java.util.function.Consumer
-
 import li.cil.oc.common.container
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.InventoryUtils
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Player
 
@@ -20,14 +19,14 @@ trait Inventory extends BaseBlockEntity with container.Inventory {
 
   override def getDisplayName: Component = super[Inventory].getDisplayName
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
-    loadData(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
+    loadData(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    saveData(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    saveData(nbt, provider)
   }
 
   // ----------------------------------------------------------------------- //

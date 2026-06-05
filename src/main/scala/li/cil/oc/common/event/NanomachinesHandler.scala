@@ -11,11 +11,11 @@ import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.nanomachines.ControllerImpl
 import net.minecraft.client.Minecraft
-import net.neoforged.event.entity.living.LivingEvent
-import net.neoforged.event.entity.player.PlayerEvent
-import net.neoforged.eventbus.api.SubscribeEvent
-import net.neoforged.event.entity.player.PlayerEvent.PlayerLoggedOutEvent
-import net.neoforged.event.entity.player.PlayerEvent.PlayerRespawnEvent
+import net.neoforged.neoforge.event.entity.living.LivingEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent
 import net.minecraft.client.renderer.MultiBufferSource
 import com.mojang.blaze3d.vertex.Tesselator
 import net.minecraft.world.entity.player.Player
@@ -25,8 +25,8 @@ import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
-import net.neoforged.client.event.RenderGuiOverlayEvent
-import net.neoforged.client.gui.overlay.VanillaGuiOverlay
+import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent
+import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay
 
 object NanomachinesHandler {
   @OnlyIn(Dist.CLIENT)

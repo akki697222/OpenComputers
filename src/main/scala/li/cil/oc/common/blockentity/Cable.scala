@@ -1,21 +1,15 @@
 package li.cil.oc.common.blockentity
 
-import li.cil.oc.api
+import li.cil.oc.{Constants, api}
 import li.cil.oc.api.network.Visibility
-import li.cil.oc.common
-import li.cil.oc.Constants
-import li.cil.oc.client.renderer.block.{CableModel, ScreenModel}
-import li.cil.oc.util.Color
-import li.cil.oc.util.ItemColorizer
-import net.minecraft.world.item.DyeColor
+import li.cil.oc.client.renderer.block.CableModel
+import li.cil.oc.util.{Color, ItemColorizer}
 import net.minecraft.core.BlockPos
-import net.minecraft.world.item.Item
-import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.{DyeColor, ItemStack}
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
-import net.neoforged.client.model.data.ModelData
+import net.neoforged.neoforge.client.model.data.ModelData
 
 class Cable(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.CABLE.get(), pos, state) with traits.Environment with traits.NotAnalyzable with traits.ImmibisMicroblock with traits.Colored {
