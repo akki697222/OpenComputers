@@ -179,6 +179,9 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
     RenderState.checkError(getClass.getName + ".draw: text")
   }
 
+  @OnlyIn(Dist.CLIENT)
+  override def shouldRenderOffScreen: Boolean = isOrigin && (width > 1 || height > 1)
+
   private def playerDistanceSq(): Double = {
     val player = Minecraft.getInstance.player
     val bounds = screen.getRenderBoundingBox

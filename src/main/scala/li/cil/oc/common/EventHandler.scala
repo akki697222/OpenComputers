@@ -109,74 +109,14 @@ object EventHandler {
     }
   }
 
-  // NeoForge 1.21.1: AttachCapabilitiesEvent has been removed.
-  // Capabilities are now registered per-type via RegisterCapabilitiesEvent on the mod event bus.
-  // This is called from the main mod class when setting up the mod event bus listeners.
   @SubscribeEvent
   def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
-    import blockentity.TileEntityTypes
-    import common.Capabilities._
-    import common.capabilities.CapabilitySidedComponent
-    import net.neoforged.neoforge.capabilities.{Capabilities => NeoCapabilities}
-    import net.neoforged.neoforge.fluids.capability.IFluidHandler
-    import common.item.traits
+    // FUCK YOU SCALA
+    // ITS FUCKING SHITTY LANGUAGE EVER
+    EventHandlerHelper.registerCapabilities(event)
 
-    // ------------------------------------------------------------------ //
-    // Block entity capabilities
-
-    // Register Environment / SidedEnvironment / Colored for all OC block entity types.
-    // Capability lambdas use runtime instanceof checks so a single registration loop works.
-    Seq(
-      TileEntityTypes.ADAPTER, TileEntityTypes.ASSEMBLER, TileEntityTypes.CABLE,
-      TileEntityTypes.CAPACITOR, TileEntityTypes.CARPETED_CAPACITOR, TileEntityTypes.CASE,
-      TileEntityTypes.CHARGER, TileEntityTypes.DISASSEMBLER, TileEntityTypes.DISK_DRIVE,
-      TileEntityTypes.GEOLYZER, TileEntityTypes.HOLOGRAM, TileEntityTypes.KEYBOARD,
-      TileEntityTypes.MICROCONTROLLER, TileEntityTypes.MOTION_SENSOR, TileEntityTypes.NET_SPLITTER,
-      TileEntityTypes.POWER_CONVERTER, TileEntityTypes.POWER_DISTRIBUTOR, TileEntityTypes.PRINT,
-      TileEntityTypes.PRINTER, TileEntityTypes.RACK, TileEntityTypes.RAID,
-      TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
-      TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
-    ).foreach { beTypeObj =>
-      event.registerBlockEntity(EnvironmentCapability, beTypeObj.get(), (be, _) => be match {
-        case env: Environment => env
-        case _ => null
-      })
-      event.registerBlockEntity(SidedEnvironmentCapability, beTypeObj.get(), (be, side) => be match {
-        case sc: Environment with SidedComponent => new CapabilitySidedComponent.SidedEnvironmentAdapter(sc)
-        case se: SidedEnvironment => se
-        case _ => null
-      })
-      event.registerBlockEntity(ColoredCapability, beTypeObj.get(), (be, _) => be match {
-        case colored: Colored => colored
-        case _ => null
-      })
-    }
-
-    // Robot implements IFluidHandler directly — register for both the proxy and the underlying BE type.
-    event.registerBlockEntity(NeoCapabilities.FluidHandler.BLOCK, TileEntityTypes.ROBOT.get(),
-      (be, _) => be match {
-        case fh: IFluidHandler => fh
-        case _ => null
-      })
-
-    // ------------------------------------------------------------------ //
-    // Item capabilities
-
-    // Register EnergyStorage for all Chargeable items.
-    // Items are registered at mod load time via DeferredRegister, so we iterate
-    // the registry here to find all items that implement the Chargeable trait.
-    net.minecraft.core.registries.BuiltInRegistries.ITEM.forEach { item =>
-      item match {
-        case chargeable: traits.Chargeable =>
-          event.registerItem(NeoCapabilities.EnergyStorage.ITEM,
-            (stack, _) => new traits.Chargeable.Provider(stack, chargeable), item)
-        case _ =>
-      }
-    }
-
-    // Also delegate to the Forge energy integration for PowerAcceptor BEs
     integration.minecraftforge.EventHandlerMinecraftForge.onRegisterCapabilities(event)
-  }  }
+  }
 
   @SubscribeEvent
   def onServerTickPre(e: ServerTickEvent.Pre): Any = {

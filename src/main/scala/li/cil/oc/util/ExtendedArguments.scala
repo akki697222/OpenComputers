@@ -3,9 +3,9 @@ package li.cil.oc.util
 import li.cil.oc.api.internal.MultiTank
 import li.cil.oc.api.machine.Arguments
 import net.minecraft.core.Direction
-import net.neoforged.fluids.{FluidStack, FluidType}
-import net.neoforged.fluids.capability.IFluidHandler
-import net.neoforged.items.IItemHandler
+import net.neoforged.neoforge.fluids.{FluidStack, FluidType}
+import net.neoforged.neoforge.fluids.capability.IFluidHandler
+import net.neoforged.neoforge.items.IItemHandler
 
 import scala.language.implicitConversions
 import net.minecraft.world.Container

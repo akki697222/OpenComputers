@@ -3,181 +3,172 @@ package li.cil.oc.common.blockentity;
 import li.cil.oc.OpenComputers;
 import li.cil.oc.Constants;
 import li.cil.oc.api.Items;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.ForgeRegistries;
-import net.neoforged.neoforge.registries.RegistryObject;
 
 public final class TileEntityTypes {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, OpenComputers.ID());
+            DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, OpenComputers.ID());
 
-    public static final RegistryObject<BlockEntityType<Adapter>> ADAPTER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Adapter>> ADAPTER =
             BLOCK_ENTITY_TYPES.register("adapter", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Adapter(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Adapter()).block())
+                    .of(Adapter::new, Items.get(Constants.BlockName$.MODULE$.Adapter()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Assembler>> ASSEMBLER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Assembler>> ASSEMBLER =
             BLOCK_ENTITY_TYPES.register("assembler", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Assembler(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Assembler()).block())
+                    .of(Assembler::new, Items.get(Constants.BlockName$.MODULE$.Assembler()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Cable>> CABLE =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Cable>> CABLE =
             BLOCK_ENTITY_TYPES.register("cable", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Cable(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Cable()).block())
+                    .of(Cable::new, Items.get(Constants.BlockName$.MODULE$.Cable()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Capacitor>> CAPACITOR =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Capacitor>> CAPACITOR =
             BLOCK_ENTITY_TYPES.register("capacitor", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Capacitor(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Capacitor()).block())
+                    .of(Capacitor::new, Items.get(Constants.BlockName$.MODULE$.Capacitor()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<CarpetedCapacitor>> CARPETED_CAPACITOR =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CarpetedCapacitor>> CARPETED_CAPACITOR =
             BLOCK_ENTITY_TYPES.register("carpeted_capacitor", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new CarpetedCapacitor(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.CarpetedCapacitor()).block())
+                    .of(CarpetedCapacitor::new, Items.get(Constants.BlockName$.MODULE$.CarpetedCapacitor()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Case>> CASE =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Case>> CASE =
             BLOCK_ENTITY_TYPES.register("case", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Case(pos, state),
+                    .of(Case::new,
                             Items.get(Constants.BlockName$.MODULE$.CaseCreative()).block(),
                             Items.get(Constants.BlockName$.MODULE$.CaseTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.CaseTier2()).block(),
                             Items.get(Constants.BlockName$.MODULE$.CaseTier3()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Charger>> CHARGER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Charger>> CHARGER =
             BLOCK_ENTITY_TYPES.register("charger", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Charger(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Charger()).block())
+                    .of(Charger::new, Items.get(Constants.BlockName$.MODULE$.Charger()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Disassembler>> DISASSEMBLER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Disassembler>> DISASSEMBLER =
             BLOCK_ENTITY_TYPES.register("disassembler", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Disassembler(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Disassembler()).block())
+                    .of(Disassembler::new, Items.get(Constants.BlockName$.MODULE$.Disassembler()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<DiskDrive>> DISK_DRIVE =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DiskDrive>> DISK_DRIVE =
             BLOCK_ENTITY_TYPES.register("disk_drive", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new DiskDrive(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.DiskDrive()).block())
+                    .of(DiskDrive::new, Items.get(Constants.BlockName$.MODULE$.DiskDrive()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Geolyzer>> GEOLYZER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Geolyzer>> GEOLYZER =
             BLOCK_ENTITY_TYPES.register("geolyzer", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Geolyzer(pos, state),
-                            Items.get(Constants.BlockName$.MODULE$.Geolyzer()).block())
+                    .of(Geolyzer::new, Items.get(Constants.BlockName$.MODULE$.Geolyzer()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Hologram>> HOLOGRAM =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Hologram>> HOLOGRAM =
             BLOCK_ENTITY_TYPES.register("hologram", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Hologram(pos, state),
+                    .of(Hologram::new,
                             Items.get(Constants.BlockName$.MODULE$.HologramTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.HologramTier2()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Keyboard>> KEYBOARD =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Keyboard>> KEYBOARD =
             BLOCK_ENTITY_TYPES.register("keyboard", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Keyboard(pos, state),
+                    .of(Keyboard::new,
                             Items.get(Constants.BlockName$.MODULE$.Keyboard()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Microcontroller>> MICROCONTROLLER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Microcontroller>> MICROCONTROLLER =
             BLOCK_ENTITY_TYPES.register("microcontroller", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Microcontroller(pos, state),
+                    .of(Microcontroller::new,
                             Items.get(Constants.BlockName$.MODULE$.Microcontroller()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<MotionSensor>> MOTION_SENSOR =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MotionSensor>> MOTION_SENSOR =
             BLOCK_ENTITY_TYPES.register("motion_sensor", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new MotionSensor(pos, state),
+                    .of(MotionSensor::new,
                             Items.get(Constants.BlockName$.MODULE$.MotionSensor()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<NetSplitter>> NET_SPLITTER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetSplitter>> NET_SPLITTER =
             BLOCK_ENTITY_TYPES.register("net_splitter", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new NetSplitter(pos, state),
+                    .of(NetSplitter::new,
                             Items.get(Constants.BlockName$.MODULE$.NetSplitter()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<PowerConverter>> POWER_CONVERTER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerConverter>> POWER_CONVERTER =
             BLOCK_ENTITY_TYPES.register("power_converter", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new PowerConverter(pos, state),
+                    .of(PowerConverter::new,
                             Items.get(Constants.BlockName$.MODULE$.PowerConverter()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<PowerDistributor>> POWER_DISTRIBUTOR =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PowerDistributor>> POWER_DISTRIBUTOR =
             BLOCK_ENTITY_TYPES.register("power_distributor", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new PowerDistributor(pos, state),
+                    .of(PowerDistributor::new,
                             Items.get(Constants.BlockName$.MODULE$.PowerDistributor()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Print>> PRINT =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Print>> PRINT =
             BLOCK_ENTITY_TYPES.register("print", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Print(pos, state),
+                    .of(Print::new,
                             Items.get(Constants.BlockName$.MODULE$.Print()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Printer>> PRINTER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Printer>> PRINTER =
             BLOCK_ENTITY_TYPES.register("printer", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Printer(pos, state),
+                    .of(Printer::new,
                             Items.get(Constants.BlockName$.MODULE$.Printer()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Rack>> RACK =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Rack>> RACK =
             BLOCK_ENTITY_TYPES.register("rack", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Rack(pos, state),
+                    .of(Rack::new,
                             Items.get(Constants.BlockName$.MODULE$.Rack()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Raid>> RAID =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Raid>> RAID =
             BLOCK_ENTITY_TYPES.register("raid", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Raid(pos, state),
+                    .of(Raid::new,
                             Items.get(Constants.BlockName$.MODULE$.Raid()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Redstone>> REDSTONE_IO =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Redstone>> REDSTONE_IO =
             BLOCK_ENTITY_TYPES.register("redstone_io", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Redstone(pos, state),
+                    .of(Redstone::new,
                             Items.get(Constants.BlockName$.MODULE$.Redstone()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Relay>> RELAY =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Relay>> RELAY =
             BLOCK_ENTITY_TYPES.register("relay", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Relay(pos, state),
+                    .of(Relay::new,
                             Items.get(Constants.BlockName$.MODULE$.Relay()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<RobotProxy>> ROBOT =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RobotProxy>> ROBOT =
             BLOCK_ENTITY_TYPES.register("robot", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new RobotProxy(pos, state),
+                    .of(RobotProxy::new,
                             Items.get(Constants.BlockName$.MODULE$.Robot()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Screen>> SCREEN =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Screen>> SCREEN =
             BLOCK_ENTITY_TYPES.register("screen", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Screen(pos, state),
+                    .of(Screen::new,
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier2()).block(),
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier3()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Transposer>> TRANSPOSER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Transposer>> TRANSPOSER =
             BLOCK_ENTITY_TYPES.register("transposer", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Transposer(pos, state),
+                    .of(Transposer::new,
                             Items.get(Constants.BlockName$.MODULE$.Transposer()).block())
                     .build(null));
 
-    public static final RegistryObject<BlockEntityType<Waypoint>> WAYPOINT =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Waypoint>> WAYPOINT =
             BLOCK_ENTITY_TYPES.register("waypoint", () -> BlockEntityType.Builder
-                    .of((pos, state) -> new Waypoint(pos, state),
+                    .of(Waypoint::new,
                             Items.get(Constants.BlockName$.MODULE$.Waypoint()).block())
                     .build(null));
 

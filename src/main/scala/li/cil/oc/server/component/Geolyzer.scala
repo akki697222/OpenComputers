@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -19,7 +18,7 @@ import li.cil.oc.api.network.Message
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import li.cil.oc.common.blockentity.{Robot => EntityRobot, Microcontroller}
+import li.cil.oc.common.blockentity.{Microcontroller, Robot => EntityRobot}
 import li.cil.oc.common.entity.{Drone => EntityDrone}
 import li.cil.oc.common.item.TabletWrapper
 import li.cil.oc.util.BlockPosition
@@ -30,7 +29,6 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.neoforged.common.MinecraftForge
 
 import scala.collection.JavaConverters.mapAsJavaMap
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -41,6 +39,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.biome.Biome.Precipitation
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
+import net.neoforged.neoforge.common.NeoForge
 
 class Geolyzer(val host: EnvironmentHost) extends AbstractManagedEnvironment with traits.LevelControl with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).
@@ -115,7 +114,7 @@ class Geolyzer(val host: EnvironmentHost) extends AbstractManagedEnvironment wit
       return result((), "not enough energy")
 
     val event = new GeolyzerEvent.Scan(host, options, minX, minY, minZ, maxX, maxY, maxZ)
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     if (event.isCanceled) result((), "scan was canceled")
     else result(event.data)
   }
@@ -155,7 +154,7 @@ class Geolyzer(val host: EnvironmentHost) extends AbstractManagedEnvironment wit
 
     val globalPos = BlockPosition(host).offset(globalSide)
     val event = new Analyze(host, options, globalPos.toBlockPos)
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     if (event.isCanceled) result((), "scan was canceled")
     else result(event.data)
   }
@@ -200,7 +199,7 @@ class Geolyzer(val host: EnvironmentHost) extends AbstractManagedEnvironment wit
         case (tablet: internal.Tablet, Array(nbt: CompoundTag, stack: ItemStack, player: Player, blockPos: BlockPosition, side: Direction, hitX: java.lang.Float, hitY: java.lang.Float, hitZ: java.lang.Float)) =>
           if (node.tryChangeBuffer(-Settings.get.geolyzerScanCost)) {
             val event = new Analyze(host, Map.empty[AnyRef, AnyRef], blockPos.toBlockPos)
-            MinecraftForge.EVENT_BUS.post(event)
+            NeoForge.EVENT_BUS.post(event)
             if (!event.isCanceled) {
               for ((key, value) <- event.data) value match {
                 case number: java.lang.Number => nbt.putDouble(key, number.doubleValue())

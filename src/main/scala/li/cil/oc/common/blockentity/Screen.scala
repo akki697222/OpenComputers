@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.phys.AABB
-import net.neoforged.client.model.data.ModelData
 
 import scala.collection.mutable
 import scala.language.postfixOps
@@ -63,8 +62,6 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   var hadRedstoneInput = false
 
-  var cachedBounds: Option[AABB] = None
-
   var invertTouchMode = false
 
   private val arrows = mutable.Set.empty[Arrow]
@@ -106,7 +103,6 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
     origin = this
     screens.clear()
     screens += this
-    cachedBounds = None
     invertTouchMode = false
   }
 
@@ -336,27 +332,6 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   // ----------------------------------------------------------------------- //
 
-  @OnlyIn(Dist.CLIENT)
-  override def getRenderBoundingBox = {
-    if ((width == 1 && height == 1) || !isOrigin) super.getRenderBoundingBox
-    else cachedBounds match {
-      case Some(bounds) => bounds
-      case _ =>
-        val spos = unproject(width, height, 1)
-        val ox = x + (if (spos.x < 0) 1 else 0)
-        val oy = y + (if (spos.y < 0) 1 else 0)
-        val oz = z + (if (spos.z < 0) 1 else 0)
-        val btmp = new AABB(ox, oy, oz, ox + spos.x, oy + spos.y, oz + spos.z)
-        val b = new AABB(
-          math.min(btmp.minX, btmp.maxX), math.min(btmp.minY, btmp.maxY), math.min(btmp.minZ, btmp.maxZ),
-          math.max(btmp.minX, btmp.maxX), math.max(btmp.minY, btmp.maxY), math.max(btmp.minZ, btmp.maxZ))
-        cachedBounds = Some(b)
-        b
-    }
-  }
-
-  // ----------------------------------------------------------------------- //
-
   override def onAnalyze(player: Player, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = Array(origin.node)
 
   override protected def onRedstoneInputChanged(args: RedstoneChangedEventArgs): Unit = {
@@ -410,7 +385,6 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
               screen.height = newHeight
               screen.origin = newOrigin
               screen.screens ++= newScreens // It's a set, so there won't be duplicates.
-              screen.cachedBounds = None
             }
             true
           }
