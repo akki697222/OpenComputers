@@ -1,11 +1,9 @@
 package li.cil.oc.client.renderer.block
 
 import java.util
-import java.util.Collections
-
-import li.cil.oc.OpenComputers
 import li.cil.oc.client.Textures
 import li.cil.oc.common.blockentity
+import net.minecraft.client.Minecraft
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.block.model.BakedQuad
@@ -21,9 +19,9 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.phys.Vec3
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.client.event.TextureStitchEvent
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ModelEvent.ModifyBakingResult
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
@@ -40,12 +38,12 @@ object NetSplitterModel extends SmartBlockModelBase {
         faces ++= BaseModel
         addSideQuads(faces, Direction.values().map(t.isSideOpen))
         faces.asJava
-      case _ => super.getQuads(state, side, rand)
+      case _ => super.getQuads(state, side, rand, data, renderType)
     }
 
   private def getSprite(location: ResourceLocation, atlas: Option[TextureAtlas]): TextureAtlasSprite = atlas match {
     case Some(atls) => atls.getSprite(location)
-    case None       => Textures.getSprite(location)
+    case None => Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(location)
   }
 
   protected def splitterTexture(atlas: Option[TextureAtlas]) = Array(
@@ -81,8 +79,11 @@ object NetSplitterModel extends SmartBlockModelBase {
   }
 
   @SubscribeEvent
-  def onTextureStitchPost(event: TextureStitchEvent.Post): Unit = {
-    initBaseModel(event.getAtlas)
+  def onModifyBakingResult(event: ModifyBakingResult): Unit = {
+    val blockAtlas = Minecraft.getInstance().getModelManager.getAtlas(InventoryMenu.BLOCK_ATLAS)
+    if (blockAtlas != null) {
+      initBaseModel(blockAtlas)
+    }
   }
 
   protected def addSideQuads(faces: mutable.ArrayBuffer[BakedQuad], openSides: Array[Boolean]): Unit = {
@@ -101,7 +102,7 @@ object NetSplitterModel extends SmartBlockModelBase {
   }
 
   object ItemModel extends SmartBlockModelBase {
-    override def getQuads(state: BlockState, side: Direction, rand: RandomSource): util.List[BakedQuad] = {
+    override def getQuads(state: BlockState, side: Direction, rand: RandomSource, data: ModelData, renderType: RenderType): util.List[BakedQuad] = {
       val faces = mutable.ArrayBuffer.empty[BakedQuad]
       faces ++= BaseModel
       addSideQuads(faces, Direction.values().map(_ => false))

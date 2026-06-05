@@ -2,7 +2,6 @@ package li.cil.oc.common.component
 
 import java.util
 import java.util.UUID
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -27,7 +26,7 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.StringTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -172,20 +171,20 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
   private final val KeyboardTag = Settings.namespace + "keyboard"
   private final val KeysTag = Settings.namespace + "keys"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (!rack.getEnvironmentLevel.isClientSide) {
-      node.loadData(nbt)
+      node.loadData(nbt, provider)
     }
-    buffer.loadData(nbt.getCompound(BufferTag))
-    keyboard.loadData(nbt.getCompound(KeyboardTag))
+    buffer.loadData(nbt.getCompound(BufferTag), provider)
+    keyboard.loadData(nbt.getCompound(KeyboardTag), provider)
     keys.clear()
     nbt.getList(KeysTag, Tag.TAG_STRING).foreach((tag: StringTag) => keys += tag.getAsString)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    node.saveData(nbt)
-    nbt.setNewCompoundTag(BufferTag, buffer.saveData)
-    nbt.setNewCompoundTag(KeyboardTag, keyboard.saveData)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    node.saveData(nbt, provider)
+    nbt.setNewCompoundTag(BufferTag, (nbt: CompoundTag) => buffer.saveData(nbt, provider))
+    nbt.setNewCompoundTag(KeyboardTag, (nbt: CompoundTag) => keyboard.saveData(nbt, provider))
     nbt.setNewTagList(KeysTag, keys)
   }
 

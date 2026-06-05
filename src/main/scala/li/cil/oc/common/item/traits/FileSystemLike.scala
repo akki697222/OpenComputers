@@ -9,8 +9,8 @@ import li.cil.oc.client.gui
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.util.Tooltip
 import net.minecraft.client.Minecraft
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.Level
 import net.minecraft.world.item.ItemStack
 import net.minecraft.network.chat.Component

@@ -11,9 +11,9 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.server.fs.Buffered
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.event.server.ServerAboutToStartEvent
-import net.minecraftforge.event.server.ServerStoppedEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent
+import net.neoforged.neoforge.event.server.ServerStoppedEvent
 
 import scala.collection.mutable
 

@@ -7,7 +7,7 @@ import li.cil.oc.api
 import li.cil.oc.api.internal.Server
 import li.cil.oc.api.machine.Machine
 import li.cil.oc.api.network.Connector
-import li.cil.oc.common.Achievement
+import li.cil.oc.common.Advancement
 import li.cil.oc.common.PacketType
 import li.cil.oc.common.component.TextBuffer
 import li.cil.oc.common.menu
@@ -21,8 +21,8 @@ import li.cil.oc.common.blockentity.traits.Computer
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.Util
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.server.ServerLifecycleHooks
 import org.apache.logging.log4j.MarkerManager
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
@@ -341,7 +341,7 @@ object PacketHandler extends CommonPacketHandler {
             if (te.start(p.player match {
               case player: ServerPlayer => player.isCreative
               case _ => false
-            })) te.output.foreach(stack => Achievement.onAssemble(stack, p.player))
+            })) te.output.foreach(stack => Advancement.onAssemble(stack, p.player))
           case _ =>
         }
       }

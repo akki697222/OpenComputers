@@ -5,7 +5,7 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.ResultWrapper.result
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
 
 trait TankControl extends TankAware {
   @Callback(doc = "function():number -- The number of tanks installed in the device.")

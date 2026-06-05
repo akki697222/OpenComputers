@@ -1,8 +1,8 @@
 package li.cil.oc.api.event;
 
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
 /**
  * A bit more specific sign change event that holds information about new text of the sign. Used in the sign upgrade.
@@ -16,8 +16,7 @@ public abstract class SignChangeEvent extends Event {
         this.lines = lines;
     }
 
-    @Cancelable
-    public static class Pre extends SignChangeEvent {
+    public static class Pre extends SignChangeEvent implements ICancellableEvent {
         public Pre(SignBlockEntity sign, String[] lines) {
             super(sign, lines);
         }

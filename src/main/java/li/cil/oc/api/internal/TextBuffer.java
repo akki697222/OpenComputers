@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.oc.api.Persistable;
 import li.cil.oc.api.network.ManagedEnvironment;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This interface implements functionality for displaying and manipulating

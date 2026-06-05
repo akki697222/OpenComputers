@@ -4,9 +4,9 @@ import java.util.Optional
 
 import li.cil.oc.Settings
 import li.cil.oc.integration
-import net.minecraftforge.fml.ModList
-import net.minecraftforge.fml.ModContainer
-import net.minecraftforge.forgespi.language.MavenVersionAdapter
+import net.neoforged.fml.ModList
+import net.neoforged.fml.ModContainer
+import net.neoforged.forgespi.language.MavenVersionAdapter
 import org.apache.maven.artifact.versioning.ArtifactVersion
 
 import scala.collection.mutable

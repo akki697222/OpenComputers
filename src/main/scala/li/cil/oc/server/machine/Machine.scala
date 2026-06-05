@@ -41,7 +41,7 @@ import li.cil.oc.util.ThreadPoolFactory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt._
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 import scala.collection.JavaConverters.mapAsJavaMap
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -57,8 +57,9 @@ import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.client.server.IntegratedServer
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.fml.DistExecutor
+import net.minecraft.core.HolderLookup
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.fml.DistExecutor
 
 class Machine(val host: MachineHost) extends AbstractManagedEnvironment with machine.Machine with Runnable with DeviceInfo {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Network).
@@ -761,12 +762,12 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
   private final val CPUTimeTag = "cpuTime"
   private final val RemainingPauseTag = "remainingPause"
 
-  override def loadData(nbt: CompoundTag): Unit = Machine.this.synchronized(state.synchronized {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = Machine.this.synchronized(state.synchronized {
     assert(state.top == Machine.State.Stopped || state.top == Machine.State.Paused)
     close()
     state.clear()
 
-    super.loadData(nbt)
+    super.loadData(nbt, provider)
 
     state.pushAll(nbt.getIntArray(StateTag).reverseMap(Machine.State(_)))
     nbt.getList(UsersTag, Tag.TAG_STRING).foreach((tag: StringTag) => _users += tag.getAsString)
@@ -778,8 +779,8 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
       tag.getString(AddressTag) -> tag.getString(NameTag))
 
     tmp.foreach(fs => {
-      if (nbt.contains(TmpTag)) fs.loadData(nbt.getCompound(TmpTag))
-      else fs.loadData(SaveHandler.loadNBT(nbt, tmpPath))
+      if (nbt.contains(TmpTag)) fs.loadData(nbt.getCompound(TmpTag), provider)
+      else fs.loadData(SaveHandler.loadNBT(nbt, tmpPath), provider)
     })
 
     if (state.nonEmpty && isRunning && init()) try {
@@ -830,7 +831,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
     }
   })
 
-  override def saveData(nbt: CompoundTag): Unit = Machine.this.synchronized(state.synchronized {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = Machine.this.synchronized(state.synchronized {
     // The lock on 'this' should guarantee that this never happens regularly.
     // If something other than regular saving tries to save while we are executing code,
     // e.g. SpongeForge saving during robot.move due to block changes being captured,
@@ -844,7 +845,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
     // Make sure we don't continue running until everything has saved.
     pause(0.05)
 
-    super.saveData(nbt)
+    super.saveData(nbt, provider)
 
     // Make sure the component list is up-to-date.
     processAddedComponents()
@@ -862,7 +863,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
     }
     nbt.put(ComponentsTag, componentsNbt)
 
-    tmp.foreach(fs => SaveHandler.scheduleSave(host, nbt, tmpPath, fs.saveData _))
+    tmp.foreach(fs => SaveHandler.scheduleSave(host, nbt, tmpPath, (nbt: CompoundTag) => fs.saveData(nbt, provider)))
 
     if (state.top != Machine.State.Stopped) try {
       architecture.saveData(nbt)

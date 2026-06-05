@@ -6,8 +6,8 @@ import li.cil.oc.server.PacketSender
 import li.cil.oc.util.Color
 import net.minecraft.world.item.DyeColor
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 trait Colored extends BaseBlockEntity with internal.Colored {
   private var _color = 0

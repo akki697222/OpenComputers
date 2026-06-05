@@ -2,8 +2,8 @@ package li.cil.oc.client.gui;
 
 import li.cil.oc.common.menu.MenuTypes;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public final class GuiTypes {
     @SubscribeEvent

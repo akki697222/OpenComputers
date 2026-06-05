@@ -11,9 +11,9 @@ import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.event.entity.item.ItemTossEvent
-import net.minecraftforge.eventbus.api.Event.Result
+import net.neoforged.common.MinecraftForge
+import net.neoforged.event.entity.item.ItemTossEvent
+import net.neoforged.eventbus.api.Event.Result
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.item.ItemEntity

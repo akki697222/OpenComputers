@@ -3,7 +3,7 @@ package li.cil.oc.server.component.traits
 import li.cil.oc.api.internal.MultiTank
 import li.cil.oc.api.machine.Arguments
 import li.cil.oc.util.ExtendedArguments._
-import net.minecraftforge.fluids.FluidStack
+import net.neoforged.fluids.FluidStack
 
 trait TankAware {
   def tank: MultiTank

@@ -10,9 +10,9 @@ import li.cil.oc.client.{Textures, gui}
 import li.cil.oc.common.component
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
 import net.minecraft.client.Minecraft
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.common.extensions.IForgeItem
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack

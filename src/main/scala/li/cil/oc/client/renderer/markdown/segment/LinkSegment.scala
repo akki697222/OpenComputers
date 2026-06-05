@@ -45,14 +45,14 @@ private[markdown] class LinkSegment(parent: Segment, text: String, val url: Stri
   }
 
   private def handleUrl(urlStr: String): Unit = {
-    var url: URL = null
+    var url: URI = null
     try {
-      url = new URL(urlStr)
+      url = new URI(urlStr)
     } catch {
       case _: MalformedURLException =>
         Minecraft.getInstance.player.sendSystemMessage(Localization.Chat.WarningLink("Malformed URL"))
     }
-    Util.getPlatform.openUrl(url)
+    Util.getPlatform.openUri(url)
   }
 
   override def toString(format: MarkupFormat.Value): String = format match {

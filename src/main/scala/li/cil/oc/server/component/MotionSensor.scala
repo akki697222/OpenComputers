@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -15,6 +14,7 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.util.SideTracker
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -143,13 +143,13 @@ class MotionSensor(val host: EnvironmentHost) extends prefab.AbstractManagedEnvi
 
   private final val SensitivityTag = Settings.namespace + "sensitivity"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     sensitivity = nbt.getDouble(SensitivityTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putDouble(SensitivityTag, sensitivity)
   }
 

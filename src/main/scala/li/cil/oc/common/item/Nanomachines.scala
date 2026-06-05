@@ -9,9 +9,9 @@ import li.cil.oc.common.nanomachines.ControllerImpl
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.common.extensions.IForgeItem
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -58,7 +58,7 @@ class Nanomachines(props: Properties) extends Item(props) with IForgeItem with t
                   if (!Strings.isNullOrEmpty(data.uuid)) {
                     controller.uuid = data.uuid
                   }
-                  controller.configuration.loadData(nbt)
+                  controller.configuration.loadData(nbt, level.registryAccess())
                 case _ => controller.reconfigure()
               }
             case controller => controller.reconfigure() // Huh.

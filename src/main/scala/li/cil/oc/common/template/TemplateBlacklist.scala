@@ -5,7 +5,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 

@@ -33,18 +33,21 @@ import li.cil.oc.util.SideTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.event.level.ChunkEvent
-import net.minecraftforge.event.level.LevelEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.event.level.ChunkEvent
+import net.neoforged.event.level.LevelEvent
+import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionHand
+import net.neoforged.neoforge.event.server.ServerLifecycleEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment with traits.TextBufferProxy with VideoRamRasterizer with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).
@@ -440,8 +443,8 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   private final val ViewportWidthTag = Settings.namespace + "viewportWidth"
   private final val ViewportHeightTag = Settings.namespace + "viewportHeight"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     if (SideTracker.isClient) {
       if (!Strings.isNullOrEmpty(proxy.nodeAddress)) return // Only load once.
       proxy.nodeAddress = nbt.getCompound(NodeData.NodeTag).getString(NodeData.AddressTag)
@@ -487,8 +490,8 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   }
 
   // Null check for Waila (and other mods that may call this client side).
-  override def saveData(nbt: CompoundTag): Unit = if (node != null) {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = if (node != null) {
+    super.saveData(nbt, provider)
     // Happy thread synchronization hack! Here's the problem: GPUs allow direct
     // calls for modifying screens to give a more responsive experience. This
     // causes the following problem: when saving, if the screen is saved first,
@@ -829,7 +832,7 @@ object TextBuffer {
       super.onBufferRamInit(ram)
       owner.host.markChanged()
       val nbt = new CompoundTag()
-      ram.saveData(nbt)
+      ram.saveData(nbt, owner.host.getEnvironmentLevel.registryAccess())
       owner.synchronized(ServerPacketSender.appendTextBufferRamInit(owner.pendingCommands, ram.owner, ram.id, nbt))
     }
 

@@ -4,8 +4,8 @@ import java.util
 
 import li.cil.oc.Localization
 import li.cil.oc.util.Tooltip
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.neoforge.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.Level
 import net.minecraft.world.item.ItemStack
 import net.minecraft.network.chat.Component

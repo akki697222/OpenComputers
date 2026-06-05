@@ -3,8 +3,8 @@ package li.cil.oc.common.menu
 import li.cil.oc.client.Textures
 import li.cil.oc.common
 import li.cil.oc.common.entity
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.Container
 import net.minecraft.world.inventory.DataSlot

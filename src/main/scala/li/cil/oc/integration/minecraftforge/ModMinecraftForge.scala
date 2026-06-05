@@ -4,7 +4,7 @@ import li.cil.oc.api
 import li.cil.oc.integration.Mod
 import li.cil.oc.integration.ModProxy
 import li.cil.oc.integration.Mods
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.common.MinecraftForge
 
 object ModMinecraftForge extends ModProxy {
   override def getMod: Mod = Mods.Forge

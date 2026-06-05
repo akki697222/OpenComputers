@@ -17,8 +17,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.core.BlockPos
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.neoforge.common.NeoForge
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 import scala.collection.mutable
@@ -205,7 +204,7 @@ object PacketSender {
           case t: BlockEntity => new FileSystemAccessEvent.Server(name, t, node)
           case _ => new FileSystemAccessEvent.Server(name, host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
         }
-        MinecraftForge.EVENT_BUS.post(event)
+        NeoForge.EVENT_BUS.post(event)
         if (!event.isCanceled) {
           hostTimeouts.put(name, System.currentTimeMillis() + diskActivityPacketDelay)
 
@@ -237,7 +236,7 @@ object PacketSender {
       case t: BlockEntity => new NetworkActivityEvent.Server(t, node)
       case _ => new NetworkActivityEvent.Server(host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
     }
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     if (!event.isCanceled) {
 
       val pb = new SimplePacketBuilder(PacketType.NetworkActivity)

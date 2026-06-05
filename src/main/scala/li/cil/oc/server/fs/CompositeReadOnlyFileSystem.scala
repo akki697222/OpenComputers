@@ -2,11 +2,11 @@ package li.cil.oc.server.fs
 
 import java.io.FileNotFoundException
 import java.util.concurrent.Callable
-
 import li.cil.oc.api
 import li.cil.oc.api.fs.Handle
 import li.cil.oc.api.fs.Mode
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.mutable
@@ -82,15 +82,15 @@ class CompositeReadOnlyFileSystem(factories: mutable.LinkedHashMap[String, Calla
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     for ((name, fs) <- parts) {
-      fs.loadData(nbt.getCompound(name))
+      fs.loadData(nbt.getCompound(name), provider)
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     for ((name, fs) <- parts) {
-      nbt.setNewCompoundTag(name, fs.saveData)
+      nbt.setNewCompoundTag(name, (nbt: CompoundTag) => fs.saveData(nbt, provider))
     }
   }
 

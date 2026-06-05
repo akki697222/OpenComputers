@@ -2,7 +2,6 @@ package li.cil.oc.server.component
 
 import java.io._
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -17,6 +16,7 @@ import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network._
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -123,15 +123,15 @@ abstract class WirelessNetworkCard(host: EnvironmentHost) extends NetworkCard(ho
 
   private final val StrengthTag = "strength"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     if (nbt.contains(StrengthTag)) {
       strength = nbt.getDouble(StrengthTag) max 0 min maxWirelessRange
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putDouble(StrengthTag, strength)
   }
 }

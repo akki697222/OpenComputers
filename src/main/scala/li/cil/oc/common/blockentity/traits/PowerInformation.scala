@@ -3,8 +3,8 @@ package li.cil.oc.common.blockentity.traits
 import li.cil.oc.Settings
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 trait PowerInformation extends BaseBlockEntity {
   private var lastSentRatio = -1.0

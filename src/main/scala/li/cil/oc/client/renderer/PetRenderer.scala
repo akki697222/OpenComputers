@@ -13,10 +13,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.phys.Vec3
 import com.mojang.math.Axis
-import net.minecraftforge.client.event.RenderPlayerEvent
-import net.minecraftforge.eventbus.api.EventPriority
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.event.TickEvent.ClientTickEvent
+import net.neoforged.neoforge.client.event.{ClientTickEvent, RenderPlayerEvent}
+import net.neoforged.bus.api.EventPriority
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable

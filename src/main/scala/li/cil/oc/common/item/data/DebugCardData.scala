@@ -3,6 +3,7 @@ package li.cil.oc.common.item.data
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.server.component.DebugCard.AccessContext
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
@@ -16,11 +17,11 @@ class DebugCardData extends ItemData(Constants.ItemName.DebugCard) {
 
   private final val DataTag = Settings.namespace + "data"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     access = AccessContext.loadData(dataTag(nbt))
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     val tag = dataTag(nbt)
     AccessContext.remove(tag)
     access.foreach(_.saveData(tag))

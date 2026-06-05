@@ -4,12 +4,16 @@ import li.cil.oc.api.Network;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.SidedEnvironment;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
+
+import javax.annotation.Nonnull;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -115,8 +119,8 @@ public abstract class TileEntitySidedEnvironment extends BlockEntity implements 
     // ----------------------------------------------------------------------- //
 
     @Override
-    public void load(final @NotNull CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(final @Nonnull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+        super.loadAdditional(nbt, provider);
         int index = 0;
         for (Node node : nodes) {
             // The host check may be superfluous for you. It's just there to allow
@@ -128,21 +132,21 @@ public abstract class TileEntitySidedEnvironment extends BlockEntity implements 
                 // to continue working without interruption across loads. If the
                 // node is a power connector this is also required to restore the
                 // internal energy buffer of the node.
-                node.loadData(nbt.getCompound("oc:node" + index));
+                node.loadData(nbt.getCompound("oc:node" + index), provider);
             }
             ++index;
         }
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(@Nonnull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+        super.saveAdditional(nbt, provider);
         int index = 0;
         for (Node node : nodes) {
             // See load() regarding host check.
             if (node != null && node.host() == this) {
                 final CompoundTag nodeNbt = new CompoundTag();
-                node.saveData(nodeNbt);
+                node.saveData(nodeNbt, provider);
                 nbt.put("oc:node" + index, nodeNbt);
             }
             ++index;

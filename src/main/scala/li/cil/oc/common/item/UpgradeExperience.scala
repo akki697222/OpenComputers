@@ -8,8 +8,8 @@ import li.cil.oc.util.{UpgradeExperience => ExperienceUtil}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.common.extensions.IForgeItem
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component

@@ -1,30 +1,19 @@
 package li.cil.oc.common.capabilities
 
 import li.cil.oc.api.network.{Environment, SidedComponent, SidedEnvironment}
-import li.cil.oc.integration.Mods
 import net.minecraft.core.Direction
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraftforge.common.capabilities.{Capability, ICapabilityProvider}
-import net.minecraftforge.common.util.{LazyOptional, NonNullSupplier}
 
+// NeoForge 1.21.1: The old ICapabilityProvider/LazyOptional system has been removed.
+// SidedComponent capabilities are now registered via RegisterCapabilitiesEvent
+// in EventHandler using event.registerBlockEntity(...).
+// The SidedEnvironment adapter logic is inlined in the registration lambda.
 object CapabilitySidedComponent {
-  final val SidedComponent = ResourceLocation.fromNamespaceAndPath(Mods.IDs.OpenComputers, "sided_component")
 
-  class Provider(val tileEntity: BlockEntity with Environment with SidedComponent) extends ICapabilityProvider with NonNullSupplier[Provider] with SidedEnvironment {
-    private val wrapper = LazyOptional.of(this)
+  /** Adapter that exposes a block entity implementing Environment+SidedComponent as SidedEnvironment. */
+  class SidedEnvironmentAdapter(val env: Environment with SidedComponent) extends SidedEnvironment {
+    override def sidedNode(side: Direction): li.cil.oc.api.network.Node =
+      if (env.canConnectNode(side)) env.node else null
 
-    def get = this
-
-    def invalidate() = wrapper.invalidate
-
-    override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-      if (capability == Capabilities.SidedEnvironmentCapability) wrapper.cast[T]
-      else LazyOptional.empty[T]
-    }
-
-    override def sidedNode(side: Direction) = if (tileEntity.canConnectNode(side)) tileEntity.node else null
-
-    override def canConnect(side: Direction) = tileEntity.canConnectNode(side)
+    override def canConnect(side: Direction): Boolean = env.canConnectNode(side)
   }
 }

@@ -11,8 +11,8 @@ import li.cil.oc.server.network.Waypoints
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.Direction
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.BlockPos

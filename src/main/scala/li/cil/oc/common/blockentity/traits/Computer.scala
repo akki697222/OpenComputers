@@ -2,7 +2,6 @@ package li.cil.oc.common.blockentity.traits
 
 import java.lang
 import java.util
-
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.machine.Machine
@@ -16,14 +15,15 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.StringTag
-import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.minecraft.core.{Direction, HolderLookup}
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 import net.minecraft.nbt.Tag
 import net.minecraft.world.entity.player.Player
+
 import scala.jdk.CollectionConverters._
 
 trait Computer extends Environment with ComponentInventory with Rotatable with BundledRedstoneAware with api.network.Analyzable with api.machine.MachineHost with StateAware with Tickable {
@@ -145,8 +145,8 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
   private final val IsRunningTag = Settings.namespace + "isRunning"
   private final val UsersTag = Settings.namespace + "users"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     // God, this is so ugly... will need to rework the robot architecture.
     // This is required for loading auxiliary data (kernel state), because the
     // coordinates in the actual robot won't be set properly, otherwise.
@@ -154,7 +154,7 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
       case proxy: RobotProxy => proxy.robot.setLevel(getLevel)
       case _ =>
     }
-    machine.loadData(nbt.getCompound(ComputerTag))
+    machine.loadData(nbt.getCompound(ComputerTag), provider)
 
     // Kickstart initialization to avoid values getting overwritten by
     // loadForClient if that packet is handled after a manual
@@ -163,16 +163,16 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     _isOutputEnabled = hasRedstoneCard
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
     if (machine != null) {
-      nbt.setNewCompoundTag(ComputerTag, machine.saveData)
+      nbt.setNewCompoundTag(ComputerTag, (nbt: CompoundTag) => machine.saveData(nbt, provider))
     }
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     hasErrored = nbt.getBoolean(HasErroredTag)
     setRunning(nbt.getBoolean(IsRunningTag))
     _users.clear()
@@ -180,8 +180,9 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     if (_isRunning) runSound.foreach(sound => Sound.startLoop(this, sound, 0.5f, (1000 + getLevel.random.nextInt(2000)).toLong))
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
     nbt.putBoolean(HasErroredTag, machine != null && machine.lastError != null)
     nbt.putBoolean(IsRunningTag, isRunning)
     nbt.setNewTagList(UsersTag, machine.users.map(user => StringTag.valueOf(user)))

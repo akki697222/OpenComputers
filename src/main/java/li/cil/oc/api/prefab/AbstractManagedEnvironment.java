@@ -3,8 +3,10 @@ package li.cil.oc.api.prefab;
 import li.cil.oc.api.network.ManagedEnvironment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Simple base implementation of the {@link ManagedEnvironment} interface, so
@@ -47,14 +49,14 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
     }
 
     @Override
-    public void loadData(final CompoundTag nbt) {
+    public void loadData(final CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
         if (node() != null && nbt.contains(NODE_TAG, Tag.TAG_COMPOUND)) {
-            node().loadData(nbt.getCompound(NODE_TAG));
+            node().loadData(nbt.getCompound(NODE_TAG), provider);
         }
     }
 
     @Override
-    public void saveData(final CompoundTag nbt) {
+    public void saveData(final CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
         if (node() != null) {
             // Force joining a network when saving and we're not in one yet, so that
             // the address is embedded in the saved data that gets sent to the client,
@@ -64,13 +66,13 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
                 li.cil.oc.api.Network.joinNewNetwork(node());
 
                 final CompoundTag nodeTag = new CompoundTag();
-                node().saveData(nodeTag);
+                node().saveData(nodeTag, provider);
                 nbt.put(NODE_TAG, nodeTag);
 
                 node().remove();
             } else {
                 final CompoundTag nodeTag = new CompoundTag();
-                node().saveData(nodeTag);
+                node().saveData(nodeTag, provider);
                 nbt.put(NODE_TAG, nodeTag);
             }
         }

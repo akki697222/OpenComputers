@@ -1,15 +1,14 @@
 package li.cil.oc.client.renderer
 
-import java.util.concurrent.TimeUnit
-import com.google.common.cache.CacheBuilder
-import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
-import li.cil.oc.{OpenComputers, Settings}
+import com.mojang.blaze3d.vertex.PoseStack
+import li.cil.oc.Settings
 import li.cil.oc.client.renderer.font.TextBufferRenderData
 import li.cil.oc.util.RenderState
-import net.minecraft.client.renderer.{GameRenderer, MultiBufferSource}
-import net.minecraftforge.event.TickEvent.ClientTickEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraft.client.renderer.MultiBufferSource
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ClientTickEvent
+
+import java.util.concurrent.TimeUnit
 
 object TextBufferRenderCache {
   val renderer =

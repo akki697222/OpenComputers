@@ -5,14 +5,14 @@ import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.fluids.{FluidStack, FluidType, IFluidBlock}
-import net.minecraftforge.fluids.capability.IFluidHandler
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
-import net.minecraftforge.fluids.capability.IFluidHandlerItem
+import net.neoforged.fluids.{FluidStack, FluidType, IFluidBlock}
+import net.neoforged.fluids.capability.IFluidHandler
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.capability.IFluidHandlerItem
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.material.Fluid
 import net.minecraft.world.level.block.LiquidBlock
-import net.minecraftforge.common.capabilities.ForgeCapabilities
+import net.neoforged.neoforge.capabilities.Capabilities
 
 object FluidUtils {
   /**
@@ -23,9 +23,9 @@ object FluidUtils {
   def fluidHandlerAt(position: BlockPosition, side: Direction): Option[IFluidHandler] = position.world match {
     case Some(world) if world.blockExists(position) => world.getBlockEntity(position) match {
       case handler: IFluidHandler => Option(handler)
-      case t: BlockEntity if t.getCapability(ForgeCapabilities.FLUID_HANDLER, side).isPresent =>
-        t.getCapability(ForgeCapabilities.FLUID_HANDLER, side).orElse(null) match {
-          case handler: IFluidHandler => Option(handler)
+      case _: BlockEntity =>
+        Option(world.getCapability(Capabilities.FluidHandler.BLOCK, position.toBlockPos, side)) match {
+          case Some(handler) => Option(handler)
           case _ => Option(new GenericBlockWrapper(position))
         }
       case _ => Option(new GenericBlockWrapper(position))
@@ -34,7 +34,7 @@ object FluidUtils {
   }
 
   def fluidHandlerOf(stack: ItemStack): IFluidHandlerItem = Option(stack) match {
-    case Some(itemStack) => itemStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM, null).orElse(null)
+    case Some(itemStack) => itemStack.getCapability(Capabilities.FluidHandler.ITEM)
     case _ => null
   }
 

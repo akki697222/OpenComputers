@@ -13,12 +13,11 @@ import li.cil.oc.util.ExtendedAABB
 import li.cil.oc.util.ExtendedAABB._
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.nbt.CompoundTag 
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.Direction
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.sounds.SoundSource
-import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.VoxelShape
@@ -27,10 +26,10 @@ import net.minecraft.world.phys.Vec3
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.ScheduledTick
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.client.model.data.ModelData
-import net.minecraftforge.client.model.data.ModelProperty
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.client.model.data.ModelData
+import net.neoforged.client.model.data.ModelProperty
 
 import scala.collection.Iterable
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -134,35 +133,25 @@ class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => B
   // ----------------------------------------------------------------------- //
 
   private final val DataTag = Settings.namespace + "data"
-  @Deprecated
-  private final val DataTagCompat = "data"
   private final val StateTag = Settings.namespace + "state"
-  @Deprecated
-  private final val StateTagCompat = "state"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
-    if (nbt.contains(DataTagCompat))
-      data.loadData(nbt.getCompound(DataTagCompat))
-    else
-      data.loadData(nbt.getCompound(DataTag))
-    if (nbt.contains(StateTagCompat))
-      state = nbt.getBoolean(StateTagCompat)
-    else
-      state = nbt.getBoolean(StateTag)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
+    data.loadData(nbt.getCompound(DataTag), provider)
+    state = nbt.getBoolean(StateTag)
     updateShape()
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    nbt.setNewCompoundTag(DataTag, data.saveData)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    nbt.setNewCompoundTag(DataTag, (nbt: CompoundTag) => data.saveData(nbt, provider))
     nbt.putBoolean(StateTag, state)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt)
-    data.loadData(nbt.getCompound(DataTag))
+    data.loadData(nbt.getCompound(DataTag), provider)
     state = nbt.getBoolean(StateTag)
     updateShape()
     if (getLevel != null) {
@@ -171,9 +160,10 @@ class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => B
     }
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForClient(nbt)
-    nbt.setNewCompoundTag(DataTag, data.saveData)
+    nbt.setNewCompoundTag(DataTag, (nbt: CompoundTag) => data.saveData(nbt, provider))
     nbt.putBoolean(StateTag, state)
   }
 

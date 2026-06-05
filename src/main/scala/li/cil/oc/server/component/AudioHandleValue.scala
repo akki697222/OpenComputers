@@ -2,6 +2,7 @@ package li.cil.oc.server.component
 
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.prefab.AbstractValue
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 final class AudioHandleValue extends AbstractValue {
@@ -21,21 +22,21 @@ final class AudioHandleValue extends AbstractValue {
       if (node != null) {
         node.host() match {
           case ac: AudioCard => try ac.closeHandle(owner, handle) catch {
-            case _: Throwable => // すでに閉じられている場合は無視
+            case _: Throwable =>
           }
         }
       }
     }
   }
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     owner = nbt.getString("owner")
     handle = nbt.getInt("handle")
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putString("owner", owner)
     nbt.putInt("handle", handle)
   }

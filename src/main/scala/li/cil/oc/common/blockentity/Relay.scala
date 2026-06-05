@@ -12,7 +12,7 @@ import li.cil.oc.integration.Mods
 import li.cil.oc.integration.opencomputers.DriverLinkedCard
 import li.cil.oc.server.PacketSender
 import li.cil.oc.server.network.QuantumNetwork
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, ListTag, Tag}
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.{Inventory, Player}
@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 import scala.collection.mutable
 
@@ -283,7 +283,7 @@ class Relay(pos: BlockPos, state: BlockState)
   private final val IsRepeaterTag = Settings.namespace + "isRepeater"
   private final val ComponentNodesTag = Settings.namespace + "componentNodes"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt)
     for (slot <- items.indices) if (!items(slot).isEmpty) {
       updateLimits(slot, items(slot))
@@ -298,11 +298,11 @@ class Relay(pos: BlockPos, state: BlockState)
     val list = nbt.getList(ComponentNodesTag, Tag.TAG_COMPOUND)
     for (i <- 0 until math.min(list.size(), componentNodes.length)) {
       val tag = list.getCompound(i)
-      componentNodes(i).loadData(tag)
+      componentNodes(i).loadData(tag, provider)
     }
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForServer(nbt)
     nbt.putDouble(StrengthTag, strength)
     nbt.putBoolean(IsRepeaterTag, isRepeater)
@@ -310,7 +310,7 @@ class Relay(pos: BlockPos, state: BlockState)
     componentNodes.foreach {
       case node: Node =>
         val tag = new CompoundTag()
-        node.saveData(tag)
+        node.saveData(tag, provider)
         componentNodesList.add(tag)
       case _ => 
         componentNodesList.add(new CompoundTag())

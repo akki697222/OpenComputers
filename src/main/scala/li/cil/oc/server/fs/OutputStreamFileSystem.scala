@@ -2,9 +2,9 @@ package li.cil.oc.server.fs
 
 import java.io.FileNotFoundException
 import java.io.IOException
-
 import li.cil.oc.api
 import li.cil.oc.api.fs.Mode
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 
@@ -50,8 +50,8 @@ trait OutputStreamFileSystem extends InputStreamFileSystem {
   private final val HandleTag = "handle"
   private final val PathTag = "path"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
 
     val handlesNbt = nbt.getList(OutputTag, Tag.TAG_COMPOUND)
     (0 until handlesNbt.size).map(handlesNbt.getCompound).foreach(handleNbt => {
@@ -64,8 +64,8 @@ trait OutputStreamFileSystem extends InputStreamFileSystem {
     })
   }
 
-  override def saveData(nbt: CompoundTag): Unit = this.synchronized {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
+    super.saveData(nbt, provider)
 
     val handlesNbt = new ListTag()
     for (file <- handles.values) {

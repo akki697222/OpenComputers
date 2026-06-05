@@ -7,7 +7,7 @@ import li.cil.oc.api
 import mekanism.api.MekanismAPI
 import mekanism.api.chemical.gas.Gas
 import mekanism.api.chemical.gas.GasStack
-import net.minecraftforge.registries.ForgeRegistry
+import net.neoforged.registries.ForgeRegistry
 
 import scala.collection.convert.ImplicitConversionsToScala._
 

@@ -1,20 +1,14 @@
 package li.cil.oc.common.blockentity.traits
 
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
+import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.client.Sound
 import li.cil.oc.common.SaveHandler
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.SideTracker
-import net.minecraft.world.level.block.state.BlockState
+import li.cil.oc.util.{BlockPosition, SideTracker}
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.BlockPos
-import net.minecraft.world.level.Level
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.minecraft.network.Connection
-import net.minecraftforge.client.model.data.ModelProperty
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {
   private final val IsServerDataTag = Settings.namespace + "isServerData"
@@ -68,17 +62,18 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   // ----------------------------------------------------------------------- //
 
-  def loadForServer(nbt: CompoundTag): Unit = {}
+  def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
-  def saveForServer(nbt: CompoundTag): Unit = {
+  def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, true)
     super.saveAdditional(nbt)
   }
 
   @OnlyIn(Dist.CLIENT)
-  def loadForClient(nbt: CompoundTag): Unit = {}
+  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
-  def saveForClient(nbt: CompoundTag): Unit = {
+  @OnlyIn(Dist.CLIENT)
+  def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, false)
   }
 

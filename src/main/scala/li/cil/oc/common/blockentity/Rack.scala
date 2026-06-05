@@ -26,8 +26,8 @@ import li.cil.oc.util.RotationHelper
 import li.cil.oc.client.renderer.block.ServerRackModel
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.BlockPos
@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.{Container, MenuProvider}
 import net.minecraft.nbt.{CompoundTag, IntArrayTag, Tag}
 import net.minecraft.world.entity.player.{Inventory, Player}
-import net.minecraftforge.client.model.data.ModelData
+import net.neoforged.client.model.data.ModelData
 
 import scala.collection.immutable.ArraySeq
 

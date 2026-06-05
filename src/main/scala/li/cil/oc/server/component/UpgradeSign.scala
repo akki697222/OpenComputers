@@ -18,16 +18,16 @@ import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.util.FakePlayerFactory
-import net.minecraftforge.eventbus.api.Event
+import net.neoforged.common.MinecraftForge
+import net.neoforged.common.util.FakePlayerFactory
+import net.neoforged.eventbus.api.Event
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.entity.SignBlockEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.network.chat.Component
-import net.minecraftforge.event.level.BlockEvent
+import net.neoforged.event.level.BlockEvent
 
 abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
   private final lazy val deviceInfo = Map(

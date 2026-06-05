@@ -11,11 +11,11 @@ import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.nanomachines.ControllerImpl
 import net.minecraft.client.Minecraft
-import net.minecraftforge.event.entity.living.LivingEvent
-import net.minecraftforge.event.entity.player.PlayerEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent
+import net.neoforged.event.entity.living.LivingEvent
+import net.neoforged.event.entity.player.PlayerEvent
+import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.event.entity.player.PlayerEvent.PlayerLoggedOutEvent
+import net.neoforged.event.entity.player.PlayerEvent.PlayerRespawnEvent
 import net.minecraft.client.renderer.MultiBufferSource
 import com.mojang.blaze3d.vertex.Tesselator
 import net.minecraft.world.entity.player.Player
@@ -24,9 +24,9 @@ import net.minecraft.nbt.NbtIo
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.client.event.RenderGuiOverlayEvent
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.client.event.RenderGuiOverlayEvent
+import net.neoforged.client.gui.overlay.VanillaGuiOverlay
 
 object NanomachinesHandler {
   @OnlyIn(Dist.CLIENT)

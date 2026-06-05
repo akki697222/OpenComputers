@@ -1,31 +1,27 @@
 package li.cil.oc.data
 
-import java.util.function.Consumer
-
-import li.cil.oc.Constants
-import li.cil.oc.OpenComputers
+import li.cil.oc.{Constants, OpenComputers}
 import li.cil.oc.common.init.Items
-import net.minecraft.advancements.Advancement
-import net.minecraft.advancements.Criterion
-import net.minecraft.advancements.FrameType
-import net.minecraft.advancements.RequirementsStrategy
+import net.minecraft.advancements.{Advancement, AdvancementHolder, AdvancementRequirements, AdvancementType, CriteriaTriggers, Criterion}
 import net.minecraft.advancements.critereon.ImpossibleTrigger
 import net.minecraft.core.HolderLookup
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.ItemStack
 
+import java.util.function.Consumer
+
 object Advancements {
   private val ModId = OpenComputers.ID
 
   private case class Definition(
-      name: String,
-      id: String,
-      icon: String,
-      parent: Option[String],
-      crafting: Seq[String] = Seq.empty,
-      assembling: Seq[String] = Seq.empty
-  ) {
+                                 name: String,
+                                 id: String,
+                                 icon: String,
+                                 parent: Option[String],
+                                 crafting: Seq[String] = Seq.empty,
+                                 assembling: Seq[String] = Seq.empty
+                               ) {
     val location: ResourceLocation = ResourceLocation.fromNamespaceAndPath(ModId, id)
   }
 
@@ -79,8 +75,8 @@ object Advancements {
     byRegisteredName(stack, Assembling).orNull
   }
 
-  def generate(registries: HolderLookup.Provider, writer: Consumer[Advancement]): Unit = {
-    val generated = scala.collection.mutable.Map.empty[String, Advancement]
+  def generate(registries: HolderLookup.Provider, writer: Consumer[AdvancementHolder]): Unit = {
+    val generated = scala.collection.mutable.Map.empty[String, AdvancementHolder]
 
     for (definition <- Definitions) {
       Option(Items.get(definition.icon)).foreach { iconInfo =>
@@ -89,15 +85,15 @@ object Advancements {
         definition.parent.flatMap(generated.get).foreach(builder.parent)
 
         val background =
-          if (definition.parent.isEmpty) ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png")
-          else null
+          if (definition.parent.isEmpty) Option(ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/stone.png"))
+          else None
 
         builder.display(
           iconInfo.createItemStack(1),
           Component.translatable("achievement.oc." + definition.name),
           Component.translatable("achievement.oc." + definition.name + ".desc"),
-          background,
-          FrameType.TASK,
+          background.orNull,
+          AdvancementType.TASK,
           true,
           true,
           false
@@ -105,16 +101,22 @@ object Advancements {
 
         addManualCriteria(builder, "crafting", definition.crafting)
         addManualCriteria(builder, "assembling", definition.assembling)
-        builder.requirements(RequirementsStrategy.OR)
 
-        generated += definition.name -> builder.save(writer, definition.location.toString)
+        builder.requirements(AdvancementRequirements.Strategy.OR)
+
+        val holder = builder.build(definition.location)
+        writer.accept(holder)
+        generated += definition.name -> holder
       }
     }
   }
 
   private def addManualCriteria(builder: Advancement.Builder, prefix: String, items: Seq[String]): Unit = {
     for (index <- items.indices) {
-      builder.addCriterion(prefix + "_" + index, new Criterion(new ImpossibleTrigger.TriggerInstance()))
+      builder.addCriterion(
+        prefix + "_" + index,
+        new Criterion(CriteriaTriggers.IMPOSSIBLE, new ImpossibleTrigger.TriggerInstance())
+      )
     }
   }
 

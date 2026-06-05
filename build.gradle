@@ -1,23 +1,10 @@
-buildscript {
-    repositories {
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
-    id 'eclipse'
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
     id 'scala'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
-
-apply plugin: 'org.spongepowered.mixin'
 
 group = mod_group_id
 version = mod_version
@@ -26,56 +13,57 @@ base {
     archivesName = mod_id
 }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
+neoForge  {
+    version = project.neoforge_version
 
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    parchment {
+        mappingsVersion = project.mapping_version
+        minecraftVersion = project.minecraft_version
+    }
+
+    accessTransformers {
+        file('src/main/resources/META-INF/accesstransformer.cfg')
+    }
 
     runs {
         configureEach {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
         }
 
         client {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            client()
+
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
+            server()
+
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArgument '--nogui'
         }
 
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            type = "gameTestServer"
+
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
         data {
-            workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/data/resources/'), '--existing', file('src/main/resources/')
+            data()
+
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/data/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
-}
 
-// currently, mixin is unused
-mixin {
-    //add sourceSets.main, "${mod_id}.refmap.json"
-    //config "${mod_id}.mixins.json"
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
 }
 
 sourceSets.main.scala { srcDir 'src/data/scala' }
@@ -163,53 +151,42 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
     compileOnly(group: 'org.scala-lang', name: 'scala-library', version: "2.13.12")
     compileOnly(group: 'org.typelevel', name: "cats-core_2.13", version: '2.8.1-kotori')
     runtimeOnly(group: "com.kotori316", name: "ScalableCatsForce".toLowerCase(), version: "3.3.1-build-0", classifier: "with-library") {
         transitive(false)
     }
 
-    //https://docs.minecraftforge.net/en/fg-6.x/dependencies/#non-minecraft-dependencies
-    minecraftLibrary "com.typesafe:config:1.4.5"
-    minecraftLibrary ":OC-LuaJ-20220907.1"
-    //minecraftLibrary ":OC-JNLua-20230530.0"
-    minecraftLibrary ":OC-JNLua-Natives-20220928.1"
-    embedded "com.typesafe:config:1.4.5"
-    embedded ":OC-LuaJ-20220907.1"
-    //embedded ":OC-JNLua-20230530.0"
-    embedded ":OC-JNLua-Natives-20220928.1"
+    jarJar(implementation("com.typesafe:config:1.4.5"))
+    jarJar(implementation(":OC-LuaJ-20220907.1"))
+    jarJar(implementation(":OC-JNLua-Natives-20220928.1"))
 
     def jeiSlug = "jei-${minecraft_version}"
 
-    compileOnly fg.deobf("curse.maven:tis-3d-238603:${tis3d_version}")
-    compileOnly fg.deobf("curse.maven:jade-324717:${jade_version}")
-    compileOnly fg.deobf("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cct_version}")
-    compileOnly fg.deobf("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cct_version}")
-    compileOnly fg.deobf("cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cct_version}")
-    runtimeOnly fg.deobf("cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cct_version}")
-    runtimeOnly fg.deobf("maven.modrinth:modernfix:${modernfix_version}")
+    compileOnly("curse.maven:jade-324717:${jade_version}")
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cct_version}")
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cct_version}")
+    compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cct_version}")
+    runtimeOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cct_version}")
+    runtimeOnly("maven.modrinth:modernfix:${modernfix_version}")
     
     // CoFH Core & Thermal
-    compileOnly fg.deobf("curse.maven:cofh-core-69162:4801048")
-    compileOnly fg.deobf("curse.maven:thermal-foundation-222880:4788649")
+    compileOnly("curse.maven:cofh-core-69162:4801048")
+    compileOnly("curse.maven:thermal-foundation-222880:4788649")
 
-    compileOnly fg.deobf("appeng:appliedenergistics2-forge:${ae2_version}:api")
-    compileOnly fg.deobf("mekanism:Mekanism:${mekanism_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:${jeiSlug}-forge:${jei_version}")
-    compileOnly fg.deobf("mezz.jei:${jeiSlug}-forge-api:${jei_version}")
-    compileOnly fg.deobf("curse.maven:cb-multipart-258426:5292585")
-    compileOnly fg.deobf("curse.maven:codechicken-lib-1-8-242818:5753868")
-    compileOnly fg.deobf("curse.maven:ender-storage-1-8-245174:5292573")
-    compileOnly fg.deobf("mrtjp:ProjectRed:${projred_version}:core")
+    compileOnly("org.appliedenergistics:appliedenergistics2:${ae2_version}:api")
+    compileOnly("mekanism:Mekanism:${mekanism_version}:api")
+    runtimeOnly("mezz.jei:${jeiSlug}-forge:${jei_version}")
+    compileOnly("mezz.jei:${jeiSlug}-forge-api:${jei_version}")
+    compileOnly("curse.maven:cb-multipart-258426:5292585")
+    compileOnly("curse.maven:codechicken-lib-1-8-242818:5753868")
+    compileOnly("curse.maven:ender-storage-1-8-245174:5292573")
+    compileOnly("mrtjp:ProjectRed:${projred_version}:core")
 
-    testImplementation "org.scala-lang:scala-library:2.13.12"
-    testImplementation "org.scalatest:scalatest_3:3.2.18"
-    testImplementation "org.scalatestplus:junit-4-13_3:3.2.18.0"
-    testImplementation "junit:junit:4.13.2"
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    testImplementation("org.scala-lang:scala-library:2.13.12")
+    testImplementation("org.scalatest:scalatest_3:3.2.18")
+    testImplementation("org.scalatestplus:junit-4-13_3:3.2.18.0")
+    testImplementation("junit:junit:4.13.2")
 }
 
 tasks.register('updateBuildNumber') {
@@ -237,18 +214,32 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
 }
 
-tasks.named('processResources', ProcessResources).configure {
-    var replaceProperties = [minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
-                             forge_version       : forge_version, forge_version_range: forge_version_range,
-                             loader_version_range: loader_version_range,
-                             mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-                             mod_authors         : mod_authors, mod_description: mod_description,]
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neoforge_version       : neoforge_version,
+            neoforge_version_range : neoforge_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
 
     inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/data/sources/modMetadata"
+}
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
-    }
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.named("createMinecraftArtifacts").configure {
+    dependsOn(generateModMetadata)
 }
 
 tasks.named('jar', Jar).configure {
@@ -279,4 +270,11 @@ tasks.withType(JavaCompile).configureEach {
 tasks.withType(ScalaCompile).configureEach {
     scalaCompileOptions.forkOptions.memoryMaximumSize = '2g'
     scalaCompileOptions.forkOptions.jvmArgs = ['-Xss4m']
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

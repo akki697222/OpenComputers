@@ -12,8 +12,8 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer, BlockEntityRendererProvider}
 import net.minecraft.client.renderer.{GameRenderer, MultiBufferSource}
 import net.minecraft.core.Direction
-import net.minecraftforge.event.TickEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ClientTickEvent
 import org.joml.Quaternionf
 
 import java.util.concurrent.TimeUnit
@@ -32,7 +32,7 @@ object HologramRenderer extends BlockEntityRendererProvider[Hologram] {
     .build[Hologram, VertexBuffer]()
 
   @SubscribeEvent
-  def onClientTick(e: TickEvent.ClientTickEvent): Unit = cache.cleanUp()
+  def onClientTick(e: ClientTickEvent): Unit = cache.cleanUp()
 }
 
 class HologramRenderer extends BlockEntityRenderer[Hologram] {
@@ -184,8 +184,8 @@ class HologramRenderer extends BlockEntityRenderer[Hologram] {
   }
 
   private def rebuildVBO(hologram: Hologram, vbo: VertexBuffer): Unit = {
-    val builder = new BufferBuilder(1 << 20)
-    builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
+    val byteBuffer = new ByteBufferBuilder(1 << 20)
+    val builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
 
     def value(x: Int, y: Int, z: Int): Int =
       if (x >= 0 && y >= 0 && z >= 0 && x < hologram.width && y < hologram.height && z < hologram.width)
@@ -197,7 +197,7 @@ class HologramRenderer extends BlockEntityRenderer[Hologram] {
     // colorsByTier uses 0xBBGGRR packing (chosen for 1.12.2's little-endian glColorPointer).
     // Extract in the correct order: R = bits 0-7, G = bits 8-15, B = bits 16-23.
     def vertex(x: Float, y: Float, z: Float, r: Int, g: Int, b: Int): Unit =
-      builder.vertex(x, y, z).color(r, g, b, 255).endVertex()
+      builder.addVertex(x, y, z).setColor(r, g, b, 255)
 
     hologram.visibleQuads = 0
 
@@ -252,7 +252,7 @@ class HologramRenderer extends BlockEntityRenderer[Hologram] {
 
     vbo.bind()
     try {
-      vbo.upload(builder.end())
+      vbo.upload(builder.buildOrThrow())
     }
     finally {
       VertexBuffer.unbind()

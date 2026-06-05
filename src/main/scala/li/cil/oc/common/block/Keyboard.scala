@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}
 import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelectionContext, Shapes => VoxelShapes}
 import net.minecraft.world.ticks.ScheduledTick
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 import java.util.Random
 

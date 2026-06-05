@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToJava._
 

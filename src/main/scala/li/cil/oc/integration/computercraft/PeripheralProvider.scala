@@ -1,26 +1,28 @@
 package li.cil.oc.integration.computercraft
 
 import dan200.computercraft.api.peripheral.IPeripheral
-import li.cil.oc.common.blockentity.Relay
+import li.cil.oc.OpenComputers
+import li.cil.oc.common.blockentity.{Relay, TileEntityTypes}
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.common.capabilities.{Capability, CapabilityManager, CapabilityToken}
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.event.AttachCapabilitiesEvent
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import li.cil.oc.OpenComputers
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.capabilities.{BlockCapability, RegisterCapabilitiesEvent}
+import net.neoforged.neoforge.common.NeoForge
 
 object PeripheralProvider {
-  val CAPABILITY_PERIPHERAL: Capability[IPeripheral] =
-    CapabilityManager.get(new CapabilityToken[IPeripheral]() {})
-
-  private val PERIPHERAL_KEY = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "peripheral")
+  // NeoForge 1.21.1: BlockCapability replaces the old CapabilityManager/CapabilityToken pattern
+  val CAPABILITY_PERIPHERAL: BlockCapability[IPeripheral, Direction] =
+    BlockCapability.createSided(
+      ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "peripheral"),
+      classOf[IPeripheral]
+    )
 
   def register(): Unit = {
     if (!isComputerCraftPresent()) return
-    MinecraftForge.EVENT_BUS.register(this)
+    // The RegisterCapabilitiesEvent listener must be on the MOD event bus, not FORGE bus.
+    // This is called from the mod's mod-bus setup; if using a separate mod-bus object,
+    // register via the mod event bus directly.
+    NeoForge.EVENT_BUS.register(this)
   }
 
   private def isComputerCraftPresent(): Boolean = {
@@ -33,21 +35,14 @@ object PeripheralProvider {
     }
   }
 
+  // NeoForge 1.21.1: RegisterCapabilitiesEvent replaces AttachCapabilitiesEvent.
+  // This must be registered on the MOD event bus, not the FORGE event bus.
   @SubscribeEvent
-  def attachCapabilities(event: AttachCapabilitiesEvent[BlockEntity]): Unit = {
-    event.getObject match {
-      case relay: Relay =>
-        val peripheral = new RelayPeripheral(relay)
-        val lazyOptional = LazyOptional.of(() => peripheral)
-
-        event.addCapability(PERIPHERAL_KEY, new net.minecraftforge.common.capabilities.ICapabilityProvider {
-          override def getCapability[T](cap: Capability[T], side: Direction): LazyOptional[T] =
-            if (cap == CAPABILITY_PERIPHERAL) lazyOptional.cast()
-            else LazyOptional.empty()
-        })
-
-        event.addListener(() => lazyOptional.invalidate())
-      case _ =>
-    }
+  def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
+    event.registerBlockEntity(
+      CAPABILITY_PERIPHERAL,
+      TileEntityTypes.RELAY.get(),
+      (relay: Relay, _: Direction) => new RelayPeripheral(relay)
+    )
   }
 }

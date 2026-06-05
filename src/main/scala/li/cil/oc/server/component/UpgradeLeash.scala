@@ -2,7 +2,6 @@ package li.cil.oc.server.component
 
 import java.util
 import java.util.UUID
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -20,6 +19,7 @@ import li.cil.oc.common.EventHandler
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.Mob
 import net.minecraft.nbt.CompoundTag
@@ -92,8 +92,8 @@ class UpgradeLeash(val host: Entity) extends AbstractManagedEnvironment with tra
 
   private final val LeashedEntitiesTag = "leashedEntities"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     leashedEntities ++= nbt.getList(LeashedEntitiesTag, Tag.TAG_STRING).
       map((s: StringTag) => UUID.fromString(s.getAsString))
     // Re-acquire leashed entities. Need to do this manually because leashed
@@ -114,8 +114,8 @@ class UpgradeLeash(val host: Entity) extends AbstractManagedEnvironment with tra
     })
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.setNewTagList(LeashedEntitiesTag, leashedEntities.map(_.toString))
   }
 }

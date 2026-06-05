@@ -9,8 +9,8 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.util.FakePlayer
+import net.neoforged.common.extensions.IForgeItem
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 

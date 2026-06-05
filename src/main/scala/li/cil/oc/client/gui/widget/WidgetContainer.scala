@@ -1,11 +1,9 @@
 package li.cil.oc.client.gui.widget
 
-import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.gui.GuiGraphics
 
 import scala.collection.mutable
 
-@Deprecated
 trait WidgetContainer {
   protected val widgets = mutable.ArrayBuffer.empty[Widget]
 

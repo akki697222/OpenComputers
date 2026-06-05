@@ -13,7 +13,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.Block
 import net.minecraft.tags.BlockTags
-import net.minecraftforge.common.Tags
+import net.neoforged.common.Tags
 
 object ExtendedLevel {
 

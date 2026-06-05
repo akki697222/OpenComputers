@@ -5,10 +5,10 @@ import net.minecraft.core.BlockPos
 import li.cil.oc.OpenComputers
 import li.cil.oc.api.network.Node
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.event.entity.player.PlayerEvent
-import net.minecraftforge.event.level.BlockEvent
-import net.minecraftforge.eventbus.api.{EventPriority, SubscribeEvent}
+import net.neoforged.common.MinecraftForge
+import net.neoforged.event.entity.player.PlayerEvent
+import net.neoforged.event.level.BlockEvent
+import net.neoforged.eventbus.api.{EventPriority, SubscribeEvent}
 
 import scala.collection.convert.ImplicitConversionsToScala._
 

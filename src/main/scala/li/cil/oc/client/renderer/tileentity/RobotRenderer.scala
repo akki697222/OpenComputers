@@ -24,9 +24,7 @@ import net.minecraft.core.{Direction, Vec3i}
 import net.minecraft.world.phys.Vec3
 import net.minecraft.ChatFormatting
 import net.minecraft.client.gui.Font
-import net.minecraftforge.client.ForgeHooksClient
-import net.minecraftforge.common.MinecraftForge
-import org.joml.Matrix3f
+import net.neoforged.neoforge.common.NeoForge
 
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
@@ -71,19 +69,18 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
   private val gt   = 0.5f + gap
   private val gb   = 0.5f - gap
 
-  // 1.18.2: IVertexBuilder → VertexConsumer
   private implicit def extendWorldRenderer(self: VertexConsumer): ExtendedWorldRenderer =
     new ExtendedWorldRenderer(self)
 
   private class ExtendedWorldRenderer(val buffer: VertexConsumer) {
-    // 1.18.2: Vector3d → Vec3（net.minecraft.world.phys.Vec3）
-    def normal(matrix: Matrix3f, normal: Vec3): VertexConsumer = {
-      val normalized = normal.normalize()
-      buffer.normal(matrix, normalized.x.toFloat, normalized.y.toFloat, normalized.z.toFloat)
+    def normal(pose: PoseStack.Pose, normal: Vec3): VertexConsumer = {
+      val n = normal.normalize()
+      buffer.setNormal(pose, n.x.toFloat, n.y.toFloat, n.z.toFloat)
     }
+    def normal(pose: PoseStack.Pose, x: Float, y: Float, z: Float): VertexConsumer =
+      buffer.setNormal(pose, x, y, z)
   }
 
-  // 1.18.2: IRenderTypeBuffer → MultiBufferSource
   private def drawTop(
                        stack: PoseStack,
                        buffer: MultiBufferSource,
@@ -92,30 +89,29 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
                      ): Unit = {
     val r = buffer.getBuffer(RenderTypes.ROBOT_CHASSIS)
 
-    // 1.18.2: new Vector3d(...) → new Vec3(...)
-    r.vertex(stack.last.pose, 0.5f, 1, 0.5f)   .color(red, green, blue, 0xFF).uv(0.25f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, l, gt, h)          .color(red, green, blue, 0xFF).uv(0, 0.5f)    .uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gt, h)          .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 1, 0.5f)    .setColor(red, green, blue, 0xFF).setUv(0.25f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), l, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0, 0.5f)    .setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), h, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
 
-    r.vertex(stack.last.pose, 0.5f, 1, 0.5f)   .color(red, green, blue, 0xFF).uv(0.25f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gt, h)          .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gt, l)          .color(red, green, blue, 0xFF).uv(0.5f, 0)    .uv2(light).normal(stack.last.normal, new Vec3(1, 0.2, 0)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 1, 0.5f)    .setColor(red, green, blue, 0xFF).setUv(0.25f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), h, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), h, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0)    .setLight(light).normal(stack.last(), new Vec3(1, 0.2, 0))
 
-    r.vertex(stack.last.pose, 0.5f, 1, 0.5f)   .color(red, green, blue, 0xFF).uv(0.25f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gt, l)          .color(red, green, blue, 0xFF).uv(0.5f, 0)    .uv2(light).normal(stack.last.normal, new Vec3(1, 0.2, 0)).endVertex()
-    r.vertex(stack.last.pose, l, gt, l)          .color(red, green, blue, 0xFF).uv(0, 0)       .uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, -1)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 1, 0.5f)    .setColor(red, green, blue, 0xFF).setUv(0.25f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), h, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0)    .setLight(light).normal(stack.last(), new Vec3(1, 0.2, 0))
+    r.addVertex(stack.last.pose(), l, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0, 0)       .setLight(light).normal(stack.last(), new Vec3(0, 0.2, -1))
 
-    r.vertex(stack.last.pose, 0.5f, 1, 0.5f)   .color(red, green, blue, 0xFF).uv(0.25f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, l, gt, l)          .color(red, green, blue, 0xFF).uv(0, 0)       .uv2(light).normal(stack.last.normal, new Vec3(0, 0.2, -1)).endVertex()
-    r.vertex(stack.last.pose, l, gt, h)          .color(red, green, blue, 0xFF).uv(0, 0.5f)    .uv2(light).normal(stack.last.normal, new Vec3(-1, 0.2, 0)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 1, 0.5f)    .setColor(red, green, blue, 0xFF).setUv(0.25f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, 0.2, 1))
+    r.addVertex(stack.last.pose(), l, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0, 0)       .setLight(light).normal(stack.last(), new Vec3(0, 0.2, -1))
+    r.addVertex(stack.last.pose(), l, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0, 0.5f)    .setLight(light).normal(stack.last(), new Vec3(-1, 0.2, 0))
 
-    r.vertex(stack.last.pose, l, gt, h)          .color(red, green, blue, 0xFF).uv(0, 1)       .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
-    r.vertex(stack.last.pose, l, gt, l)          .color(red, green, blue, 0xFF).uv(0, 0.5f)    .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gt, l)          .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
+    r.addVertex(stack.last.pose(), l, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0, 1)       .setLight(light).normal(stack.last(), 0, -1, 0)
+    r.addVertex(stack.last.pose(), l, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0, 0.5f)    .setLight(light).normal(stack.last(), 0, -1, 0)
+    r.addVertex(stack.last.pose(), h, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), 0, -1, 0)
 
-    r.vertex(stack.last.pose, l, gt, h)          .color(red, green, blue, 0xFF).uv(0, 1)       .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gt, l)          .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gt, h)          .color(red, green, blue, 0xFF).uv(0.5f, 1)    .uv2(light).normal(stack.last.normal, 0, -1, 0).endVertex()
+    r.addVertex(stack.last.pose(), l, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0, 1)       .setLight(light).normal(stack.last(), 0, -1, 0)
+    r.addVertex(stack.last.pose(), h, gt, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), 0, -1, 0)
+    r.addVertex(stack.last.pose(), h, gt, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 1)    .setLight(light).normal(stack.last(), 0, -1, 0)
   }
 
   private def drawBottom(
@@ -126,66 +122,53 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
                         ): Unit = {
     val r = buffer.getBuffer(RenderTypes.ROBOT_CHASSIS)
 
-    r.vertex(stack.last.pose, 0.5f, 0.03f, 0.5f).color(red, green, blue, 0xFF).uv(0.75f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, l, gb, l)           .color(red, green, blue, 0xFF).uv(0.5f, 0)    .uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gb, l)           .color(red, green, blue, 0xFF).uv(1, 0)       .uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 0.03f, 0.5f).setColor(red, green, blue, 0xFF).setUv(0.75f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), l, gb, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0)    .setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), h, gb, l)           .setColor(red, green, blue, 0xFF).setUv(1, 0)       .setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
 
-    r.vertex(stack.last.pose, 0.5f, 0.03f, 0.5f).color(red, green, blue, 0xFF).uv(0.75f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gb, l)           .color(red, green, blue, 0xFF).uv(1, 0)       .uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gb, h)           .color(red, green, blue, 0xFF).uv(1, 0.5f)    .uv2(light).normal(stack.last.normal, new Vec3(1, -0.2, 0)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 0.03f, 0.5f).setColor(red, green, blue, 0xFF).setUv(0.75f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), h, gb, l)           .setColor(red, green, blue, 0xFF).setUv(1, 0)       .setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), h, gb, h)           .setColor(red, green, blue, 0xFF).setUv(1, 0.5f)    .setLight(light).normal(stack.last(), new Vec3(1, -0.2, 0))
 
-    r.vertex(stack.last.pose, 0.5f, 0.03f, 0.5f).color(red, green, blue, 0xFF).uv(0.75f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, h, gb, h)           .color(red, green, blue, 0xFF).uv(1, 0.5f)    .uv2(light).normal(stack.last.normal, new Vec3(1, -0.2, 0)).endVertex()
-    r.vertex(stack.last.pose, l, gb, h)           .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, -1)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 0.03f, 0.5f).setColor(red, green, blue, 0xFF).setUv(0.75f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), h, gb, h)           .setColor(red, green, blue, 0xFF).setUv(1, 0.5f)    .setLight(light).normal(stack.last(), new Vec3(1, -0.2, 0))
+    r.addVertex(stack.last.pose(), l, gb, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), new Vec3(0, -0.2, -1))
 
-    r.vertex(stack.last.pose, 0.5f, 0.03f, 0.5f).color(red, green, blue, 0xFF).uv(0.75f, 0.25f).uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, 1)).endVertex()
-    r.vertex(stack.last.pose, l, gb, h)           .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, new Vec3(0, -0.2, -1)).endVertex()
-    r.vertex(stack.last.pose, l, gb, l)           .color(red, green, blue, 0xFF).uv(0.5f, 0)    .uv2(light).normal(stack.last.normal, new Vec3(-1, -0.2, 0)).endVertex()
+    r.addVertex(stack.last.pose(), 0.5f, 0.03f, 0.5f).setColor(red, green, blue, 0xFF).setUv(0.75f, 0.25f).setLight(light).normal(stack.last(), new Vec3(0, -0.2, 1))
+    r.addVertex(stack.last.pose(), l, gb, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), new Vec3(0, -0.2, -1))
+    r.addVertex(stack.last.pose(), l, gb, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0)    .setLight(light).normal(stack.last(), new Vec3(-1, -0.2, 0))
 
-    r.vertex(stack.last.pose, l, gb, l)           .color(red, green, blue, 0xFF).uv(0, 0.5f)    .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
-    r.vertex(stack.last.pose, l, gb, h)           .color(red, green, blue, 0xFF).uv(0, 1)       .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gb, h)           .color(red, green, blue, 0xFF).uv(0.5f, 1)    .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
+    r.addVertex(stack.last.pose(), l, gb, l)           .setColor(red, green, blue, 0xFF).setUv(0, 0.5f)    .setLight(light).normal(stack.last(), 0, 1, 0)
+    r.addVertex(stack.last.pose(), l, gb, h)           .setColor(red, green, blue, 0xFF).setUv(0, 1)       .setLight(light).normal(stack.last(), 0, 1, 0)
+    r.addVertex(stack.last.pose(), h, gb, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 1)    .setLight(light).normal(stack.last(), 0, 1, 0)
 
-    r.vertex(stack.last.pose, l, gb, l)           .color(red, green, blue, 0xFF).uv(0, 0.5f)    .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gb, h)           .color(red, green, blue, 0xFF).uv(0.5f, 1)    .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
-    r.vertex(stack.last.pose, h, gb, l)           .color(red, green, blue, 0xFF).uv(0.5f, 0.5f) .uv2(light).normal(stack.last.normal, 0, 1, 0).endVertex()
+    r.addVertex(stack.last.pose(), l, gb, l)           .setColor(red, green, blue, 0xFF).setUv(0, 0.5f)    .setLight(light).normal(stack.last(), 0, 1, 0)
+    r.addVertex(stack.last.pose(), h, gb, h)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 1)    .setLight(light).normal(stack.last(), 0, 1, 0)
+    r.addVertex(stack.last.pose(), h, gb, l)           .setColor(red, green, blue, 0xFF).setUv(0.5f, 0.5f) .setLight(light).normal(stack.last(), 0, 1, 0)
   }
 
   def resetMountPoints(running: Boolean): Unit = {
     val offset = if (running) 0 else -0.06f
 
-    // Left top.
     mountPoints(0).offset.set(0, 0.2f, 0.24f)
     mountPoints(0).rotation.set(0, 1, 0, 90)
-
-    // Right top.
     mountPoints(1).offset.set(0, 0.2f, 0.24f)
     mountPoints(1).rotation.set(0, 1, 0, -90)
-
-    // Back top.
     mountPoints(2).offset.set(0, 0.2f, 0.24f)
     mountPoints(2).rotation.set(0, 1, 0, 180)
-
-    // Left bottom.
     mountPoints(3).offset.set(0, -0.2f - offset, 0.24f)
     mountPoints(3).rotation.set(0, 1, 0, 90)
-
-    // Right bottom.
     mountPoints(4).offset.set(0, -0.2f - offset, 0.24f)
     mountPoints(4).rotation.set(0, 1, 0, -90)
-
-    // Back bottom.
     mountPoints(5).offset.set(0, -0.2f - offset, 0.24f)
     mountPoints(5).rotation.set(0, 1, 0, 180)
-
-    // Front bottom.
     mountPoints(6).offset.set(0, -0.2f - offset, 0.24f)
     mountPoints(6).rotation.set(0, 1, 0, 0)
   }
 
   def renderChassis(
                      stack: PoseStack,
-                     buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
+                     buffer: MultiBufferSource,
                      light: Int,
                      robot: blockentity.Robot = null,
                      offset: Double = 0,
@@ -208,7 +191,7 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
 
     resetMountPoints(robot != null && robot.isRunning)
     val event = new RobotRenderEvent(robot, mountPoints)
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     if (!event.isCanceled) {
       val color        = event.getColorMultiplier
       val (cr, cg, cb) = ((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF)
@@ -226,25 +209,25 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
         val blue  = (lightColor >>> 0)  & 0xFF
 
         val r = buffer.getBuffer(RenderTypes.ROBOT_LIGHT)
-        r.vertex(stack.last.pose, l, gt, l).color(red, green, blue, 0xFF).uv(u0, v0).endVertex()
-        r.vertex(stack.last.pose, l, gb, l).color(red, green, blue, 0xFF).uv(u0, v1).endVertex()
-        r.vertex(stack.last.pose, l, gb, h).color(red, green, blue, 0xFF).uv(u1, v1).endVertex()
-        r.vertex(stack.last.pose, l, gt, h).color(red, green, blue, 0xFF).uv(u1, v0).endVertex()
+        r.addVertex(stack.last.pose(), l, gt, l).setColor(red, green, blue, 0xFF).setUv(u0, v0)
+        r.addVertex(stack.last.pose(), l, gb, l).setColor(red, green, blue, 0xFF).setUv(u0, v1)
+        r.addVertex(stack.last.pose(), l, gb, h).setColor(red, green, blue, 0xFF).setUv(u1, v1)
+        r.addVertex(stack.last.pose(), l, gt, h).setColor(red, green, blue, 0xFF).setUv(u1, v0)
 
-        r.vertex(stack.last.pose, l, gt, h).color(red, green, blue, 0xFF).uv(u0, v0).endVertex()
-        r.vertex(stack.last.pose, l, gb, h).color(red, green, blue, 0xFF).uv(u0, v1).endVertex()
-        r.vertex(stack.last.pose, h, gb, h).color(red, green, blue, 0xFF).uv(u1, v1).endVertex()
-        r.vertex(stack.last.pose, h, gt, h).color(red, green, blue, 0xFF).uv(u1, v0).endVertex()
+        r.addVertex(stack.last.pose(), l, gt, h).setColor(red, green, blue, 0xFF).setUv(u0, v0)
+        r.addVertex(stack.last.pose(), l, gb, h).setColor(red, green, blue, 0xFF).setUv(u0, v1)
+        r.addVertex(stack.last.pose(), h, gb, h).setColor(red, green, blue, 0xFF).setUv(u1, v1)
+        r.addVertex(stack.last.pose(), h, gt, h).setColor(red, green, blue, 0xFF).setUv(u1, v0)
 
-        r.vertex(stack.last.pose, h, gt, h).color(red, green, blue, 0xFF).uv(u0, v0).endVertex()
-        r.vertex(stack.last.pose, h, gb, h).color(red, green, blue, 0xFF).uv(u0, v1).endVertex()
-        r.vertex(stack.last.pose, h, gb, l).color(red, green, blue, 0xFF).uv(u1, v1).endVertex()
-        r.vertex(stack.last.pose, h, gt, l).color(red, green, blue, 0xFF).uv(u1, v0).endVertex()
+        r.addVertex(stack.last.pose(), h, gt, h).setColor(red, green, blue, 0xFF).setUv(u0, v0)
+        r.addVertex(stack.last.pose(), h, gb, h).setColor(red, green, blue, 0xFF).setUv(u0, v1)
+        r.addVertex(stack.last.pose(), h, gb, l).setColor(red, green, blue, 0xFF).setUv(u1, v1)
+        r.addVertex(stack.last.pose(), h, gt, l).setColor(red, green, blue, 0xFF).setUv(u1, v0)
 
-        r.vertex(stack.last.pose, h, gt, l).color(red, green, blue, 0xFF).uv(u0, v0).endVertex()
-        r.vertex(stack.last.pose, h, gb, l).color(red, green, blue, 0xFF).uv(u0, v1).endVertex()
-        r.vertex(stack.last.pose, l, gb, l).color(red, green, blue, 0xFF).uv(u1, v1).endVertex()
-        r.vertex(stack.last.pose, l, gt, l).color(red, green, blue, 0xFF).uv(u1, v0).endVertex()
+        r.addVertex(stack.last.pose(), h, gt, l).setColor(red, green, blue, 0xFF).setUv(u0, v0)
+        r.addVertex(stack.last.pose(), h, gb, l).setColor(red, green, blue, 0xFF).setUv(u0, v1)
+        r.addVertex(stack.last.pose(), l, gb, l).setColor(red, green, blue, 0xFF).setUv(u1, v1)
+        r.addVertex(stack.last.pose(), l, gt, l).setColor(red, green, blue, 0xFF).setUv(u1, v0)
       }
     }
   }
@@ -252,8 +235,8 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
   override def render(
                        proxy: blockentity.RobotProxy,
                        f: Float,
-                       matrix: PoseStack, // 1.18.2: MatrixStack → PoseStack
-                       buffer: MultiBufferSource, // 1.18.2: IRenderTypeBuffer → MultiBufferSource
+                       matrix: PoseStack,
+                       buffer: MultiBufferSource,
                        light: Int,
                        overlay: Int
                      ): Unit = {
@@ -293,7 +276,7 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
       case Direction.WEST  => matrix.mulPose(Axis.YP.rotationDegrees(-90))
       case Direction.NORTH => matrix.mulPose(Axis.YP.rotationDegrees(180))
       case Direction.EAST  => matrix.mulPose(Axis.YP.rotationDegrees(90))
-      case _               => // No yaw.
+      case _               =>
     }
 
     matrix.translate(-0.5f, -0.5f, -0.5f)
@@ -383,7 +366,7 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
         firstEmpty = slotMapping.indexOf(null)
       }
 
-      for ((info, mountPoint) <- (slotMapping, mountPoints).zipped if info != null) try {
+      for ((info, mountPoint) <- slotMapping.lazyZip(mountPoints) if info != null) try {
         val (stack, renderer) = info
         matrix.pushPose()
         matrix.translate(0.5f, 0.5f, 0.5f)
@@ -401,11 +384,11 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
     if (
       Settings.get.robotLabels &&
         !Strings.isNullOrEmpty(name) &&
-        ForgeHooksClient.isNameplateInRenderDistance(null, dist)
+        dist < 64 * 64
     ) {
-      val f         = Minecraft.getInstance.font
+      val font      = Minecraft.getInstance.font
       val scale     = 1.6f / 60f
-      val width     = f.width(name)
+      val width     = font.width(name)
       val halfWidth = width / 2
       val bgColor   = (255f * Minecraft.getInstance.options.getBackgroundOpacity(0.25F)).asInstanceOf[Int] << 24
 
@@ -413,14 +396,14 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
       matrix.mulPose(Minecraft.getInstance.getEntityRenderDispatcher.cameraOrientation)
       RenderState.mirrorScale(matrix, -scale, -scale, scale)
 
-      f.drawInBatch(
+      font.drawInBatch(
         (if (EventHandler.isItTime) ChatFormatting.OBFUSCATED.toString else "") + name,
         -halfWidth, 0f,
         -1,
         false,
-        matrix.last.pose,
+        matrix.last.pose(),
         buffer,
-        Font.DisplayMode.NORMAL, // 影なし指定
+        Font.DisplayMode.NORMAL,
         bgColor,
         light
       )

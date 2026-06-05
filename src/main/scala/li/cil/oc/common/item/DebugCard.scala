@@ -9,7 +9,7 @@ import li.cil.oc.server.component.{DebugCard => CDebugCard}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.extensions.IForgeItem
 import net.minecraft.world.level.Level
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionResult

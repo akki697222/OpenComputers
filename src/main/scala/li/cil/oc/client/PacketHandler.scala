@@ -1,44 +1,33 @@
 package li.cil.oc.client
 
-import java.io.EOFException
-import java.io.InputStream
 import com.mojang.blaze3d.pipeline.RenderCall
 import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.Localization
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.event.FileSystemAccessEvent
-import li.cil.oc.api.event.NetworkActivityEvent
+import li.cil.oc.{Localization, OpenComputers, Settings, api}
+import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
 import li.cil.oc.client.audio.AudioSession
 import li.cil.oc.client.renderer.PetRenderer
-import li.cil.oc.common.Loot
-import li.cil.oc.common.PacketType
-import li.cil.oc.common.component
-import li.cil.oc.common.menu
-import li.cil.oc.common.item.{Tablet, TabletWrapper}
-import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.blockentity._
 import li.cil.oc.common.blockentity.traits._
-import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
+import li.cil.oc.common.item.Tablet
+import li.cil.oc.common.nanomachines.ControllerImpl
+import li.cil.oc.common.{Loot, PacketType, component, menu, PacketHandler => CommonPacketHandler}
 import li.cil.oc.integration.Mods
-//import li.cil.oc.integration.jei.ModJEI
+
+import java.io.{EOFException, InputStream}
 import li.cil.oc.util.Audio
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.client.Minecraft
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.level.Level
-import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraft.Util
+import net.minecraft.core.registries.Registries
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.nbt.NbtIo
-import net.minecraft.network.chat.ChatType
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.{SoundEvent, SoundSource}
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.registries.NeoForgeRegistries
 
 object PacketHandler extends CommonPacketHandler {
   private val audioSessions = scala.collection.mutable.Map[Int, AudioSession]()
@@ -286,12 +275,12 @@ object PacketHandler extends CommonPacketHandler {
       case _ => // Invalid packet.
     }
 
-  def onFileSystemActivity(p: PacketParser): AnyVal = {
+  def onFileSystemActivity(p: PacketParser): Unit = {
     val sound = p.readUTF()
     val data = NbtIo.read(p)
     if (p.readBoolean()) p.readBlockEntity[net.minecraft.world.level.block.entity.BlockEntity]() match {
       case Some(t) =>
-        MinecraftForge.EVENT_BUS.post(new FileSystemAccessEvent.Client(sound, t, data))
+        NeoForge.EVENT_BUS.post(new FileSystemAccessEvent.Client(sound, t, data))
       case _ => // Invalid packet.
     }
     else world(p.player, ResourceLocation.tryParse(p.readUTF())) match {
@@ -299,16 +288,16 @@ object PacketHandler extends CommonPacketHandler {
         val x = p.readDouble()
         val y = p.readDouble()
         val z = p.readDouble()
-        MinecraftForge.EVENT_BUS.post(new FileSystemAccessEvent.Client(sound, world, x, y, z, data))
+        NeoForge.EVENT_BUS.post(new FileSystemAccessEvent.Client(sound, world, x, y, z, data))
       case _ => // Invalid packet.
     }
   }
 
-  def onNetworkActivity(p: PacketParser): AnyVal = {
+  def onNetworkActivity(p: PacketParser): Unit = {
     val data = NbtIo.read(p)
     if (p.readBoolean()) p.readBlockEntity[net.minecraft.world.level.block.entity.BlockEntity]() match {
       case Some(t) =>
-        MinecraftForge.EVENT_BUS.post(new NetworkActivityEvent.Client(t, data))
+        NeoForge.EVENT_BUS.post(new NetworkActivityEvent.Client(t, data))
       case _ => // Invalid packet.
     }
     else world(p.player, ResourceLocation.tryParse(p.readUTF())) match {
@@ -316,7 +305,7 @@ object PacketHandler extends CommonPacketHandler {
         val x = p.readDouble()
         val y = p.readDouble()
         val z = p.readDouble()
-        MinecraftForge.EVENT_BUS.post(new NetworkActivityEvent.Client(world, x, y, z, data))
+        NeoForge.EVENT_BUS.post(new NetworkActivityEvent.Client(world, x, y, z, data))
       case _ => // Invalid packet.
     }
   }
@@ -499,7 +488,8 @@ object PacketHandler extends CommonPacketHandler {
         val z = p.readInt()
         val velocity = p.readDouble()
         val direction = p.readDirection()
-        val particleType = p.readRegistryEntry(ForgeRegistries.PARTICLE_TYPES)
+        val particleRegistry = p.player.level().registryAccess().registryOrThrow(Registries.PARTICLE_TYPE)
+        val particleType = p.readRegistryEntry(particleRegistry)
         particleType match {
           case particle: ParticleOptions =>
             val count = p.readUnsignedByte() / (1 << Minecraft.getInstance.options.particles.get.getId)
@@ -711,7 +701,7 @@ object PacketHandler extends CommonPacketHandler {
           val maxHeight = nbt.getInt("maxHeight")
           buffer.setMaximumResolution(maxWidth, maxHeight)
         }
-        buffer.data.loadData(nbt)
+        buffer.data.loadData(nbt, p.player.level.registryAccess())
         if (nbt.contains("viewportWidth")) {
           val viewportWidth = nbt.getInt("viewportWidth")
           val viewportHeight = nbt.getInt("viewportHeight")

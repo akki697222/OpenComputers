@@ -23,8 +23,8 @@ class DroneRenderer(ctx: EntityRendererProvider.Context) extends EntityRenderer[
       model.prepareMobModel(entity, 0, 0, dt)
       val xRot = Mth.rotLerp(dt, entity.xRotO, entity.getXRot)
       val yRot = Mth.rotLerp(dt, entity.yRotO, entity.getYRot)
-      model.setupAnim(entity, 0, 0, entity.tickCount, yRot, xRot)
-      model.renderToBuffer(stack, builder, light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1)
+      model.setupAnim(entity, 0, 0, entity.tickCount.toFloat, yRot, xRot)
+      model.renderToBuffer(stack, builder, light, OverlayTexture.NO_OVERLAY)
       stack.popPose()
     }
     super.render(entity, yaw, dt, stack, buffer, light)

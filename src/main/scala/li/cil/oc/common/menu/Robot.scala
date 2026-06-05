@@ -8,8 +8,8 @@ import li.cil.oc.common.blockentity
 import li.cil.oc.integration.opencomputers.DriverKeyboard
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.SideTracker
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.entity.player.Inventory

@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -11,11 +10,12 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.IFluidTank
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
-import net.minecraftforge.fluids.capability.templates.FluidTank
+import net.neoforged.fluids.FluidStack
+import net.neoforged.fluids.IFluidTank
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.capability.templates.FluidTank
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
@@ -36,14 +36,14 @@ class UpgradeTank(val owner: EnvironmentHost, val capacity: Int) extends Abstrac
 
   val tank = new FluidTank(capacity)
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
-    tank.readFromNBT(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
+    tank.readFromNBT(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
-    tank.writeToNBT(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
+    tank.writeToNBT(nbt, provider)
   }
 
   // ----------------------------------------------------------------------- //

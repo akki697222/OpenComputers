@@ -9,7 +9,7 @@ import li.cil.oc.common.blockentity.Raid
 import li.cil.oc.server.component.DiskDriveMountable
 import li.cil.oc.server.component.Server
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.eventbus.api.SubscribeEvent
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundSource
 

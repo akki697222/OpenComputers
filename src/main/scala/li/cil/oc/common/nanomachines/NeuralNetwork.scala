@@ -8,6 +8,7 @@ import li.cil.oc.api.nanomachines.Behavior
 import li.cil.oc.api.nanomachines.BehaviorProvider
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
@@ -159,7 +160,7 @@ class NeuralNetwork(controller: ControllerImpl) extends Persistable {
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     saveData(nbt, forItem = false)
   }
 
@@ -193,7 +194,7 @@ class NeuralNetwork(controller: ControllerImpl) extends Persistable {
     }))
   }
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     triggers.clear()
     nbt.getList(TriggersTag, Tag.TAG_COMPOUND).foreach((t: CompoundTag) => {
       val neuron = new TriggerNeuron()

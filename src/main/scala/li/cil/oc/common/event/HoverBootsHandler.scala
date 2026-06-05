@@ -2,10 +2,10 @@ package li.cil.oc.common.event
 
 import li.cil.oc.Settings
 import li.cil.oc.common.item.HoverBoots
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent
-import net.minecraftforge.event.entity.living.{LivingEvent, LivingFallEvent}
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.common.util.FakePlayer
+import net.neoforged.event.entity.living.LivingEvent.LivingJumpEvent
+import net.neoforged.event.entity.living.{LivingEvent, LivingFallEvent}
+import net.neoforged.eventbus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.player.Player

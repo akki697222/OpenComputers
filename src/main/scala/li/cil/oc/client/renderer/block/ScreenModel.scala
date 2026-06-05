@@ -1,8 +1,6 @@
 package li.cil.oc.client.renderer.block
 
 import java.util
-import java.util.Collections
-import li.cil.oc.Constants
 import li.cil.oc.api
 import li.cil.oc.client.Textures
 import li.cil.oc.common.Tier
@@ -19,10 +17,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
-
-import scala.collection.JavaConverters.seqAsJavaList
-import scala.collection.convert.ImplicitConversionsToJava._
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
 object ScreenModel extends SmartBlockModelBase {
   val SCREEN_PROPERTY = new ModelProperty[blockentity.Screen]()

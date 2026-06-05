@@ -10,7 +10,7 @@ import li.cil.oc.integration.util.BundledRedstone
 import li.cil.oc.server.component
 import li.cil.oc.server.component.RedstoneVanilla
 import li.cil.oc.util.ExtendedNBT._
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.entity.BlockEntity
@@ -36,14 +36,14 @@ class Redstone(pos: BlockPos, state: BlockState)
 
   private final val RedstoneTag = Settings.namespace + "redstone"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt)
-    instance.loadData(nbt.getCompound(RedstoneTag))
+    instance.loadData(nbt.getCompound(RedstoneTag), provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForServer(nbt)
-    nbt.setNewCompoundTag(RedstoneTag, instance.saveData)
+    nbt.setNewCompoundTag(RedstoneTag, (nbt: CompoundTag) => instance.saveData(nbt, provider))
   }
 
   // ----------------------------------------------------------------------- //

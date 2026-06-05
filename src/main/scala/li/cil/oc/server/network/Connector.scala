@@ -4,6 +4,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api.network
 import li.cil.oc.api.network.{Node => ImmutableNode}
 import li.cil.oc.common.item.data.NodeData
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 trait Connector extends network.Connector with Node {
@@ -119,13 +120,13 @@ trait Connector extends network.Connector with Node {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     localBuffer = nbt.getDouble(NodeData.BufferTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putDouble(NodeData.BufferTag, math.min(localBuffer, localBufferSize))
   }
 }

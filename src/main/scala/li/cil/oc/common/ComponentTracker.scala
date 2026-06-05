@@ -5,8 +5,8 @@ import com.google.common.cache.CacheBuilder
 import li.cil.oc.api.network.ManagedEnvironment
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.level.Level
-import net.minecraftforge.event.level.LevelEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.event.level.LevelEvent
+import net.neoforged.eventbus.api.SubscribeEvent
 
 import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToJava._

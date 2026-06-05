@@ -10,11 +10,12 @@ import li.cil.oc.api
 import li.cil.oc.api.fs.FileSystem
 import li.cil.oc.common.init.Items
 import li.cil.oc.util.Color
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.mutable
 import net.minecraft.server.level.ServerLevel
@@ -22,7 +23,9 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.LevelResource
 import net.minecraft.nbt.Tag
 import net.minecraft.network.chat.Component
-import net.minecraftforge.event.level.LevelEvent
+import net.minecraft.world.item.component.CustomData
+import net.neoforged.neoforge.event.level.LevelEvent
+
 import scala.jdk.CollectionConverters._
 
 //class Loot extends WeightedRandomChestContent(api.Items.get(Constants.ItemName.Floppy).item(), api.Items.get(Constants.ItemName.Floppy).createItemStack(1).getDamageValue, 1, 1, Settings.get.lootProbability) {
@@ -57,7 +60,7 @@ object Loot {
 
   val disksForClient = mutable.ArrayBuffer.empty[ItemStack]
 
-  def isLootDisk(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy) && stack.hasTag && stack.getTag.contains(Settings.namespace + "lootFactory", Tag.TAG_STRING)
+  def isLootDisk(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy) && stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).getUnsafe.contains(Settings.namespace + "lootFactory", Tag.TAG_STRING)
 
   def randomDisk(rng: Random) =
     if (disksForSampling.nonEmpty) Some(disksForSampling(rng.nextInt(disksForSampling.length)))
@@ -70,7 +73,7 @@ object Loot {
     data.putString(Settings.namespace + "fs.label", name)
 
     val stack = Items.get(Constants.ItemName.Floppy).createItemStack(1)
-    val nbt = stack.getOrCreateTag
+    val nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe
     nbt.put(Settings.namespace + "data", data)
 
     // Store this top level, so it won't get wiped on save.
@@ -161,7 +164,7 @@ object Loot {
       override def call(): FileSystem = api.FileSystem.fromResource(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, "loot/" + path))
     }
     val stack = registerLootDisk(path, ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, path), color.getOrElse(DyeColor.LIGHT_GRAY), callable, doRecipeCycling = true)
-    stack.setHoverName(Component.literal(name))
+    stack.set(DataComponents.CUSTOM_NAME, Component.literal(name))
     if (!external) {
       Items.registerStack(stack, path)
     }

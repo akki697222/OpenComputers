@@ -6,8 +6,8 @@ import li.cil.oc.api.machine.Context
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.FluidUtils
 import li.cil.oc.util.ResultWrapper.result
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.FluidStack
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
 
 trait TankLevelControl extends TankAware with LevelAware with SideRestricted {
   @Callback(doc = "function(side:number [, tank:number]):boolean -- Compare the fluid in the selected tank with the fluid in the specified tank on the specified side. Returns true if equal.")

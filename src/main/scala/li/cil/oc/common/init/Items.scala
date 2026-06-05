@@ -23,21 +23,20 @@ import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
-import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Rarity
+import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.level.ItemLike
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent
-import net.minecraftforge.eventbus.api.{EventPriority, IEventBus}
-import net.minecraftforge.registries.{DeferredRegister, ForgeRegistries, RegisterEvent, RegistryObject}
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
+import net.neoforged.bus.api.{EventPriority, IEventBus}
+import net.neoforged.neoforge.registries.{DeferredRegister, RegisterEvent}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 object Items extends ItemAPI {
   val ITEMS: DeferredRegister[Item] =
-    DeferredRegister.create(ForgeRegistries.ITEMS, Settings.resourceDomain)
+    DeferredRegister.create(Registries.ITEM, Settings.resourceDomain)
 
   val descriptors = mutable.LinkedHashMap.empty[String, ItemInfo]
 

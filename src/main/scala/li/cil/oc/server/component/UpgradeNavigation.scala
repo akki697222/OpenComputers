@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -24,7 +23,7 @@ import li.cil.oc.server.network.Waypoints
 import li.cil.oc.util.BlockPosition
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.entity.player.Player
@@ -107,13 +106,13 @@ class UpgradeNavigation(val host: EnvironmentHost with Rotatable) extends Abstra
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
-    data.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
+    data.loadData(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
-    data.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
+    data.saveData(nbt, provider)
   }
 }

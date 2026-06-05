@@ -1,18 +1,17 @@
 package li.cil.oc.api.prefab;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import li.cil.oc.api.manual.TabIconRenderer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * Simple implementation of a tab icon renderer using an item stack as its graphic.
  * In 1.18, this class isn't required
  */
 @SuppressWarnings("UnusedDeclaration")
-@Deprecated(forRemoval = true)
+@Deprecated
 public class ItemStackTabIconRenderer implements TabIconRenderer {
     private final ItemStack stack;
 

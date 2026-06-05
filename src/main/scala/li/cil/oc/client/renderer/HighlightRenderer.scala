@@ -6,12 +6,11 @@ import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.{Constants, Settings, api}
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer._
 import net.minecraft.core.Direction
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.phys.shapes.CollisionContext
-import net.minecraftforge.client.event.RenderHighlightEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.RenderHighlightEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.util.Random
 
@@ -53,35 +52,35 @@ object HighlightRenderer {
         val r = e.getMultiBufferSource.getBuffer(TexHologram)
         sideHit match {
           case Direction.UP =>
-            r.vertex(stack.last.pose, maxX, maxY + 0.002f, maxZ).uv(maxZ * 16, maxX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX, maxY + 0.002f, minZ).uv(minZ * 16, maxX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, maxY + 0.002f, minZ).uv(minZ * 16, minX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, maxY + 0.002f, maxZ).uv(maxZ * 16, minX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, maxX, maxY + 0.002f, maxZ).setUv(maxZ * 16, maxX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX, maxY + 0.002f, minZ).setUv(minZ * 16, maxX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, maxY + 0.002f, minZ).setUv(minZ * 16, minX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, maxY + 0.002f, maxZ).setUv(maxZ * 16, minX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
           case Direction.DOWN =>
-            r.vertex(stack.last.pose, maxX, minY - 0.002f, minZ).uv(minZ * 16, maxX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX, minY - 0.002f, maxZ).uv(maxZ * 16, maxX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, minY - 0.002f, maxZ).uv(maxZ * 16, minX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, minY - 0.002f, minZ).uv(minZ * 16, minX * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, maxX, minY - 0.002f, minZ).setUv(minZ * 16, maxX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX, minY - 0.002f, maxZ).setUv(maxZ * 16, maxX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, minY - 0.002f, maxZ).setUv(maxZ * 16, minX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, minY - 0.002f, minZ).setUv(minZ * 16, minX * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
           case Direction.EAST =>
-            r.vertex(stack.last.pose, maxX + 0.002f, maxY, minZ).uv(minZ * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX + 0.002f, maxY, maxZ).uv(maxZ * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX + 0.002f, minY, maxZ).uv(maxZ * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX + 0.002f, minY, minZ).uv(minZ * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, maxX + 0.002f, maxY, minZ).setUv(minZ * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX + 0.002f, maxY, maxZ).setUv(maxZ * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX + 0.002f, minY, maxZ).setUv(maxZ * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX + 0.002f, minY, minZ).setUv(minZ * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
           case Direction.WEST =>
-            r.vertex(stack.last.pose, minX - 0.002f, maxY, maxZ).uv(maxZ * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX - 0.002f, maxY, minZ).uv(minZ * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX - 0.002f, minY, minZ).uv(minZ * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX - 0.002f, minY, maxZ).uv(maxZ * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, minX - 0.002f, maxY, maxZ).setUv(maxZ * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX - 0.002f, maxY, minZ).setUv(minZ * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX - 0.002f, minY, minZ).setUv(minZ * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX - 0.002f, minY, maxZ).setUv(maxZ * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
           case Direction.SOUTH =>
-            r.vertex(stack.last.pose, maxX, maxY, maxZ + 0.002f).uv(maxX * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, maxY, maxZ + 0.002f).uv(minX * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, minY, maxZ + 0.002f).uv(minX * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX, minY, maxZ + 0.002f).uv(maxX * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, maxX, maxY, maxZ + 0.002f).setUv(maxX * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, maxY, maxZ + 0.002f).setUv(minX * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, minY, maxZ + 0.002f).setUv(minX * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX, minY, maxZ + 0.002f).setUv(maxX * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
           case _ =>
-            r.vertex(stack.last.pose, minX, maxY, minZ - 0.002f).uv(minX * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX, maxY, minZ - 0.002f).uv(maxX * 16, maxY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, maxX, minY, minZ - 0.002f).uv(maxX * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
-            r.vertex(stack.last.pose, minX, minY, minZ - 0.002f).uv(minX * 16, minY * 16).color(0.0F, 1.0F, 0.0F, 0.4F).endVertex()
+            r.addVertex(stack.last.pose, minX, maxY, minZ - 0.002f).setUv(minX * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX, maxY, minZ - 0.002f).setUv(maxX * 16, maxY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, maxX, minY, minZ - 0.002f).setUv(maxX * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
+            r.addVertex(stack.last.pose, minX, minY, minZ - 0.002f).setUv(minX * 16, minY * 16).setColor(0.0F, 1.0F, 0.0F, 0.4F)
         }
 
         stack.popPose()

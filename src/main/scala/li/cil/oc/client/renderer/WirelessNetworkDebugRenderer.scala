@@ -1,14 +1,17 @@
 package li.cil.oc.client.renderer
 
+import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, VertexFormat}
 import li.cil.oc.Settings
 import li.cil.oc.server.network.WirelessNetwork
-import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.{GameRenderer, MultiBufferSource, RenderStateShard, RenderType}
-import net.minecraftforge.client.event.RenderLevelStageEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import com.mojang.blaze3d.systems.RenderSystem
+import net.minecraft.client.renderer.{
+  GameRenderer,
+  RenderStateShard,
+  RenderType
+}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent
 import org.lwjgl.opengl.GL11
 
 object WirelessNetworkDebugRenderer {
@@ -43,9 +46,9 @@ object WirelessNetworkDebugRenderer {
     WirelessNetwork.dimensions.get(world.dimension) match {
       case Some(tree) =>
         val player = Minecraft.getInstance.player
-        val px = player.xOld + (player.getX - player.xOld) * e.getPartialTick
-        val py = player.yOld + (player.getY - player.yOld) * e.getPartialTick
-        val pz = player.zOld + (player.getZ - player.zOld) * e.getPartialTick
+        val px = player.xOld + (player.getX - player.xOld) * e.getPartialTick.getGameTimeDeltaTicks.toDouble
+        val py = player.yOld + (player.getY - player.yOld) * e.getPartialTick.getGameTimeDeltaTicks.toDouble
+        val pz = player.zOld + (player.getZ - player.zOld) * e.getPartialTick.getGameTimeDeltaTicks.toDouble
 
         val stack = e.getPoseStack
         stack.pushPose()
@@ -79,7 +82,7 @@ object WirelessNetworkDebugRenderer {
 
   private def vertex(stack: PoseStack, consumer: com.mojang.blaze3d.vertex.VertexConsumer,
                      x: Float, y: Float, z: Float, r: Int, g: Int, b: Int, a: Int): Unit = {
-    consumer.vertex(stack.last.pose, x, y, z).color(r, g, b, a).endVertex()
+    consumer.addVertex(stack.last.pose, x, y, z).setColor(r, g, b, a)
   }
 
   private def drawBox(stack: PoseStack, consumer: com.mojang.blaze3d.vertex.VertexConsumer,

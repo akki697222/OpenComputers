@@ -1,85 +1,58 @@
 package li.cil.oc.integration.minecraftforge
 
-import li.cil.oc.OpenComputers
 import li.cil.oc.common.blockentity.traits.PowerAcceptor
+import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.util.Power
-import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraftforge.common.capabilities.{Capability, ForgeCapabilities, ICapabilityProvider}
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.common.util.NonNullSupplier
-import net.minecraftforge.energy.IEnergyStorage
-import net.minecraftforge.event.AttachCapabilitiesEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraft.world.item.ItemStack
+import net.neoforged.neoforge.capabilities.{Capabilities, RegisterCapabilitiesEvent}
+import net.neoforged.neoforge.energy.IEnergyStorage
 
 object EventHandlerMinecraftForge {
 
-  @SubscribeEvent
-  def onAttachCapabilities(event: AttachCapabilitiesEvent[BlockEntity]): Unit = {
-    event.getObject match {
-      case tileEntity: PowerAcceptor =>
-        val provider = new Provider(tileEntity)
-        event.addCapability(ProviderEnergy, provider)
-        event.addListener(new Runnable {
-          override def run = provider.invalidate()
-        })
-      case _ =>
+  // Called from EventHandler.onRegisterCapabilities
+  def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
+    // Register IEnergyStorage (EnergyStorage.BLOCK) for all PowerAcceptor block entities
+    Seq(
+      TileEntityTypes.ADAPTER, TileEntityTypes.ASSEMBLER, TileEntityTypes.CABLE,
+      TileEntityTypes.CAPACITOR, TileEntityTypes.CARPETED_CAPACITOR, TileEntityTypes.CASE,
+      TileEntityTypes.CHARGER, TileEntityTypes.DISASSEMBLER, TileEntityTypes.DISK_DRIVE,
+      TileEntityTypes.GEOLYZER, TileEntityTypes.HOLOGRAM, TileEntityTypes.KEYBOARD,
+      TileEntityTypes.MICROCONTROLLER, TileEntityTypes.MOTION_SENSOR, TileEntityTypes.NET_SPLITTER,
+      TileEntityTypes.POWER_CONVERTER, TileEntityTypes.POWER_DISTRIBUTOR, TileEntityTypes.PRINT,
+      TileEntityTypes.PRINTER, TileEntityTypes.RACK, TileEntityTypes.RAID,
+      TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
+      TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
+    ).foreach { beType =>
+      event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get(), (be, side) => be match {
+        case pa: PowerAcceptor if pa.canConnectPower(side) => new EnergyStorageImpl(pa, side)
+        case _ => null
+      })
     }
   }
 
   def canCharge(stack: ItemStack): Boolean =
-    stack.getCapability(ForgeCapabilities.ENERGY, null).orElse(null) match {
-      case storage: IEnergyStorage => storage.canReceive
-      case _ => false
-    }
+    Option(stack.getCapability(Capabilities.EnergyStorage.ITEM)).exists(_.canReceive)
 
   def charge(stack: ItemStack, amount: Double, simulate: Boolean): Double =
-    stack.getCapability(ForgeCapabilities.ENERGY, null).orElse(null) match {
-      case storage: IEnergyStorage => amount - Power.fromRF(storage.receiveEnergy(Power.toRF(amount), simulate))
+    Option(stack.getCapability(Capabilities.EnergyStorage.ITEM)) match {
+      case Some(storage) => amount - Power.fromRF(storage.receiveEnergy(Power.toRF(amount), simulate))
       case _ => amount
     }
 
-  val ProviderEnergy: ResourceLocation = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "forgeenergy")
+  class EnergyStorageImpl(val tile: PowerAcceptor, val side: Direction) extends IEnergyStorage {
 
-  class Provider(tile: PowerAcceptor) extends ICapabilityProvider {
+    override def getEnergyStored: Int = Power.toRF(tile.globalBuffer(side))
 
-    private val providers = Direction.values.map(side => LazyOptional.of(new NonNullSupplier[EnergyStorageImpl] {
-      override def get = new EnergyStorageImpl(tile, side)
-    }))
-    private val nullProvider = LazyOptional.of(new NonNullSupplier[EnergyStorageImpl] {
-      override def get = new EnergyStorageImpl(tile, null)
-    })
+    override def getMaxEnergyStored: Int = Power.toRF(tile.globalBufferSize(side))
 
-    def invalidate(): Unit = {
-      for (provider <- providers) provider.invalidate
-      nullProvider.invalidate
-    }
+    override def canReceive: Boolean = tile.canConnectPower(side)
 
-    override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-      if (capability == ForgeCapabilities.ENERGY) {
-        (if (facing == null) nullProvider.cast[T] else providers(facing.get3DDataValue)).cast[T]
-      } else LazyOptional.empty[T]
-    }
+    override def receiveEnergy(maxReceive: Int, simulate: Boolean): Int =
+      Power.toRF(tile.tryChangeBuffer(side, Power.fromRF(maxReceive), !simulate))
 
-    class EnergyStorageImpl(val tile: PowerAcceptor, val side: Direction) extends IEnergyStorage {
+    override def canExtract: Boolean = false
 
-      override def getEnergyStored: Int = Power.toRF(tile.globalBuffer(side))
-
-      override def getMaxEnergyStored: Int = Power.toRF(tile.globalBufferSize(side))
-
-      override def canReceive: Boolean = tile.canConnectPower(side)
-
-      override def receiveEnergy(maxReceive: Int, simulate: Boolean): Int = {
-        Power.toRF(tile.tryChangeBuffer(side, Power.fromRF(maxReceive), !simulate))
-      }
-
-      override def canExtract: Boolean = false
-
-      override def extractEnergy(maxExtract: Int, simulate: Boolean): Int = 0
-    }
-
+    override def extractEnergy(maxExtract: Int, simulate: Boolean): Int = 0
   }
-
 }

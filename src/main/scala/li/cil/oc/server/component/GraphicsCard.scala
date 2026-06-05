@@ -14,6 +14,7 @@ import li.cil.oc.util.{ExtendedUnicodeHelper, PackedColor}
 import net.minecraft.nbt.{CompoundTag, ListTag}
 import li.cil.oc.common.component
 import li.cil.oc.common.component.GpuTextBuffer
+import net.minecraft.core.HolderLookup
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.util.matching.Regex
@@ -616,8 +617,8 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
   private final val NBT_PAGE_DATA: String = "page_data"
   private val COMPOUND_ID = (new CompoundTag).getId
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
 
     if (nbt.contains(SCREEN_KEY)) {
       nbt.getString(SCREEN_KEY) match {
@@ -644,8 +645,8 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
 
     if (screenAddress.isDefined) {
       nbt.putString(SCREEN_KEY, screenAddress.get)

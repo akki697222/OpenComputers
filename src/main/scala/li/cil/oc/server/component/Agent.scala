@@ -22,7 +22,7 @@ import net.minecraft.world.{Container, InteractionHand}
 import net.minecraft.world.entity.{Entity, LivingEntity, Pose}
 import net.minecraft.world.phys.{BlockHitResult, EntityHitResult, HitResult, Vec3}
 import net.minecraft.world.level.ClipContext
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.common.MinecraftForge
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.player

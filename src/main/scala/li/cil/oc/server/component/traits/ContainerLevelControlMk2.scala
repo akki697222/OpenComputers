@@ -10,7 +10,7 @@ import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.InventoryUtils
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.items.IItemHandler
+import net.neoforged.items.IItemHandler
 
 trait ContainerLevelControlMk2 extends ContainerAware with LevelAware with SideRestricted {
   @Callback(doc = """function(facing:number, slot:number[, count:number[, fromSide:number]]):boolean -- Drops the selected item stack into the specified slot of an inventory.""")

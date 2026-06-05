@@ -7,10 +7,6 @@ import li.cil.oc.util.StackOption._
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.items.IItemHandler
-import net.minecraftforge.items.IItemHandlerModifiable
-import net.minecraftforge.items.wrapper.InvWrapper
-import net.minecraftforge.items.wrapper.SidedInvWrapper
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.Container
@@ -19,7 +15,9 @@ import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.WorldlyContainer
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.phys.Vec3
-import net.minecraftforge.common.capabilities.ForgeCapabilities
+import net.neoforged.neoforge.capabilities.Capabilities
+import net.neoforged.neoforge.items.IItemHandler
+import net.neoforged.neoforge.items.IItemHandlerModifiable
 
 object InventoryUtils {
 
@@ -46,14 +44,16 @@ object InventoryUtils {
    * complete with a reference to the source of said implementation.
    */
   def inventorySourceAt(position: BlockPosition, side: Direction): Option[InventorySource] = position.world match {
-    case Some(world) if world.blockExists(position) => world.getBlockEntity(position) match {
-      case tile: BlockEntity if tile.getCapability(ForgeCapabilities.ITEM_HANDLER, side).isPresent => Option(BlockInventorySource(position, side, tile.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null)))
-      case tile: Container => Option(BlockInventorySource(position, side, asItemHandler(tile, side)))
-      case _ => world.getEntitiesOfClass(classOf[Entity], position.bounds)
-        .filter(e => e.isAlive && e.getCapability(ForgeCapabilities.ITEM_HANDLER, side).isPresent)
-        .map(a => EntityInventorySource(a, side, a.getCapability(ForgeCapabilities.ITEM_HANDLER, side).orElse(null)))
-        .find(a => a != null && a.inventory != null)
-    }
+    case Some(world) if world.blockExists(position) =>
+      val pos = position.toBlockPos
+      Option(world.getCapability(Capabilities.ItemHandler.BLOCK, pos, side)) match {
+        case Some(handler) => Some(BlockInventorySource(position, side, handler))
+        case _ =>
+          world.getEntitiesOfClass(classOf[Entity], position.bounds)
+            .filter(e => e.isAlive && e.getCapability(Capabilities.ItemHandler.ENTITY, side) != null)
+            .map(a => EntityInventorySource(a, side, a.getCapability(Capabilities.ItemHandler.ENTITY, side)))
+            .find(a => a != null && a.inventory != null)
+      }
     case _ => None
   }
 

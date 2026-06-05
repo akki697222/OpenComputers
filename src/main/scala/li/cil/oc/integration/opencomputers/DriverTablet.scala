@@ -13,21 +13,21 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.{CompoundTag, Tag}
 
 object DriverTablet extends Item {
-  override def worksWith(stack: ItemStack) = isOneOf(stack,
+  override def worksWith(stack: ItemStack): Unit = isOneOf(stack,
     api.Items.get(Constants.ItemName.Tablet))
 
-  override def createEnvironment(stack: ItemStack, host: EnvironmentHost) =
+  override def createEnvironment(stack: ItemStack, host: EnvironmentHost): Unit =
     if (host.getEnvironmentLevel != null && host.getEnvironmentLevel.isClientSide) null
     else {
       Tablet.Server.cache.invalidate(Tablet.getOrCreateId(stack))
       val data = new TabletData(stack)
-      data.items.collect {
+      data.items.collectFirst {
         case fs if !fs.isEmpty && DriverFileSystem.worksWith(fs) => fs
-      }.headOption.map(DriverFileSystem.createEnvironment(_, host)) match {
+      }.map(DriverFileSystem.createEnvironment(_, host)) match {
         case Some(environment) => environment.node match {
           case component: Component =>
             component.setVisibility(Visibility.Network)
-            environment.saveData(dataTag(stack))
+            environment.saveData(dataTag(stack), host.getEnvironmentLevel.registryAccess())
             environment
           case _ => null
         }

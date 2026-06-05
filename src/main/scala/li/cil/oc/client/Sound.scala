@@ -12,14 +12,14 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import net.minecraft.client.Minecraft
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.event.TickEvent.ClientTickEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ClientTickEvent
 
 import scala.collection.mutable
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.client.resources.sounds.{AbstractSoundInstance, SoundInstance, TickableSoundInstance}
 import net.minecraft.sounds.SoundSource
-import net.minecraftforge.event.level.LevelEvent
+import net.neoforged.neoforge.event.level.LevelEvent
 
 object Sound {
   private val sources = mutable.Map.empty[BlockEntity, PseudoLoopingStream]

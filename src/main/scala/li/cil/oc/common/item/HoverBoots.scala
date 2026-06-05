@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.{ArmorItem, ArmorMaterials, ItemStack}
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.{Blocks, LayeredCauldronBlock}
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.extensions.IForgeItem
 
 class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, props) with IForgeItem with traits.SimpleItem with traits.Chargeable {
   override def maxCharge(stack: ItemStack): Double = Settings.get.bufferHoverBoots

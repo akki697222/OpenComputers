@@ -1,33 +1,20 @@
 package li.cil.oc.common.item
 
-import com.google.common.cache.{
-  CacheBuilder,
-  RemovalListener,
-  RemovalNotification
-}
+import com.google.common.cache.{CacheBuilder, RemovalListener, RemovalNotification}
 import com.google.common.collect.ImmutableMap
 import li.cil.oc.api.driver.item.Container
-import li.cil.oc.api.{Driver, Machine, internal}
 import li.cil.oc.api.machine.MachineHost
 import li.cil.oc.api.network.{Connector, Message, Node}
+import li.cil.oc.api.{Driver, Machine, internal}
 import li.cil.oc.client.{KeyBindings, gui}
 import li.cil.oc.common.container.ComponentInventory
 import li.cil.oc.common.item.data.TabletData
-import li.cil.oc.common.{Slot, Tier, menu}
 import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.common.{Slot, Tier, menu}
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.server.component
-import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util._
-import li.cil.oc.{
-  Constants,
-  Localization,
-  OpenComputers,
-  Settings,
-  api,
-  client,
-  server
-}
+import li.cil.oc.{Constants, Localization, OpenComputers, Settings, api, client, server}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
@@ -35,18 +22,13 @@ import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.{Entity, LivingEntity}
-import net.minecraft.world.entity.player.{Inventory, Player}
 import net.minecraft.world._
+import net.minecraft.world.entity.player.{Inventory, Player}
+import net.minecraft.world.entity.{Entity, LivingEntity}
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.world.level.Level
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraftforge.event.TickEvent.{ClientTickEvent, ServerTickEvent}
-import net.minecraftforge.event.level.LevelEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 import java.util
 import java.util.UUID
@@ -264,8 +246,9 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       val data = stack.getTag
       loadData(data)
       if (!getEnvironmentLevel.isClientSide) {
-        tablet.loadData(data.getCompound(Settings.namespace + "component"))
-        machine.loadData(data.getCompound(Settings.namespace + "data"))
+        val holderLookupProvider = getEnvironmentLevel.registryAccess()
+        tablet.loadData(provider = holderLookupProvider)
+        machine.loadData(provider = holderLookupProvider)
       }
     }
   }
@@ -273,11 +256,12 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   def writeToNBT(clearState: Boolean = true): Unit = {
     val data = stack.getOrCreateTag
     if (!getEnvironmentLevel.isClientSide) {
+      val provider = getEnvironmentLevel.registryAccess()
       if (!data.contains(Settings.namespace + "data")) {
         data.put(Settings.namespace + "data", new CompoundTag())
       }
-      data.setNewCompoundTag(Settings.namespace + "component", tablet.saveData(_))
-      data.setNewCompoundTag(Settings.namespace + "data", machine.saveData(_))
+      data.setNewCompoundTag(Settings.namespace + "component", (nbt: CompoundTag) => tablet.saveData(nbt, provider))
+      data.setNewCompoundTag(Settings.namespace + "data", (nbt: CompoundTag) => machine.saveData(nbt, provider))
 
       if (clearState) {
         // Force tablets into stopped state to avoid errors when trying to
@@ -452,12 +436,14 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   // ----------------------------------------------------------------------- //
 
   override def loadData(nbt: CompoundTag): Unit = {
-    data.loadData(nbt)
+    val provider = getEnvironmentLevel.registryAccess()
+    data.loadData(nbt, provider)
   }
 
   override def saveData(nbt: CompoundTag): Unit = {
+    val provider = getEnvironmentLevel.registryAccess()
     saveComponents()
-    data.saveData(nbt)
+    data.saveData(nbt, provider)
   }
 }
 

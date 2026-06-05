@@ -9,7 +9,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.effect.{MobEffect, MobEffectInstance}
 import net.minecraft.world.entity.player.Player
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 

@@ -9,6 +9,7 @@ import li.cil.oc.api
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ItemUtils
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 
 import scala.io.Source
@@ -59,7 +60,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
   private final val ContainersTag = Settings.namespace + "containers"
   private final val LightColorTag = Settings.namespace + "lightColor"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     name = ItemUtils.getDisplayName(nbt).getOrElse("")
     if (Strings.isNullOrEmpty(name)) {
       name = RobotData.randomName
@@ -76,7 +77,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (!Strings.isNullOrEmpty(name)) {
       ItemUtils.setDisplayName(nbt, name)
     }

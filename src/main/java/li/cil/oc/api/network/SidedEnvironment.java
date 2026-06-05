@@ -3,11 +3,11 @@ package li.cil.oc.api.network;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
- * This interface is like {@link net.minecraft.world.inventory.ISidedInventory} is to
+ * This interface is like {@link net.minecraft.world.WorldlyContainer} is to
  * {@link Container}, it allows an environment to
  * specify different node access for its different sides.
  * <br>

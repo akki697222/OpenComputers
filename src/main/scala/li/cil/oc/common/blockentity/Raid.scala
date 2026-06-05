@@ -18,16 +18,17 @@ import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.{Inventory, Player}
 import net.minecraft.nbt.ByteArrayTag
+import net.minecraft.server.MinecraftServer
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class Raid(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.RAID.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable with Analyzable with MenuProvider {
@@ -79,7 +80,7 @@ class Raid(pos: BlockPos, state: BlockState)
       filesystem.foreach(fs => {
         fs.fileSystem.close()
         fs.fileSystem.list("/").foreach(fs.fileSystem.delete)
-        fs.saveData(new CompoundTag()) // Flush buffered fs.
+        fs.saveData(new CompoundTag(), this.getLevel.registryAccess()) // Flush buffered fs.
         fs.node.remove()
         filesystem = None
       })
@@ -108,7 +109,7 @@ class Raid(pos: BlockPos, state: BlockState)
         asInstanceOf[FileSystem]
       val nbtToSetAddress = new CompoundTag()
       nbtToSetAddress.putString(NodeData.AddressTag, id)
-      fs.node.loadData(nbtToSetAddress)
+      fs.node.loadData(nbtToSetAddress, this.getLevel.registryAccess())
       fs.node.setVisibility(Visibility.Network)
       // Ensure we're in a network before connecting the raid fs.
       api.Network.joinNewNetwork(node)
@@ -122,10 +123,10 @@ class Raid(pos: BlockPos, state: BlockState)
       case Some(driver) => driver.createEnvironment(hdd, this) match {
         case fs: FileSystem =>
           val nbt = driver.dataTag(hdd)
-          fs.loadData(nbt)
+          fs.loadData(nbt, this.getLevel.registryAccess())
           fs.fileSystem.close()
           fs.fileSystem.list("/").foreach(fs.fileSystem.delete)
-          fs.saveData(nbt)
+          fs.saveData(nbt, this.getLevel.registryAccess())
           fs.fileSystem.spaceTotal
         case _ => 0L // Ignore.
       }
@@ -145,33 +146,34 @@ class Raid(pos: BlockPos, state: BlockState)
   private final val PresenceTag = Settings.namespace + "presence"
   private final val LabelTag = Settings.namespace + "label"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     if (nbt.contains(FileSystemTag)) {
       val tag = nbt.getCompound(FileSystemTag)
       tryCreateRaid(tag.getCompound(NodeData.NodeTag).getString(NodeData.AddressTag))
-      filesystem.foreach(fs => fs.loadData(tag))
+      filesystem.foreach(fs => fs.loadData(tag, provider))
     }
-    label.loadData(nbt)
+    label.loadData(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    filesystem.foreach(fs => nbt.setNewCompoundTag(FileSystemTag, fs.saveData))
-    label.saveData(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    filesystem.foreach(fs => nbt.setNewCompoundTag(FileSystemTag, (nbt: CompoundTag) => fs.saveData(nbt, provider)))
+    label.saveData(nbt, provider)
   }
 
-  @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  @OnlyIn(Dist.CLIENT) 
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     nbt.getByteArray(PresenceTag).
       map(_ != 0).
       copyToArray(presence)
     label.setLabel(nbt.getString(LabelTag))
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
     val presenceArray = Array.tabulate[Byte](items.length) { i =>
       if (items(i).isEmpty) 0.toByte else 1.toByte
     }
@@ -191,13 +193,13 @@ class Raid(pos: BlockPos, state: BlockState)
 
     override def setLabel(value: String) = label = Option(value).map(_.take(16)).orNull
 
-    override def loadData(nbt: CompoundTag): Unit = {
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
       if (nbt.contains(Settings.namespace + "label")) {
         label = nbt.getString(Settings.namespace + "label")
       }
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
       nbt.putString(Settings.namespace + "label", label)
     }
   }

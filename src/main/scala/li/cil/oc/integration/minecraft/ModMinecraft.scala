@@ -10,7 +10,7 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.level.block.{Blocks, RedStoneWireBlock}
 import net.minecraft.core.Direction
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.common.MinecraftForge
 
 object ModMinecraft extends ModProxy with RedstoneProvider {
   def getMod = Mods.Minecraft

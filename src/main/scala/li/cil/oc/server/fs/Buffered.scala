@@ -8,11 +8,11 @@ import java.util.concurrent.CancellationException
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.api.fs.Mode
 import li.cil.oc.util.ThreadPoolFactory
 import li.cil.oc.util.SafeThreadPool
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import org.apache.commons.io.FileUtils
 
@@ -49,7 +49,7 @@ trait Buffered extends OutputStreamFileSystem {
 
   private var saving: Option[Future[_]] = None
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     saving.foreach(f => try {
       f.get(120L, TimeUnit.SECONDS)
     } catch {
@@ -57,7 +57,7 @@ trait Buffered extends OutputStreamFileSystem {
       case e: CancellationException => // NO-OP
     })
     loadFiles(nbt)
-    super.loadData(nbt)
+    super.loadData(nbt, provider)
   }
 
   private def loadFiles(nbt: CompoundTag): Unit = this.synchronized {
@@ -101,8 +101,8 @@ trait Buffered extends OutputStreamFileSystem {
     else recurse("", fileRoot)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     saving = Buffered.fileSaveHandler.withPool(_.submit(new Runnable {
       override def run(): Unit = saveFiles()
     }))

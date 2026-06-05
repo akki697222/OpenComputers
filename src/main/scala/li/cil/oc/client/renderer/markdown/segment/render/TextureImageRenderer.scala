@@ -39,14 +39,12 @@ class TextureImageRenderer(val location: ResourceLocation) extends ImageRenderer
 
     val matrix = graphics.pose.last.pose
     val tesselator = Tesselator.getInstance()
-    val builder = tesselator.getBuilder
-
-    builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-    builder.vertex(matrix, 0, texture.height.toFloat, 0).uv(0, 1).endVertex()
-    builder.vertex(matrix, texture.width.toFloat, texture.height.toFloat, 0).uv(1, 1).endVertex()
-    builder.vertex(matrix, texture.width.toFloat, 0, 0).uv(1, 0).endVertex()
-    builder.vertex(matrix, 0, 0, 0).uv(0, 0).endVertex()
-    tesselator.end()
+    val builder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+    builder.addVertex(matrix, 0, texture.height.toFloat, 0).setUv(0, 1)
+    builder.addVertex(matrix, texture.width.toFloat, texture.height.toFloat, 0).setUv(1, 1)
+    builder.addVertex(matrix, texture.width.toFloat, 0, 0).setUv(1, 0)
+    builder.addVertex(matrix, 0, 0, 0).setUv(0, 0)
+    BufferUploader.drawWithShader(builder.buildOrThrow())
 
     RenderSystem.disableBlend()
   }

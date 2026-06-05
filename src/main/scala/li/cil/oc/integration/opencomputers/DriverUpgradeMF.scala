@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.core.{Direction, Registry}
 import net.minecraft.resources.{ResourceKey, ResourceLocation}
 import net.minecraft.server.level.ServerLevel
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 /**
   * @author Vexatos

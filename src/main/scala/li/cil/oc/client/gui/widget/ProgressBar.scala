@@ -2,7 +2,6 @@ package li.cil.oc.client.gui.widget
 
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex._
-import com.mojang.blaze3d.vertex.PoseStack
 import li.cil.oc.client.Textures
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.renderer.GameRenderer
@@ -29,17 +28,15 @@ class ProgressBar(val x: Int, val y: Int) extends Widget {
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F)
 
       val t = Tesselator.getInstance
-      val r = t.getBuilder
-
-      r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+      val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
 
       val matrix = graphics.pose.last.pose
-      r.vertex(matrix, tx, ty, owner.windowZ).uv(u0, v0).endVertex()
-      r.vertex(matrix, tx, ty + height, owner.windowZ).uv(u0, v1).endVertex()
-      r.vertex(matrix, tx + w, ty + height, owner.windowZ).uv(u1, v1).endVertex()
-      r.vertex(matrix, tx + w, ty, owner.windowZ).uv(u1, v0).endVertex()
+      r.addVertex(matrix, tx, ty, owner.windowZ).setUv(u0, v0)
+      r.addVertex(matrix, tx, ty + height, owner.windowZ).setUv(u0, v1)
+      r.addVertex(matrix, tx + w, ty + height, owner.windowZ).setUv(u1, v1)
+      r.addVertex(matrix, tx + w, ty, owner.windowZ).setUv(u1, v0)
 
-      t.end()
+      BufferUploader.drawWithShader(r.buildOrThrow())
     }
   }
 }

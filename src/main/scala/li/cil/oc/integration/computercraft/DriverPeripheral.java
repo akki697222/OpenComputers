@@ -23,7 +23,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
@@ -59,28 +60,28 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
     }
 
     @SuppressWarnings("unchecked")
-    private static Capability<IPeripheral> getPeripheralCapability() {
+    private static BlockCapability<IPeripheral, Direction> getPeripheralCapability() {
+        // NeoForge 1.21.1: CC:T exposes its capability as a BlockCapability<IPeripheral, Direction>.
+        // Try to obtain it via reflection to avoid hard dependency.
         try {
             Class<?> clazz = Class.forName("dan200.computercraft.shared.Capabilities");
-            return (Capability<IPeripheral>) clazz.getField("CAPABILITY_PERIPHERAL").get(null);
+            return (BlockCapability<IPeripheral, Direction>) clazz.getField("CAPABILITY_PERIPHERAL").get(null);
         } catch (Exception e) {
-            OpenComputers.log().warn("Could not access ComputerCraft Capabilities via reflection.", e);
-            return null;
+            // Fall back to the OC-registered one (PeripheralProvider)
+            return li.cil.oc.integration.computercraft.PeripheralProvider$.MODULE$.CAPABILITY_PERIPHERAL();
         }
     }
 
-    private static final Capability<IPeripheral> PERIPHERAL_CAP = getPeripheralCapability();
+    private static final BlockCapability<IPeripheral, Direction> PERIPHERAL_CAP = getPeripheralCapability();
 
     private IPeripheral findPeripheral(final Level world, final BlockPos pos, final Direction side) {
         try {
             if (PERIPHERAL_CAP == null) return null;
 
-            final BlockEntity be = world.getBlockEntity(pos);
-            if (be == null) return null;
+            // NeoForge 1.21.1: query capability from the level directly
+            final IPeripheral p = world.getCapability(PERIPHERAL_CAP, pos, side);
 
-            final IPeripheral p = be.getCapability(PERIPHERAL_CAP, side).orElse(null);
-
-            if (!isBlacklisted(p)) {
+            if (p != null && !isBlacklisted(p)) {
                 return p;
             }
         } catch (Exception e) {

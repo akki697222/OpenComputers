@@ -62,7 +62,7 @@ trait ComponentInventory extends Inventory with network.Environment {
               case Some(component) =>
                 applyLifecycleState(component, Lifecycle.LifecycleState.Constructing)
                 try {
-                  component.loadData(dataTag(driver, stack))
+                  component.loadData(dataTag(driver, stack), host.getEnvironmentLevel.registryAccess())
                 }
                 catch {
                   case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while loading.", e)
@@ -137,7 +137,7 @@ trait ComponentInventory extends Inventory with network.Environment {
           components(slot) = Some(component)
           applyLifecycleState(component, Lifecycle.LifecycleState.Constructing)
           try {
-            component.loadData(dataTag(driver, stack))
+            component.loadData(dataTag(driver, stack), host.getEnvironmentLevel.registryAccess())
           } catch {
             case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while loading.", e)
           }
@@ -197,7 +197,7 @@ trait ComponentInventory extends Inventory with network.Environment {
       for (key <- tag.getAllKeys.map(_.asInstanceOf[String])) {
         tag.remove(key)
       }
-      component.saveData(tag)
+      component.saveData(tag, host.getEnvironmentLevel.registryAccess())
     } catch {
       case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while saving.", e)
     }

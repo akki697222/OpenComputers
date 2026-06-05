@@ -8,7 +8,8 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
-import net.minecraft.world.level.block.Block
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.Registries
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.BucketItem
@@ -24,13 +25,17 @@ import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.inventory.CraftingContainer
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 
 object ItemUtils {
+  def getOrCreateTag(stack: ItemStack): CompoundTag = {
+    stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag()
+  }
+
   def getDisplayName(nbt: CompoundTag): Option[String] = {
     if (nbt.contains("display")) {
       val displayNbt = nbt.getCompound("display")
@@ -115,8 +120,8 @@ object ItemUtils {
     def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(null).getCount
 
     def isInputBlacklisted(stack: ItemStack) = stack.getItem match {
-      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(ForgeRegistries.BLOCKS.getKey(item.getBlock))
-      case item: Item => Settings.get.disassemblerInputBlacklist.contains(ForgeRegistries.ITEMS.getKey(item))
+      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(Registries.BLOCK.getKey(item.getBlock))
+      case item: Item => Settings.get.disassemblerInputBlacklist.contains(Registries.ITEM.getKey(item))
       case _ => false
     }
 

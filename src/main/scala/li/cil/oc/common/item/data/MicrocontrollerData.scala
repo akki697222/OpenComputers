@@ -5,6 +5,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
@@ -25,7 +26,7 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
   private final val ComponentsTag = Settings.namespace + "components"
   private final val StoredEnergyTag = Settings.namespace + "storedEnergy"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
       toTagArray[CompoundTag].map(ItemStack.of(_)).filter(!_.isEmpty)
@@ -38,7 +39,7 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putByte(TierTag, tier.toByte)
     nbt.setNewTagList(ComponentsTag, components.filter(!_.isEmpty).toIterable)
     nbt.putInt(StoredEnergyTag, storedEnergy)

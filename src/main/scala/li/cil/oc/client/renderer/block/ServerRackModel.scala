@@ -2,7 +2,6 @@ package li.cil.oc.client.renderer.block
 
 import java.util
 import java.util.Collections
-
 import li.cil.oc.api.component.RackMountable
 import li.cil.oc.api.event.RackMountableRenderEvent
 import li.cil.oc.client.Textures
@@ -18,8 +17,8 @@ import net.minecraft.core.Direction
 import net.minecraft.world.phys.Vec3
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
+import net.neoforged.neoforge.common.NeoForge
 
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
@@ -51,7 +50,7 @@ class ServerRackModel(val parent: BakedModel) extends SmartBlockModelBase {
         for (slot <- 0 until 4) rack.getMountable(slot) match {
           case mountable: RackMountable =>
             val event = new RackMountableRenderEvent.Block(rack, slot, rack.lastData(slot), side)
-            MinecraftForge.EVENT_BUS.post(event)
+            NeoForge.EVENT_BUS.post(event)
             if (!event.isCanceled) {
               if (event.getFrontTextureOverride != null) {
                 (2 until 6).foreach(textures(_) = event.getFrontTextureOverride)

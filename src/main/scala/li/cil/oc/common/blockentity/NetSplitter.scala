@@ -18,9 +18,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.client.model.data.ModelData
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.client.model.data.ModelData
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable

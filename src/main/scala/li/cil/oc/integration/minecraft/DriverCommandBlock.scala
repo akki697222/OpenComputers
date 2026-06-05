@@ -16,7 +16,7 @@ import net.minecraft.core.Direction
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.CommandBlockEntity
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 object DriverCommandBlock extends DriverSidedTileEntity {
   override def getTileEntityClass: Class[_] = classOf[CommandBlockEntity]

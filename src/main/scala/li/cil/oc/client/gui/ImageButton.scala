@@ -1,18 +1,15 @@
 package li.cil.oc.client.gui
 
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.Tesselator
-import com.mojang.blaze3d.vertex.VertexFormat
-import li.cil.oc.client.Textures
+import com.mojang.blaze3d.vertex.{BufferUploader, DefaultVertexFormat, Tesselator, VertexFormat}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.renderer.GameRenderer
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 @OnlyIn(Dist.CLIENT)
 class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
@@ -45,7 +42,6 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
       val y1 = (y + height).toFloat
 
       val t = Tesselator.getInstance
-      val r = t.getBuilder
 
       if (image != null) {
         val (ru0, ru1, rv0, rv1) = if (textureWidth > 0 && textureHeight > 0) {
@@ -70,12 +66,12 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
         RenderSystem.defaultBlendFunc()
         RenderSystem.enableDepthTest()
 
-        r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-        r.vertex(graphics.pose.last.pose, x0, y1, z).uv(ru0, rv1).endVertex()
-        r.vertex(graphics.pose.last.pose, x1, y1, z).uv(ru1, rv1).endVertex()
-        r.vertex(graphics.pose.last.pose, x1, y0, z).uv(ru1, rv0).endVertex()
-        r.vertex(graphics.pose.last.pose, x0, y0, z).uv(ru0, rv0).endVertex()
-        t.end()
+        val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+        r.addVertex(graphics.pose().last.pose(), x0, y1, z).setUv(ru0, rv1)
+        r.addVertex(graphics.pose().last.pose(), x1, y1, z).setUv(ru1, rv1)
+        r.addVertex(graphics.pose().last.pose(), x1, y0, z).setUv(ru1, rv0)
+        r.addVertex(graphics.pose().last.pose(), x0, y0, z).setUv(ru0, rv0)
+        BufferUploader.drawWithShader(r.buildOrThrow())
         RenderSystem.disableBlend()
       } else {
         val alpha = if (isHov) 0.4f else 0.0f
@@ -84,12 +80,13 @@ class ImageButton(xPos: Int, yPos: Int, w: Int, h: Int,
           RenderSystem.setShader(() => GameRenderer.getPositionColorShader)
           RenderSystem.enableBlend()
           RenderSystem.defaultBlendFunc()
-          r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-          r.vertex(graphics.pose.last.pose, x0, y1, z).color(1f, 1f, 1f, alpha).endVertex()
-          r.vertex(graphics.pose.last.pose, x1, y1, z).color(1f, 1f, 1f, alpha).endVertex()
-          r.vertex(graphics.pose.last.pose, x1, y0, z).color(1f, 1f, 1f, alpha).endVertex()
-          r.vertex(graphics.pose.last.pose, x0, y0, z).color(1f, 1f, 1f, alpha).endVertex()
-          t.end()
+
+          val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
+          r.addVertex(graphics.pose().last.pose(), x0, y1, z).setColor(1f, 1f, 1f, alpha)
+          r.addVertex(graphics.pose().last.pose(), x1, y1, z).setColor(1f, 1f, 1f, alpha)
+          r.addVertex(graphics.pose().last.pose(), x1, y0, z).setColor(1f, 1f, 1f, alpha)
+          r.addVertex(graphics.pose().last.pose(), x0, y0, z).setColor(1f, 1f, 1f, alpha)
+          BufferUploader.drawWithShader(r.buildOrThrow())
           RenderSystem.disableBlend()
         }
       }

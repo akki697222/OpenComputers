@@ -12,15 +12,14 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.trading.MerchantOffer
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.{ResourceKey, ResourceLocation}
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, HolderLookup, Registry}
 import net.minecraft.world.item.trading.Merchant
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.ref.WeakReference
 import net.minecraft.world.Container
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries
 
 class Trade(val info: TradeInfo) extends AbstractValue {
@@ -38,9 +37,9 @@ class Trade(val info: TradeInfo) extends AbstractValue {
 
   // Queue the load because when load is called we can't access the world yet
   // and we need to access it to get the Robot's TileEntity / Drone's Entity.
-  override def loadData(nbt: CompoundTag) = EventHandler.scheduleServer(() => info.loadData(nbt))
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = EventHandler.scheduleServer(() => info.loadData(nbt))
 
-  override def saveData(nbt: CompoundTag) = info.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = info.saveData(nbt)
 
   @Callback(doc = "function():number -- Returns a sort index of the merchant that provides this trade")
   def getMerchantId(context: Context, arguments: Arguments): Array[AnyRef] =

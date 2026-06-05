@@ -1,6 +1,6 @@
 package li.cil.oc.api.internal;
 
-import net.minecraftforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.IFluidTank;
 
 /**
  * Implemented by objects with multiple internal tanks.

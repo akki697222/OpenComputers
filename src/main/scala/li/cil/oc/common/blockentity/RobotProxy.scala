@@ -13,26 +13,19 @@ import li.cil.oc.api.network._
 import li.cil.oc.common.container.InventoryProxy
 import li.cil.oc.common.blockentity.traits.RedstoneAware
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
-import net.minecraftforge.common.capabilities.{Capability, ForgeCapabilities}
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.common.util.NonNullSupplier
-import net.minecraftforge.fluids.capability.IFluidHandler
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.IFluidTank
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.WorldlyContainer
-import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity
 import net.minecraft.network.chat.{Component => MCComponent}
+import net.neoforged.neoforge.fluids.capability.IFluidHandler
 
 class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
   extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state)
@@ -42,19 +35,11 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
 
   // ----------------------------------------------------------------------- //
 
-  private val wrapper = LazyOptional.of(new NonNullSupplier[IFluidHandler] {
-    override def get = RobotProxy.this
-  })
+  // NeoForge 1.21.1: FluidHandler capability is registered via RegisterCapabilitiesEvent.
+  // RobotProxy itself implements IFluidHandler, so no wrapper is needed.
 
   override def invalidateCaps(): Unit = {
     super.invalidateCaps()
-    wrapper.invalidate()
-  }
-
-  override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-    if (capability == ForgeCapabilities.FLUID_HANDLER)
-      wrapper.cast[T]
-    else super.getCapability(capability, facing)
   }
 
   override val node: Component = api.Network.newNode(this, Visibility.Network).
@@ -177,7 +162,7 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
       // Use the same address we use internally on the outside.
       val nbt = new CompoundTag()
       nbt.putString("address", robot.node.address)
-      node.loadData(nbt)
+      node.loadData(nbt, null)
     }
   }
 
@@ -188,15 +173,15 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
     }
   }
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    robot.info.loadData(nbt)
-    super.loadForServer(nbt)
-    robot.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    robot.info.loadData(nbt, provider)
+    super.loadForServer(nbt, provider)
+    robot.loadForServer(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    robot.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    robot.saveForServer(nbt, provider)
   }
 
   override def saveData(nbt: CompoundTag): Unit = robot.saveData(nbt)
@@ -204,9 +189,10 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
   override def loadData(nbt: CompoundTag): Unit = robot.loadData(nbt)
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = robot.loadForClient(nbt)
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadForClient(nbt, provider)
 
-  override def saveForClient(nbt: CompoundTag): Unit = robot.saveForClient(nbt)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.saveForClient(nbt, provider)
 
   override def getRenderBoundingBox: AABB = robot.getRenderBoundingBox
 

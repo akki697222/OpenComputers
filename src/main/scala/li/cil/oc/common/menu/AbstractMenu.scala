@@ -18,11 +18,11 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.inventory.Slot
-import net.minecraftforge.common.util.FakePlayer
+import net.neoforged.common.util.FakePlayer
 import net.minecraft.world.inventory.ContainerListener
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
 import net.minecraft.nbt.Tag
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.nbt.IntArrayTag

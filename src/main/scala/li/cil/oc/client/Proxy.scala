@@ -25,10 +25,10 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.Item
-import net.minecraftforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
+import net.neoforged.neoforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
+import net.neoforged.neoforge.common.NeoForge
 
 private[oc] class Proxy extends CommonProxy {
   modBus.register(this)
@@ -53,19 +53,19 @@ private[oc] class Proxy extends CommonProxy {
 
       ColorHandler.init()
 
-      MinecraftForge.EVENT_BUS.register(HighlightRenderer)
-      MinecraftForge.EVENT_BUS.register(NanomachinesHandler.Client)
-      MinecraftForge.EVENT_BUS.register(PetRenderer)
-      MinecraftForge.EVENT_BUS.register(RackMountableRenderHandler)
-      MinecraftForge.EVENT_BUS.register(Sound)
-      MinecraftForge.EVENT_BUS.register(TextBuffer)
-      MinecraftForge.EVENT_BUS.register(MFUTargetRenderer)
-      MinecraftForge.EVENT_BUS.register(WirelessNetworkDebugRenderer)
-      MinecraftForge.EVENT_BUS.register(Audio)
-      MinecraftForge.EVENT_BUS.register(HologramRenderer)
+      NeoForge.EVENT_BUS.register(HighlightRenderer)
+      NeoForge.EVENT_BUS.register(NanomachinesHandler.Client)
+      NeoForge.EVENT_BUS.register(PetRenderer)
+      NeoForge.EVENT_BUS.register(RackMountableRenderHandler)
+      NeoForge.EVENT_BUS.register(Sound)
+      NeoForge.EVENT_BUS.register(TextBuffer)
+      NeoForge.EVENT_BUS.register(MFUTargetRenderer)
+      NeoForge.EVENT_BUS.register(WirelessNetworkDebugRenderer)
+      NeoForge.EVENT_BUS.register(Audio)
+      NeoForge.EVENT_BUS.register(HologramRenderer)
     }): Runnable)
 
-    RenderSystem.recordRenderCall(() => MinecraftForge.EVENT_BUS.register(TextBufferRenderCache))
+    RenderSystem.recordRenderCall(() => NeoForge.EVENT_BUS.register(TextBufferRenderCache))
   }
 
   @SubscribeEvent

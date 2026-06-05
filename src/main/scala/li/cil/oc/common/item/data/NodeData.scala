@@ -2,6 +2,7 @@ package li.cil.oc.common.item.data
 
 import li.cil.oc.Settings
 import li.cil.oc.api.network.Visibility
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
@@ -18,7 +19,7 @@ class NodeData extends ItemData(null) {
 
   private final val DataTag = Settings.namespace + "data"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     val nodeNbt = nbt.getCompound(DataTag).getCompound(NodeData.NodeTag)
     if (nodeNbt.contains(NodeData.AddressTag)) {
       address = Option(nodeNbt.getString(NodeData.AddressTag))
@@ -31,7 +32,7 @@ class NodeData extends ItemData(null) {
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (!nbt.contains(DataTag)) {
       nbt.put(DataTag, new CompoundTag())
     }

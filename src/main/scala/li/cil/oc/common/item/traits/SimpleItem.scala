@@ -22,8 +22,8 @@ import net.minecraft.world.InteractionResultHolder
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import com.mojang.blaze3d.vertex.PoseStack

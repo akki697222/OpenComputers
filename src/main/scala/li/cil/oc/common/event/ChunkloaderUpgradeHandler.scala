@@ -5,17 +5,17 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.api.event.RobotMoveEvent
 import li.cil.oc.server.component.UpgradeChunkloader
 import li.cil.oc.util.BlockPosition
-import net.minecraftforge.common.world.ForgeChunkManager
-import net.minecraftforge.common.world.ForgeChunkManager.LoadingValidationCallback
-import net.minecraftforge.common.world.ForgeChunkManager.TicketHelper
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.common.world.ForgeChunkManager
+import net.neoforged.common.world.ForgeChunkManager.LoadingValidationCallback
+import net.neoforged.common.world.ForgeChunkManager.TicketHelper
+import net.neoforged.eventbus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.immutable
 import scala.collection.mutable
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
-import net.minecraftforge.event.level.LevelEvent
+import net.neoforged.event.level.LevelEvent
 
 object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
   private val restoredTickets = mutable.Map.empty[UUID, ChunkPos]

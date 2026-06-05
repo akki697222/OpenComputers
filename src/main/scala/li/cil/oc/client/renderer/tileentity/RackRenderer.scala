@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.LevelRenderer
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer => TileEntityRenderer}
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.core.Direction
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.neoforge.common.NeoForge
 
 object RackRenderer extends BlockEntityRendererProvider[Rack] {
   override def create(ctx: BlockEntityRendererProvider.Context): RackRenderer =
@@ -54,7 +54,7 @@ class RackRenderer extends TileEntityRenderer[Rack] {
         val v0    = vOffset + i * vSize
         val v1    = vOffset + (i + 1) * vSize
         val event = new RackMountableRenderEvent.TileEntity(rack, i, rack.lastData(i), stack, buffer, rackLight, overlay, v0, v1)
-        MinecraftForge.EVENT_BUS.post(event)
+        NeoForge.EVENT_BUS.post(event)
       }
     }
 

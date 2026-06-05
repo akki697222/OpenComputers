@@ -1,12 +1,12 @@
 package li.cil.oc.server.driver
 
 import java.nio.charset.Charset
-
 import com.google.common.hash.Hashing
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
 import li.cil.oc.api.network._
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 class CompoundBlockEnvironment(val name: String, val environments: (String, ManagedEnvironment)*) extends ManagedEnvironment {
@@ -54,14 +54,14 @@ class CompoundBlockEnvironment(val name: String, val environments: (String, Mana
 
   private final val TypeHashTag = "typeHash"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     // Ignore existing data if the underlying type is different.
     if (nbt.contains(TypeHashTag) && nbt.getLong(TypeHashTag) != typeHash) return
-    node.loadData(nbt)
+    node.loadData(nbt, provider)
     for ((driver, environment) <- environments) {
       if (nbt.contains(driver)) {
         try {
-          environment.loadData(nbt.getCompound(driver))
+          environment.loadData(nbt.getCompound(driver), provider)
         } catch {
           case e: Throwable => OpenComputers.log.warn(s"A block component of type '${environment.getClass.getName}' (provided by driver '$driver') threw an error while loading.", e)
         }
@@ -69,12 +69,12 @@ class CompoundBlockEnvironment(val name: String, val environments: (String, Mana
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putLong(TypeHashTag, typeHash)
-    node.saveData(nbt)
+    node.saveData(nbt, provider)
     for ((driver, environment) <- environments) {
       try {
-        nbt.setNewCompoundTag(driver, environment.saveData)
+        nbt.setNewCompoundTag(driver, (nbt: CompoundTag) => environment.saveData(nbt, provider))
       } catch {
         case e: Throwable => OpenComputers.log.warn(s"A block component of type '${environment.getClass.getName}' (provided by driver '$driver') threw an error while saving.", e)
       }

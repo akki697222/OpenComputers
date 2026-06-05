@@ -3,7 +3,7 @@ package li.cil.oc.common.item
 import li.cil.oc.Settings
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.extensions.IForgeItem
 
 class UpgradeHover(props: Properties, val tier: Int) extends Item(props) with IForgeItem with traits.SimpleItem with traits.ItemTier {
   @Deprecated

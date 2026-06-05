@@ -8,8 +8,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
 /**
  * Fired to allow rendering a custom overlay for {@link RackMountable}s.
@@ -52,8 +52,7 @@ public abstract class RackMountableRenderEvent extends Event {
      * <br>
      * The bounds will be set up before this call, so you may adjust those, if you wish.
      */
-    @Cancelable
-    public static class Block extends RackMountableRenderEvent {
+    public static class Block extends RackMountableRenderEvent implements ICancellableEvent {
         /**
          * The front-facing side, i.e. where the mountable is visible on the rack.
          */

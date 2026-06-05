@@ -18,10 +18,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ServerLevelData
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.eventbus.api.Event
+import net.neoforged.common.MinecraftForge
+import net.neoforged.common.util.FakePlayer
+import net.neoforged.event.entity.player.PlayerInteractEvent
+import net.neoforged.eventbus.api.Event
 
 import scala.collection.mutable
 

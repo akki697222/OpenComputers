@@ -10,7 +10,7 @@ import li.cil.oc.util.Tooltip
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.extensions.IForgeItem
 
 import scala.collection.mutable
 import scala.collection.convert.ImplicitConversionsToScala._

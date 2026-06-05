@@ -30,7 +30,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.minecraftforge.common.MinecraftForge
+import net.neoforged.common.MinecraftForge
 
 import scala.collection.JavaConverters.mapAsJavaMap
 import scala.collection.convert.ImplicitConversionsToJava._

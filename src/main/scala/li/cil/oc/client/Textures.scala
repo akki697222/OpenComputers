@@ -11,8 +11,8 @@ import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.packs.resources.{ResourceManager, ResourceManagerReloadListener}
 import net.minecraft.world.inventory.InventoryMenu
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.mutable
 
@@ -93,8 +93,10 @@ object Textures {
   object Item {
     val DroneItem = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "item/drone")
     val Robot = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "item/robot")
-    val TerminalOn = new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Terminal + "_on", "inventory")
-    val TerminalOff = new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Terminal + "_off", "inventory")
+    private val LocationTerminalOn = ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, Constants.ItemName.Terminal + "_on")
+    private val LocationTerminalOff = ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, Constants.ItemName.Terminal + "_off")
+    val TerminalOn = new ModelResourceLocation(LocationTerminalOn, "inventory")
+    val TerminalOff = new ModelResourceLocation(LocationTerminalOff, "inventory")
   }
 
   object Block {
@@ -178,7 +180,7 @@ object Textures {
   def onRegisterReloadListeners(e: RegisterClientReloadListenersEvent): Unit = {
     e.registerReloadListener(new ResourceManagerReloadListener {
       override def onResourceManagerReload(manager: ResourceManager): Unit = {
-        val tm = Minecraft.getInstance.textureManager
+        val tm = Minecraft.getInstance.getTextureManager
         def register(bundle: SimpleTextureBundle): Unit = {
           bundle.locations.foreach { loc =>
             tm.register(loc, new SimpleTexture(ResourceLocation.fromNamespaceAndPath(loc.getNamespace, s"textures/${loc.getPath}.png")))

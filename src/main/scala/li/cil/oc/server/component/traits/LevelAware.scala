@@ -4,12 +4,12 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.util.{BlockInventorySource, BlockPosition, EntityInventorySource, InventorySource}
 import li.cil.oc.util.ExtendedBlock._
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.util.FakePlayerFactory
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.eventbus.api.Event.Result
-import net.minecraftforge.fluids.IFluidBlock
-import net.minecraftforge.items.wrapper.InvWrapper
+import net.neoforged.common.MinecraftForge
+import net.neoforged.common.util.FakePlayerFactory
+import net.neoforged.event.entity.player.PlayerInteractEvent
+import net.neoforged.eventbus.api.Event.Result
+import net.neoforged.fluids.IFluidBlock
+import net.neoforged.items.wrapper.InvWrapper
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.core.Direction
@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.LiquidBlock
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.vehicle.Minecart
 import net.minecraft.world.phys.shapes.CollisionContext
-import net.minecraftforge.event.level.BlockEvent
+import net.neoforged.event.level.BlockEvent
 
 trait LevelAware {
   def position: BlockPosition

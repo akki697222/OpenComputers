@@ -13,22 +13,20 @@ import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.Mods
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.ThreadPoolFactory
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.forgespi.Environment
-import net.minecraftforge.fml.InterModComms
-import net.minecraftforge.fml.ModContainer
-import net.minecraftforge.fml.ModLoadingContext
-import net.minecraftforge.fml.event.lifecycle.{FMLCommonSetupEvent, InterModProcessEvent}
-import net.minecraftforge.fml.loading.FMLPaths
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.bus.api.{IEventBus, SubscribeEvent}
+import net.neoforged.neoforgespi.Environment
+import net.neoforged.fml.InterModComms
+import net.neoforged.fml.ModContainer
+import net.neoforged.fml.ModLoadingContext
+import net.neoforged.fml.event.lifecycle.{FMLCommonSetupEvent, InterModProcessEvent}
+import net.neoforged.fml.loading.FMLPaths
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraftforge.network.simple.SimpleChannel
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
-import net.minecraftforge.fml.common.Mod
+import net.neoforged.fml.common.Mod
 
 object OpenComputers {
   final val ID = "opencomputers"
@@ -49,8 +47,6 @@ object OpenComputers {
     cls.getConstructor().newInstance().asInstanceOf[Proxy]
   }
 
-  var channel: SimpleChannel = null
-
   private var instance: Option[OpenComputers] = None
 
   def get = instance match {
@@ -60,10 +56,7 @@ object OpenComputers {
 }
 
 @Mod(OpenComputers.ID)
-class OpenComputers {
-  val modContainer: ModContainer = ModLoadingContext.get.getActiveContainer
-  val modBus = FMLJavaModLoadingContext.get.getModEventBus
-
+class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   modBus.register(this)
   Items.init(modBus)
   Blocks.init(modBus)
@@ -77,11 +70,11 @@ class OpenComputers {
   modBus.register(li.cil.oc.data.DataGenerators)
   modBus.register(CreativeTab)
   OpenComputers.instance = Some(this)
-  MinecraftForge.EVENT_BUS.register(OpenComputers.proxy)
+  NeoForge.EVENT_BUS.register(OpenComputers.proxy)
   modBus.register(OpenComputers.proxy)
   Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
   OpenComputers.proxy.preInit()
-  MinecraftForge.EVENT_BUS.register(ThreadPoolFactory)
+  NeoForge.EVENT_BUS.register(ThreadPoolFactory)
   Mods.preInit() // Must happen after loading Settings but before registry events are fired.
 
   @SubscribeEvent

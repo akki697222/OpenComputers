@@ -7,8 +7,8 @@ import li.cil.oc.Settings
 import li.cil.oc.client.PacketHandler
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.event.TickEvent.ClientTickEvent
+import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.event.TickEvent.ClientTickEvent
 import org.lwjgl.BufferUtils
 import org.lwjgl.openal.AL10
 

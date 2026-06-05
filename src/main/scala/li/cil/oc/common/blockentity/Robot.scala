@@ -15,7 +15,6 @@ import li.cil.oc.common.EventHandler
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.container.InventoryProxy
 import li.cil.oc.common.container.InventorySelection
 import li.cil.oc.common.container.TankSelection
@@ -24,7 +23,6 @@ import li.cil.oc.integration.opencomputers.DriverKeyboard
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.server.agent
-import li.cil.oc.server.agent.Player
 import li.cil.oc.server.component
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.{BlockPosHelper, BlockPosition, InventoryUtils, StackOption}
@@ -33,22 +31,14 @@ import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.StackOption._
 import net.minecraft.client.Minecraft
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.capabilities.{Capability, ForgeCapabilities}
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.common.util.NonNullSupplier
-import net.minecraftforge.fluids._
-import net.minecraftforge.fluids.capability.IFluidHandler
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.mutable
 import net.minecraft.world.MenuProvider
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.core.Direction
 import net.minecraft.world.entity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.level.block.Blocks
@@ -56,11 +46,11 @@ import net.minecraft.world.level.material.FlowingFluid
 import net.minecraft.world.level.block.Block
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.Util
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.network.chat
+import net.neoforged.neoforge.fluids.capability.IFluidHandler
 
 // Implementation note: this tile entity is never directly added to the world.
 // It is always wrapped by a `RobotProxy` tile entity, which forwards any
@@ -78,22 +68,14 @@ class Robot(pos: BlockPos, state: BlockState)
 
   val bot: component.Robot = if (isServer) new component.Robot(this) else null
 
-  val fluidCap: LazyOptional[IFluidHandler] = LazyOptional.of(new NonNullSupplier[IFluidHandler] {
-    override def get = Robot.this
-  })
+  // NeoForge 1.21.1: FluidHandler capability is registered via RegisterCapabilitiesEvent.
+  // Robot itself implements IFluidHandler, so the registration lambda returns `this`.
 
   if (isServer) {
     machine.setCostPerTick(Settings.get.robotCost)
   }
 
   // ----------------------------------------------------------------------- //
-
-  override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-    if (capability == ForgeCapabilities.FLUID_HANDLER)
-      fluidCap.cast()
-    else
-      super.getCapability(capability, facing)
-  }
 
   override def tier: Int = info.tier
 
@@ -424,11 +406,11 @@ class Robot(pos: BlockPos, state: BlockState)
   private final val SwingingToolTag = Settings.namespace + "swingingTool"
   private final val TurnAxisTag = Settings.namespace + "turnAxis"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     updateInventorySize()
     machine.onHostChanged()
 
-    bot.loadData(nbt.getCompound(RobotTag))
+    bot.loadData(nbt.getCompound(RobotTag), provider)
     if (nbt.contains(OwnerTag)) {
       ownerName = nbt.getString(OwnerTag)
     }
@@ -459,12 +441,12 @@ class Robot(pos: BlockPos, state: BlockState)
   }
 
   // Side check for Waila (and other mods that may call this client side).
-  override def saveForServer(nbt: CompoundTag): Unit = if (isServer) this.synchronized {
-    info.saveData(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = if (isServer) this.synchronized {
+    info.saveData(nbt, provider)
 
     // Note: computer is saved when proxy is saved (in proxy's super save)
     // which is a bit ugly, and may be refactored some day, but it works.
-    nbt.setNewCompoundTag(RobotTag, bot.saveData)
+    nbt.setNewCompoundTag(RobotTag, (nbt: CompoundTag) => bot.saveData(nbt, provider))
     nbt.putString(OwnerTag, ownerName)
     nbt.putString(OwnerUUIDTag, ownerUUID.toString)
     nbt.putInt(SelectedSlotTag, selectedSlot)
@@ -485,10 +467,10 @@ class Robot(pos: BlockPos, state: BlockState)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt)
     loadData(nbt)
-    info.loadData(nbt)
+    info.loadData(nbt, provider)
 
     updateInventorySize()
 
@@ -508,10 +490,11 @@ class Robot(pos: BlockPos, state: BlockState)
     connectComponents()
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = this.synchronized {
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
     super.saveForClient(nbt)
     saveData(nbt)
-    info.saveData(nbt)
+    info.saveData(nbt, provider)
 
     nbt.putInt(SelectedSlotTag, selectedSlot)
     if (isAnimatingMove || isAnimatingSwing || isAnimatingTurn) {

@@ -2,9 +2,9 @@ package li.cil.oc.common.blockentity.traits
 
 import li.cil.oc.Settings
 import li.cil.oc.util.RotationHelper
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraft.core.Direction
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 
 /**
@@ -35,7 +35,7 @@ trait RotatableBaseBlock extends Rotatable {
   private final val PitchTag = Settings.namespace + "pitch"
   private final val YawTag = Settings.namespace + "yaw"
 
-  override def loadForServer(nbt: CompoundTag) = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider) = {
     super.loadForServer(nbt)
     if (nbt.contains(PitchTag)) {
       pitch = Direction.from3DDataValue(nbt.getInt(PitchTag))
@@ -46,7 +46,7 @@ trait RotatableBaseBlock extends Rotatable {
     validatePitchAndYaw()
   }
 
-  override def saveForServer(nbt: CompoundTag) = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider) = {
     super.saveForServer(nbt)
     nbt.putInt(PitchTag, pitch.ordinal)
     nbt.putInt(YawTag, yaw.ordinal)

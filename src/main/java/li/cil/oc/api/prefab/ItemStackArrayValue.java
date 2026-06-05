@@ -3,10 +3,12 @@ package li.cil.oc.api.prefab;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -69,7 +71,7 @@ public class ItemStackArrayValue extends AbstractValue {
 	}
 
 	@Override
-	public void loadData(CompoundTag nbt) {
+	public void loadData(CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
 		if (nbt.contains(ARRAY_KEY, TAGLIST_ID)){
 			ListTag tagList = nbt.getList(ARRAY_KEY,COMPOUND_ID);
 			this.array = new ItemStack[tagList.size()];
@@ -78,7 +80,7 @@ public class ItemStackArrayValue extends AbstractValue {
 				if (el.isEmpty())
 					this.array[i] = ItemStack.EMPTY;
 				else
-					this.array[i] = ItemStack.of(el);
+					this.array[i] = ItemStack.parseOptional(provider, el);
 			}
 		} else {
 			this.array = null;
@@ -87,7 +89,7 @@ public class ItemStackArrayValue extends AbstractValue {
 	}
 
 	@Override
-	public void saveData(CompoundTag nbt) {
+	public void saveData(CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
 
 		CompoundTag nullnbt = new CompoundTag();
 
@@ -95,7 +97,7 @@ public class ItemStackArrayValue extends AbstractValue {
 			ListTag nbttaglist = new ListTag();
 			for (ItemStack stack : this.array) {
 				if (stack != null) {
-					nbttaglist.add(stack.save(new CompoundTag()));
+					nbttaglist.add(stack.save(provider));
 				} else {
 					nbttaglist.add(nullnbt);
 				}

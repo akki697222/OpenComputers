@@ -1,32 +1,22 @@
 package li.cil.oc.client.gui
 
-import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.Localization
-import li.cil.oc.Settings
-import li.cil.oc.api
+import com.mojang.blaze3d.vertex.{BufferUploader, DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
+import li.cil.oc.{Localization, Settings}
 import li.cil.oc.api.internal.TextBuffer
-import li.cil.oc.client.ComponentTracker
-import li.cil.oc.client.Textures
 import li.cil.oc.client.gui.widget.ProgressBar
 import li.cil.oc.client.renderer.TextBufferRenderCache
 import li.cil.oc.client.renderer.gui.BufferRenderer
-import li.cil.oc.client.{PacketSender => ClientPacketSender}
+import li.cil.oc.client.{ComponentTracker, Textures, PacketSender => ClientPacketSender}
 import li.cil.oc.common.menu
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.components.Button
-import org.lwjgl.glfw.GLFW
-import org.lwjgl.opengl.GL11
-
-import scala.collection.JavaConverters.asJavaCollection
-import scala.collection.convert.ImplicitConversionsToJava._
-import net.minecraft.client.gui.components.events.ContainerEventHandler
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.Tesselator
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.network.chat.Component
-import com.mojang.blaze3d.vertex.VertexFormat
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.events.ContainerEventHandler
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Inventory
+import org.lwjgl.glfw.GLFW
+import scala.jdk.CollectionConverters._
 
 class Robot(state: menu.Robot, playerInventory: Inventory, name: Component)
   extends DynamicGuiContainer(state, playerInventory, name)
@@ -144,19 +134,24 @@ class Robot(state: menu.Robot, playerInventory: Inventory, name: Component)
   }
 
   override protected def drawSecondaryForegroundLayer(graphics: GuiGraphics, mouseX: Int, mouseY: Int): Unit = {
-    drawBufferLayer(graphics.pose)
+    drawBufferLayer(graphics.pose())
     if (isHovering(power.x, power.y, power.width, power.height, mouseX - leftPos, mouseY - topPos)) {
       val tooltip = new java.util.ArrayList[Component]
       val format = Localization.Computer.Power + ": %d%% (%d/%d)"
       tooltip.add(Component.literal(format.format(
         100 * inventoryContainer.globalBuffer / inventoryContainer.globalBufferSize,
         inventoryContainer.globalBuffer, inventoryContainer.globalBufferSize)))
-      graphics.renderComponentTooltip(font, tooltip, mouseX - leftPos, mouseY - topPos)
+      graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY)
     }
     if (powerButton.isMouseOver(mouseX, mouseY)) {
       val tooltip = new java.util.ArrayList[Component]
-      tooltip.addAll(if (inventoryContainer.isRunning) Localization.Computer.TurnOff.linesIterator.map(Component.literal).iterator.to(Iterable) else Localization.Computer.TurnOn.linesIterator.map(Component.literal).iterator.to(Iterable))
-      graphics.renderComponentTooltip(font, tooltip, mouseX - leftPos, mouseY - topPos)
+      tooltip.addAll(
+        if (inventoryContainer.isRunning)
+          Localization.Computer.TurnOff.linesIterator.map(Component.literal).toList.asJava
+        else
+          Localization.Computer.TurnOn.linesIterator.map(Component.literal).toList.asJava
+      )
+      graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY)
     }
   }
 
@@ -206,15 +201,15 @@ class Robot(state: menu.Robot, playerInventory: Inventory, name: Component)
     scrollTo(math.round((mouseY - topPos - scrollY + 1 - 6.5) * maxOffset / (scrollHeight - 13.0)).toInt)
   }
 
-  override def mouseScrolled(mouseX: Double, mouseY: Double, scroll: Double): Boolean = {
+  override def mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean = {
     val mx = mouseX.asInstanceOf[Int] - leftPos
     val my = mouseY.asInstanceOf[Int] - topPos
     if (isCoordinateOverInventory(mx, my) || isCoordinateOverScrollBar(mx, my)) {
-      if (scroll < 0) scrollDown()
+      if (scrollY < 0) scrollDown()
       else scrollUp()
       true
     }
-    else super.mouseScrolled(mouseX, mouseY, scroll)
+    else super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)
   }
 
   private def isCoordinateOverInventory(x: Int, y: Int) =
@@ -259,13 +254,12 @@ class Robot(state: menu.Robot, playerInventory: Inventory, name: Component)
       val y = topPos + inventoryY - 1 + (slot / 4) * (selectionSize - 2)
 
       val t = Tesselator.getInstance
-      val r = t.getBuilder
-      r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-      r.vertex(stack.last.pose, x, y, 0).uv(0, offsetV).endVertex()
-      r.vertex(stack.last.pose, x, y + selectionSize, 0).uv(0, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y + selectionSize, 0).uv(1, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y, 0).uv(1, offsetV).endVertex()
-      t.end()
+      val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+      r.addVertex(stack.last.pose(), x, y, 0).setUv(0, offsetV)
+      r.addVertex(stack.last.pose(), x, y + selectionSize, 0).setUv(0, offsetV + selectionStepV)
+      r.addVertex(stack.last.pose(), x + selectionSize, y + selectionSize, 0).setUv(1, offsetV + selectionStepV)
+      r.addVertex(stack.last.pose(), x + selectionSize, y, 0).setUv(1, offsetV)
+      BufferUploader.drawWithShader(r.buildOrThrow())
     }
   }
 }

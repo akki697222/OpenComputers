@@ -1,7 +1,8 @@
 package li.cil.oc.common
 
-import java.lang.reflect.Method
+import net.minecraft.core.component.DataComponents
 
+import java.lang.reflect.Method
 import net.minecraft.world.item.ItemStack
 
 import scala.collection.mutable
@@ -17,7 +18,7 @@ object ToolDurabilityProviders {
       if (!durability.isNaN) return Option(durability)
     }
     // Fall back to vanilla damage values.
-    if (stack.getItem.canBeDepleted) Option(1.0 - stack.getDamageValue.toDouble / stack.getMaxDamage.toDouble)
+    if (stack.getItem.components().has(DataComponents.MAX_DAMAGE)) Option(1.0 - stack.getDamageValue.toDouble / stack.getMaxDamage.toDouble)
     else None
   }
 }

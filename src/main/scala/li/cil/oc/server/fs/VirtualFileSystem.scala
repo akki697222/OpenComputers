@@ -2,8 +2,8 @@ package li.cil.oc.server.fs
 
 import java.io
 import java.io.FileNotFoundException
-
 import li.cil.oc.api.fs.Mode
+import net.minecraft.core.HolderLookup
 
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
@@ -126,17 +126,17 @@ trait VirtualFileSystem extends OutputStreamFileSystem {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     //println(s"Loading file data, NBT contains root: ${nbt.contains("root")}")
     if (nbt.contains("root", 10)) {
       root.loadData(nbt.getCompound("root"))
     }
     if (!this.isInstanceOf[Buffered]) root.loadData(nbt)
-    super.loadData(nbt) // Last to ensure streams can be re-opened.
+    super.loadData(nbt, provider) // Last to ensure streams can be re-opened.
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt) // First to allow flushing.
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider) // First to allow flushing.
     if (!this.isInstanceOf[Buffered]) {
       val fsNbt = new CompoundTag()
       root.saveData(fsNbt)

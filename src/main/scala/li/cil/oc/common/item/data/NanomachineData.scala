@@ -3,6 +3,7 @@ package li.cil.oc.common.item.data
 import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.Constants
 import li.cil.oc.Settings
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
@@ -26,7 +27,7 @@ class NanomachineData extends ItemData(Constants.ItemName.Nanomachines) {
   private final val UUIDTag = Settings.namespace + "uuid"
   private final val ConfigurationTag = Settings.namespace + "configuration"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     uuid = nbt.getString(UUIDTag)
     if (nbt.contains(ConfigurationTag)) {
       configuration = Option(nbt.getCompound(ConfigurationTag))
@@ -36,7 +37,7 @@ class NanomachineData extends ItemData(Constants.ItemName.Nanomachines) {
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putString(UUIDTag, uuid)
     configuration.foreach(nbt.put(ConfigurationTag, _))
   }

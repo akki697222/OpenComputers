@@ -10,7 +10,7 @@ import li.cil.oc.util.ExtendedArguments.TankProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.IFluidTank;
 
 public final class DriverFluidTank extends DriverSidedTileEntity {
     @Override

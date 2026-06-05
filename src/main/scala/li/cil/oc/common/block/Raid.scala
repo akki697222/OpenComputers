@@ -23,7 +23,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.{Component => ITextComponent}
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
-import net.minecraftforge.common.extensions.IForgeBlock
+import net.neoforged.common.extensions.IForgeBlock
 
 class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with traits.GUI {
 
@@ -70,7 +70,7 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
         data.label.foreach(tileEntity.label.setLabel)
         if (!data.filesystem.isEmpty) {
           tileEntity.tryCreateRaid(data.filesystem.getCompound("node").getString("address"))
-          tileEntity.filesystem.foreach(_.loadData(data.filesystem))
+          tileEntity.filesystem.foreach(_.loadData(data.filesystem, world.registryAccess()))
         }
       }
       case _ =>
@@ -85,7 +85,7 @@ class Raid(props: Properties) extends SimpleBlock(props) with IForgeBlock with t
           if (tileEntity.items.exists(!_.isEmpty)) {
             val data = new RaidData()
             data.disks = tileEntity.items.clone()
-            tileEntity.filesystem.foreach(_.saveData(data.filesystem))
+            tileEntity.filesystem.foreach(_.saveData(data.filesystem, tileEntity.getLevel.registryAccess()))
             data.label = Option(tileEntity.label.getLabel)
             data.saveData(stack)
           }

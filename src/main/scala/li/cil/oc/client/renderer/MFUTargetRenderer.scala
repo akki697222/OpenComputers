@@ -9,11 +9,12 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.RenderType
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.InteractionHand
-import net.minecraftforge.client.event.RenderLevelStageEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent
+import net.neoforged.bus.api.SubscribeEvent
 import net.minecraft.nbt.Tag
 import org.joml.Matrix4f
 
@@ -28,9 +29,10 @@ object MFUTargetRenderer {
     val player = mc.player
     if (player == null) return
     player.getItemInHand(InteractionHand.MAIN_HAND) match {
-      case stack: ItemStack if api.Items.get(stack) == mfu && stack.hasTag =>
-        val data = stack.getTag
-        if (data.contains(Settings.namespace + "coord", Tag.TAG_INT_ARRAY)) {
+      case stack: ItemStack if api.Items.get(stack) == mfu && stack.has(DataComponents.CUSTOM_DATA) =>
+        val customData = stack.get(DataComponents.CUSTOM_DATA)
+        val data = if (customData != null) customData.getUnsafe else null
+        if (data != null && data.contains(Settings.namespace + "coord", Tag.TAG_INT_ARRAY)) {
           val dimension = ResourceLocation.tryParse(data.getString(Settings.namespace + "dimension"))
           if (!player.level.dimension.location.equals(dimension)) return
           val Array(x, y, z, side) = data.getIntArray(Settings.namespace + "coord")
@@ -63,68 +65,68 @@ object MFUTargetRenderer {
 
   def drawBox(matrix: Matrix4f, builder: VertexConsumer, minX: Float, minY: Float, minZ: Float, maxX: Float, maxY: Float, maxZ: Float, r: Float, g: Float, b: Float) = {
     // Bottom square.
-    builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.5f).endVertex()
+    builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.5f)
 
     // Vertical bars.
-    builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
+    builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.5f)
 
     // Top square.
-    builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
-    builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.5f).endVertex()
+    builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.5f)
+    builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.5f)
   }
 
   private def drawFace(matrix: Matrix4f, builder: VertexConsumer, minX: Float, minY: Float, minZ: Float, maxX: Float, maxY: Float, maxZ: Float, side: Int, r: Float, g: Float, b: Float): Unit = {
     side match {
       case 0 => // Down
-        builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.25f)
       case 1 => // Up
-        builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.25f)
       case 2 => // North
-        builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.25f)
       case 3 => // South
-        builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.25f)
       case 4 => // East
-        builder.vertex(matrix, minX, minY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, minX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, minX, minY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, maxY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, minX, minY, maxZ).setColor(r, g, b, 0.25f)
       case 5 => // West
-        builder.vertex(matrix, maxX, minY, minZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, minY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, maxY, maxZ).color(r, g, b, 0.25f).endVertex()
-        builder.vertex(matrix, maxX, maxY, minZ).color(r, g, b, 0.25f).endVertex()
+        builder.addVertex(matrix, maxX, minY, minZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, minY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, maxY, maxZ).setColor(r, g, b, 0.25f)
+        builder.addVertex(matrix, maxX, maxY, minZ).setColor(r, g, b, 0.25f)
       case _ => // WTF?
     }
   }

@@ -344,17 +344,19 @@ class ControllerImpl(val player: Player) extends Controller with WirelessEndpoin
   // ----------------------------------------------------------------------- //
 
   def saveData(nbt: CompoundTag): Unit = configuration.synchronized {
+    val provider = player.level.registryAccess()
     nbt.putString("uuid", uuid)
     nbt.putInt("port", responsePort)
     nbt.putDouble("energy", storedEnergy)
-    nbt.setNewCompoundTag("configuration", configuration.saveData)
+    nbt.setNewCompoundTag("configuration", (nbt: CompoundTag) => configuration.saveData(nbt, provider))
   }
 
   def loadData(nbt: CompoundTag): Unit = configuration.synchronized {
+    val provider = player.level.registryAccess()
     uuid = nbt.getString("uuid")
     responsePort = nbt.getInt("port")
     storedEnergy = nbt.getDouble("energy")
-    configuration.loadData(nbt.getCompound("configuration"))
+    configuration.loadData(nbt.getCompound("configuration"), provider)
     activeBehaviorsDirty = true
   }
 

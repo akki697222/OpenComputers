@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.level.Level
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 class Waypoint(props: Properties) extends RedstoneAware(props) with traits.Tickable {
   protected override def createBlockStateDefinition(builder: StateDefinition.Builder[Block, BlockState]) =

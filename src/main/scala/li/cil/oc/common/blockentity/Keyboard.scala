@@ -10,10 +10,10 @@ import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 class Keyboard(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.KEYBOARD.get(), pos, state) with traits.Environment with traits.Rotatable with traits.ImmibisMicroblock with SidedEnvironment with Analyzable {
@@ -45,17 +45,17 @@ class Keyboard(pos: BlockPos, state: BlockState)
 
   private final val KeyboardTag = Settings.namespace + "keyboard"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     if (isServer) {
-      keyboard.loadData(nbt.getCompound(KeyboardTag))
+      keyboard.loadData(nbt.getCompound(KeyboardTag), provider)
     }
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
     if (isServer) {
-      nbt.setNewCompoundTag(KeyboardTag, keyboard.saveData)
+      nbt.setNewCompoundTag(KeyboardTag, (nbt: CompoundTag) => keyboard.saveData(nbt, provider))
     }
   }
 

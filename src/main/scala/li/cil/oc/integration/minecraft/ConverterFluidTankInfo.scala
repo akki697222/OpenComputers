@@ -3,7 +3,7 @@ package li.cil.oc.integration.minecraft
 import java.util
 
 import li.cil.oc.api
-import net.minecraftforge.fluids
+import net.neoforged.fluids
 
 import scala.collection.convert.ImplicitConversionsToScala._
 

@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import com.google.common.base.Charsets
 import li.cil.oc.Constants
 import li.cil.oc.Settings
@@ -21,6 +20,7 @@ import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.common.Tier
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt._
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -160,15 +160,15 @@ class NetworkCard(val host: EnvironmentHost) extends AbstractManagedEnvironment 
 
   private final val OpenPortsTag = "openPorts"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     assert(openPorts.isEmpty)
     openPorts ++= nbt.getIntArray(OpenPortsTag)
     loadWakeMessage(nbt)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
 
     nbt.putIntArray(OpenPortsTag, openPorts.toArray)
     saveWakeMessage(nbt)

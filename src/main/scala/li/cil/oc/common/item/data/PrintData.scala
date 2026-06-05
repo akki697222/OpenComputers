@@ -1,7 +1,6 @@
 package li.cil.oc.common.item.data
 
 import java.lang.reflect.Method
-
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.api
@@ -9,6 +8,7 @@ import li.cil.oc.common.IMC
 import li.cil.oc.common.item.data.PrintData.Shape
 import li.cil.oc.util.ExtendedAABB._
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 
 import scala.collection.mutable
@@ -73,7 +73,7 @@ class PrintData extends ItemData(Constants.BlockName.Print) {
   private final val NoclipOffTag = "noclipOff"
   private final val NoclipOnTag = "noclipOn"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (nbt.contains(LabelTag)) label = Option(nbt.getString(LabelTag)) else label = None
     if (nbt.contains(TooltipTag)) tooltip = Option(nbt.getString(TooltipTag)) else tooltip = None
     isButtonMode = nbt.getBoolean(IsButtonModeTag)
@@ -92,7 +92,7 @@ class PrintData extends ItemData(Constants.BlockName.Print) {
     opacityDirty = true
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     label.foreach(nbt.putString("label", _))
     tooltip.foreach(nbt.putString("tooltip", _))
     nbt.putBoolean("isButtonMode", isButtonMode)

@@ -4,8 +4,8 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.core.Direction
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.fluids.IFluidBlock
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.IFluidBlock
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
 
 import scala.language.implicitConversions
 

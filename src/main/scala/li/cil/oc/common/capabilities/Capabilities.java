@@ -3,24 +3,25 @@ package li.cil.oc.common.capabilities;
 import li.cil.oc.api.internal.Colored;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.SidedEnvironment;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 public final class Capabilities {
-    public static Capability<Colored> ColoredCapability = CapabilityManager.get(new CapabilityToken<>(){});
+    // These are defined in the Scala Capabilities object, but we keep Java stubs
+    // for backwards compatibility with Java callers.
+    // The actual declarations live in li.cil.oc.common.Capabilities (Scala object).
 
-    public static Capability<Environment> EnvironmentCapability = CapabilityManager.get(new CapabilityToken<>(){});
+    public static BlockCapability<Colored, Direction> ColoredCapability() {
+        return li.cil.oc.common.Capabilities$.MODULE$.ColoredCapability();
+    }
 
-    public static Capability<SidedEnvironment> SidedEnvironmentCapability = CapabilityManager.get(new CapabilityToken<>(){});
+    public static BlockCapability<Environment, Direction> EnvironmentCapability() {
+        return li.cil.oc.common.Capabilities$.MODULE$.EnvironmentCapability();
+    }
 
-    @SubscribeEvent
-    public static void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(Colored.class);
-        event.register(Environment.class);
-        event.register(SidedEnvironment.class);
+    public static BlockCapability<SidedEnvironment, Direction> SidedEnvironmentCapability() {
+        return li.cil.oc.common.Capabilities$.MODULE$.SidedEnvironmentCapability();
     }
 
     private Capabilities() {

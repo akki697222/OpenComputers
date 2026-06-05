@@ -17,7 +17,7 @@ import li.cil.oc.server.agent
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.{BlockPosition, InventoryUtils}
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.{EntityDataAccessor, EntityDataSerializers, SynchedEntityData}
@@ -32,9 +32,9 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.{InteractionHand, InteractionResult, MenuProvider}
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.fluids.IFluidTank
-import net.minecraftforge.network.NetworkHooks
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.fluids.IFluidTank
+import net.neoforged.network.NetworkHooks
 
 import java.lang
 import java.lang.Iterable
@@ -600,11 +600,12 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
   override def getAddEntityPacket = NetworkHooks.getEntitySpawningPacket(this)
 
   override protected def readAdditionalSaveData(nbt: CompoundTag): Unit = {
-    info.loadData(nbt.getCompound("info"))
+    val provider = this.level.registryAccess()
+    info.loadData(nbt.getCompound("info"), provider)
     inventorySize = computeInventorySize()
     if (!getEnvironmentLevel.isClientSide) {
-      machine.loadData(nbt.getCompound("machine"))
-      control.loadData(nbt.getCompound("control"))
+      machine.loadData(nbt.getCompound("machine"), provider)
+      control.loadData(nbt.getCompound("control"), provider)
       components.loadData(nbt.getCompound("components"))
       mainInventory.loadData(nbt.getCompound("inventory"))
 
@@ -628,12 +629,13 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   override protected def addAdditionalSaveData(nbt: CompoundTag): Unit = {
     if (getEnvironmentLevel.isClientSide) return
+    val provider = this.level.registryAccess()
     components.saveComponents()
     info.storedEnergy = globalBuffer.toInt
-    nbt.setNewCompoundTag("info", info.saveData)
+    nbt.setNewCompoundTag("info", (nbt: CompoundTag) => info.saveData(nbt, provider))
     if (!getEnvironmentLevel.isClientSide) {
-      nbt.setNewCompoundTag("machine", machine.saveData)
-      nbt.setNewCompoundTag("control", control.saveData)
+      nbt.setNewCompoundTag("machine", (nbt: CompoundTag) => machine.saveData(nbt, provider))
+      nbt.setNewCompoundTag("control", (nbt: CompoundTag) => control.saveData(nbt, provider))
       nbt.setNewCompoundTag("components", components.saveData)
       nbt.setNewCompoundTag("inventory", mainInventory.saveData)
     }

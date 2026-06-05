@@ -1,9 +1,9 @@
 package li.cil.oc.server.fs
 
 import java.io
-
 import li.cil.oc.Settings
 import li.cil.oc.api.fs.Mode
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 trait Capacity extends OutputStreamFileSystem {
@@ -65,10 +65,10 @@ trait Capacity extends OutputStreamFileSystem {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     try {
       ignoreCapacity = true
-      super.loadData(nbt)
+      super.loadData(nbt, provider)
     } finally {
       ignoreCapacity = false
     }
@@ -76,8 +76,8 @@ trait Capacity extends OutputStreamFileSystem {
     used = computeSize("/")
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
 
     // For the tooltip.
     nbt.putLong("capacity.used", used)

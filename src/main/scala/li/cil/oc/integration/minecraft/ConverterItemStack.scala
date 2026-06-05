@@ -11,7 +11,7 @@ import net.minecraft.world.item
 import net.minecraft.world.item.Item
 import net.minecraft.tags.ItemTags
 import net.minecraft.world.item.enchantment.EnchantmentHelper
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable

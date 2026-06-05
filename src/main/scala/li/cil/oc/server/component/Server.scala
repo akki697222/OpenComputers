@@ -2,7 +2,6 @@ package li.cil.oc.server.component
 
 import java.lang.Iterable
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -31,10 +30,7 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraftforge.common.capabilities.Capability
-import net.minecraftforge.common.capabilities.ICapabilityProvider
-import net.minecraftforge.common.util.LazyOptional
+import net.minecraft.core.{Direction, HolderLookup}
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.server.level.ServerPlayer
@@ -42,7 +38,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.Level
 
-class Server(val rack: api.internal.Rack, val slot: Int) extends Environment with MachineHost with ServerInventory with ComponentInventory with Analyzable with internal.Server with ICapabilityProvider with DeviceInfo {
+class Server(val rack: api.internal.Rack, val slot: Int) extends Environment with MachineHost with ServerInventory with ComponentInventory with Analyzable with internal.Server with DeviceInfo {
   lazy val machine: api.machine.Machine = Machine.create(this)
 
   val node: Node = if (!rack.getEnvironmentLevel.isClientSide) machine.node else null
@@ -82,17 +78,17 @@ class Server(val rack: api.internal.Rack, val slot: Int) extends Environment wit
 
   private final val MachineTag = "machine"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     if (!rack.getEnvironmentLevel.isClientSide) {
-      machine.loadData(nbt.getCompound(MachineTag))
+      machine.loadData(nbt.getCompound(MachineTag), provider)
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     if (!rack.getEnvironmentLevel.isClientSide) {
-      nbt.setNewCompoundTag(MachineTag, machine.saveData)
+      nbt.setNewCompoundTag(MachineTag, (nbt: CompoundTag) => machine.saveData(nbt, provider))
     }
   }
 
@@ -235,18 +231,5 @@ class Server(val rack: api.internal.Rack, val slot: Int) extends Environment wit
   // Analyzable
 
   override def onAnalyze(player: Player, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = Array(machine.node)
-
-  // ----------------------------------------------------------------------- //
-  // ICapabilityProvider
-
-  override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-    for (curr <- components) curr match {
-      case Some(comp: ICapabilityProvider) => {
-        val cap = comp.getCapability(capability, host.toLocal(facing))
-        if (cap.isPresent) return cap
-      }
-      case _ =>
-    }
-    LazyOptional.empty[T]
-  }
 }
+

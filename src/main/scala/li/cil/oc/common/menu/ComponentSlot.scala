@@ -3,8 +3,8 @@ package li.cil.oc.common.menu
 import li.cil.oc.api.Driver
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.Container

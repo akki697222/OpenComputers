@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import net.minecraft.util.Mth
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import org.joml.{Matrix3f, Matrix4f}
 import org.lwjgl.opengl._
 

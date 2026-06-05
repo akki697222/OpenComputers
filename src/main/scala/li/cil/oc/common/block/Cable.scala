@@ -1,41 +1,36 @@
 package li.cil.oc.common.block
 
-import java.util
 import li.cil.oc.common.block.property.PropertyCableConnection
-import li.cil.oc.common.capabilities.Capabilities
 import li.cil.oc.common.blockentity
-import li.cil.oc.util.Color
-import li.cil.oc.util.ExtendedLevel._
-import li.cil.oc.util.ItemColorizer
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.state.BlockState
+import li.cil.oc.common.{Capabilities}
+import li.cil.oc.util.{Color, ItemColorizer}
+import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
-import net.minecraft.world.entity.{Entity, LivingEntity}
-import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
+import net.minecraft.world.item.context.{
+  BlockPlaceContext => BlockItemUseContext
+}
 import net.minecraft.world.item.{DyeColor, ItemStack}
-import net.minecraft.world.level.block.state.{StateDefinition => StateContainer}
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.{BlockEntity => TileEntity}
-import net.minecraft.core.Direction
-import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties
+import net.minecraft.world.level.block.state.{
+  BlockState,
+  StateDefinition => StateContainer
+}
+import net.minecraft.world.level.{
+  BlockGetter => IBlockReader,
+  Level => World,
+  LevelAccessor => IWorld
+}
+import net.minecraft.world.phys.shapes.{
+  VoxelShape,
+  CollisionContext => ISelectionContext,
+  Shapes => VoxelShapes
+}
 import net.minecraft.world.phys.{HitResult => RayTraceResult}
-import net.minecraft.world.phys.shapes.{CollisionContext => ISelectionContext}
-import net.minecraft.world.phys.shapes.VoxelShape
-import net.minecraft.world.phys.shapes.{Shapes => VoxelShapes}
-import net.minecraft.world.level.{BlockGetter => IBlockReader}
-import net.minecraft.world.level.{LevelAccessor => IWorld}
-import net.minecraft.world.level.{Level => World}
-import net.minecraft.server.level.{ServerLevel => ServerWorld}
-import net.minecraft.world.level.block.state.properties.Property
-import net.minecraftforge.common.extensions.IForgeBlock
 
-import scala.collection.JavaConverters._
-import scala.reflect.ClassTag
-
-class Cable(props: Properties) extends SimpleBlock(props) with IForgeBlock {
-  // For Immibis Microblock support.
-  val ImmibisMicroblocks_TransformableBlockMarker = null
-
+class Cable(props: Properties) extends SimpleBlock(props) {
   // For FMP part coloring.
   var colorMultiplierOverride: Option[Int] = None
 
@@ -169,16 +164,15 @@ object Cable {
     if (tileEntity != null) {
       if (tileEntity.isInstanceOf[blockentity.RobotProxy]) return false
 
-      if (tileEntity.getCapability(Capabilities.SidedEnvironmentCapability, side).isPresent) {
-        val host = tileEntity.getCapability(Capabilities.SidedEnvironmentCapability, side).orElse(null)
-        if (host != null) {
-          return if (tileEntity.getLevel.isClientSide) host.canConnect(side) else host.sidedNode(side) != null
+      val level = tileEntity.getLevel
+      val pos = tileEntity.getBlockPos
+      if (level != null) {
+        Option(level.getCapability(Capabilities.SidedEnvironmentCapability, pos, side)) match {
+          case Some(host) =>
+            return if (level.isClientSide) host.canConnect(side) else host.sidedNode(side) != null
+          case _ =>
         }
-      }
-
-      if (tileEntity.getCapability(Capabilities.EnvironmentCapability, side).isPresent) {
-        val host = tileEntity.getCapability(Capabilities.EnvironmentCapability, side)
-        if (host.isPresent) return true
+        if (level.getCapability(Capabilities.EnvironmentCapability, pos, side) != null) return true
       }
     }
 
@@ -192,9 +186,13 @@ object Cable {
 
   private def getConnectionColor(tileEntity: TileEntity): Int = {
     if (tileEntity != null) {
-      if (tileEntity.getCapability(Capabilities.ColoredCapability, null).isPresent) {
-        val colored = tileEntity.getCapability(Capabilities.ColoredCapability, null).orElse(null)
-        if (colored != null && colored.controlsConnectivity) return colored.getColor
+      val level = tileEntity.getLevel
+      val pos = tileEntity.getBlockPos
+      if (level != null) {
+        Option(level.getCapability(Capabilities.ColoredCapability, pos, null)) match {
+          case Some(colored) if colored.controlsConnectivity => return colored.getColor
+          case _ =>
+        }
       }
     }
 

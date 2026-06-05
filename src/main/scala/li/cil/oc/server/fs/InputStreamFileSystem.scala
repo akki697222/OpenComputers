@@ -4,9 +4,9 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.ReadableByteChannel
-
 import li.cil.oc.api
 import li.cil.oc.api.fs.Mode
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 
@@ -58,7 +58,7 @@ trait InputStreamFileSystem extends api.fs.FileSystem {
   private final val PathTag = "path"
   private final val PositionTag = "position"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     val handlesNbt = nbt.getList(InputTag, Tag.TAG_COMPOUND)
     (0 until handlesNbt.size).map(handlesNbt.getCompound).foreach(handleNbt => {
       val handle = handleNbt.getInt(HandleTag)
@@ -74,7 +74,7 @@ trait InputStreamFileSystem extends api.fs.FileSystem {
     })
   }
 
-  override def saveData(nbt: CompoundTag): Unit = this.synchronized {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
     val handlesNbt = new ListTag()
     for (file <- handles.values) {
       assert(file.channel.isOpen)

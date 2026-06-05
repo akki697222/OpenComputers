@@ -8,12 +8,9 @@ import li.cil.oc.common.menu
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.Rect2i
 import org.lwjgl.opengl.GL11
-import com.mojang.blaze3d.vertex.Tesselator
+import com.mojang.blaze3d.vertex.{BufferUploader, DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Inventory
-import com.mojang.blaze3d.vertex.VertexFormat
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.gui.GuiGraphics
 
 class Relay(state: menu.Relay, playerInventory: Inventory, name: Component)
@@ -26,22 +23,20 @@ class Relay(state: menu.Relay, playerInventory: Inventory, name: Component)
   override protected def drawSecondaryBackgroundLayer(graphics: GuiGraphics): Unit = {
     super.drawSecondaryBackgroundLayer(graphics)
 
-    // Tab background.
     RenderSystem.setShaderColor(1, 1, 1, 1)
     RenderSystem.setShaderTexture(0, Textures.GUI.UpgradeTab)
-    val stack = graphics.pose
+    val stack = graphics.pose()
     val x = windowX + tabPosition.getX
     val y = windowY + tabPosition.getY
     val w = tabPosition.getWidth
     val h = tabPosition.getHeight
     val t = Tesselator.getInstance
-    val r = t.getBuilder
-    r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-    r.vertex(stack.last.pose, x, y + h, 0).uv(0, 1).endVertex()
-    r.vertex(stack.last.pose, x + w, y + h, 0).uv(1, 1).endVertex()
-    r.vertex(stack.last.pose, x + w, y, 0).uv(1, 0).endVertex()
-    r.vertex(stack.last.pose, x, y, 0).uv(0, 0).endVertex()
-    t.end()
+    val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+    r.addVertex(stack.last.pose(), x, y + h, 0).setUv(0, 1)
+    r.addVertex(stack.last.pose(), x + w, y + h, 0).setUv(1, 1)
+    r.addVertex(stack.last.pose(), x + w, y, 0).setUv(1, 0)
+    r.addVertex(stack.last.pose(), x, y, 0).setUv(0, 0)
+    BufferUploader.drawWithShader(r.buildOrThrow())
   }
 
   override def mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean = {

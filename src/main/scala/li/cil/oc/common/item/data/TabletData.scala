@@ -4,6 +4,7 @@ import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.common.Tier
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
@@ -30,7 +31,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
   private final val TierTag = Settings.namespace + "tier"
   private final val ContainerTag = Settings.namespace + "container"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.getList(ItemsTag, Tag.TAG_COMPOUND).foreach((slotNbt: CompoundTag) => {
       val slot = slotNbt.getByte(SlotTag)
       if (slot >= 0 && slot < items.length) {
@@ -46,7 +47,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.setNewTagList(ItemsTag,
       items.zipWithIndex collect {
         case (stack, slot) if !stack.isEmpty => (stack, slot)

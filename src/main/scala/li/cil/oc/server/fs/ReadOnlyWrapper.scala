@@ -1,9 +1,9 @@
 package li.cil.oc.server.fs
 
 import java.io.FileNotFoundException
-
 import li.cil.oc.api
 import li.cil.oc.api.fs.Mode
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 private class ReadOnlyWrapper(val fileSystem: api.fs.FileSystem) extends api.fs.FileSystem {
@@ -41,7 +41,7 @@ private class ReadOnlyWrapper(val fileSystem: api.fs.FileSystem) extends api.fs.
 
   override def close() = fileSystem.close()
 
-  override def loadData(nbt: CompoundTag): Unit = fileSystem.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = fileSystem.loadData(nbt, provider)
 
-  override def saveData(nbt: CompoundTag): Unit = fileSystem.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = fileSystem.saveData(nbt, provider)
 }

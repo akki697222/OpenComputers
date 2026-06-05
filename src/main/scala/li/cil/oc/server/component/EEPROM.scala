@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import com.google.common.hash.Hashing
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
@@ -15,6 +14,7 @@ import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network._
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -121,8 +121,8 @@ class EEPROM extends AbstractManagedEnvironment with DeviceInfo {
   private final val ReadonlyTag = Settings.namespace + "readonly"
   private final val UserdataTag = Settings.namespace + "userdata"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     codeData = nbt.getByteArray(EEPROMTag)
     if (nbt.contains(LabelTag)) {
       label = nbt.getString(LabelTag)
@@ -131,8 +131,8 @@ class EEPROM extends AbstractManagedEnvironment with DeviceInfo {
     volatileData = nbt.getByteArray(UserdataTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putByteArray(EEPROMTag, codeData)
     nbt.putString(LabelTag, label)
     nbt.putBoolean(ReadonlyTag, readonly)

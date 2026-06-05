@@ -12,8 +12,8 @@ import li.cil.oc.util.ExtendedArguments._
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.minecraftforge.items.IItemHandler
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.items.IItemHandler
+import net.neoforged.registries.ForgeRegistries
 
 import scala.jdk.CollectionConverters._
 

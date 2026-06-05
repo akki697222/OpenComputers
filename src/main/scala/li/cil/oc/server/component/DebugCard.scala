@@ -43,37 +43,35 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria
 import net.minecraft.world.scores.Scoreboard
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.core.Direction
+import net.minecraft.core.{BlockPos, Direction, HolderLookup, Registry}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.resources.ResourceKey
 import net.minecraft.sounds.SoundSource
-import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
-import net.minecraft.core.Registry
 import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.{GameType, Level, LevelSettings}
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.storage.ServerLevelData
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.common.util.FakePlayerFactory
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.IFluidBlock
-import net.minecraftforge.fluids.capability.IFluidHandler
-import net.minecraftforge.fml.ModList
-import net.minecraftforge.server.ServerLifecycleHooks
-import net.minecraftforge.registries.ForgeRegistries
-import net.minecraftforge.registries.IForgeRegistry
+import net.neoforged.common.MinecraftForge
+import net.neoforged.common.util.FakePlayer
+import net.neoforged.common.util.FakePlayerFactory
+import net.neoforged.fluids.FluidStack
+import net.neoforged.fluids.IFluidBlock
+import net.neoforged.fluids.capability.IFluidHandler
+import net.neoforged.fml.ModList
+import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.registries.ForgeRegistries
+import net.neoforged.registries.IForgeRegistry
 
 import scala.collection.JavaConverters.{collectionAsScalaIterable, mapAsScalaMap}
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.vehicle.Minecart
-import net.minecraftforge.event.level.BlockEvent
+import net.neoforged.event.level.BlockEvent
 
 class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with DebugNode {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Neighbors).
@@ -364,8 +362,8 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     access = AccessContext.loadData(nbt)
     if (nbt.contains(Settings.namespace + "remoteX")) {
       val x = nbt.getInt(Settings.namespace + "remoteX")
@@ -375,8 +373,8 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     access.foreach(_.saveData(nbt))
     remoteNodePosition.foreach {
       case (x, y, z) =>
@@ -522,14 +520,14 @@ object DebugCard {
 
     private final val NameTag = "name"
 
-    override def loadData(nbt: CompoundTag): Unit = {
-      super.loadData(nbt)
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.loadData(nbt, provider)
       ctx = AccessContext.loadData(nbt)
       name = nbt.getString(NameTag)
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
-      super.saveData(nbt)
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.saveData(nbt, provider)
       ctx.foreach(_.saveData(nbt))
       nbt.putString(NameTag, name)
     }
@@ -653,16 +651,16 @@ object DebugCard {
 
     private final val DimensionTag = "dimension"
 
-    override def loadData(nbt: CompoundTag): Unit = {
-      super.loadData(nbt)
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.loadData(nbt, provider)
       ctx = AccessContext.loadData(nbt)
       dimension = ResourceLocation.tryParse(nbt.getString(DimensionTag))
       val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
       scoreboard = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey).getScoreboard
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
-      super.saveData(nbt)
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.saveData(nbt, provider)
       ctx.foreach(_.saveData(nbt))
       nbt.putString(DimensionTag, dimension.toString)
     }
@@ -973,16 +971,16 @@ object DebugCard {
 
     private final val DimensionTag = "dimension"
 
-    override def loadData(nbt: CompoundTag): Unit = {
-      super.loadData(nbt)
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.loadData(nbt, provider)
       ctx = AccessContext.loadData(nbt)
       val dimension = ResourceLocation.tryParse(nbt.getString(DimensionTag))
       val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
       world = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
-      super.saveData(nbt)
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.saveData(nbt, provider)
       ctx.foreach(_.saveData(nbt))
       nbt.putString(DimensionTag, world.dimension.location.toString)
     }
@@ -1013,15 +1011,14 @@ object DebugCard {
 
     private final val ValueTag = "value"
 
-    override def loadData(nbt: CompoundTag): Unit = {
-      super.loadData(nbt)
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.loadData(nbt, provider)
       value = nbt.getString(ValueTag)
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
-      super.saveData(nbt)
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+      super.saveData(nbt, provider)
       nbt.putString(ValueTag, value)
     }
   }
-
 }

@@ -11,7 +11,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.RecipeManager
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.common.extensions.IForgeItem
 
 import scala.collection.mutable
 import net.minecraft.world.item.CreativeModeTab

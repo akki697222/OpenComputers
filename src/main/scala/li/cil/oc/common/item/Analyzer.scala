@@ -16,10 +16,10 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.Util
-import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.common.extensions.IForgeItem
+import net.neoforged.common.util.FakePlayer
+import net.neoforged.event.entity.player.PlayerInteractEvent
+import net.neoforged.eventbus.api.SubscribeEvent
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level

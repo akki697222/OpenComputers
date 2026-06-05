@@ -7,9 +7,9 @@ import li.cil.oc.api.network.SidedEnvironment
 import li.cil.oc.common.EventHandler
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.world.level.Level
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
+import net.neoforged.client.model.data.{ModelData, ModelProperty}
 
 trait Environment extends BaseBlockEntity with network.Environment with network.EnvironmentHost {
   protected var isChangeScheduled = false
@@ -60,17 +60,17 @@ trait Environment extends BaseBlockEntity with network.Environment with network.
 
   private final val NodeTag = Settings.namespace + "node"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     if (node != null && node.host == this) {
-      node.loadData(nbt.getCompound(NodeTag))
+      node.loadData(nbt.getCompound(NodeTag), provider)
     }
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
     if (node != null && node.host == this) {
-      nbt.setNewCompoundTag(NodeTag, node.saveData)
+      nbt.setNewCompoundTag(NodeTag, (nbt: CompoundTag) => node.saveData(nbt, provider))
     }
   }
 

@@ -1,11 +1,20 @@
 package li.cil.oc.common
 
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.chunk.{ChunkAccess, LevelChunk}
+import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.phys.AABB
-import net.minecraftforge.event.entity.EntityJoinLevelEvent
-import net.minecraftforge.event.level.{BlockEvent, ChunkEvent, LevelEvent}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
+import net.neoforged.neoforge.client.event.{ClientPlayerNetworkEvent, ClientTickEvent}
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent.{ItemCraftedEvent, PlayerChangedDimensionEvent, PlayerLoggedInEvent, PlayerLoggedOutEvent, PlayerRespawnEvent}
+import net.neoforged.neoforge.event.level.{BlockEvent, ChunkEvent, LevelEvent}
+import net.neoforged.neoforge.event.tick.ServerTickEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import java.util.Calendar
 
@@ -14,60 +23,34 @@ import java.util.Calendar
 import li.cil.oc._
 import li.cil.oc.api.Network
 import li.cil.oc.api.detail.ItemInfo
-import li.cil.oc.api.internal.Colored
-import li.cil.oc.api.internal.Rack
-import li.cil.oc.api.internal.Server
+import li.cil.oc.api.internal.{Colored, Rack, Server}
 import li.cil.oc.api.machine.MachineHost
-import li.cil.oc.api.network.Environment
-import li.cil.oc.api.network.SidedComponent
-import li.cil.oc.api.network.SidedEnvironment
+import li.cil.oc.api.network.{Environment, SidedComponent, SidedEnvironment}
 import li.cil.oc.client.renderer.PetRenderer
-import li.cil.oc.common.capabilities.CapabilityColored
-import li.cil.oc.common.capabilities.CapabilityEnvironment
+import li.cil.oc.common.blockentity.{Robot, TileEntityTypes}
 import li.cil.oc.common.capabilities.CapabilitySidedComponent
-import li.cil.oc.common.capabilities.CapabilitySidedEnvironment
 import li.cil.oc.common.component.TerminalServer
-import li.cil.oc.common.item.data.MicrocontrollerData
-import li.cil.oc.common.item.data.RobotData
-import li.cil.oc.common.item.data.TabletData
+import li.cil.oc.common.item.data.{MicrocontrollerData, RobotData, TabletData}
 import li.cil.oc.common.item.traits
-import li.cil.oc.common.blockentity.Robot
-import li.cil.oc.common.blockentity.traits.power
-import li.cil.oc.integration.Mods
 import li.cil.oc.integration.util
 import li.cil.oc.server.component.Keyboard
-import li.cil.oc.server.machine.Callbacks
-import li.cil.oc.server.machine.Machine
+import li.cil.oc.server.machine.{Callbacks, Machine}
 import li.cil.oc.server.machine.luac.LuaStateFactory
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.StackOption._
 import li.cil.oc.util._
-import net.minecraft.sounds.SoundEvents
+import net.minecraft.server.level.{ChunkHolder, ServerLevel, ServerPlayer}
+import net.minecraft.sounds.{SoundEvents, SoundSource}
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
-import net.minecraft.Util
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.event.AttachCapabilitiesEvent
-import net.minecraftforge.event.TickEvent
-import net.minecraftforge.event.TickEvent.ClientTickEvent
-import net.minecraftforge.event.TickEvent.ServerTickEvent
-import net.minecraftforge.event.entity.player.PlayerEvent._
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
-import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Player
-import net.minecraft.sounds.SoundSource
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ChunkHolder
+import scala.jdk.CollectionConverters._
 
 object EventHandler {
   private var serverTicks = 0L
@@ -117,14 +100,6 @@ object EventHandler {
     }
   }
 
-  //object AE2 {
-  //  def scheduleAE2Add(tileEntity: power.AppliedEnergistics2): Unit = {
-  //    if (SideTracker.isServer) pendingServer.synchronized {
-  //      pendingServer += (() => tileEntity.updateGridNodeState())
-  //    }
-  //  }
-  //}
-
   def scheduleWirelessRedstone(rs: server.component.RedstoneWireless): Unit = {
     if (SideTracker.isServer) pendingServer.synchronized {
       pendingServer += (() => if (rs.node.network != null) {
@@ -134,55 +109,77 @@ object EventHandler {
     }
   }
 
+  // NeoForge 1.21.1: AttachCapabilitiesEvent has been removed.
+  // Capabilities are now registered per-type via RegisterCapabilitiesEvent on the mod event bus.
+  // This is called from the main mod class when setting up the mod event bus listeners.
   @SubscribeEvent
-  def onAttachCapabilitiesItemStack(event: AttachCapabilitiesEvent[ItemStack]): Unit = {
-    if (!event.getCapabilities.containsKey(traits.Chargeable.KEY)) {
-      event.getObject match {
-        case stack: ItemStack => stack.getItem match {
-          case chargeable: traits.Chargeable =>
-            val provider = new traits.Chargeable.Provider(stack, chargeable)
-            event.addCapability(traits.Chargeable.KEY, provider)
-            event.addListener(() => provider.invalidate())
-          case _ =>
-        }
+  def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
+    import blockentity.TileEntityTypes
+    import common.Capabilities._
+    import common.capabilities.CapabilitySidedComponent
+    import net.neoforged.neoforge.capabilities.{Capabilities => NeoCapabilities}
+    import net.neoforged.neoforge.fluids.capability.IFluidHandler
+    import common.item.traits
+
+    // ------------------------------------------------------------------ //
+    // Block entity capabilities
+
+    // Register Environment / SidedEnvironment / Colored for all OC block entity types.
+    // Capability lambdas use runtime instanceof checks so a single registration loop works.
+    Seq(
+      TileEntityTypes.ADAPTER, TileEntityTypes.ASSEMBLER, TileEntityTypes.CABLE,
+      TileEntityTypes.CAPACITOR, TileEntityTypes.CARPETED_CAPACITOR, TileEntityTypes.CASE,
+      TileEntityTypes.CHARGER, TileEntityTypes.DISASSEMBLER, TileEntityTypes.DISK_DRIVE,
+      TileEntityTypes.GEOLYZER, TileEntityTypes.HOLOGRAM, TileEntityTypes.KEYBOARD,
+      TileEntityTypes.MICROCONTROLLER, TileEntityTypes.MOTION_SENSOR, TileEntityTypes.NET_SPLITTER,
+      TileEntityTypes.POWER_CONVERTER, TileEntityTypes.POWER_DISTRIBUTOR, TileEntityTypes.PRINT,
+      TileEntityTypes.PRINTER, TileEntityTypes.RACK, TileEntityTypes.RAID,
+      TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
+      TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
+    ).foreach { beTypeObj =>
+      event.registerBlockEntity(EnvironmentCapability, beTypeObj.get(), (be, _) => be match {
+        case env: Environment => env
+        case _ => null
+      })
+      event.registerBlockEntity(SidedEnvironmentCapability, beTypeObj.get(), (be, side) => be match {
+        case sc: Environment with SidedComponent => new CapabilitySidedComponent.SidedEnvironmentAdapter(sc)
+        case se: SidedEnvironment => se
+        case _ => null
+      })
+      event.registerBlockEntity(ColoredCapability, beTypeObj.get(), (be, _) => be match {
+        case colored: Colored => colored
+        case _ => null
+      })
+    }
+
+    // Robot implements IFluidHandler directly — register for both the proxy and the underlying BE type.
+    event.registerBlockEntity(NeoCapabilities.FluidHandler.BLOCK, TileEntityTypes.ROBOT.get(),
+      (be, _) => be match {
+        case fh: IFluidHandler => fh
+        case _ => null
+      })
+
+    // ------------------------------------------------------------------ //
+    // Item capabilities
+
+    // Register EnergyStorage for all Chargeable items.
+    // Items are registered at mod load time via DeferredRegister, so we iterate
+    // the registry here to find all items that implement the Chargeable trait.
+    net.minecraft.core.registries.BuiltInRegistries.ITEM.forEach { item =>
+      item match {
+        case chargeable: traits.Chargeable =>
+          event.registerItem(NeoCapabilities.EnergyStorage.ITEM,
+            (stack, _) => new traits.Chargeable.Provider(stack, chargeable), item)
         case _ =>
       }
     }
-  }
+
+    // Also delegate to the Forge energy integration for PowerAcceptor BEs
+    integration.minecraftforge.EventHandlerMinecraftForge.onRegisterCapabilities(event)
+  }  }
 
   @SubscribeEvent
-  def onAttachCapabilities(event: AttachCapabilitiesEvent[BlockEntity]): Unit = {
-    event.getObject match {
-      case tileEntity: BlockEntity with Environment =>
-        val provider = new CapabilityEnvironment.Provider(tileEntity)
-        event.addCapability(CapabilityEnvironment.ProviderEnvironment, provider)
-        event.addListener(() => provider.invalidate())
-      case _ =>
-    }
-
-    event.getObject match {
-      case tileEntity: BlockEntity with Environment with SidedComponent =>
-        val provider = new CapabilitySidedComponent.Provider(tileEntity)
-        event.addCapability(CapabilitySidedComponent.SidedComponent, provider)
-        event.addListener(() => provider.invalidate())
-      case tileEntity: BlockEntity with SidedEnvironment =>
-        val provider = new CapabilitySidedEnvironment.Provider(tileEntity)
-        event.addCapability(CapabilitySidedEnvironment.ProviderSidedEnvironment, provider)
-        event.addListener(() => provider.invalidate())
-      case _ =>
-    }
-
-    event.getObject match {
-      case tileEntity: BlockEntity with Colored =>
-        val provider = new CapabilityColored.Provider(tileEntity)
-        event.addCapability(CapabilityColored.ProviderColored, provider)
-        event.addListener(() => provider.invalidate())
-      case _ =>
-    }
-  }
-
-  @SubscribeEvent
-  def onServerTick(e: ServerTickEvent): Any = if (e.phase == TickEvent.Phase.START) {
+  def onServerTickPre(e: ServerTickEvent.Pre): Any = {
     pendingServer.synchronized {
       val adds = pendingServer.toArray
       pendingServer.clear()
@@ -208,7 +205,9 @@ object EventHandler {
     })
     runningRobots --= invalid
   }
-  else if (e.phase == TickEvent.Phase.END) {
+
+  @SubscribeEvent
+  def onServerTickPost(e: ServerTickEvent.Post): Unit = {
     // Clean up machines *after* a tick, to allow stuff to be saved, first.
     val closed = mutable.ArrayBuffer.empty[Machine]
     machines.foreach(machine => if (machine.tryClose()) {
@@ -221,7 +220,7 @@ object EventHandler {
   }
 
   @SubscribeEvent
-  def onClientTick(e: ClientTickEvent): Unit = if (e.phase == TickEvent.Phase.START) {
+  def onClientTick(e: ClientTickEvent.Pre): Unit = {
     pendingClient.synchronized {
       val adds = pendingClient.toArray
       pendingClient.clear()
@@ -234,7 +233,7 @@ object EventHandler {
   }
 
   @SubscribeEvent
-  def playerLoggedIn(e: PlayerLoggedInEvent): Unit = {
+  def onPlayerLoggedIn(e: PlayerLoggedInEvent): Unit = {
     if (SideTracker.isServer) e.getEntity match {
       case _: FakePlayer => // Nope
       case player: ServerPlayer =>
@@ -332,7 +331,10 @@ object EventHandler {
     didRecraft = recraft(e, navigationUpgrade, stack => {
       // Restore the map currently used in the upgrade.
       Option(api.Driver.driverFor(e.getCrafting)) match {
-        case Some(driver) => StackOption(ItemStack.of(driver.dataTag(stack).getCompound(Settings.namespace + "map")))
+        case Some(driver) => StackOption(ItemStack.parseOptional(
+          e.getEntity.level.registryAccess(),
+          driver.dataTag(stack).getCompound(Settings.namespace + "map"))
+        )
         case _ => EmptyStack
       }
     }) || didRecraft
@@ -366,22 +368,22 @@ object EventHandler {
           e.getEntity.getRandom.nextFloat() < Settings.get.presentChance && timeForPresents) {
           // Presents!
           val present = api.Items.get(Constants.ItemName.Present).createItemStack(1)
-          e.getEntity.level.playSound(e.getEntity, e.getEntity.getX, e.getEntity.getY, e.getEntity.getZ, SoundEvents.NOTE_BLOCK_PLING.get, SoundSource.MASTER, 0.2f, 1f)
+          e.getEntity.level.playSound(e.getEntity, e.getEntity.getX, e.getEntity.getY, e.getEntity.getZ, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.MASTER, 0.2f, 1f)
           InventoryUtils.addToPlayerInventory(present, e.getEntity)
         }
       case _ => // Nope.
     }
 
-    Achievement.onCraft(e.getCrafting, e.getEntity)
+    Advancement.onCraft(e.getCrafting, e.getEntity)
   }
 
   @SubscribeEvent
-  def onPickup(e: ItemPickupEvent): Unit = {
-    val entity = e.getOriginalEntity
+  def onItemEntityPickup(e: ItemEntityPickupEvent): Unit = {
+    val entity = e.getItemEntity
     Option(entity).flatMap(e => Option(e.getItem)) match {
       case Some(stack) =>
-        Achievement.onAssemble(stack, e.getEntity)
-        Achievement.onCraft(stack, e.getEntity)
+        Advancement.onAssemble(stack, e.getPlayer)
+        Advancement.onCraft(stack, e.getPlayer)
       case _ => // Huh.
     }
   }

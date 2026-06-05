@@ -1,33 +1,30 @@
 package li.cil.oc.common
 
-import java.util.function.Supplier
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
-import java.io.DataOutputStream
-import java.io.OutputStream
-import java.util.zip.Deflater
-import java.util.zip.DeflaterOutputStream
-import li.cil.oc.{OpenComputers, Settings}
+import li.cil.oc.Settings
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.util.BlockPosition
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraftforge.network.PacketDistributor
-import net.minecraftforge.server.ServerLifecycleHooks
-import net.minecraftforge.registries._
-
-import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.level.ChunkPos
+import net.minecraft.core.{Direction, Registry}
+import net.minecraft.nbt.{CompoundTag, NbtIo}
+import net.minecraft.server.level.{ServerLevel, ServerPlayer}
 import net.minecraft.world.entity.Entity
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.level.Level
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.{ChunkPos, Level}
+import net.neoforged.neoforge.network.PacketDistributor
+import net.neoforged.neoforge.server.ServerLifecycleHooks
+
+import java.io.{
+  BufferedOutputStream,
+  ByteArrayOutputStream,
+  DataOutputStream,
+  OutputStream
+}
+import java.util.zip.{Deflater, DeflaterOutputStream}
+
+import scala.jdk.CollectionConverters._
 
 abstract class PacketBuilder(stream: OutputStream) extends DataOutputStream(stream) {
-  def writeRegistryEntry[T](registry: IForgeRegistry[T], value: T): Unit = {
+  def writeRegistryEntry[T](registry: Registry[T], value: T): Unit = {
     val key = registry.getKey(value)
     if (key != null) {
       writeUTF(key.toString)
@@ -57,7 +54,7 @@ abstract class PacketBuilder(stream: OutputStream) extends DataOutputStream(stre
     val haveStack = !stack.isEmpty && stack.getCount > 0
     writeBoolean(haveStack)
     if (haveStack) {
-      writeNBT(stack.save(new CompoundTag()))
+      writeNBT(stack.save(ServerLifecycleHooks.getCurrentServer.registryAccess()).asInstanceOf[CompoundTag])
     }
   }
 
@@ -82,9 +79,7 @@ abstract class PacketBuilder(stream: OutputStream) extends DataOutputStream(stre
   }
 
   def writePacketType(pt: PacketType.Value) = writeByte(pt.id)
-
-  def sendToAllPlayers() = OpenComputers.channel.send(PacketDistributor.ALL.noArg(), packet)
-
+  
   def sendToPlayersNearEntity(e: Entity, range: Option[Double] = None): Unit = sendToNearbyPlayers(e.level, e.getX, e.getY, e.getZ, range)
 
   def sendToPlayersNearHost(host: EnvironmentHost, range: Option[Double] = None): Unit = {
@@ -127,18 +122,21 @@ abstract class PacketBuilder(stream: OutputStream) extends DataOutputStream(stre
     }
     val maxPacketRangeSq = maxPacketRange * maxPacketRange
 
-    for (player <- manager.getPlayers if player.level == world) {
+    for (player <- manager.getPlayers.asScala if player.level == world) {
       if (player.distanceToSqr(x, y, z) <= maxPacketRangeSq) {
         sendToPlayer(player)
       }
     }
   }
 
-  def sendToPlayer(player: ServerPlayer) = OpenComputers.channel.send(PacketDistributor.PLAYER.`with`(new Supplier[ServerPlayer] {
-    override def get = player
-  }), packet)
+  def sendToAllPlayers(): Unit =
+    PacketDistributor.sendToAllPlayers(new PacketPayload(packet))
 
-  def sendToServer() = OpenComputers.channel.sendToServer(packet)
+  def sendToPlayer(player: ServerPlayer): Unit =
+    PacketDistributor.sendToPlayer(player, new PacketPayload(packet))
+
+  def sendToServer(): Unit =
+    PacketDistributor.sendToServer(new PacketPayload(packet))
 
   protected def packet: Array[Byte]
 }

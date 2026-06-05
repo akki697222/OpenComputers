@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.api.Persistable
 import li.cil.oc.api.machine.Value
@@ -13,6 +12,7 @@ import li.cil.oc.server.machine.ArgumentsImpl
 import li.cil.oc.util.ExtendedLuaState.extendLuaState
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -23,8 +23,9 @@ class UserdataAPI(owner: NativeLuaArchitecture) extends NativeLuaAPI(owner) {
     lua.pushScalaFunction(lua => {
       val nbt = new CompoundTag()
       val persistable = lua.toJavaObjectRaw(1).asInstanceOf[Persistable]
+      val server = ServerLifecycleHooks.getCurrentServer
       lua.pushString(persistable.getClass.getName)
-      persistable.saveData(nbt)
+      persistable.saveData(nbt, server.registryAccess())
       val baos = new ByteArrayOutputStream()
       val dos = new DataOutputStream(baos)
       NbtIo.write(nbt, dos)
@@ -38,11 +39,12 @@ class UserdataAPI(owner: NativeLuaArchitecture) extends NativeLuaAPI(owner) {
         val className = lua.toString(1)
         val clazz = Class.forName(className)
         val persistable = clazz.newInstance.asInstanceOf[Persistable]
+        val server = ServerLifecycleHooks.getCurrentServer
         val data = lua.toByteArray(2)
         val bais = new ByteArrayInputStream(data)
         val dis = new DataInputStream(bais)
         val nbt = NbtIo.read(dis)
-        persistable.loadData(nbt)
+        persistable.loadData(nbt, server.registryAccess())
         lua.pushJavaObjectRaw(persistable)
         1
       }

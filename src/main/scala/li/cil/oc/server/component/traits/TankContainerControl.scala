@@ -8,8 +8,8 @@ import li.cil.oc.server.component.result
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.FluidUtils
 import net.minecraft.world.item.ItemStack
-import net.minecraftforge.fluids.FluidStack
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.fluids.FluidStack
+import net.neoforged.fluids.capability.IFluidHandler.FluidAction
 
 trait TankContainerControl extends LevelAware with ContainerAware with TankAware {
   @Callback(doc = """function([slot:number]):number -- Get the amount of fluid in the tank item in the specified slot or the selected slot.""")

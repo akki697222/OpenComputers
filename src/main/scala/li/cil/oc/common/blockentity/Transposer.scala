@@ -1,7 +1,7 @@
 package li.cil.oc.common.blockentity
 
 import li.cil.oc.server.component
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.block.state.BlockState
@@ -15,13 +15,13 @@ class Transposer(pos: BlockPos, state: BlockState)
   // Used on client side to check whether to render activity indicators.
   var lastOperation = 0L
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt)
-    transposer.loadData(nbt)
+    transposer.loadData(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForServer(nbt)
-    transposer.saveData(nbt)
+    transposer.saveData(nbt, provider)
   }
 }

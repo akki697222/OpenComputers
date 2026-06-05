@@ -3,6 +3,7 @@ package li.cil.oc.common.item.data
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.nbt.CompoundTag
@@ -43,13 +44,13 @@ class NavigationUpgradeData extends ItemData(Constants.ItemName.NavigationUpgrad
     saveData(stack.getOrCreateTagElement(DataTag))
   }
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (nbt.contains(MapTag)) {
       map = ItemStack.of(nbt.getCompound(MapTag))
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     if (map != null) {
       nbt.setNewCompoundTag(MapTag, map.save)
     }

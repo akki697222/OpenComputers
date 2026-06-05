@@ -15,7 +15,7 @@ import li.cil.oc.api.prefab.TextureTabIconRenderer
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.markdown.segment.render.BlockImageProvider
 import li.cil.oc.client.renderer.markdown.segment.render.ItemImageProvider
-import li.cil.oc.client.renderer.markdown.segment.render.OreDictImageProvider
+import li.cil.oc.client.renderer.markdown.segment.render.TagImageProvider
 import li.cil.oc.client.renderer.markdown.segment.render.TextureImageProvider
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.Loot
@@ -44,11 +44,11 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.world.ForgeChunkManager
-import net.minecraftforge.fml.DistExecutor
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.common.MinecraftForge
+import net.neoforged.common.world.ForgeChunkManager
+import net.neoforged.fml.DistExecutor
 
 object ModOpenComputers extends ModProxy {
   override def getMod = Mods.OpenComputers
@@ -329,7 +329,7 @@ object ModOpenComputers extends ModProxy {
     api.Manual.addProvider("", TextureImageProvider)
     api.Manual.addProvider("item", ItemImageProvider)
     api.Manual.addProvider("block", BlockImageProvider)
-    api.Manual.addProvider("oredict", OreDictImageProvider)
+    api.Manual.addProvider("oredict", TagImageProvider)
 
     api.Manual.addTab(new TextureTabIconRenderer(Textures.GUI.ManualHome), "oc:gui.Manual.Home", "%LANGUAGE%/index.md")
     api.Manual.addTab(new ItemStackTabIconRenderer(api.Items.get("case1").createItemStack(1)), "oc:gui.Manual.Blocks", "%LANGUAGE%/block/index.md")

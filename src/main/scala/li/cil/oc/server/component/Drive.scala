@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream
 import java.util
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-
 import com.google.common.io.Files
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
@@ -24,8 +23,9 @@ import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.level.storage.LevelResource
@@ -138,8 +138,8 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
 
   private final val HeadPosTag = "headPos"
 
-  override def loadData(nbt: CompoundTag): Unit = this.synchronized {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
+    super.loadData(nbt, provider)
 
     if (node.address != null) try {
       val path = savePath
@@ -161,12 +161,12 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
     headPos = nbt.getInt(HeadPosTag) max 0 min sectorToHeadPos(sectorCount)
 
     if (label != null) {
-      label.loadData(nbt)
+      label.loadData(nbt, provider)
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = this.synchronized {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
+    super.saveData(nbt, provider)
 
     if (node.address != null) try {
       val path = savePath
@@ -184,7 +184,7 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
     nbt.putInt(HeadPosTag, headPos)
 
     if (label != null) {
-      label.saveData(nbt)
+      label.saveData(nbt, provider)
     }
   }
 

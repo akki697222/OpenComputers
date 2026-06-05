@@ -1,11 +1,13 @@
 package li.cil.oc.api;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.InterModComms;
+import net.neoforged.fml.InterModComms;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This is a pure utility class to more comfortably register things that can
@@ -366,12 +368,12 @@ public final class IMC {
      * @param host  the class of the host to blacklist the component for.
      * @param stack the item stack representing the blacklisted component.
      */
-    public static void blacklistHost(final String name, final Class host, final ItemStack stack) {
+    public static void blacklistHost(final String name, final Class<?> host, final ItemStack stack, final @NotNull HolderLookup.Provider provider) {
         final CompoundTag nbt = new CompoundTag();
         nbt.putString("name", name);
         nbt.putString("host", host.getName());
         final CompoundTag stackNbt = new CompoundTag();
-        stack.save(stackNbt);
+        stack.save(provider, stackNbt);
         nbt.put("item", stackNbt);
         InterModComms.sendTo(MOD_ID, BLACKLIST_HOST, () -> nbt);
     }

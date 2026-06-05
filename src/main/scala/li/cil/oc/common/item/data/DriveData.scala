@@ -4,6 +4,7 @@ import li.cil.oc.Settings
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import li.cil.oc.server.fs
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.entity.player.Player
 
 class DriveData extends ItemData(null) {
@@ -22,14 +23,14 @@ class DriveData extends ItemData(null) {
   private final val UnmanagedTag = Settings.namespace + "unmanaged"
   private val LockTag = Settings.namespace + "lock"
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     isUnmanaged = nbt.getBoolean(UnmanagedTag)
     lockInfo = if (nbt.contains(LockTag)) {
       nbt.getString(LockTag)
     } else ""
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(UnmanagedTag, isUnmanaged)
     nbt.putString(LockTag, lockInfo)
   }

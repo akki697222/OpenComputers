@@ -10,6 +10,7 @@ import li.cil.oc.api.fs.Label
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
 import li.cil.oc.integration.opencomputers.Item
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
@@ -52,9 +53,9 @@ object DriverComputerCraftMedia extends Item {
       media.setLabel(stack, value)
     }
 
-    override def loadData(nbt: CompoundTag): Unit = {}
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
-    override def saveData(nbt: CompoundTag): Unit = {}
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
   }
 
 }

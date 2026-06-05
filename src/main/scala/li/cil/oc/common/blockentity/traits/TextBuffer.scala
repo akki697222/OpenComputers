@@ -5,8 +5,9 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.internal
 import li.cil.oc.api.network.Node
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.minecraft.core.HolderLookup
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.nbt.CompoundTag
 
 trait TextBuffer extends Environment with Tickable {
@@ -45,26 +46,27 @@ trait TextBuffer extends Environment with Tickable {
     buffer.setMaximumColorDepth(Settings.screenDepthsByTier(tier))
   }
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt)
     reapplyTierToBuffer()
-    buffer.loadData(nbt)
+    buffer.loadData(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForServer(nbt)
-    buffer.saveData(nbt)
+    buffer.saveData(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag): Unit = {
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt)
     reapplyTierToBuffer()
-    buffer.loadData(nbt)
+    buffer.loadData(nbt, provider)
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForClient(nbt)
-    buffer.saveData(nbt)
+    buffer.saveData(nbt, provider)
   }
 }

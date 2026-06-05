@@ -2,14 +2,14 @@ package li.cil.oc.integration.minecraft
 
 import java.util
 import li.cil.oc.api
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
 object ConverterFluidStack extends api.driver.Converter {
   override def convert(value: scala.Any, output: util.Map[AnyRef, AnyRef]) =
     value match {
-      case stack: net.minecraftforge.fluids.FluidStack =>
+      case stack: net.neoforged.fluids.FluidStack =>
         output += "amount" -> Int.box(stack.getAmount)
         output += "hasTag" -> Boolean.box(stack.hasTag)
         val fluid = stack.getFluid

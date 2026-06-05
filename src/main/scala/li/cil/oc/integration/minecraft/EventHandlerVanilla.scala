@@ -7,9 +7,9 @@ import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.block.{Block, Blocks, CropBlock, LiquidBlock, StemBlock}
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.IntegerProperty
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fluids.IFluidBlock
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.fluids.IFluidBlock
+import net.neoforged.registries.ForgeRegistries
 
 import scala.jdk.CollectionConverters._
 

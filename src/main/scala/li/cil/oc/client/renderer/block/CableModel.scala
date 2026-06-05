@@ -1,31 +1,24 @@
 package li.cil.oc.client.renderer.block
 
-import java.util
-import java.util.Collections
-
 import li.cil.oc.client.Textures
 import li.cil.oc.common.block.property.PropertyCableConnection
 import li.cil.oc.common.blockentity
-import li.cil.oc.util.Color
-import li.cil.oc.util.ExtendedLevel._
-import li.cil.oc.util.ItemColorizer
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.client.renderer.block.model.BakedQuad
-import net.minecraft.client.resources.model.BakedModel
-import net.minecraft.client.renderer.block.model.ItemOverrides
+import li.cil.oc.util.{Color, ItemColorizer}
 import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.item.DyeColor
-import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
-import net.minecraft.world.phys.Vec3
-import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
+import net.minecraft.client.renderer.block.model.{BakedQuad, ItemOverrides}
+import net.minecraft.client.resources.model.BakedModel
+import net.minecraft.core.Direction
+import net.minecraft.util.RandomSource
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.{DyeColor, ItemStack}
+import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.Property
+import net.minecraft.world.phys.Vec3
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
+import java.util
 import scala.collection.JavaConverters.bufferAsJavaList
-import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 object CableModel extends SmartBlockModelBase {

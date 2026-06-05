@@ -3,7 +3,6 @@ package li.cil.oc.server.component
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -24,6 +23,7 @@ import li.cil.oc.api.prefab.AbstractValue
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -304,8 +304,8 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
 
     nbt.getList("owners", Tag.TAG_COMPOUND).foreach((ownerNbt: CompoundTag) => {
       val address = ownerNbt.getString("address")
@@ -315,16 +315,16 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
     })
 
     if (label != null) {
-      label.loadData(nbt)
+      label.loadData(nbt, provider)
     }
-    fileSystem.loadData(nbt.getCompound("fs"))
+    fileSystem.loadData(nbt.getCompound("fs"), provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = fileSystem.synchronized {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = fileSystem.synchronized {
+    super.saveData(nbt, provider)
 
     if (label != null) {
-      label.saveData(nbt)
+      label.saveData(nbt, provider)
     }
 
     if (!SaveHandler.savingForClients) {
@@ -337,7 +337,7 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
       }
       nbt.put("owners", ownersNbt)
 
-      nbt.setNewCompoundTag("fs", fileSystem.saveData)
+      nbt.setNewCompoundTag("fs", (nbt: CompoundTag) => fileSystem.saveData(nbt, provider))
     }
   }
 
@@ -396,14 +396,14 @@ final class HandleValue extends AbstractValue {
   private val OwnerTag = "owner"
   private val HandleTag = "handle"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     owner = nbt.getString(OwnerTag)
     handle = nbt.getInt(HandleTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putString(OwnerTag, owner)
     nbt.putInt(HandleTag, handle)
   }

@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 
-object Achievement {
+object Advancement {
   def init(): Unit = {
   }
 
@@ -27,7 +27,7 @@ object Achievement {
   }
 
   private def award(player: ServerPlayer, location: ResourceLocation): Unit = {
-    Option(player.server.getAdvancements.getAdvancement(location)).foreach { advancement =>
+    Option(player.server.getAdvancements.get(location)).foreach { advancement =>
       val progress = player.getAdvancements.getOrStartProgress(advancement)
       advancement.getCriteria.keySet.forEach { criterion =>
         if (!progress.isDone) {

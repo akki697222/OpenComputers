@@ -6,10 +6,15 @@ import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+
+import javax.annotation.Nonnull;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
  * TileEntities can implement the {@link Environment}
@@ -125,8 +130,8 @@ public abstract class TileEntityEnvironment extends BlockEntity implements Envir
     // ----------------------------------------------------------------------- //
 
     @Override
-    public void load(final CompoundTag nbt) {
-        super.load(nbt);
+    public void loadAdditional(final @Nonnull CompoundTag nbt, @Nonnull HolderLookup. Provider provider) {
+        super.loadAdditional(nbt, provider);
         // The host check may be superfluous for you. It's just there to allow
         // some special cases, where getNode() returns some node managed by
         // some other instance (for example when you have multiple internal
@@ -136,17 +141,17 @@ public abstract class TileEntityEnvironment extends BlockEntity implements Envir
             // to continue working without interruption across loads. If the
             // node is a power connector this is also required to restore the
             // internal energy buffer of the node.
-            node.loadData(nbt.getCompound(TAG_NODE));
+            node.loadData(nbt.getCompound(TAG_NODE), provider);
         }
     }
 
     @Override
-    public void saveAdditional(final CompoundTag nbt) {
-        super.saveAdditional(nbt);
+    public void saveAdditional(final @Nonnull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+        super.saveAdditional(nbt, provider);
         // See load() regarding host check.
         if (node != null && node.host() == this) {
             final CompoundTag nodeNbt = new CompoundTag();
-            node.saveData(nodeNbt);
+            node.saveData(nodeNbt, provider);
             nbt.put(TAG_NODE, nodeNbt);
         }
     }

@@ -25,11 +25,11 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -210,44 +210,45 @@ class Microcontroller(pos: BlockPos, state: BlockState)
   private final val ComponentNodesTag = Settings.namespace + "componentNodes"
   private final val SnooperTag = Settings.namespace + "snooper"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     // Load info before inventory and such, to avoid initializing components
     // to empty inventory.
-    info.loadData(nbt.getCompound(InfoTag))
+    info.loadData(nbt.getCompound(InfoTag), provider)
     nbt.getBooleanArray(OutputsTag)
     nbt.getList(ComponentNodesTag, Tag.TAG_COMPOUND).toTagArray[CompoundTag].
       zipWithIndex.foreach {
-      case (tag, index) => componentNodes(index).loadData(tag)
+      case (tag, index) => componentNodes(index).loadData(tag, provider)
     }
-    snooperNode.loadData(nbt.getCompound(SnooperTag))
-    super.loadForServer(nbt)
+    snooperNode.loadData(nbt.getCompound(SnooperTag), provider)
+    super.loadForServer(nbt, provider)
     api.Network.joinNewNetwork(machine.node)
     machine.node.connect(snooperNode)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    nbt.setNewCompoundTag(InfoTag, info.saveData)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    nbt.setNewCompoundTag(InfoTag, (nbt: CompoundTag) => info.saveData(nbt, provider))
     nbt.setBooleanArray(OutputsTag, outputSides)
     nbt.setNewTagList(ComponentNodesTag, componentNodes.map {
       case node: Node =>
         val tag = new CompoundTag()
-        node.saveData(tag)
+        node.saveData(tag, provider)
         tag
       case _ => new CompoundTag()
     })
-    nbt.setNewCompoundTag(SnooperTag, snooperNode.saveData)
+    nbt.setNewCompoundTag(SnooperTag, (nbt: CompoundTag) => snooperNode.saveData(nbt, provider))
   }
 
   @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
-    info.loadData(nbt.getCompound(InfoTag))
-    super.loadForClient(nbt)
+  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    info.loadData(nbt.getCompound(InfoTag), provider)
+    super.loadForClient(nbt, provider)
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
-    nbt.setNewCompoundTag(InfoTag, info.saveData)
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
+    nbt.setNewCompoundTag(InfoTag, (nbt: CompoundTag) => info.saveData(nbt, provider))
   }
 
   // ----------------------------------------------------------------------- //

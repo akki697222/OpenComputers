@@ -13,11 +13,8 @@ import li.cil.oc.util.RenderState
 import li.cil.oc.util.TextBuffer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.network.chat.Component
-import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.{BufferUploader, DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import net.minecraft.client.gui.components.Button
-import com.mojang.blaze3d.vertex.Tesselator
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
 import net.minecraft.client.gui.GuiGraphics
 
 import scala.jdk.javaapi.CollectionConverters.asJavaCollection
@@ -125,7 +122,7 @@ class Drone(state: menu.Drone, playerInventory: Inventory, name: Component)
   override protected def drawSlotBackground(graphics: GuiGraphics, x: Int, y: Int): Unit = {}
 
   private def drawSelection(graphics: GuiGraphics): Unit = {
-    val stack = graphics.pose
+    val stack = graphics.pose()
     val slot = inventoryContainer.selectedSlot
     if (slot >= 0 && slot < 16) {
       Textures.bind(Textures.GUI.RobotSelection)
@@ -135,13 +132,12 @@ class Drone(state: menu.Drone, playerInventory: Inventory, name: Component)
       val y = topPos + inventoryY - 1 + (slot / 4) * (selectionSize - 2)
 
       val t = Tesselator.getInstance
-      val r = t.getBuilder
-      r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-      r.vertex(stack.last.pose, x, y, 0).uv(0, offsetV).endVertex()
-      r.vertex(stack.last.pose, x, y + selectionSize, 0).uv(0, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y + selectionSize, 0).uv(1, offsetV + selectionStepV).endVertex()
-      r.vertex(stack.last.pose, x + selectionSize, y, 0).uv(1, offsetV).endVertex()
-      t.end()
+      val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+      r.addVertex(stack.last.pose(), x, y, 0).setUv(0, offsetV)
+      r.addVertex(stack.last.pose(), x, y + selectionSize, 0).setUv(0, offsetV + selectionStepV)
+      r.addVertex(stack.last.pose(), x + selectionSize, y + selectionSize, 0).setUv(1, offsetV + selectionStepV)
+      r.addVertex(stack.last.pose(), x + selectionSize, y, 0).setUv(1, offsetV)
+      BufferUploader.drawWithShader(r.buildOrThrow())
     }
   }
 }

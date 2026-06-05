@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
-import net.minecraftforge.common.extensions.IForgeBlock
+import net.neoforged.common.extensions.IForgeBlock
 
 import scala.reflect.ClassTag
 

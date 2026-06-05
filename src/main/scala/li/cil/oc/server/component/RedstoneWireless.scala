@@ -14,6 +14,7 @@ import li.cil.oc.common.EventHandler
 import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
 import li.cil.oc.integration.Mods
 import li.cil.oc.integration.util
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -117,15 +118,15 @@ trait RedstoneWireless extends RedstoneSignaller with DeviceInfo {
   private final val WirelessInputTag = "wirelessInput"
   private final val WirelessOutputTag = "wirelessOutput"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     wirelessFrequency = nbt.getInt(WirelessFrequencyTag)
     wirelessInput = nbt.getBoolean(WirelessInputTag)
     wirelessOutput = nbt.getBoolean(WirelessOutputTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     nbt.putInt(WirelessFrequencyTag, wirelessFrequency)
     nbt.putBoolean(WirelessInputTag, wirelessInput)
     nbt.putBoolean(WirelessOutputTag, wirelessOutput)

@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -25,7 +24,7 @@ import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.resources.ResourceLocation
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -159,13 +158,13 @@ class Robot(val agent: blockentity.Robot) extends AbstractManagedEnvironment wit
 
   private final val RomRobotTag = "romRobot"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
-    romRobot.foreach(_.loadData(nbt.getCompound(RomRobotTag)))
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
+    romRobot.foreach(_.loadData(nbt.getCompound(RomRobotTag), provider))
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
-    romRobot.foreach(fs => nbt.setNewCompoundTag(RomRobotTag, fs.saveData))
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
+    romRobot.foreach(fs => nbt.setNewCompoundTag(RomRobotTag, (nbt: CompoundTag) => fs.saveData(nbt, provider)))
   }
 }

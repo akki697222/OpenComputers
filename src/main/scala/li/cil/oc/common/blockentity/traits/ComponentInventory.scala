@@ -11,11 +11,8 @@ import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.minecraftforge.common.capabilities.Capability
-import net.minecraftforge.common.capabilities.ICapabilityProvider
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.mutable
 
@@ -152,18 +149,6 @@ trait ComponentInventory extends Environment with Inventory with container.Compo
     if (node == this.node) {
       disconnectComponents()
     }
-  }
-
-  override def getCapability[T](capability: Capability[T], facing: Direction): LazyOptional[T] = {
-    val localFacing = this match {
-      case rotatable: Rotatable => rotatable.toLocal(facing)
-      case _ => facing
-    }
-    components.flatten.collect { case cp: ICapabilityProvider => cp }.foreach { comp =>
-      val cap = comp.getCapability(capability, localFacing)
-      if (cap.isPresent) return cap
-    }
-    super.getCapability(capability, facing)
   }
 
   override def saveForClient(nbt: CompoundTag): Unit = {

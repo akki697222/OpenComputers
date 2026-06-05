@@ -4,8 +4,8 @@ import li.cil.oc.Settings
 import li.cil.oc.api.network.Connector
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
 import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 trait Common extends BaseBlockEntity {
   @OnlyIn(Dist.CLIENT)

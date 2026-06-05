@@ -8,8 +8,8 @@ import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.world.level.block.Rotation
 import net.minecraft.world.level.{BlockGetter, Level, LevelReader}
 import net.minecraft.world.{InteractionHand, InteractionResult}
-import net.minecraftforge.common.extensions.IForgeItem
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.common.extensions.IForgeItem
+import net.neoforged.event.entity.player.PlayerInteractEvent
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.level.block.Blocks
 

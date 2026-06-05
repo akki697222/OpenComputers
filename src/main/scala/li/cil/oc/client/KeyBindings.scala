@@ -4,9 +4,9 @@ import com.mojang.blaze3d.platform.InputConstants
 import li.cil.oc.OpenComputers
 import li.cil.oc.client.gui.traits.InputBuffer
 import net.minecraft.client.{KeyMapping, Minecraft}
-import net.minecraftforge.client.settings.IKeyConflictContext
-import net.minecraftforge.client.settings.KeyConflictContext
-import net.minecraftforge.client.settings.KeyModifier
+import net.neoforged.neoforge.client.settings.IKeyConflictContext
+import net.neoforged.neoforge.client.settings.KeyConflictContext
+import net.neoforged.neoforge.client.settings.KeyModifier
 import org.lwjgl.glfw.GLFW
 
 import scala.collection.mutable

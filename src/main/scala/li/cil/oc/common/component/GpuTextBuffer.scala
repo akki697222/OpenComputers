@@ -2,16 +2,16 @@ package li.cil.oc.common.component
 
 import java.io.InvalidObjectException
 import java.security.InvalidParameterException
-
 import li.cil.oc.api.network.{Environment, Message, Node}
 import li.cil.oc.api.internal.TextBuffer.ColorDepth
 import li.cil.oc.api
 import li.cil.oc.common.component.traits.{TextBufferProxy, VideoRamDevice, VideoRamRasterizer}
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
 import com.mojang.blaze3d.vertex.PoseStack
+import net.minecraft.core.HolderLookup
 
 class GpuTextBuffer(val owner: String, val id: Int, val data: li.cil.oc.util.TextBuffer) extends traits.TextBufferProxy {
 
@@ -33,13 +33,13 @@ class GpuTextBuffer(val owner: String, val id: Int, val data: li.cil.oc.util.Tex
   override def onBufferCopy(col: Int, row: Int, w: Int, h: Int, tx: Int, ty: Int): Unit = dirty = true
   override def onBufferFill(col: Int, row: Int, w: Int, h: Int, c: Int): Unit = dirty = true
 
-  override def loadData(nbt: CompoundTag): Unit = {
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     // the data is initially dirty because other devices don't know about it yet
     data.loadData(nbt)
     dirty = true
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     data.saveData(nbt)
     dirty = false
   }

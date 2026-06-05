@@ -1,7 +1,7 @@
 package li.cil.oc.util;
 
-import net.minecraftforge.fml.util.thread.EffectiveSide;
-import net.minecraftforge.forgespi.Environment;
+import net.neoforged.fml.util.thread.EffectiveSide;
+import net.neoforged.neoforgespi.Environment;
 
 public final class SideTracker {
     public static boolean isServer() {

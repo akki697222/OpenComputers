@@ -8,8 +8,8 @@ import li.cil.oc.util.PlayerUtils
 import net.minecraft.core.particles.{ParticleType, ParticleTypes, SimpleParticleType}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
-import net.minecraftforge.registries.ForgeRegistries
-import net.minecraftforge.registries.ForgeRegistry
+import net.neoforged.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistry
 
 object ParticleProvider extends ScalaProvider("b48c4bbd-51bb-4915-9367-16cff3220e4b") {
   final val ParticleTypeList: Array[SimpleParticleType] = Array(

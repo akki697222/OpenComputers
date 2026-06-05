@@ -13,10 +13,11 @@ import li.cil.oc.common.item.HardDiskDrive
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.server.component.Drive
 import li.cil.oc.server.fs.FileSystem.{ItemLabel, ReadOnlyLabel}
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.server.ServerLifecycleHooks
+import net.neoforged.server.ServerLifecycleHooks
 
 object DriverFileSystem extends Item {
   val UUIDVerifier = """^([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$""".r
@@ -115,13 +116,13 @@ object DriverFileSystem extends Item {
 
     private final val LabelTag = Settings.namespace + "fs.label"
 
-    override def loadData(nbt: CompoundTag): Unit = {
+    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
       if (nbt.contains(LabelTag)) {
         label = Option(nbt.getString(LabelTag))
       }
     }
 
-    override def saveData(nbt: CompoundTag): Unit = {
+    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
       label match {
         case Some(value) => nbt.putString(LabelTag, value)
         case _ =>

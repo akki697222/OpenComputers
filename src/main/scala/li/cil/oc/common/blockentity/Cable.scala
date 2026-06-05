@@ -14,8 +14,8 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.client.model.data.ModelData
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.client.model.data.ModelData
 
 class Cable(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.CABLE.get(), pos, state) with traits.Environment with traits.NotAnalyzable with traits.ImmibisMicroblock with traits.Colored {

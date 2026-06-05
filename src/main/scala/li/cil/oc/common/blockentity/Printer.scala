@@ -24,13 +24,13 @@ import net.minecraft.world.entity.player.{Inventory => PlayerInventory}
 import net.minecraft.world.WorldlyContainer
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.item.ItemStack
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
@@ -322,11 +322,11 @@ class Printer(pos: BlockPos, state: BlockState)
   private final val TotalTag = Settings.namespace + "total"
   private final val RemainingTag = Settings.namespace + "remaining"
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt)
     amountMaterial = nbt.getInt(AmountMaterialTag)
     amountInk = nbt.getInt(AmountInkTag)
-    data.loadData(nbt.getCompound(DataTag))
+    data.loadData(nbt.getCompound(DataTag), provider)
     isActive = nbt.getBoolean(IsActiveTag)
     limit = nbt.getInt(LimitTag)
     if (nbt.contains(OutputTag)) {
@@ -339,11 +339,11 @@ class Printer(pos: BlockPos, state: BlockState)
     requiredEnergy = nbt.getDouble(RemainingTag)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForServer(nbt)
     nbt.putInt(AmountMaterialTag, amountMaterial)
     nbt.putInt(AmountInkTag, amountInk)
-    nbt.setNewCompoundTag(DataTag, data.saveData)
+    nbt.setNewCompoundTag(DataTag, (nbt: CompoundTag) => data.saveData(nbt, provider))
     nbt.putBoolean(IsActiveTag, isActive)
     nbt.putInt(LimitTag, limit)
     output.foreach(stack => nbt.setNewCompoundTag(OutputTag, stack.save))
@@ -352,15 +352,16 @@ class Printer(pos: BlockPos, state: BlockState)
   }
 
   @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag): Unit = {
+  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt)
-    data.loadData(nbt.getCompound(DataTag))
+    data.loadData(nbt.getCompound(DataTag), provider)
     requiredEnergy = nbt.getDouble(RemainingTag)
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
+  @OnlyIn(Dist.CLIENT)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveForClient(nbt)
-    nbt.setNewCompoundTag(DataTag, data.saveData)
+    nbt.setNewCompoundTag(DataTag, (nbt: CompoundTag) => data.saveData(nbt, provider))
     nbt.putDouble(RemainingTag, requiredEnergy)
   }
 

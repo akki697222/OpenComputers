@@ -28,7 +28,7 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.InventoryUtils
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
+import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.world.MenuProvider
 import net.minecraft.network.chat
 
@@ -154,14 +154,14 @@ class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int)
   // ----------------------------------------------------------------------- //
   // Persistable
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super[AbstractManagedEnvironment].loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super[AbstractManagedEnvironment].loadData(nbt, provider)
     super[ComponentInventory].loadData(nbt)
     connectComponents()
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super[AbstractManagedEnvironment].saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super[AbstractManagedEnvironment].saveData(nbt, provider)
     super[ComponentInventory].saveData(nbt)
   }
 

@@ -1,7 +1,6 @@
 package li.cil.oc.server.component
 
 import java.util
-
 import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
@@ -18,7 +17,8 @@ import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
-import net.minecraftforge.common.ForgeHooks
+import net.minecraft.core.HolderLookup
+import net.neoforged.common.ForgeHooks
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.item.ItemStack
@@ -212,8 +212,8 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
   private final val InventoryTag = "inventory"
   private final val RemainingTicksTag = "remainingTicks"
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
       inventory = StackOption(ItemStack.of(nbt.getCompound("inventory")))
     if (nbt.contains(InventoryTag)) {
       inventory = StackOption(ItemStack.of(nbt.getCompound(InventoryTag)))
@@ -221,8 +221,8 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     remainingTicks = nbt.getInt(RemainingTicksTag)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(nbt, provider)
     inventory match {
       case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, stack.save)
       case _ =>

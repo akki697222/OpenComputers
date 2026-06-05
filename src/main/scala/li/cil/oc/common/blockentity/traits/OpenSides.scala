@@ -4,8 +4,8 @@ import li.cil.oc.Settings
 import li.cil.oc.util.RotationHelper
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.Dist
+import net.neoforged.api.distmarker.OnlyIn
 
 /**
   * @author Vexatos

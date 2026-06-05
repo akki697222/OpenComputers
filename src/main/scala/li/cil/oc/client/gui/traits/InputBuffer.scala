@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants
 import com.mojang.blaze3d.systems.RenderSystem
 
 import java.util.Arrays
-import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
+import com.mojang.blaze3d.vertex.{BufferUploader, DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import li.cil.oc.api
 import li.cil.oc.client.KeyBindings
 import li.cil.oc.client.Textures
@@ -94,13 +94,12 @@ trait InputBuffer extends DisplayBuffer {
       val y = bufferY + buffer.renderHeight - 16
 
       val t = Tesselator.getInstance
-      val r = t.getBuilder
-      r.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
-      r.vertex(stack.last.pose, x, y + 16, 0).uv(0, 1).endVertex()
-      r.vertex(stack.last.pose, x + 16, y + 16, 0).uv(1, 1).endVertex()
-      r.vertex(stack.last.pose, x + 16, y, 0).uv(1, 0).endVertex()
-      r.vertex(stack.last.pose, x, y, 0).uv(0, 0).endVertex()
-      t.end()
+      val r = t.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+      r.addVertex(stack.last.pose, x, y + 16, 0).setUv(0, 1)
+      r.addVertex(stack.last.pose, x + 16, y + 16, 0).setUv(1, 1)
+      r.addVertex(stack.last.pose, x + 16, y, 0).setUv(1, 0)
+      r.addVertex(stack.last.pose, x, y, 0).setUv(0, 0)
+      BufferUploader.drawWithShader(r.buildOrThrow())
 
       RenderState.checkError(getClass.getName + ".drawBufferLayer: keyboard icon")
     }

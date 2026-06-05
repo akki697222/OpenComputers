@@ -15,7 +15,7 @@ import net.minecraft.core.Direction
 import net.minecraft.world.phys.Vec3
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.client.model.data.ModelData
+import net.neoforged.neoforge.client.model.data.ModelData
 import org.joml.Vector3f
 
 trait SmartBlockModelBase extends BakedModel {
@@ -136,12 +136,12 @@ trait SmartBlockModelBase extends BakedModel {
     val (uAxis, vAxis) = Planes(facing.get3DDataValue)
     val rot = (rotation + 4) % 4
     vertices.flatMap(vertex => {
-      var u = vertex.dot(uAxis)
-      var v = vertex.dot(vAxis)
+      var u = vertex.dot(uAxis).toFloat
+      var v = vertex.dot(vAxis).toFloat
       if (uAxis.x + uAxis.y + uAxis.z < 0) u = 1 + u
       if (vAxis.x + vAxis.y + vAxis.z < 0) v = 1 + v
       for (i <- 0 until rot) {
-        val tmp = u; u = v; v = (-(tmp - 0.5)) + 0.5
+        val tmp = u; u = v; v = (-(tmp - 0.5f)) + 0.5f
       }
       rawData(vertex.x, vertex.y, vertex.z, facing, texture, texture.getU(u * 16), texture.getV(v * 16), colorRGB)
     })

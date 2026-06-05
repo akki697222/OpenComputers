@@ -4,8 +4,8 @@ import li.cil.oc.api.network.EnvironmentHost;
 import li.cil.oc.api.network.Environment;
 import net.minecraft.world.Container;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 /**
  * This interface allows interaction with robots.

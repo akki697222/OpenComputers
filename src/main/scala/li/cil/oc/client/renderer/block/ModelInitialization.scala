@@ -1,27 +1,25 @@
 package li.cil.oc.client.renderer.block
 
-import li.cil.oc.Constants
-import li.cil.oc.Settings
-import li.cil.oc.api
+import li.cil.oc.{Constants, Settings, api}
 import li.cil.oc.common.item.{Tablet, TabletWrapper}
-import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.client.Minecraft
-import net.minecraft.client.resources.model.{BakedModel, ModelResourceLocation}
-import net.minecraft.client.renderer.block.model.ItemOverrides
 import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.renderer.RenderType
+import net.minecraft.client.renderer.block.model.ItemOverrides
+import net.minecraft.client.resources.model.{BakedModel, ModelResourceLocation}
+import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.RandomSource
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.{DyeColor, Item, ItemStack}
 import net.minecraft.world.level.ItemLike
-import net.minecraft.core.Direction
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.util.RandomSource
-import net.minecraft.client.renderer.RenderType
-import net.minecraft.resources.ResourceLocation
-import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
-import net.minecraftforge.client.event.ModelEvent
-import net.minecraftforge.client.model.data.ModelData
-import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.registries.ForgeRegistries
+import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ModelEvent
+import net.neoforged.neoforge.client.model.data.ModelData
 
 import scala.collection.mutable
 
@@ -104,7 +102,7 @@ object ModelInitialization {
 
     withItem(Constants.ItemName.Terminal) { item =>
       dynamicItems += item -> DynamicItemModel(
-        stack => termLoc(stack.hasTag && stack.getTag.contains(Settings.namespace + "server")),
+        stack => termLoc(stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).contains(Settings.namespace + "server")),
         event => Seq(true, false).foreach(s => event.register(termLoc(s)))
       )
     }
@@ -118,18 +116,12 @@ object ModelInitialization {
         (stack: ItemStack, tintIndex: Int) => {
           if (tintIndex == 1) {
             val color =
-              if (stack.hasTag && stack.getTag.contains(Settings.namespace + "color"))
-                stack.getTag.getInt(Settings.namespace + "color")
+              if (stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).contains(Settings.namespace + "color"))
+                stack.get(DataComponents.CUSTOM_DATA).getUnsafe.getInt(Settings.namespace + "color")
               else
                 DyeColor.GRAY.getId
 
-            val rgb = DyeColor.byId(color max 0 min 15).getTextureDiffuseColors
-
-            val r = (rgb(0) * 255.0f).toInt
-            val g = (rgb(1) * 255.0f).toInt
-            val b = (rgb(2) * 255.0f).toInt
-
-            (r << 16) | (g << 8) | b
+            DyeColor.byId(color max 0 min 15).getTextureDiffuseColor
           }
           else 0xFFFFFF
         },
@@ -204,7 +196,7 @@ object ModelInitialization {
 
     for ((item, model) <- dynamicItems) {
       val originalLocation =
-        new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory")
+        new ModelResourceLocation(BuiltInRegistries.ITEM.getKey(item), "inventory")
 
       registry.get(originalLocation) match {
         case original: BakedModel =>

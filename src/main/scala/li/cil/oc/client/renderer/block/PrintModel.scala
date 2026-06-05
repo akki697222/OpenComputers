@@ -1,8 +1,6 @@
 package li.cil.oc.client.renderer.block
 
 import java.util
-import java.util.Collections
-
 import com.google.common.base.Strings
 import li.cil.oc.Settings
 import li.cil.oc.client.KeyBindings
@@ -26,7 +24,7 @@ import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
-import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
+import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
 import scala.collection.JavaConverters.bufferAsJavaList
 import scala.jdk.CollectionConverters._

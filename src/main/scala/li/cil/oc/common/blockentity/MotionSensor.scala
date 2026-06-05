@@ -2,7 +2,7 @@ package li.cil.oc.common.blockentity
 
 import li.cil.oc.api.network.Node
 import li.cil.oc.server.component
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
@@ -21,13 +21,13 @@ class MotionSensor(pos: BlockPos, state: BlockState)
     }
   }
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
-    motionSensor.loadData(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
+    motionSensor.loadData(nbt, provider)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
-    motionSensor.saveData(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
+    motionSensor.saveData(nbt, provider)
   }
 }

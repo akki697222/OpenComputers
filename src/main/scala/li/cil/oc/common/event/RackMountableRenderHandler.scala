@@ -9,7 +9,7 @@ import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.client.renderer.tileentity.RenderUtil
 import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
-import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.neoforged.eventbus.api.SubscribeEvent
 import net.minecraft.client.renderer.block.model.ItemTransforms
 import net.minecraft.world.item.{ItemDisplayContext, ItemStack}
 import net.minecraft.nbt.Tag

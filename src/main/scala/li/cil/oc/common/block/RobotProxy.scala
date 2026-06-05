@@ -29,7 +29,7 @@ import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelecti
 
 import java.util
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraftforge.common.extensions.IForgeBlock
+import net.neoforged.common.extensions.IForgeBlock
 
 class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.StateAware with traits.Tickable {
   val shape = VoxelShapes.box(0.1, 0.1, 0.1, 0.9, 0.9, 0.9)

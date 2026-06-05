@@ -1,71 +1,44 @@
 package li.cil.oc.server.agent
 
-import java.util
-import java.util.UUID
-import com.mojang.datafixers.util.Either
 import com.mojang.authlib.GameProfile
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
+import com.mojang.datafixers.util.Either
+import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.api.event._
 import li.cil.oc.api.internal
 import li.cil.oc.api.network.Connector
 import li.cil.oc.common.EventHandler
 import li.cil.oc.server.agent.{Inventory => AgentInventory}
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.InventoryUtils
-import net.minecraft.world.level.block.piston.PistonBaseBlock
-import net.minecraft.world.entity.{Entity, EntityDimensions, EquipmentSlot, LivingEntity, Pose}
-import net.minecraft.world.entity.item.ItemEntity
-import net.minecraft.world.entity.player.{Player => PlayerEntity}
-import net.minecraft.world.entity.player.Player.{BedSleepingProblem => BedStatus}
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.item.Items
-import net.minecraft.world.Container
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.inventory.InventoryMenu
-import net.minecraft.world.item.BlockItem
-import net.minecraft.world.item.context.UseOnContext
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.trading.MerchantOffers
-import net.minecraft.server.network.ServerGamePacketListenerImpl
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.server.players.ServerOpListEntry
-import net.minecraft.world.level.block.entity.{CommandBlockEntity, SignBlockEntity}
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.core.Direction
-import net.minecraft.world.InteractionHand
-import net.minecraft.core.BlockPos
-import net.minecraft.world.phys.BlockHitResult
-import net.minecraft.world.phys.Vec3
+import li.cil.oc.util.{BlockPosition, InventoryUtils}
+import net.minecraft.core.{BlockPos, Direction, NonNullList}
 import net.minecraft.network.chat.Component
-import net.minecraft.world.level.{BaseCommandBlock, Level}
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
 import net.minecraft.server.level.ServerLevel
-import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.common.util.FakePlayer
-import net.minecraftforge.common.util.LazyOptional
-import net.minecraftforge.common.util.NonNullSupplier
-import net.minecraftforge.event.ForgeEventFactory
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper
-import net.minecraftforge.eventbus.api.{Event, EventPriority, SubscribeEvent}
-import net.minecraftforge.items.IItemHandler
-import net.minecraftforge.items.wrapper._
-
-import scala.jdk.CollectionConverters._
-import net.minecraft.core.NonNullList
+import net.minecraft.server.network.ServerGamePacketListenerImpl
+import net.minecraft.server.players.ServerOpListEntry
+import net.minecraft.world.{Container, InteractionHand, InteractionResult, MenuProvider}
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.Entity.RemovalReason
+import net.minecraft.world.entity.item.ItemEntity
+import net.minecraft.world.entity.player.Player.{BedSleepingProblem => BedStatus}
+import net.minecraft.world.entity.player.{Player => PlayerEntity}
+import net.minecraft.world.entity._
+import net.minecraft.world.inventory.InventoryMenu
+import net.minecraft.world.item.{BlockItem, ItemStack, Items}
+import net.minecraft.world.item.context.UseOnContext
+import net.minecraft.world.item.trading.MerchantOffers
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.entity.{CommandBlockEntity, SignBlockEntity}
+import net.minecraft.world.level.block.piston.PistonBaseBlock
+import net.minecraft.world.level.{BaseCommandBlock, Level}
+import net.minecraft.world.phys.{BlockHitResult, Vec3}
+import net.neoforged.neoforge.common.util.FakePlayer
+
+import java.util
+import java.util.UUID
+import scala.jdk.CollectionConverters._
 
 object Player {
-  // These use unobfuscated names because they're added by forge (LazyOptional / capabilities).
-  private val playerMainHandler = ObfuscationReflectionHelper.findField(classOf[PlayerEntity], "playerMainHandler")
-
-  private val playerEquipmentHandler = ObfuscationReflectionHelper.findField(classOf[PlayerEntity], "playerEquipmentHandler")
-
-  private val playerJoinedHandler = ObfuscationReflectionHelper.findField(classOf[PlayerEntity], "playerJoinedHandler")
-
   def profileFor(agent: internal.Agent): GameProfile = {
     val uuid = agent.ownerUUID
     val randomId = (agent.getEnvironmentLevel.random.nextInt(0xFFFFFF) + 1).toString
@@ -168,19 +141,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
     this.inventoryMenu = new InventoryMenu(inventory, !level.isClientSide, this)
     this.containerMenu = this.inventoryMenu
 
-    try {
-      Player.playerMainHandler.set(this, LazyOptional.of(new NonNullSupplier[IItemHandler] {
-        override def get = new PlayerMainInvWrapper(inventory)
-      }))
-      Player.playerEquipmentHandler.set(this, LazyOptional.of(new NonNullSupplier[IItemHandler] {
-        override def get = new CombinedInvWrapper(new PlayerArmorInvWrapper(inventory), new PlayerOffhandInvWrapper(inventory))
-      }))
-      Player.playerJoinedHandler.set(this, LazyOptional.of(new NonNullSupplier[IItemHandler] {
-        override def get = new PlayerInvWrapper(inventory)
-      }))
-    } catch {
-      case _: Exception =>
-    }
+    // NeoForge 1.21.1: LazyOptional-based inventory capability fields removed; AgentInventory is used directly
   }
 
   var facing, side = Direction.SOUTH
@@ -326,7 +287,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   }
 
   def fireLeftClickBlock(pos: BlockPos, side: Direction): PlayerInteractEvent.LeftClickBlock = {
-    net.minecraftforge.common.ForgeHooks.onLeftClickBlock(this, pos, side)
+    net.neoforged.common.ForgeHooks.onLeftClickBlock(this, pos, side)
   }
 
   def fireRightClickAir(): PlayerInteractEvent.RightClickItem = {

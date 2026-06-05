@@ -17,7 +17,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.effect.MobEffect
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BeaconBlockEntity
-import net.minecraftforge.registries.ForgeRegistries
+import net.neoforged.registries.ForgeRegistries
 
 object DriverBeacon extends DriverSidedTileEntity {
   override def getTileEntityClass: Class[_] = classOf[BeaconBlockEntity]

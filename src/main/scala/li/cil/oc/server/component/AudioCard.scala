@@ -12,6 +12,7 @@ import li.cil.oc.api.network.{EnvironmentHost, Message, Node, Visibility}
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.server.PacketSender
+import net.minecraft.core.HolderLookup
 
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
@@ -262,8 +263,8 @@ class AudioCard(private val host: EnvironmentHost) extends AbstractManagedEnviro
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super.loadData(nbt)
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(nbt, provider)
     nbt.getList("owners", Tag.TAG_COMPOUND).forEach {
       case ownerNbt: CompoundTag =>
         val address = ownerNbt.getString("address")
@@ -274,8 +275,8 @@ class AudioCard(private val host: EnvironmentHost) extends AbstractManagedEnviro
     }
   }
 
-  override def saveData(nbt: CompoundTag): Unit = synchronized {
-    super.saveData(nbt)
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = synchronized {
+    super.saveData(nbt, provider)
     val ownersNbt = new ListTag()
     for ((address, handles) <- owners) {
       val ownerNbt = new CompoundTag()
