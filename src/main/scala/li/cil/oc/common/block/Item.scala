@@ -1,40 +1,30 @@
 package li.cil.oc.common.block
 
-import java.util
-import li.cil.oc.Constants
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.common.block
-import li.cil.oc.common.item.data.MicrocontrollerData
-import li.cil.oc.common.item.data.PrintData
-import li.cil.oc.common.item.data.RobotData
-import li.cil.oc.common.blockentity
-import li.cil.oc.util.Color
-import li.cil.oc.util.ItemColorizer
+import li.cil.oc.{Constants, Settings, api}
+import li.cil.oc.common.{block, blockentity}
+import li.cil.oc.common.item.data.{MicrocontrollerData, PrintData, RobotData}
 import li.cil.oc.util.Rarity
+import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item
+import net.minecraft.world.item.Item.{Properties, TooltipContext}
+import net.minecraft.world.item.{BlockItem, ItemStack, TooltipFlag}
+import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.item // Rarity
-import net.minecraft.world.item.BlockItem
-import net.minecraft.world.item.DyeColor
-import net.minecraft.world.item.Item.Properties
-import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
-import net.minecraft.network.chat.Component
-import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.phys.BlockHitResult
 
 class Item(value: Block, props: Properties) extends BlockItem(value, props) {
-  override def getRarity(stack: ItemStack): item.Rarity = getBlock match {
-    case _: block.Microcontroller => {
-      val data = new MicrocontrollerData(stack)
-      Rarity.byTier(data.tier)
+  override def appendHoverText(stack: ItemStack, ctx: TooltipContext, tooltip: java.util.List[Component], flag: TooltipFlag): Unit = {
+    getBlock match {
+      case _: block.Microcontroller =>
+        stack.set(DataComponents.RARITY, Rarity.byTier(new MicrocontrollerData(stack).tier))
+      case _: block.RobotProxy =>
+        stack.set(DataComponents.RARITY, Rarity.byTier(new RobotData(stack).tier))
+      case _ =>
     }
-    case _: block.RobotProxy => {
-      val data = new RobotData(stack)
-      Rarity.byTier(data.tier)
-    }
-    case _ => super.getRarity(stack)
+    super.appendHoverText(stack, ctx, tooltip, flag)
   }
 
   override def getName(stack: ItemStack): Component = {

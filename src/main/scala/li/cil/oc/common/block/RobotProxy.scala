@@ -9,6 +9,7 @@ import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.server.{PacketSender, agent}
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.{BlockPosition, InventoryUtils, Tooltip}
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent}
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
@@ -29,7 +30,6 @@ import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelecti
 
 import java.util
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.neoforged.common.extensions.IForgeBlock
 
 class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.StateAware with traits.Tickable {
   val shape = VoxelShapes.box(0.1, 0.1, 0.1, 0.9, 0.9, 0.9)
@@ -94,9 +94,9 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
   }
 
   private def addLines(stack: ItemStack, tooltip: util.List[ITextComponent]): Unit = {
-    if (stack.hasTag) {
-      if (stack.getTag.contains(Settings.namespace + "xp")) {
-        val xp = stack.getTag.getDouble(Settings.namespace + "xp")
+    if (stack.has(DataComponents.CUSTOM_DATA)) {
+      if (stack.get(DataComponents.CUSTOM_DATA).contains(Settings.namespace + "xp")) {
+        val xp = stack.get(DataComponents.CUSTOM_DATA).getUnsafe.getDouble(Settings.namespace + "xp")
         val level = Math.min((Math.pow(xp - Settings.get.baseXpToLevel, 1 / Settings.get.exponentialXpGrowth) / Settings.get.constantXpGrowth).toInt, 30)
         if (level > 0) {
           for (curr <- Tooltip.get(getDescriptionId + "_level", level)) {
@@ -104,8 +104,8 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
           }
         }
       }
-      if (stack.getTag.contains(Settings.namespace + "storedEnergy")) {
-        val energy = stack.getTag.getInt(Settings.namespace + "storedEnergy")
+      if (stack.get(DataComponents.CUSTOM_DATA).contains(Settings.namespace + "storedEnergy")) {
+        val energy = stack.get(DataComponents.CUSTOM_DATA).getUnsafe.getInt(Settings.namespace + "storedEnergy")
         if (energy > 0) {
           for (curr <- Tooltip.get(getDescriptionId + "_storedenergy", energy)) {
             tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))

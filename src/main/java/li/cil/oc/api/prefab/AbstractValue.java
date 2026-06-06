@@ -34,6 +34,6 @@ public abstract class AbstractValue implements Value {
     }
 
     @Override
-    public void saveData(CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
+    public void saveData(@NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
     }
 }

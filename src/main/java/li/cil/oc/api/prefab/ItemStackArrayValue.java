@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class ItemStackArrayValue extends AbstractValue {
 	}
 
 	@Override
-	public void saveData(CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+	public void saveData(@NotNull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
 
 		CompoundTag nullnbt = new CompoundTag();
 

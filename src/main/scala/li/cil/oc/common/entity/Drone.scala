@@ -19,8 +19,9 @@ import li.cil.oc.util.{BlockPosition, InventoryUtils}
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.syncher.{EntityDataAccessor, EntityDataSerializers, SynchedEntityData}
-import net.minecraft.server.level.{ServerLevel, ServerPlayer}
+import net.minecraft.server.level.{ServerEntity, ServerLevel, ServerPlayer}
 import net.minecraft.world.entity._
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
@@ -28,6 +29,7 @@ import net.minecraft.world.entity.player.{Inventory => PlayerInventory}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.portal.DimensionTransition
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.{InteractionHand, InteractionResult, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
@@ -35,7 +37,6 @@ import net.neoforged.neoforge.fluids.IFluidTank
 
 import java.lang
 import java.util.UUID
-
 import scala.jdk.CollectionConverters._
 
 object Drone {
@@ -258,18 +259,18 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   // ----------------------------------------------------------------------- //
 
-  override def defineSynchedData(): Unit = {
-    entityData.define(Drone.DataRunning, java.lang.Boolean.FALSE)
-    entityData.define(Drone.DataTargetX, Float.box(0f))
-    entityData.define(Drone.DataTargetY, Float.box(0f))
-    entityData.define(Drone.DataTargetZ, Float.box(0f))
-    entityData.define(Drone.DataMaxAcceleration, Float.box(0f))
-    entityData.define(Drone.DataSelectedSlot, Int.box(0))
-    entityData.define(Drone.DataCurrentEnergy, Int.box(0))
-    entityData.define(Drone.DataMaxEnergy, Int.box(100))
-    entityData.define(Drone.DataStatusText, "")
-    entityData.define(Drone.DataInventorySize, Int.box(0))
-    entityData.define(Drone.DataLightColor, Int.box(0x66DD55))
+  override def defineSynchedData(builder: SynchedEntityData.Builder): Unit = {
+    builder.define(Drone.DataRunning, java.lang.Boolean.FALSE)
+    builder.define(Drone.DataTargetX, Float.box(0f))
+    builder.define(Drone.DataTargetY, Float.box(0f))
+    builder.define(Drone.DataTargetZ, Float.box(0f))
+    builder.define(Drone.DataMaxAcceleration, Float.box(0f))
+    builder.define(Drone.DataSelectedSlot, Int.box(0))
+    builder.define(Drone.DataCurrentEnergy, Int.box(0))
+    builder.define(Drone.DataMaxEnergy, Int.box(100))
+    builder.define(Drone.DataStatusText, "")
+    builder.define(Drone.DataInventorySize, Int.box(0))
+    builder.define(Drone.DataLightColor, Int.box(0x66DD55))
   }
 
   def initializeAfterPlacement(stack: ItemStack, player: Player, position: Vec3): Unit = {
@@ -506,7 +507,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   private var isChangingDimension = false
 
-  override def changeDimension(dimension: ServerLevel): Entity = {
+  override def changeDimension(dimension: DimensionTransition): Entity = {
     // Store relative target as target, to allow adding that in our "new self"
     // (entities get re-created after changing dimension).
     targetX = (targetX - getX).toFloat
@@ -575,7 +576,8 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   override def getName: Component = Localization.localizeLater("entity.oc.Drone.name")
 
-  override def getAddEntityPacket = NetworkHooks.getEntitySpawningPacket(this)
+  override def getAddEntityPacket(entityTrackerEntry: ServerEntity) =
+    new ClientboundAddEntityPacket(this, entityTrackerEntry)
 
   override protected def readAdditionalSaveData(nbt: CompoundTag): Unit = {
     val provider = this.level.registryAccess()
@@ -584,8 +586,8 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
     if (!getEnvironmentLevel.isClientSide) {
       machine.loadData(nbt.getCompound("machine"), provider)
       control.loadData(nbt.getCompound("control"), provider)
-      components.loadData(nbt.getCompound("components"))
-      mainInventory.loadData(nbt.getCompound("inventory"))
+      components.loadData(nbt.getCompound("components"), provider)
+      mainInventory.loadData(nbt.getCompound("inventory"), provider)
 
       wireThingsTogether()
     }
@@ -614,8 +616,8 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
     if (!getEnvironmentLevel.isClientSide) {
       nbt.setNewCompoundTag("machine", (nbt: CompoundTag) => machine.saveData(nbt, provider))
       nbt.setNewCompoundTag("control", (nbt: CompoundTag) => control.saveData(nbt, provider))
-      nbt.setNewCompoundTag("components", components.saveData)
-      nbt.setNewCompoundTag("inventory", mainInventory.saveData)
+      nbt.setNewCompoundTag("components", tag => components.saveData(tag, provider))
+      nbt.setNewCompoundTag("inventory", tag => mainInventory.saveData(tag, provider))
     }
     nbt.putFloat("targetX", targetX)
     nbt.putFloat("targetY", targetY)

@@ -9,7 +9,7 @@ import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.client.renderer.tileentity.RenderUtil
 import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
 import net.minecraft.client.renderer.block.model.ItemTransforms
 import net.minecraft.world.item.{ItemDisplayContext, ItemStack}
 import net.minecraft.nbt.Tag
@@ -34,7 +34,7 @@ object RackMountableRenderHandler {
       // Disk drive.
 
       if (e.data.contains("disk")) {
-        val stack = ItemStack.of(e.data.getCompound("disk"))
+        val stack = ItemStack.parseOptional(e.rack.getEnvironmentLevel.registryAccess(), e.data.getCompound("disk"))
         if (!stack.isEmpty) {
           val matrix = e.stack
           matrix.pushPose()
@@ -93,10 +93,10 @@ object RackMountableRenderHandler {
     val matrix = e.stack.last.pose
     val r = e.typeBuffer.getBuffer(RenderTypes.BLOCK_OVERLAY)
     val icon = Textures.getSprite(texture)
-    r.vertex(matrix, u0, e.v1, 0).uv(icon.getU(u0 * 16), icon.getV(e.v1 * 16)).endVertex();
-    r.vertex(matrix, u1, e.v1, 0).uv(icon.getU(u1 * 16), icon.getV(e.v1 * 16)).endVertex();
-    r.vertex(matrix, u1, e.v0, 0).uv(icon.getU(u1 * 16), icon.getV(e.v0 * 16)).endVertex();
-    r.vertex(matrix, u0, e.v0, 0).uv(icon.getU(u0 * 16), icon.getV(e.v0 * 16)).endVertex();
+    r.addVertex(matrix, u0, e.v1, 0).setUv(icon.getU(u0 * 16), icon.getV(e.v1 * 16))
+    r.addVertex(matrix, u1, e.v1, 0).setUv(icon.getU(u1 * 16), icon.getV(e.v1 * 16))
+    r.addVertex(matrix, u1, e.v0, 0).setUv(icon.getU(u1 * 16), icon.getV(e.v0 * 16))
+    r.addVertex(matrix, u0, e.v0, 0).setUv(icon.getU(u0 * 16), icon.getV(e.v0 * 16))
   }
 
   @SubscribeEvent

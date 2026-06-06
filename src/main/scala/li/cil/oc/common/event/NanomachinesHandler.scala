@@ -17,16 +17,13 @@ import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent
 import net.minecraft.client.renderer.MultiBufferSource
-import com.mojang.blaze3d.vertex.Tesselator
+import com.mojang.blaze3d.vertex.{ByteBufferBuilder, DefaultVertexFormat, PoseStack, Tesselator, VertexConsumer}
 import net.minecraft.world.entity.player.Player
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.NbtIo
-import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
-import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import net.minecraft.nbt.{CompoundTag, NbtAccounter, NbtIo}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
-import net.neoforged.neoforge.client.event.RenderGuiOverlayEvent
-import net.neoforged.neoforge.client.gui.overlay.VanillaGuiOverlay
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers
+import net.neoforged.neoforge.event.tick.EntityTickEvent
 
 object NanomachinesHandler {
   @OnlyIn(Dist.CLIENT)
@@ -35,8 +32,8 @@ object NanomachinesHandler {
     val TexNanomachinesBar = RenderTypes.createTexturedQuad("nanomachines_bar", Textures.GUI.NanomachinesBar, DefaultVertexFormat.POSITION_TEX, false)
 
     @SubscribeEvent
-    def onRenderGameOverlay(e: RenderGuiOverlayEvent.Post): Unit = {
-      if (e.getOverlay.id() == VanillaGuiOverlay.DEBUG_TEXT.id()) {
+    def onRenderGameOverlay(e: RenderGuiLayerEvent.Post): Unit = {
+      if (e.getName == VanillaGuiLayers.DEBUG_OVERLAY) {
         val mc = Minecraft.getInstance
         api.Nanomachines.getController(mc.player) match {
           case controller: Controller =>
@@ -58,10 +55,12 @@ object NanomachinesHandler {
                 else if (y < 1) (y * height).toInt
                 else y.toInt)
             val fill = controller.getLocalBuffer / controller.getLocalBufferSize
-            val buffer = MultiBufferSource.immediate(Tesselator.getInstance.getBuilder)
+            val byteBuffer = new ByteBufferBuilder(786432)
+            val buffer = MultiBufferSource.immediate(byteBuffer)
             drawRect(graphics.pose, buffer.getBuffer(TexNanomachines), left, top, sizeX, sizeY, sizeX, sizeY)
             drawRect(graphics.pose, buffer.getBuffer(TexNanomachinesBar), left, top, sizeX, sizeY, sizeX, sizeY, fill.toFloat)
             buffer.endBatch()
+            byteBuffer.close()
           case _ => // Nothing to show.
         }
       }
@@ -70,10 +69,10 @@ object NanomachinesHandler {
     private def drawRect(stack: PoseStack, r: VertexConsumer, x: Int, y: Int, w: Int, h: Int, tw: Int, th: Int, fill: Float = 1): Unit = {
       val sx = 1f / tw
       val sy = 1f / th
-      r.vertex(stack.last.pose, x, y + h, 0).uv(0, h * sy).endVertex()
-      r.vertex(stack.last.pose, x + w, y + h, 0).uv(w * sx, h * sy).endVertex()
-      r.vertex(stack.last.pose, x + w, y + h * (1 - fill), 0).uv(w * sx, 1 - fill).endVertex()
-      r.vertex(stack.last.pose, x, y + h * (1 - fill), 0).uv(0, 1 - fill).endVertex()
+      r.addVertex(stack.last.pose, x, y + h, 0).setUv(0, h * sy)
+      r.addVertex(stack.last.pose, x + w, y + h, 0).setUv(w * sx, h * sy)
+      r.addVertex(stack.last.pose, x + w, y + h * (1 - fill), 0).setUv(w * sx, 1 - fill)
+      r.addVertex(stack.last.pose, x, y + h * (1 - fill), 0).setUv(0, 1 - fill)
     }
   }
 
@@ -87,7 +86,7 @@ object NanomachinesHandler {
     }
 
     @SubscribeEvent
-    def onLivingUpdate(e: LivingEvent.LivingTickEvent): Unit = {
+    def onLivingUpdate(e: EntityTickEvent.Post): Unit = {
       e.getEntity match {
         case player: Player => api.Nanomachines.getController(player) match {
           case controller: ControllerImpl =>
@@ -143,7 +142,7 @@ object NanomachinesHandler {
           case controller: ControllerImpl =>
             try {
               val fis = new FileInputStream(file)
-              try controller.loadData(NbtIo.readCompressed(fis)) catch {
+              try controller.loadData(NbtIo.readCompressed(fis, NbtAccounter.unlimitedHeap())) catch {
                 case t: Throwable =>
                   OpenComputers.log.warn("Error loading nanomachine state.", t)
               }

@@ -224,7 +224,7 @@ private class Network private(private val data: mutable.Map[String, Network.Vert
   private def node(node: ImmutableNode) = data(node.address)
 
   private def addNew(node: MutableNode) = {
-    val newNode = new Network.Vertex(node)
+    val newNode = new Network.addVertex(node)
     if (node.address == null || data.contains(node.address))
       node.address = java.util.UUID.randomUUID().toString
     data += node.address -> newNode

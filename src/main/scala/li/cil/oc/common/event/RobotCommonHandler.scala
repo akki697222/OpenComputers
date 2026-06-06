@@ -9,7 +9,7 @@ import li.cil.oc.common.item.UpgradeHover
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.core.Direction
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 object RobotCommonHandler {
   @SubscribeEvent

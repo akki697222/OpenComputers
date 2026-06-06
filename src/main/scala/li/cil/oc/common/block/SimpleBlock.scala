@@ -20,7 +20,7 @@ import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.level.block.entity.{BlockEntity => TileEntity}
 import net.minecraft.core.Direction
-import net.minecraft.world.{InteractionHand, InteractionResult}
+import net.minecraft.world.{InteractionHand, InteractionResult, ItemInteractionResult}
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.network.chat.Component
@@ -144,7 +144,8 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
     }
 
   // ----------------------------------------------------------------------- //
-
+  override def useItemOn(stack: ItemStack, state: BlockState, level: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult = super.useItemOn(stack, state, level, pos, player, hand, hitResult)
+  
   override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, trace: BlockHitResult): InteractionResult = {
     val heldItem = player.getItemInHand(hand)
     world.getBlockEntity(pos) match {

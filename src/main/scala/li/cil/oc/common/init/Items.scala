@@ -25,14 +25,15 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Rarity
-import net.minecraft.core.registries.Registries
+import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.bus.api.{EventPriority, IEventBus}
-import net.neoforged.neoforge.registries.{DeferredRegister, RegisterEvent}
+import net.neoforged.neoforge.registries.{DeferredRegister, NeoForgeRegistries, RegisterEvent}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import li.cil.oc.util.ExtendedItemStack._
 
 object Items extends ItemAPI {
   val ITEMS: DeferredRegister[Item] =
@@ -350,7 +351,7 @@ object Items extends ItemAPI {
     // DeferredRegister listens at HIGHEST priority, so our LOW-priority listener
     // runs after all items are registered — safe to call ro.get() / createItemStack.
     bus.addListener(EventPriority.LOW, (event: RegisterEvent) => {
-      if (event.getRegistryKey == ForgeRegistries.Keys.ITEMS) {
+      if (event.getRegistryKey == Registries.ITEM) {
         initPostStorage()
       }
     })

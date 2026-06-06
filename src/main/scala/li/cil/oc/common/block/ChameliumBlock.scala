@@ -11,9 +11,9 @@ import net.minecraft.world.level.block.state.properties.EnumProperty
 import net.minecraft.world.level.block.state.{StateDefinition => StateContainer}
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
-import net.neoforged.event.BuildCreativeModeTabContentsEvent
-import net.neoforged.eventbus.api.SubscribeEvent
-import net.neoforged.fml.common.Mod.EventBusSubscriber
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.fml.common.EventBusSubscriber
 
 object ChameliumBlock {
   final val Color = EnumProperty.create("color", classOf[DyeColor])

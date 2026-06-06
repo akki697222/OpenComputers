@@ -32,8 +32,7 @@ class RobotAfterimage(props: Properties) extends SimpleBlock(props) with traits.
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = {
     findMovingRobot(world, pos) match {
       case Some(robot) =>
-        val block = robot.getBlockState.getBlock.asInstanceOf[SimpleBlock]
-        val shape = block.getShape(state, world, robot.getBlockPos, ctx)
+        val shape = robot.getBlockState.getShape(world, robot.getBlockPos, ctx)
         val delta = robot.moveFrom.fold(BlockPos.ZERO)(vec => {
           val blockPos = robot.getBlockPos
           new BlockPos(blockPos.getX - vec.getX, blockPos.getY - vec.getY, blockPos.getZ - vec.getZ)
@@ -82,11 +81,12 @@ class RobotAfterimage(props: Properties) extends SimpleBlock(props) with traits.
     }
   }
 
-  @Deprecated
-  override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, trace: BlockRayTraceResult): ActionResultType = {
+  override def useWithoutItem(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, trace: BlockRayTraceResult): ActionResultType = {
     findMovingRobot(world, pos) match {
-      case Some(robot) => api.Items.get(Constants.BlockName.Robot).block.use(world.getBlockState(robot.getBlockPos), world, robot.getBlockPos, player, hand, trace)
-      case _ => if (world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState)) ActionResultType.sidedSuccess(world.isClientSide) else ActionResultType.PASS
+      case Some(robot) =>
+        world.getBlockState(robot.getBlockPos).useWithoutItem(world, player, trace)
+      case _ =>
+        if (world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState)) ActionResultType.sidedSuccess(world.isClientSide) else ActionResultType.PASS
     }
   }
 

@@ -1,15 +1,17 @@
 package li.cil.oc.common.event
 
-import li.cil.oc.Settings
+import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.common.item.HoverBoots
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.ai.attributes.{AttributeModifier, Attributes}
+import net.minecraft.world.entity.player.Player
+import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.common.util.FakePlayer
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent
-import net.neoforged.neoforge.event.entity.living.{LivingEvent, LivingFallEvent}
-import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent
+import net.neoforged.neoforge.event.tick.EntityTickEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraft.world.entity.player.Player
-import net.neoforged.neoforge.event.tick.EntityTickEvent
 
 object HoverBootsHandler {
   @SubscribeEvent
@@ -32,7 +34,18 @@ object HoverBootsHandler {
       })
       if (hasHoverBoots != hadHoverBoots) {
         nbt.putBoolean(Settings.namespace + "hasHoverBoots", hasHoverBoots)
-        player.setMaxUpStep(if (hasHoverBoots) 1f else 0.5f)
+        val stepHeightAttr = player.getAttribute(Attributes.STEP_HEIGHT)
+        if (stepHeightAttr != null) {
+          val modifierId = ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "hover_boots_step")
+          stepHeightAttr.removeModifier(modifierId)
+          if (hasHoverBoots) {
+            stepHeightAttr.addTransientModifier(new AttributeModifier(
+              modifierId,
+              0.5,
+              AttributeModifier.Operation.ADD_VALUE
+            ))
+          }
+        }
       }
       if (hasHoverBoots && !player.onGround && player.fallDistance < 5 && player.getDeltaMovement.y < 0) {
         player.setDeltaMovement(player.getDeltaMovement.multiply(1, 0.9, 1))

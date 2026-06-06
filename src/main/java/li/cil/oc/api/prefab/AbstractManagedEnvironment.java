@@ -56,7 +56,7 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
     }
 
     @Override
-    public void saveData(final CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
+    public void saveData(final @NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
         if (node() != null) {
             // Force joining a network when saving and we're not in one yet, so that
             // the address is embedded in the saved data that gets sent to the client,
