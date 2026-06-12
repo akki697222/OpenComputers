@@ -19,9 +19,3 @@ description="This mod adds modular computers and robots that can be programmed i
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.opencomputers]]
-    modId="jei"
-    mandatory=false
-    versionRange="[15,)"
-    ordering="AFTER"
-    side="BOTH"

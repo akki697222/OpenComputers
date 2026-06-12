@@ -24,8 +24,8 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.component.CustomData
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.ItemTags
-import net.minecraft.world.inventory.CraftingContainer
-import net.minecraft.world.item.crafting.Recipe
+import net.minecraft.core.HolderLookup
+import net.minecraft.world.item.crafting.{CraftingInput, Recipe}
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -57,7 +57,7 @@ object ExtendedRecipe {
   private val beaconBlocks = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "beacon_base_blocks"))
   
   def patchRecipe[R <: Recipe[_]](recipe: R): R = {
-    val resultStack = recipe.getResultItem(null)
+    val resultStack = recipe.getResultItem(ServerLifecycleHooks.getCurrentServer.registryAccess())
     val resultItemName = api.Items.get(resultStack)
 
     // EEPROM initialization.
@@ -86,7 +86,7 @@ object ExtendedRecipe {
     recipe
   }
 
-  def addNBTToResult(recipe: Recipe[_], craftedStack: ItemStack, inventory: CraftingContainer): ItemStack = {
+  def addNBTToResult(recipe: Recipe[_], craftedStack: ItemStack, inventory: CraftingInput): ItemStack = {
     val craftedItemName = api.Items.get(craftedStack)
 
     if (craftedItemName == navigationUpgrade) {
@@ -209,9 +209,9 @@ object ExtendedRecipe {
     craftedStack
   }
 
-  private def getItems(inventory: CraftingContainer) = (0 until inventory.getContainerSize).map(inventory.getItem).filter(!_.isEmpty)
+  private def getItems(inventory: CraftingInput) = (0 until inventory.size).map(inventory.getItem).filter(!_.isEmpty)
 
-  private def recraft(craftedStack: ItemStack, inventory: CraftingContainer, descriptor: ItemInfo, dataFactory: (ItemStack) => ItemDataWrapper): Unit = {
+  private def recraft(craftedStack: ItemStack, inventory: CraftingInput, descriptor: ItemInfo, dataFactory: (ItemStack) => ItemDataWrapper): Unit = {
     if (api.Items.get(craftedStack) == descriptor) {
       // Find old Microcontroller.
       getItems(inventory).find(api.Items.get(_) == descriptor) match {

@@ -1,9 +1,10 @@
 package li.cil.oc.server.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import li.cil.oc.api.internal.Colored;
 import li.cil.oc.util.ItemColorizer;
+import java.util.List;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -14,12 +15,16 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
 
 public final class CopyColor extends LootItemConditionalFunction {
-    private CopyColor(LootItemCondition[] conditions) {
+    public static final MapCodec<CopyColor> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> commonFields(instance).apply(instance, CopyColor::new)
+    );
+
+    private CopyColor(List<LootItemCondition> conditions) {
         super(conditions);
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public LootItemFunctionType<CopyColor> getType() {
         return LootFunctions.COPY_COLOR.get();
     }
 
@@ -41,10 +46,4 @@ public final class CopyColor extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static class Serializer extends LootItemConditionalFunction.Serializer<CopyColor> {
-        @Override
-        public CopyColor deserialize(JsonObject src, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-            return new CopyColor(conditions);
-        }
-    }
 }

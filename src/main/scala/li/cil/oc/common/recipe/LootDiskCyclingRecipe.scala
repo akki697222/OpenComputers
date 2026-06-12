@@ -6,7 +6,6 @@ import li.cil.oc.api
 import li.cil.oc.common.Loot
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.util.StackOption
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.{NonNullList, HolderLookup}
 import net.minecraft.world.item.ItemStack
@@ -16,7 +15,7 @@ import net.minecraft.world.level.Level
 import scala.collection.JavaConverters
 import scala.collection.immutable
 
-class LootDiskCyclingRecipe(val getId: ResourceLocation, val bookCategory: CraftingBookCategory) extends CraftingRecipe {
+class LootDiskCyclingRecipe(val bookCategory: CraftingBookCategory) extends CraftingRecipe {
   val ingredients = NonNullList.create[Ingredient]
   ingredients.add(Ingredient.of(Loot.disksForCycling.toArray: _*))
   ingredients.add(Ingredient.of(api.Items.get(Constants.ItemName.Wrench).createItemStack(1)))

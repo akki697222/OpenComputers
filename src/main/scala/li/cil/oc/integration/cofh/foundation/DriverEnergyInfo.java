@@ -29,7 +29,12 @@ public final class DriverEnergyInfo extends DriverSidedTileEntity {
 
         @Callback(doc = "function():number --  Returns the amount of stored energy.")
         public Object[] getEnergy(final Context context, final Arguments args) {
-            return new Object[]{blockEntity.getEnergyStorage().getEnergyStored()};
+            try {
+                Object storage = blockEntity.getClass().getMethod("getEnergyStorage").invoke(blockEntity);
+                return new Object[]{storage.getClass().getMethod("getEnergyStored").invoke(storage)};
+            } catch (ReflectiveOperationException e) {
+                return new Object[]{null, e.getMessage()};
+            }
         }
 
         @Callback(doc = "function():number --  Returns the energy per tick.")

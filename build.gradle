@@ -129,13 +129,8 @@ repositories {
         }
     }
     maven {
-        name = "Azure-SLP"
-        url = uri("https://pkgs.dev.azure.com/Kotori316/minecraft/_packaging/mods/maven/v1")
-        content {
-            it.includeModule("com.kotori316", "ScalableCatsForce".toLowerCase())
-            it.includeModule("org.typelevel", "cats-core_2.13")
-            it.includeModule("org.typelevel", "cats-kernel_2.13")
-        }
+        name = "kotori316"
+        url = "https://maven.kotori316.com"
     }
     maven {
         name = "Jared's maven"
@@ -145,9 +140,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly(group: 'org.scala-lang', name: 'scala-library', version: "2.13.12")
-    compileOnly(group: 'org.typelevel', name: "cats-core_2.13", version: '2.8.1-kotori')
-    runtimeOnly(group: "com.kotori316", name: "ScalableCatsForce".toLowerCase(), version: "3.3.1-build-0", classifier: "with-library") {
+    compileOnly("org.scala-lang:scala-library:2.13.12")
+    compileOnly("org.typelevel:cats-core_2.13:2.8.1-kotori")
+    runtimeOnly("com.kotori316:scalablecatsforce-neoforge:3.3.3-build-15:with-library") {
         transitive(false)
     }
 

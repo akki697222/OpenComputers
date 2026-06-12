@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.bus.api.Event;
 
 public final class DriverInventory extends DriverSidedTileEntity {
     @Override
@@ -184,8 +184,8 @@ public final class DriverInventory extends DriverSidedTileEntity {
                 fakePlayer.setPos(position.toVec3().x, position.toVec3().y, position.toVec3().z);
                 final BlockHitResult trace = new BlockHitResult(fakePlayer.position(), Direction.DOWN, position.toBlockPos(), false);
                 final PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(fakePlayer, InteractionHand.MAIN_HAND, position.toBlockPos(), trace);
-                MinecraftForge.EVENT_BUS.post(event);
-                return !event.isCanceled() && event.getUseBlock() != Event.Result.DENY && !blockEntity.stillValid(fakePlayer);
+                NeoForge.EVENT_BUS.post(event);
+                return !event.isCanceled() && event.getUseBlock() != TriState.FALSE && !blockEntity.stillValid(fakePlayer);
             }
         }
     }
