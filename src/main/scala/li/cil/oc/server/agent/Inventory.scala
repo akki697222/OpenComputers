@@ -59,8 +59,6 @@ class Inventory(player: Player, val agent: internal.Agent) extends PlayerInvento
 
   override def getArmor(slot: Int): ItemStack = ItemStack.EMPTY
 
-  override def hurtArmor(source: DamageSource, damage: Float, slots: Array[Int]): Unit = {}
-
   override def dropAll(): Unit = {}
 
   override def contains(stack: ItemStack): Boolean = (0 until getContainerSize).map(getItem).filter(!_.isEmpty).exists(containerStack => ItemStack.isSameItem(stack, containerStack))

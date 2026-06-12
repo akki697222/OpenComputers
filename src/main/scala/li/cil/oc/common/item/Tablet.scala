@@ -135,12 +135,12 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
     new InteractionResultHolder(InteractionResult.sidedSuccess(level.isClientSide), stack)
   }
 
-  override def getUseDuration(stack: ItemStack): Int = 72000
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 72000
 
   override def releaseUsing(stack: ItemStack, level: Level, entity: LivingEntity, duration: Int): Unit = {
     entity match {
       case player: Player =>
-        val didAnalyze = getUseDuration(stack) - duration >= TimeToAnalyze
+        val didAnalyze = getUseDuration(stack, entity) - duration >= TimeToAnalyze
         if (didAnalyze) {
           if (!level.isClientSide) {
             Tablet.currentlyAnalyzing match {
@@ -182,7 +182,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
               }
             }
             else {
-              Tablet.get(stack, player).components.collect {
+              Tablet.get(stack, player).componentSlots.collect {
                 case Some(buffer: api.internal.TextBuffer) => buffer
               }.headOption match {
                 case Some(buffer: api.internal.TextBuffer) => showGui(buffer)
@@ -317,10 +317,10 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override protected def connectItemNode(node: Node): Unit = {
     super.connectItemNode(node)
     if (node != null) node.host match {
-      case buffer: api.internal.TextBuffer => components collect {
+      case buffer: api.internal.TextBuffer => componentSlots collect {
         case Some(keyboard: api.internal.Keyboard) => buffer.node.connect(keyboard.node)
       }
-      case keyboard: api.internal.Keyboard => components collect {
+      case keyboard: api.internal.Keyboard => componentSlots collect {
         case Some(buffer: api.internal.TextBuffer) => keyboard.node.connect(buffer.node)
       }
       case _ =>
@@ -387,7 +387,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       case slot if !getItem(slot).isEmpty && isComponentSlot(slot, getItem(slot)) => getItem(slot)
   }.asJava
 
-  override def componentSlot(address: String): Int = components.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   override def onMachineConnect(node: Node): Unit = onConnect(node)
 
@@ -408,7 +408,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       // in the component setup would otherwise be queued before the events that
       // caused this wrapper's initialization).
       connectComponents()
-      components collect {
+      componentSlots collect {
         case Some(buffer: api.internal.TextBuffer) =>
           buffer.setMaximumColorDepth(api.internal.TextBuffer.ColorDepth.FourBit)
           buffer.setMaximumResolution(80, 25)
@@ -436,7 +436,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
         }
 
         if (machine.isRunning) {
-          components collect {
+          componentSlots collect {
             case Some(buffer: api.internal.TextBuffer) =>
               buffer.setPowerState(true)
           }

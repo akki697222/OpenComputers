@@ -133,12 +133,11 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   abilities.flying = true
   setOnGround(true)
 
-  override def getMyRidingOffset = 0.5
-
-  override def getStandingEyeHeight(pose: Pose, size: EntityDimensions) = 0f
-
-  override def getDimensions(pose: Pose) = EntityDimensions.scalable(1.0f, 1.0f)
-  refreshDimensions()
+  //@TODO
+  //override def getMyRidingOffset = 0.5
+  //override def getStandingEyeHeight(pose: Pose, size: EntityDimensions) = 0f
+  //override def getDimensions(pose: Pose) = EntityDimensions.scalable(1.0f, 1.0f)
+  //refreshDimensions()
 
   {
     this.inventory = new AgentInventory(this, agent)
