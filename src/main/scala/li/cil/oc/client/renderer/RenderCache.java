@@ -18,17 +18,20 @@ public class RenderCache implements MultiBufferSource {
         private final RenderType type;
         private VertexBuffer vertexBuffer;
 
-        public DrawEntry(RenderType type, BufferBuilder builder) {
+        public DrawEntry(RenderType type, BufferBuilder builder, ByteBufferBuilder byteBuffer) {
             this.type = type;
             try {
                 this.vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
                 this.vertexBuffer.bind();
-                BufferBuilder.RenderedBuffer renderedBuffer = builder.end();
-                this.vertexBuffer.upload(renderedBuffer);
+                MeshData meshData = builder.buildOrThrow();
+                this.vertexBuffer.upload(meshData);
+                meshData.close();
                 VertexBuffer.unbind();
             } catch (Exception e) {
                 if (this.vertexBuffer != null) this.vertexBuffer.close();
                 this.vertexBuffer = null;
+            } finally {
+                byteBuffer.close();
             }
         }
 
@@ -39,8 +42,8 @@ public class RenderCache implements MultiBufferSource {
             ShaderInstance shader = RenderSystem.getShader();
 
             if (shader == null) {
-                if (this.type.format().getElements().contains(com.mojang.blaze3d.vertex.DefaultVertexFormat.ELEMENT_UV0)) {
-                    RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+                if (this.type.format().hasUV(0)) {
+                    RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
                 } else {
                     RenderSystem.setShader(GameRenderer::getPositionColorShader);
                 }
@@ -72,6 +75,7 @@ public class RenderCache implements MultiBufferSource {
 
     private final List<DrawEntry> cached = new ArrayList<>();
     private RenderType activeType;
+    private ByteBufferBuilder activeByteBuffer;
     private BufferBuilder activeBuilder;
 
     public RenderCache() {}
@@ -87,9 +91,10 @@ public class RenderCache implements MultiBufferSource {
 
     private void flush() {
         if (activeType != null && activeBuilder != null) {
-            cached.add(new DrawEntry(activeType, activeBuilder));
+            cached.add(new DrawEntry(activeType, activeBuilder, activeByteBuffer));
         }
         activeType = null;
+        activeByteBuffer = null;
         activeBuilder = null;
     }
 
@@ -100,8 +105,8 @@ public class RenderCache implements MultiBufferSource {
         }
         if (activeBuilder == null) {
             activeType = type;
-            activeBuilder = new BufferBuilder(2048);
-            activeBuilder.begin(type.mode(), type.format());
+            activeByteBuffer = new ByteBufferBuilder(type.bufferSize());
+            activeBuilder = new BufferBuilder(activeByteBuffer, type.mode(), type.format());
         }
         return activeBuilder;
     }
@@ -113,16 +118,11 @@ public class RenderCache implements MultiBufferSource {
     public void render(PoseStack poseStack) {
         if (isEmpty()) return;
 
-        Matrix4f modelView = new Matrix4f(RenderSystem.getModelViewStack().last().pose());
+        Matrix4f modelView = new Matrix4f(RenderSystem.getModelViewMatrix());
 
         modelView.mul(poseStack.last().pose());
 
         Matrix4f projection = RenderSystem.getProjectionMatrix();
-
-        Matrix3f identityNormal = new Matrix3f().identity();
-
-        Matrix3f oldInverseRotation = new Matrix3f(RenderSystem.getInverseViewRotationMatrix());
-        RenderSystem.setInverseViewRotationMatrix(identityNormal);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -132,6 +132,5 @@ public class RenderCache implements MultiBufferSource {
         }
 
         VertexBuffer.unbind();
-        RenderSystem.setInverseViewRotationMatrix(oldInverseRotation);
     }
 }

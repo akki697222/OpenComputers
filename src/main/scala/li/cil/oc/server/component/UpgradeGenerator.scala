@@ -223,7 +223,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveData(nbt, provider)
     inventory match {
-      case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, tag => stack.save(provider, tag))
+      case SomeStack(stack) => nbt.put(InventoryTag, stack.save(provider))
       case _ =>
     }
     if (remainingTicks > 0) {

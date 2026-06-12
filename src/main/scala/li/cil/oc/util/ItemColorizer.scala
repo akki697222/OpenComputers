@@ -1,6 +1,7 @@
 package li.cil.oc.util
 
 import net.minecraft.core.component.DataComponents
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.item.component.CustomData
@@ -38,7 +39,7 @@ object ItemColorizer {
       val displayTag = tag.getCompound("display")
       if (displayTag.contains("color")) displayTag.remove("color")
       if (displayTag.isEmpty) tag.remove("display")
-      if (tag.isEmpty) CustomData.set(DataComponents.CUSTOM_DATA, stack, new CompoundTag())
+      CustomData.set(DataComponents.CUSTOM_DATA, stack, if(tag.isEmpty) new CompoundTag() else tag)
     }
   }
 
@@ -47,7 +48,7 @@ object ItemColorizer {
       if (!data.contains("display")) {
         data.put("display", new CompoundTag())
       }
-      
+
       val display = data.getCompound("display")
       display.putInt("color", color)
     })

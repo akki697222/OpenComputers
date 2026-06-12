@@ -31,17 +31,19 @@ import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class DiskDrive(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.DISK_DRIVE.get(), pos, state) with traits.Environment
-  with traits.ComponentInventory with traits.Rotatable with Analyzable with DeviceInfo with MenuProvider {
+  with traits.ComponentInventory with traits.Rotatable with Analyzable with DeviceInfo with MenuProvider
+    with IBlockEntityExtension{
 
   // Used on client side to check whether to render disk activity indicators.
   var lastAccess = 0L
 
-  def filesystemNode: Option[Node] = environmentComponents(0) match {
+  def filesystemNode: Option[Node] = componentSlots(0) match {
     case Some(environment) => Option(environment.node)
     case _ => None
   }
@@ -118,7 +120,7 @@ class DiskDrive(pos: BlockPos, state: BlockState)
 
   override protected def onItemAdded(slot: Int, stack: ItemStack): Unit = {
     super.onItemAdded(slot, stack)
-    environmentComponents(slot) match {
+    componentSlots(slot) match {
       case Some(environment) => environment.node match {
         case component: Component => component.setVisibility(Visibility.Network)
       }

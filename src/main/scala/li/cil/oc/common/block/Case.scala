@@ -16,7 +16,7 @@ import net.minecraft.util.ExtraCodecs
 import net.minecraft.world.{InteractionHand => Hand}
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.Item.TooltipContext
-import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
+import net.minecraft.world.item.{Item, ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
@@ -29,7 +29,7 @@ import scala.collection.convert.ImplicitConversionsToScala._
 
 class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with traits.PowerAcceptor with traits.StateAware with traits.GUI with traits.Tickable {
   override def codec(): MapCodec[Case] = CODEC
-  
+
   protected override def createBlockStateDefinition(builder: StateContainer.Builder[Block, BlockState]): Unit =
     builder.add(PropertyRotatable.Facing, property.PropertyRunning.Running)
 

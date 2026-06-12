@@ -22,12 +22,12 @@ import net.minecraft.world.{Container, InteractionHand}
 import net.minecraft.world.entity.{Entity, LivingEntity, Pose}
 import net.minecraft.world.phys.{BlockHitResult, EntityHitResult, HitResult, Vec3}
 import net.minecraft.world.level.ClipContext
+import net.neoforged.neoforge.common.NeoForge
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.player
 import net.minecraft.world.entity.vehicle.Minecart
 import net.minecraft.world.level.block.state.BlockState
-import net.neoforged.neoforge.common.NeoForge
 
 trait Agent extends traits.LevelControl with traits.ContainerControl with traits.ContainerLevelControl with traits.TankAware with traits.TankControl with traits.TankLevelControl {
   def agent: internal.Agent

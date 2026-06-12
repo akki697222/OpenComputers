@@ -30,13 +30,15 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 class Adapter(pos: BlockPos, state: BlockState)
   extends BlockEntity(TileEntityTypes.ADAPTER.get(), pos, state) with traits.Environment with traits.ComponentInventory
-  with traits.Tickable with traits.OpenSides with Analyzable with internal.Adapter with DeviceInfo with MenuProvider {
+  with traits.Tickable with traits.OpenSides with Analyzable with internal.Adapter with DeviceInfo with MenuProvider
+  with IBlockEntityExtension {
 
   val node: Node = api.Network.newNode(this, Visibility.Network).create()
 
@@ -77,7 +79,7 @@ class Adapter(pos: BlockPos, state: BlockState)
     (blocks collect {
       case Some((environment, _)) => environment.node
     }) ++
-    (environmentComponents collect {
+    (componentSlots collect {
       case Some(environment) => environment.node
     })
   }

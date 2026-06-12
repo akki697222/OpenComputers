@@ -10,6 +10,7 @@ import li.cil.oc.server.component
 import li.cil.oc.util.ExtendedInventory._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.component.DataComponents
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.item.component.CustomData

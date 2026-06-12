@@ -27,7 +27,22 @@ object ExtendedItemStack {
     def hasTag: Boolean = stack.has(DataComponents.CUSTOM_DATA)
     
     def getTag: CompoundTag = stack.get(DataComponents.CUSTOM_DATA).getUnsafe
-    
-    
+
+    def getOrCreateTag: CompoundTag = {
+      val data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+      if (data.isEmpty) {
+        val tag = new CompoundTag()
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+        tag
+      } else data.getUnsafe
+    }
+
+    def removeTagKey(key: String): Unit = {
+      if (stack.has(DataComponents.CUSTOM_DATA)) {
+        val tag = stack.get(DataComponents.CUSTOM_DATA).getUnsafe.copy()
+        tag.remove(key)
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+      }
+    }
   }
 }

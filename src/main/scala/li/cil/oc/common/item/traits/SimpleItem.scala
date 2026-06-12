@@ -28,8 +28,9 @@ import com.mojang.blaze3d.vertex.PoseStack
 import li.cil.oc.common.item.data.TabletData
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item.TooltipContext
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
+trait SimpleItem extends Item with api.driver.item.UpgradeRenderer with IItemExtension {
   def createItemStack(amount: Int = 1) = new ItemStack(this, amount)
 
   def getRarity(stack: ItemStack): item.Rarity = item.Rarity.COMMON

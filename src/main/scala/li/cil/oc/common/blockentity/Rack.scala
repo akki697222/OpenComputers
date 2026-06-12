@@ -21,13 +21,15 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.{Container, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import java.util
 import scala.collection.immutable.ArraySeq
 
 class Rack(pos: BlockPos, state: BlockState)
   extends BlockEntity(TileEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
-  with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider {
+  with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider
+    with IBlockEntityExtension {
 
   var isRelayEnabled = false
   val lastData = new Array[CompoundTag](getContainerSize)
@@ -258,7 +260,7 @@ class Rack(pos: BlockPos, state: BlockState)
 
   override def onAnalyze(player: Player, side: Direction, hitX: Float, hitY: Float, hitZ: Float): Array[Node] = {
     slotAt(side, hitX, hitY, hitZ) match {
-      case Some(slot) => environmentComponents(slot) match {
+      case Some(slot) => componentSlots(slot) match {
         case Some(analyzable: Analyzable) => analyzable.onAnalyze(player, side, hitX, hitY, hitZ)
         case _ => null
       }
@@ -269,9 +271,9 @@ class Rack(pos: BlockPos, state: BlockState)
   // ----------------------------------------------------------------------- //
   // internal.Rack
 
-  override def indexOfMountable(mountable: RackMountable): Int = environmentComponents.indexWhere(_.contains(mountable))
+  override def indexOfMountable(mountable: RackMountable): Int = componentSlots.indexWhere(_.contains(mountable))
 
-  override def getMountable(slot: Int): RackMountable = environmentComponents(slot) match {
+  override def getMountable(slot: Int): RackMountable = componentSlots(slot) match {
     case Some(mountable: RackMountable) => mountable
     case _ => null
   }
@@ -288,7 +290,7 @@ class Rack(pos: BlockPos, state: BlockState)
 
   override def getCurrentState: util.EnumSet[StateAware.State] = {
     val result = util.EnumSet.noneOf(classOf[api.util.StateAware.State])
-    environmentComponents.collect {
+    componentSlots.collect {
       case Some(mountable: RackMountable) => result.addAll(mountable.getCurrentState)
     }
     result
@@ -307,7 +309,7 @@ class Rack(pos: BlockPos, state: BlockState)
 
   override protected def onRedstoneInputChanged(args: RedstoneChangedEventArgs): Unit = {
     super.onRedstoneInputChanged(args)
-    environmentComponents.collect {
+    componentSlots.collect {
       case Some(mountable: RackMountable) if mountable.node != null =>
         val toLocalArgs = RedstoneChangedEventArgs(toLocal(args.side), args.oldValue, args.newValue, args.color)
         mountable.node.sendToNeighbors("redstone.changed", toLocalArgs)
@@ -382,7 +384,7 @@ class Rack(pos: BlockPos, state: BlockState)
       lazy val connectors = ArraySeq.unsafeWrapArray(Direction.values()).map(sidedNode).collect {
         case connector: Connector => connector
       }
-      environmentComponents.zipWithIndex.collect {
+      componentSlots.zipWithIndex.collect {
         case (Some(mountable: RackMountable), slot) =>
           if (hasChanged(slot)) {
             hasChanged(slot) = false
@@ -473,7 +475,7 @@ class Rack(pos: BlockPos, state: BlockState)
 
   def isWorking(mountable: RackMountable): Boolean = mountable.getCurrentState.contains(api.util.StateAware.State.IsWorking)
 
-  def hasRedstoneCard: Boolean = environmentComponents.exists {
+  def hasRedstoneCard: Boolean = componentSlots.exists {
     case Some(mountable: EnvironmentHost with RackMountable with Container) if isWorking(mountable) =>
       mountable.exists(stack => DriverRedstoneCard.worksWith(stack, mountable.getClass))
     case _ => false

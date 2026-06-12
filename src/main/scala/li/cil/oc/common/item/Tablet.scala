@@ -20,9 +20,9 @@ import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
 import net.minecraft.core.component.{DataComponentMap, DataComponents}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world._
 import net.minecraft.world.entity.player.{Inventory, Player}
@@ -37,6 +37,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent
 import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 import net.neoforged.neoforge.server.ServerLifecycleHooks
+import li.cil.oc.util.ExtendedItemStack._
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
 import java.util
 import java.util.UUID
@@ -45,7 +47,7 @@ import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.jdk.CollectionConverters._
 
-class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with traits.Chargeable {
+class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with traits.Chargeable with IItemExtension {
   final val TimeToAnalyze = 10
 
   // ----------------------------------------------------------------------- //
@@ -70,7 +72,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
     val data = new TabletData(stack)
     Rarity.byTier(data.tier)
   }
-  
+
   override def isBarVisible(stack: ItemStack) = true
 
   override def getBarWidth(stack: ItemStack): Int = {
@@ -182,7 +184,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
               }
             }
             else {
-              Tablet.get(stack, player).environmentComponents.collect {
+              Tablet.get(stack, player).componentSlots.collect {
                 case Some(buffer: api.internal.TextBuffer) => buffer
               }.headOption match {
                 case Some(buffer: api.internal.TextBuffer) => showGui(buffer)
@@ -256,9 +258,8 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
     if (data != null) {
       loadData(data, provider)
       if (!getEnvironmentLevel.isClientSide) {
-        val holderLookupProvider = getEnvironmentLevel.registryAccess()
-        tablet.loadData(data.getCompound(Settings.namespace + "component"), provider = holderLookupProvider)
-        machine.loadData(data.getCompound(Settings.namespace + "data"), provider = holderLookupProvider)
+        tablet.loadData(data.getCompound(Settings.namespace + "component"), provider)
+        machine.loadData(data.getCompound(Settings.namespace + "data"), provider)
       }
     }
   }
@@ -317,10 +318,10 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override protected def connectItemNode(node: Node): Unit = {
     super.connectItemNode(node)
     if (node != null) node.host match {
-      case buffer: api.internal.TextBuffer => environmentComponents collect {
+      case buffer: api.internal.TextBuffer => componentSlots collect {
         case Some(keyboard: api.internal.Keyboard) => buffer.node.connect(keyboard.node)
       }
-      case keyboard: api.internal.Keyboard => environmentComponents collect {
+      case keyboard: api.internal.Keyboard => componentSlots collect {
         case Some(buffer: api.internal.TextBuffer) => keyboard.node.connect(buffer.node)
       }
       case _ =>
@@ -387,7 +388,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       case slot if !getItem(slot).isEmpty && isComponentSlot(slot, getItem(slot)) => getItem(slot)
   }.asJava
 
-  override def componentSlot(address: String): Int = environmentComponents.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   override def onMachineConnect(node: Node): Unit = onConnect(node)
 
@@ -408,7 +409,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       // in the component setup would otherwise be queued before the events that
       // caused this wrapper's initialization).
       connectComponents()
-      environmentComponents collect {
+      componentSlots collect {
         case Some(buffer: api.internal.TextBuffer) =>
           buffer.setMaximumColorDepth(api.internal.TextBuffer.ColorDepth.FourBit)
           buffer.setMaximumResolution(80, 25)
@@ -436,7 +437,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
         }
 
         if (machine.isRunning) {
-          environmentComponents collect {
+          componentSlots collect {
             case Some(buffer: api.internal.TextBuffer) =>
               buffer.setPowerState(true)
           }

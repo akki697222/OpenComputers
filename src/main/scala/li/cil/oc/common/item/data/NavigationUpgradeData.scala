@@ -3,12 +3,14 @@ package li.cil.oc.common.item.data
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.world.item.MapItem
 import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData

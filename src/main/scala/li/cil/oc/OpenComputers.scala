@@ -73,6 +73,7 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   NeoForge.EVENT_BUS.register(OpenComputers.proxy)
   modBus.register(OpenComputers.proxy)
   Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
+  OpenComputers.proxy.modBus = modBus
   OpenComputers.proxy.preInit()
   NeoForge.EVENT_BUS.register(ThreadPoolFactory)
   Mods.preInit() // Must happen after loading Settings but before registry events are fired.

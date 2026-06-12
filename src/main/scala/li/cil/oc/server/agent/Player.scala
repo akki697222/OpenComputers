@@ -38,7 +38,9 @@ import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.common.util.{FakePlayer, TriState}
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.neoforged.neoforge.network.connection.ConnectionType
+import net.neoforged.neoforge.common.CommonHooks
 
 import java.util
 import java.util.UUID
@@ -126,13 +128,7 @@ object Player {
 }
 
 class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentLevel.asInstanceOf[ServerLevel], Player.profileFor(agent)) {
-  connection = new ServerGamePacketListenerImpl(server, FakeNetworkManager, this, new CommonListenerCookie(
-    new GameProfile(UUID.nameUUIDFromBytes("not-real:FakePlayer".getBytes), "FakePlayer"),
-    0,
-    ClientInformation.createDefault(),
-    false,
-    ConnectionType.NEOFORGE
-  ))
+  // NeoForge 1.21: FakePlayer already sets up connection internally
   val abilities = getAbilities
 
   abilities.mayfly = true
@@ -140,8 +136,8 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   abilities.flying = true
   setOnGround(true)
 
+  //@TODO
   //override def getMyRidingOffset = 0.5
-
   //override def getStandingEyeHeight(pose: Pose, size: EntityDimensions) = 0f
 
   override def getDefaultDimensions(pose: Pose) = new EntityDimensions(1, 1, 1, EntityAttachments.createDefault(1, 1), true)
@@ -253,7 +249,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
       val canActivate = !state.isAir() && Settings.get.allowActivateBlocks
       val shouldActivate = canActivate && (!isCrouching || (item == null || item.doesSneakBypassUse(stack, level, pos, this)))
       val result =
-        if (shouldActivate && state.useWithoutItem(level, this, new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)).consumesAction)
+        if (shouldActivate && state.useItemOn(stack, level, this, InteractionHand.OFF_HAND, new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)).consumesAction)
           ActivationType.BlockActivated
         else if (duration <= Double.MinPositiveValue && isItemUseAllowed(stack) && tryPlaceBlockWhileHandlingFunnySpecialCases(stack, pos, side, hitX, hitY, hitZ))
           ActivationType.ItemPlaced
@@ -301,7 +297,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   }
 
   def fireLeftClickBlock(pos: BlockPos, side: Direction): PlayerInteractEvent.LeftClickBlock = {
-    net.neoforged.neoforge.common.CommonHooks.onLeftClickBlock(this, pos, side, Action.START_DESTROY_BLOCK)
+    CommonHooks.onLeftClickBlock(this, pos, side, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK)
   }
 
   def fireRightClickAir(): PlayerInteractEvent.RightClickItem = {

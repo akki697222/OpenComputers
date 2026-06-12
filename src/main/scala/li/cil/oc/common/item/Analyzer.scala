@@ -11,6 +11,7 @@ import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.{BlockPosition, ItemUtils}
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
@@ -26,6 +27,7 @@ import net.minecraft.world.item.component.CustomData
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.common.util.FakePlayer
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
 object Analyzer {
   private lazy val analyzer = api.Items.get(Constants.ItemName.Analyzer)
@@ -106,7 +108,7 @@ object Analyzer {
   }
 }
 
-class Analyzer(props: Properties) extends Item(props) with traits.SimpleItem {
+class Analyzer(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     if (player.isCrouching) {
       CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {

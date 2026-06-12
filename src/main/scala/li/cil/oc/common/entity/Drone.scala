@@ -135,12 +135,12 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
     override def stillValid(player: Player): Boolean = player.distanceToSqr(drone) < 64
   }
   val tank = new MultiTank {
-    override def tankCount: Int = components.environmentComponents.count {
+    override def tankCount: Int = components.componentSlots.count {
       case Some(tank: IFluidTank) => true
       case _ => false
     }
 
-    override def getFluidTank(index: Int): IFluidTank = components.environmentComponents.collect {
+    override def getFluidTank(index: Int): IFluidTank = components.componentSlots.collect {
       case Some(tank: IFluidTank) => tank
     }.apply(index)
   }
@@ -241,9 +241,9 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   // ----------------------------------------------------------------------- //
 
-  override def internalComponents(): java.lang.Iterable[ItemStack] = info.components.toList.asJava
+  override def internalComponents(): java.lang.Iterable[ItemStack] = info.components.iterator.to(Iterable).asJava
 
-  override def componentSlot(address: String): Int = components.environmentComponents.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = components.componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   override def onMachineConnect(node: Node): Unit = {}
 

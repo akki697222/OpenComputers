@@ -32,7 +32,7 @@ object PotionProvider extends ScalaProvider("c29e4eec-5a46-479a-9b3d-ad0f06da784
   def isPotionEligible(potion: MobEffect) = potion != null && PotionWhitelist.contains(potion)
 
   override def createScalaBehaviors(player: Player) = {
-    BuiltInRegistries.MOB_EFFECT.asLookup().filterElements(isPotionEligible).listElements().map(new PotionBehavior(_, player)).toList
+    BuiltInRegistries.MOB_EFFECT.filter(isPotionEligible).map(new PotionBehavior(_, player))
   }
 
   override def writeBehaviorToNBT(behavior: Behavior, nbt: CompoundTag): Unit = {
@@ -61,11 +61,11 @@ object PotionProvider extends ScalaProvider("c29e4eec-5a46-479a-9b3d-ad0f06da784
     override def getNameHint: String = effect.value.getDescriptionId.stripPrefix("effect.")
 
     override def onDisable(reason: DisableReason): Unit = {
-      player.removeEffect(effect)
+      player.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect))
     }
 
     override def update(): Unit = {
-      player.addEffect(new MobEffectInstance(effect, Duration, amplifier(player), true, Settings.get.enableNanomachinePfx))
+      player.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect), Duration, amplifier(player), true, Settings.get.enableNanomachinePfx))
     }
   }
 

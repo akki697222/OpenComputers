@@ -29,7 +29,7 @@ class Waypoint(props: Properties) extends RedstoneAware(props) with traits.Ticka
 
   // ----------------------------------------------------------------------- //
 
-  override def use(state: BlockState, world: Level, pos: BlockPos, player: Player, hand: InteractionHand, trace: BlockHitResult): InteractionResult = {
+  override def useWithoutItem(state: BlockState, world: Level, pos: BlockPos, player: Player, hitResult: BlockHitResult): InteractionResult = {
     if (!player.isCrouching) {
       if (world.isClientSide) world.getBlockEntity(pos) match {
         case t: blockentity.Waypoint => showGui(t)
@@ -37,7 +37,7 @@ class Waypoint(props: Properties) extends RedstoneAware(props) with traits.Ticka
       }
       InteractionResult.sidedSuccess(world.isClientSide)
     }
-    else super.use(state, world, pos, player, hand, trace)
+    else super.useWithoutItem(state, world, pos, player, hitResult)
   }
 
   @OnlyIn(Dist.CLIENT)

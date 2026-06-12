@@ -78,13 +78,6 @@ class Print(props: Properties) extends RedstoneAware(props) {
       case _ => super.getLightBlock(state, world, pos)
     }
 
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack = {
-    world.getBlockEntity(pos) match {
-      case print: blockentity.Print => print.data.createItemStack()
-      case _ => ItemStack.EMPTY
-    }
-  }
-
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = {
     world.getBlockEntity(pos) match {
       case print: blockentity.Print => print.shape
@@ -116,10 +109,10 @@ class Print(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, trace: BlockRayTraceResult): ActionResultType = {
+  override def useWithoutItem(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hitResult: BlockRayTraceResult): ActionResultType = {
     world.getBlockEntity(pos) match {
       case print: blockentity.Print => if (print.activate()) ActionResultType.sidedSuccess(world.isClientSide) else ActionResultType.PASS
-      case _ => super.use(state, world, pos, player, hand, trace)
+      case _ => super.useWithoutItem(state, world, pos, player, hitResult)
     }
   }
 

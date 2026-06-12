@@ -13,7 +13,7 @@ import li.cil.oc.util.Tooltip
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.{Block, BaseEntityBlock => ContainerBlock, RenderShape => BlockRenderType}
-import net.minecraft.world.item.{TooltipFlag => ITooltipFlag}
+import net.minecraft.world.item.{TooltipFlag => ITooltipFlag, Item}
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.ItemStack
@@ -35,6 +35,8 @@ import net.neoforged.api.distmarker.OnlyIn
 import scala.collection.convert.ImplicitConversionsToScala._
 
 abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
+  override protected def codec(): com.mojang.serialization.MapCodec[_ <: SimpleBlock] = com.mojang.serialization.MapCodec.unit(this)
+
   @Deprecated
   private var unlocalizedName = super.getDescriptionId()
 
@@ -126,7 +128,7 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
     super.getDrops(state, newCtx)
   }
 
-  override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity) = {
+  override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity): BlockState = {
     if (!world.isClientSide && player.isCreative) world.getBlockEntity(pos) match {
       case inventory: Inventory => inventory.dropAllSlots()
       case _ => // Ignore.
@@ -146,10 +148,14 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
     }
 
   // ----------------------------------------------------------------------- //
-  override def useItemOn(stack: ItemStack, state: BlockState, level: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult = super.useItemOn(stack, state, level, pos, player, hand, hitResult)
+  override def useItemOn(stack: ItemStack, state: BlockState, level: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, hitResult: BlockHitResult): ItemInteractionResult = {
+    val result = localOnBlockActivated(level, pos, player, hand, stack, hitResult.getDirection,
+      (hitResult.getLocation.x - pos.getX).toFloat, (hitResult.getLocation.y - pos.getY).toFloat, (hitResult.getLocation.z - pos.getZ).toFloat)
+    if (result) ItemInteractionResult.sidedSuccess(level.isClientSide) else ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+  }
   
-  override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: InteractionHand, trace: BlockHitResult): InteractionResult = {
-    val heldItem = player.getItemInHand(hand)
+  override def useWithoutItem(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hitResult: BlockHitResult): InteractionResult = {
+    val heldItem = player.getItemInHand(InteractionHand.MAIN_HAND)
     world.getBlockEntity(pos) match {
       case colored: Colored if Color.isDye(heldItem) =>
         colored.setColor(Color.rgbValues(Color.dyeColor(heldItem)))
@@ -159,12 +165,12 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
         }
         InteractionResult.sidedSuccess(world.isClientSide)
       case _ => {
-        val loc = trace.getLocation
-        val pos = trace.getBlockPos
-        val x = loc.x.toFloat - pos.getX
-        val y = loc.y.toFloat - pos.getY
-        val z = loc.z.toFloat - pos.getZ
-        if (localOnBlockActivated(world, pos, player, hand, heldItem, trace.getDirection, x, y, z))
+        val loc = hitResult.getLocation
+        val bPos = hitResult.getBlockPos
+        val x = loc.x.toFloat - bPos.getX
+        val y = loc.y.toFloat - bPos.getY
+        val z = loc.z.toFloat - bPos.getZ
+        if (localOnBlockActivated(world, bPos, player, InteractionHand.MAIN_HAND, heldItem, hitResult.getDirection, x, y, z))
           InteractionResult.sidedSuccess(world.isClientSide) else InteractionResult.PASS
       }
     }

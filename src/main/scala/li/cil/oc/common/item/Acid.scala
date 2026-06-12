@@ -4,7 +4,6 @@ import li.cil.oc.api
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.item.UseAnim
 import net.minecraft.world.level.Level
@@ -14,8 +13,9 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Acid(props: Properties) extends Item(props) with traits.SimpleItem {
+class Acid(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     player.startUsingItem(if (player.getItemInHand(InteractionHand.MAIN_HAND) == stack) InteractionHand.MAIN_HAND else InteractionHand.OFF_HAND)
     new InteractionResultHolder(InteractionResult.sidedSuccess(level.isClientSide), stack)

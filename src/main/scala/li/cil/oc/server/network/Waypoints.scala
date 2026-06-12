@@ -4,12 +4,12 @@ import li.cil.oc.Settings
 import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.RTree
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import net.minecraft.world.level.Level
 import net.minecraft.resources.ResourceKey
-import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.event.level.ChunkEvent
 

@@ -57,8 +57,7 @@ import net.minecraft.world.level.{GameType, Level, LevelSettings}
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.storage.ServerLevelData
 import net.neoforged.neoforge.common.NeoForge
-import net.neoforged.neoforge.common.util.FakePlayer
-import net.neoforged.neoforge.common.util.FakePlayerFactory
+import net.neoforged.neoforge.common.util.{FakePlayer, FakePlayerFactory}
 import net.neoforged.neoforge.fluids.FluidStack
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.fml.ModList
@@ -255,7 +254,7 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
       var value = 0
       for (command <- commands) {
         // FIXME This method no longer returns the command's return value
-        ServerLifecycleHooks.getCurrentServer.getCommands.performPrefixedCommand(source, command.toString)
+        ServerLifecycleHooks.getCurrentServer.getCommands.getDispatcher.execute(command.toString, source)
       }
       result(0, CommandMessages.orNull)
     }
@@ -511,7 +510,7 @@ object DebugCard {
         val amount = args.checkInteger(1)
         args.checkInteger(2) // meta
         val tagJson = args.checkString(3)
-        val tag = if (Strings.isNullOrEmpty(tagJson)) null else TagParser.parseTag(tagJson)
+        val tag = if (Strings.isNullOrEmpty(tagJson)) new CompoundTag() else TagParser.parseTag(tagJson)
         val stack = new ItemStack(item, amount)
         CustomData.set(DataComponents.CUSTOM_DATA, stack, tag)
         result(InventoryUtils.addToPlayerInventory(stack, player))
@@ -592,7 +591,7 @@ object DebugCard {
       val criteria = ObjectiveCriteria.byName(objType).orElseThrow(new Supplier[IllegalArgumentException] {
         override def get = new IllegalArgumentException("invalid criterion")
       })
-      scoreboard.addObjective(objName, criteria, Component.literal(objName), ObjectiveCriteria.RenderType.INTEGER, true, new StyledFormat(Style.EMPTY))
+      scoreboard.addObjective(objName, criteria, Component.literal(objName), ObjectiveCriteria.RenderType.INTEGER, false, new StyledFormat(Style.EMPTY))
       null
     }
 
@@ -910,7 +909,7 @@ object DebugCard {
       val count = args.checkInteger(1)
       val damage = args.checkInteger(2)
       val tagJson = args.optString(3, "")
-      val tag = if (Strings.isNullOrEmpty(tagJson)) null else TagParser.parseTag(tagJson)
+      val tag = if (Strings.isNullOrEmpty(tagJson)) new CompoundTag() else TagParser.parseTag(tagJson)
       val position = BlockPosition(args.checkDouble(4), args.checkDouble(5), args.checkDouble(6), world)
       val side = args.checkSideAny(7)
       InventoryUtils.inventoryAt(position, side) match {

@@ -9,6 +9,7 @@ import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 

@@ -26,8 +26,8 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.HitResult
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.phys.shapes.CollisionContext
+import net.minecraft.world.effect.MobEffects
 
 class MotionSensor(val host: EnvironmentHost) extends prefab.AbstractManagedEnvironment with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).

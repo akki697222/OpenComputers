@@ -28,10 +28,12 @@ import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.{Inventory, Player}
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.server.MinecraftServer
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class Raid(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.RAID.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable with Analyzable with MenuProvider {
+  extends BlockEntity(TileEntityTypes.RAID.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable with Analyzable with MenuProvider
+    with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.None).create()
 
   var filesystem: Option[FileSystem] = None

@@ -98,7 +98,7 @@ abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
 
     val signEvent = new SignChangeEvent.Pre(tileEntity, lines)
     NeoForge.EVENT_BUS.post(signEvent)
-    !(signEvent.isCanceled)
+    !signEvent.isCanceled
   }
 
   override def onMessage(message: Message): Unit = {

@@ -14,9 +14,10 @@ import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Keyboard(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.KEYBOARD.get(), pos, state) with traits.Environment with traits.Rotatable with traits.ImmibisMicroblock with SidedEnvironment with Analyzable {
+  extends BlockEntity(TileEntityTypes.KEYBOARD.get(), pos, state) with traits.Environment with traits.Rotatable with traits.ImmibisMicroblock with SidedEnvironment with Analyzable with IBlockEntityExtension {
   override def validFacings = Direction.values
 
   val keyboard = {

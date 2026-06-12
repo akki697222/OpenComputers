@@ -28,7 +28,7 @@ object Chargeable {
     }
     unused
   }
-  
+
   class Provider(val stack: ItemStack, val item: Chargeable) extends IEnergyStorage {
 
     override def receiveEnergy(maxReceive: Int, simulate: Boolean): Int =

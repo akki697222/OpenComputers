@@ -11,9 +11,10 @@ import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class PowerDistributor(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.POWER_DISTRIBUTOR.get(), pos, state) with traits.Environment with traits.PowerBalancer with traits.NotAnalyzable {
+  extends BlockEntity(TileEntityTypes.POWER_DISTRIBUTOR.get(), pos, state) with traits.Environment with traits.PowerBalancer with traits.NotAnalyzable with IBlockEntityExtension {
   val node = null
 
   private val nodes = Array.fill(6)(api.Network.newNode(this, Visibility.None).

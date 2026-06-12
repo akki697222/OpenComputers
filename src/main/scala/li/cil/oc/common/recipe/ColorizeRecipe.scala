@@ -3,7 +3,7 @@ package li.cil.oc.common.recipe
 import li.cil.oc.util.Color
 import li.cil.oc.util.ItemColorizer
 import li.cil.oc.util.StackOption
-import net.minecraft.core.{HolderLookup, RegistryAccess}
+import net.minecraft.core.HolderLookup
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.FastColor.ARGB32
 import net.minecraft.world.inventory.CraftingContainer
@@ -19,7 +19,7 @@ class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecip
   val targetItem: Item = target.asItem()
 
   override def matches(crafting: CraftingInput, level: Level): Boolean = {
-    val stacks = (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i)))
+    val stacks = (0 until crafting.size).flatMap(i => StackOption(crafting.getItem(i)))
     val targets = stacks.filter(stack => stack.getItem == targetItem)
     val other = stacks.filterNot(targets.contains(_))
     targets.size == 1 && other.nonEmpty && other.forall(Color.isDye)
@@ -31,7 +31,7 @@ class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecip
     var colorCount = 0
     var maximum = 0
 
-    (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
+    (0 until crafting.size).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
       if (stack.getItem == targetItem) {
         targetStack = stack.copy()
         targetStack.setCount(1)
@@ -40,7 +40,7 @@ class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecip
         if (dye.isEmpty)
           return ItemStack.EMPTY
 
-        val itemColor = Color.byTag(dye.get).getTextureDiffuseColor()
+        val itemColor = Color.byTag(dye.get).getTextureDiffuseColor
         val red = ARGB32.red(itemColor)
         val green = ARGB32.green(itemColor)
         val blue = ARGB32.blue(itemColor)

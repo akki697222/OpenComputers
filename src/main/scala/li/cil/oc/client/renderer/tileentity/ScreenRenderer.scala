@@ -212,7 +212,7 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def shouldRenderOffScreen: Boolean = isOrigin && (width > 1 || height > 1)
+  override def shouldRenderOffScreen(screen: Screen): Boolean = screen.isOrigin && (screen.width > 1 || screen.height > 1)
 
   private def renderHolo(stack: PoseStack, buffer: MultiBufferSource): Unit = {
     RenderSystem.setShaderColor(1, 1, 1, 1)
@@ -276,10 +276,10 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
   }
 
   private def drawColoredQuad(stack: PoseStack, r: VertexConsumer, red: Int, green: Int, blue: Int, alpha: Int, x1: Float, y1: Float, x2: Float, y2: Float): Unit = {
-    r.addVertex(stack.last.pose, x1, y2, 0).setColor(red, green, blue, alpha)
-    r.addVertex(stack.last.pose, x2, y2, 0).setColor(red, green, blue, alpha)
-    r.addVertex(stack.last.pose, x2, y1, 0).setColor(red, green, blue, alpha)
-    r.addVertex(stack.last.pose, x1, y1, 0).setColor(red, green, blue, alpha)
+    r.addVertex(stack.last.pose, x1, y2, 0).setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+    r.addVertex(stack.last.pose, x2, y2, 0).setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+    r.addVertex(stack.last.pose, x2, y1, 0).setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f)
+    r.addVertex(stack.last.pose, x1, y1, 0).setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f)
   }
 
   @OnlyIn(Dist.CLIENT)

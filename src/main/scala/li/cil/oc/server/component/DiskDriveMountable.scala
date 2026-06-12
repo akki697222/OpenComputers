@@ -43,7 +43,7 @@ class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int)
   // Stored for filling data packet when queried.
   var lastAccess = 0L
 
-  def filesystemNode: Option[Node] = environmentComponents(0) match {
+  def filesystemNode: Option[Node] = componentSlots(0) match {
     case Some(environment) => Option(environment.node)
     case _ => None
   }
@@ -126,7 +126,7 @@ class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int)
 
   override protected def onItemAdded(slot: Int, stack: ItemStack): Unit = {
     super.onItemAdded(slot, stack)
-    environmentComponents(slot) match {
+    componentSlots(slot) match {
       case Some(environment) => environment.node match {
         case component: Component => component.setVisibility(Visibility.Network)
       }

@@ -10,6 +10,7 @@ import li.cil.oc.client.{Textures, gui}
 import li.cil.oc.common.component
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
 import li.cil.oc.util.ItemUtils
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.client.Minecraft
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -22,8 +23,9 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionHand
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
+class Terminal(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   def hasServer(stack: ItemStack) = ItemUtils.getOrCreateTag(stack).contains(Settings.namespace + "server")
 
   @OnlyIn(Dist.CLIENT)

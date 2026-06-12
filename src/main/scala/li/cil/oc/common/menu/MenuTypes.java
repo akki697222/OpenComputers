@@ -2,6 +2,7 @@ package li.cil.oc.common.menu;
 
 import li.cil.oc.OpenComputers;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.MenuType;
@@ -10,9 +11,11 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import net.minecraft.core.registries.Registries;
+
 public final class MenuTypes {
     public static final DeferredRegister<MenuType<?>> MENU =
-            DeferredRegister.create(BuiltInRegistries.MENU, OpenComputers.ID());
+            DeferredRegister.create(Registries.MENU, OpenComputers.ID());
 
     public static final DeferredHolder<MenuType<?>, MenuType<Adapter>> ADAPTER =
             MENU.register("adapter", () -> IMenuTypeExtension.create(

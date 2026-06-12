@@ -30,12 +30,15 @@ import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Microcontroller(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.MICROCONTROLLER.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.Computer with WorldlyContainer with internal.Microcontroller with DeviceInfo {
+  extends BlockEntity(TileEntityTypes.MICROCONTROLLER.get(), pos, state)
+    with traits.PowerAcceptor with traits.Hub with traits.Computer with WorldlyContainer with internal.Microcontroller with DeviceInfo
+    with IBlockEntityExtension {
   val info = new MicrocontrollerData()
 
   override def node = null
@@ -98,7 +101,7 @@ class Microcontroller(pos: BlockPos, state: BlockState)
 
   override def internalComponents(): java.lang.Iterable[ItemStack] = asJavaIterable(info.components)
 
-  override def componentSlot(address: String): Int = environmentComponents.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   // ----------------------------------------------------------------------- //
 

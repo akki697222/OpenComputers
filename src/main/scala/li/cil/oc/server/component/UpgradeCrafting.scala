@@ -20,6 +20,7 @@ import net.minecraft.world.inventory
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.ResultContainer
 import net.minecraft.world.inventory.ResultSlot
+import net.minecraft.world.item.crafting.CraftingInput
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container

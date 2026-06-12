@@ -11,6 +11,7 @@ import li.cil.oc.server.component
 import li.cil.oc.server.machine.luac.NativeLuaArchitecture
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.component.DataComponents
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.item.component.CustomData
@@ -67,7 +68,7 @@ abstract class DriverCPU extends Item with api.driver.item.MutableProcessor with
 
   override def setArchitecture(stack: ItemStack, architecture: Class[_ <: api.machine.Architecture]): Unit = {
     if (!worksWith(stack)) throw new IllegalArgumentException("Unsupported processor type.")
-    
+
     CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {
       data.putString(Settings.namespace + "archClass", architecture.getName)
       data.putString(Settings.namespace + "archName", api.Machine.getArchitectureName(architecture))

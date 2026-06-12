@@ -6,6 +6,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.client.gui
 import li.cil.oc.common.item.data.DriveData
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.{ItemUtils, Tooltip}
 import net.minecraft.client.Minecraft
 import net.neoforged.api.distmarker.Dist

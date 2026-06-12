@@ -28,6 +28,8 @@ object ParticleProvider extends ScalaProvider("b48c4bbd-51bb-4915-9367-16cff3220
 
   override def createScalaBehaviors(player: Player): Iterable[Behavior] = ParticleTypeList.map(new ParticleBehavior(_, player))
 
+  // TODO: replace NBT particle ids with ResourceLocation, needs additional work to migrate old saves
+
   override def writeBehaviorToNBT(behavior: Behavior, nbt: CompoundTag): Unit = {
     behavior match {
       case particles: ParticleBehavior =>

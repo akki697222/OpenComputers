@@ -18,6 +18,7 @@ import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.core.BlockPos
 import net.neoforged.neoforge.common.NeoForge
+import net.minecraft.core.registries.BuiltInRegistries
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 import scala.collection.mutable
@@ -238,7 +239,7 @@ object PacketSender {
       case _ => new NetworkActivityEvent.Server(host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
     }
     NeoForge.EVENT_BUS.post(event)
-    if (!event.isCanceled) {
+    if (!event.asInstanceOf[net.neoforged.bus.api.ICancellableEvent].isCanceled()) {
 
       val pb = new SimplePacketBuilder(PacketType.NetworkActivity)
 

@@ -374,7 +374,7 @@ object PacketHandler extends CommonPacketHandler {
               case _ => true
             }) {
               val nbt = new CompoundTag()
-              buffer.data.saveData(nbt, ServerLifecycleHooks.getCurrentServer.registryAccess())
+              buffer.data.saveData(nbt, entity.level().registryAccess())
               nbt.putInt("maxWidth", buffer.getMaximumWidth)
               nbt.putInt("maxHeight", buffer.getMaximumHeight)
               nbt.putInt("viewportWidth", buffer.getViewportWidth)

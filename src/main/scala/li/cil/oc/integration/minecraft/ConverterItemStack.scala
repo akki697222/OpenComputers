@@ -5,6 +5,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.integration.Mods
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries

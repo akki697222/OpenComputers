@@ -3,18 +3,18 @@ package li.cil.oc.common.recipe;
 import li.cil.oc.OpenComputers;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.*;
-import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.ForgeRegistries;
-import net.neoforged.neoforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
+
+import java.util.function.Supplier;
 
 public final class Recipes {
     public static final class RecipeRegistration<R extends Recipe<?>> {
-        private final Lazy<RecipeType<R>> recipeType;
-        private final Lazy<RecipeSerializer<R>> serializer;
+        private final Supplier<RecipeType<R>> recipeType;
+        private final Supplier<RecipeSerializer<R>> serializer;
 
-        public RecipeRegistration(Lazy<RecipeType<R>> recipeType, Lazy<RecipeSerializer<R>> serializer) {
+        public RecipeRegistration(Supplier<RecipeType<R>> recipeType, Supplier<RecipeSerializer<R>> serializer) {
             this.recipeType = recipeType;
             this.serializer = serializer;
         }
@@ -28,7 +28,7 @@ public final class Recipes {
         }
     }
 
-    public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, OpenComputers.ID());
+    public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, OpenComputers.ID());
     public static final DeferredRegister<RecipeType<?>> RECIPES = DeferredRegister.create(Registries.RECIPE_TYPE, OpenComputers.ID());
 
     public static final RecipeRegistration<LootDiskCyclingRecipe> LOOTDISK_CYCLING = register(
@@ -41,11 +41,11 @@ public final class Recipes {
     public static final RecipeRegistration<ExtendedShapelessRecipe> SHAPELESS_EXTENDED = register("crafting_shapeless_extended", new ExtendedShapelessRecipe.Serializer());
 
     private static <R extends Recipe<?>> RecipeRegistration<R> register(String id, RecipeSerializer<R> serializer) {
-        RegistryObject<RecipeType<R>> recipeType = RECIPES.register(id, () -> new RecipeType<>() {
+        DeferredHolder<RecipeType<?>, RecipeType<R>> recipeType = RECIPES.register(id, () -> new RecipeType<>() {
             @Override
             public String toString() { return id; }
         });
-        RegistryObject<RecipeSerializer<R>> recipeSerializer = SERIALIZERS.register(id, () -> serializer);
+        DeferredHolder<RecipeSerializer<?>, RecipeSerializer<R>> recipeSerializer = SERIALIZERS.register(id, () -> serializer);
         return new RecipeRegistration<>(
                 recipeType::get,
                 recipeSerializer::get

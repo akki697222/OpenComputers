@@ -8,6 +8,7 @@ import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
 import li.cil.oc.util.ItemUtils
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.storage.LevelResource

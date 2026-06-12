@@ -14,9 +14,10 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.{ArmorItem, ArmorMaterials, ItemStack}
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.{Blocks, LayeredCauldronBlock}
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
 
-class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, props) with traits.SimpleItem with traits.Chargeable {
+class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, ArmorItem.Type.BOOTS, props) with traits.SimpleItem with traits.Chargeable with IItemExtension {
   override def maxCharge(stack: ItemStack): Double = Settings.get.bufferHoverBoots
 
   override def getCharge(stack: ItemStack): Double =
@@ -88,9 +89,6 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
 
   // Always show energy bar.
   override def isDamaged(stack: ItemStack): Boolean = true
-
-  // Contradictory as it may seem with the above, this avoids actual damage value changing.
-  //override def canBeDepleted: Boolean = false
 
   override def setDamage(stack: ItemStack, damage: Int): Unit = {
     // Subtract energy when taking damage instead of actually damaging the item.

@@ -44,7 +44,7 @@ object Mods {
     //integration.tis3d.ModTIS3D,
     integration.mekanism.ModMekanism,
     integration.minecraft.ModMinecraft,
-    integration.projectred.ModProjectRed,
+    //integration.projectred.ModProjectRed,
     integration.computercraft.ModComputerCraft,
     integration.enderstorage.ModEnderStorage,
 

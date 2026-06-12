@@ -26,8 +26,11 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.projectile.Arrow
 import net.minecraft.world.entity.player.Player
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
-class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntity(TileEntityTypes.SCREEN.get(), pos, state) with traits.TextBuffer with SidedEnvironment with traits.Rotatable with traits.RedstoneAware with traits.Colored with Analyzable with Ordered[Screen] {
+class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntity(TileEntityTypes.SCREEN.get(), pos, state) 
+  with traits.TextBuffer with SidedEnvironment with traits.Rotatable with traits.RedstoneAware with traits.Colored with Analyzable with Ordered[Screen]
+  with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = this(pos, state, 0)
 
   // Enable redstone functionality.
@@ -58,6 +61,8 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   var width, height = 1
 
+  var cachedBounds: Option[AABB] = None
+
   var origin = this
 
   val screens = mutable.Set(this)
@@ -81,6 +86,14 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
   // ----------------------------------------------------------------------- //
 
   def isOrigin = origin == this
+
+  def getRenderBoundingBox: AABB = {
+    cachedBounds.getOrElse {
+      val bb = new AABB(getBlockPos).expandTowards(width - 1, height - 1, 0)
+      cachedBounds = Some(bb)
+      bb
+    }
+  }
 
   def localPosition = {
     val lpos = project(this)

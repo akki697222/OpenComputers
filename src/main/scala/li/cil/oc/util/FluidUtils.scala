@@ -114,7 +114,6 @@ object FluidUtils {
     override def fill(resource: FluidStack, action: FluidAction): Int = currentWrapper.fold(0)(_.fill(resource, action))
 
     def currentWrapper: Option[IFluidHandler] = if (position.world.get.blockExists(position)) position.world.get.getBlock(position) match {
-      //case block: IFluidBlock => Option(new FluidBlockWrapper(position, block))
       case block: LiquidBlock if lookupFluidForBlock(block) != null && isFullLiquidBlock => Option(new LiquidBlockWrapper(position, block))
       case block: Block if block.isAir(position) || block.isReplaceable(position) => Option(new AirBlockWrapper(position, block))
       case _ => None
@@ -152,15 +151,6 @@ object FluidUtils {
 
     override def fill(resource: FluidStack, action: FluidAction): Int = 0
   }
-
-//  @Deprecated
-//  private class FluidBlockWrapper(val position: BlockPosition, val block: IFluidBlock) extends BlockWrapperBase {
-//    override def getFluidInTank(tank: Int) = block.drain(position, FluidAction.SIMULATE)
-//
-//    override def isFluidValid(tank: Int, fluid: FluidStack): Boolean = block.getFluid.isSame(fluid.getFluid) && block.canDrain(position)
-//
-//    override protected def uncheckedDrain(action: FluidAction): FluidStack = block.drain(position, action)
-//  }
 
   private class LiquidBlockWrapper(val position: BlockPosition, val block: LiquidBlock) extends BlockWrapperBase {
     val fluid: Fluid = lookupFluidForBlock(block)

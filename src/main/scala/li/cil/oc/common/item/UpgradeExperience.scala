@@ -3,6 +3,7 @@ package li.cil.oc.common.item
 import java.util
 import li.cil.oc.Localization
 import li.cil.oc.util.Tooltip
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.{UpgradeExperience => ExperienceUtil}
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item
@@ -12,8 +13,9 @@ import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class UpgradeExperience(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier {
+class UpgradeExperience(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier with IItemExtension {
   @OnlyIn(Dist.CLIENT)
   override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
     super.appendHoverText(stack, context, tooltip, flag)

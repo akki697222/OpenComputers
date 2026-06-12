@@ -2,13 +2,12 @@ package li.cil.oc.common.recipe
 
 import li.cil.oc.util.ItemColorizer
 import li.cil.oc.util.StackOption
-import net.minecraft.core.{HolderLookup, RegistryAccess}
+import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
-import net.minecraft.world.inventory.CraftingContainer
-import net.minecraft.world.item.crafting.{CraftingBookCategory, CraftingInput, CustomRecipe}
+import net.minecraft.world.item.crafting.{CraftingBookCategory, CustomRecipe, CraftingInput}
 import net.minecraft.world.level.{ItemLike, Level}
 
 /**
@@ -18,7 +17,7 @@ class DecolorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRec
   val targetItem: Item = target.asItem()
 
   override def matches(crafting: CraftingInput, level: Level): Boolean = {
-    val stacks = (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i)))
+    val stacks = (0 until crafting.size).flatMap(i => StackOption(crafting.getItem(i)))
     val targets = stacks.filter(stack => stack.getItem == targetItem)
     val other = stacks.filterNot(targets.contains)
     targets.size == 1 && other.size == 1 && other.forall(_.getItem == Items.WATER_BUCKET)
@@ -27,7 +26,7 @@ class DecolorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRec
   override def assemble(crafting: CraftingInput, provider: HolderLookup.Provider): ItemStack = {
     var targetStack: ItemStack = ItemStack.EMPTY
 
-    (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
+    (0 until crafting.size).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
       if (stack.getItem == targetItem) {
         targetStack = stack.copy()
         targetStack.setCount(1)

@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.client.KeyBindings
 import li.cil.oc.common.menu.MenuTypes
@@ -10,7 +9,6 @@ import li.cil.oc.util.Tooltip
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-
 
 import scala.collection.mutable
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -21,8 +19,9 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.network.chat.Component
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Server(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem {
+class Server(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with IItemExtension {
   @Deprecated
   override def getDescriptionId = super.getDescriptionId + tier
 

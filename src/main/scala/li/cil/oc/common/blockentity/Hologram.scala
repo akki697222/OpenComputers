@@ -22,12 +22,13 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 class Hologram(pos: BlockPos, state: BlockState, var tier: Int) 
-  extends BlockEntity(TileEntityTypes.HOLOGRAM.get(), pos, state) with traits.Environment with SidedEnvironment with Analyzable with traits.RotatableBaseBlock with traits.Tickable with DeviceInfo {
+  extends BlockEntity(TileEntityTypes.HOLOGRAM.get(), pos, state) with traits.Environment with SidedEnvironment with Analyzable with traits.RotatableBaseBlock with traits.Tickable with DeviceInfo with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = this(pos, state, 0)
 
   val node = api.Network.newNode(this, Visibility.Network).

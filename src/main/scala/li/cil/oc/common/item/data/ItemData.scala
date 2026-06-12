@@ -31,6 +31,24 @@ abstract class ItemData(val itemName: String) extends Persistable {
     )
   }
 
+  def loadData(stack: ItemStack): Unit = {
+    val provider = if (FMLEnvironment.dist.isClient) {
+      ClientAccessHelper.getClientRegistryAccess
+    } else {
+      ServerLifecycleHooks.getCurrentServer.registryAccess()
+    }
+    loadData(stack, provider)
+  }
+
+  def saveData(stack: ItemStack): Unit = {
+    val provider = if (FMLEnvironment.dist.isClient) {
+      ClientAccessHelper.getClientRegistryAccess
+    } else {
+      ServerLifecycleHooks.getCurrentServer.registryAccess()
+    }
+    saveData(stack, provider)
+  }
+
   def createItemStack() = {
     if (itemName == null) ItemStack.EMPTY
     else {

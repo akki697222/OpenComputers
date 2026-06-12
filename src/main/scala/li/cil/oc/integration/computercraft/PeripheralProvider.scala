@@ -42,13 +42,7 @@ object PeripheralProvider {
     event.registerBlockEntity(
       CAPABILITY_PERIPHERAL,
       TileEntityTypes.RELAY.get(),
-      // I could not get this to type-check correctly
-      // Scala is weird
-      RelayPeripheralProvider.asInstanceOf
+      (relay: Relay, _: Direction) => new RelayPeripheral(relay): IPeripheral
     )
-  }
-
-  object RelayPeripheralProvider extends ICapabilityProvider[Relay, Direction, RelayPeripheral] {
-    override def getCapability(relay: Relay, c: Direction): RelayPeripheral = new RelayPeripheral(relay)
   }
 }

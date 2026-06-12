@@ -20,9 +20,3 @@ enumExtensions="META-INF/enumextensions.json"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.opencomputers]]
-    modId="jei"
-    mandatory=false
-    versionRange="[15,)"
-    ordering="AFTER"
-    side="BOTH"

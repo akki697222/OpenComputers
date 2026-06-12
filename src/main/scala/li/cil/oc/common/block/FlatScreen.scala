@@ -8,7 +8,7 @@ import li.cil.oc.util.Tooltip
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent}
 import net.minecraft.world.item.Item.TooltipContext
-import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
+import net.minecraft.world.item.{Item, ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}

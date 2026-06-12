@@ -6,6 +6,7 @@ import li.cil.oc.api.network.{EnvironmentHost, ManagedEnvironment}
 import li.cil.oc.common.{Slot, Tier}
 import li.cil.oc.server.component
 import li.cil.oc.util.{BlockPosition, ItemUtils, RotationHelper}
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.{Constants, Settings, api}
 import net.minecraft.core.registries.Registries
 import net.minecraft.world.item.ItemStack

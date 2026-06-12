@@ -5,6 +5,7 @@ import li.cil.oc.Settings
 import li.cil.oc.common.container.DatabaseInventory
 import li.cil.oc.common.menu.MenuTypes
 import net.minecraft.core.component.DataComponents
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -15,8 +16,9 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.component.CustomData
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class UpgradeDatabase(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with traits.ItemTier {
+class UpgradeDatabase(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with traits.ItemTier with IItemExtension {
   @Deprecated
   override def getDescriptionId = super.getDescriptionId + tier
 

@@ -106,6 +106,7 @@ object ItemUtils {
 
   def saveStack(stack: ItemStack, provider: HolderLookup.Provider): Array[Byte] = {
     val tag = new CompoundTag()
+    val provider = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess()
     stack.save(provider, tag)
     saveTag(tag)
   }
@@ -125,7 +126,7 @@ object ItemUtils {
         // to make it output fluids into fluiducts or such, sorry).
         !input.getItem.isInstanceOf[BucketItem]).toArray, outputSize)
 
-    def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(null).getCount
+    def getOutputSize(recipe: Recipe[?]) = recipe.getResultItem(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess()).getCount
 
     def isInputBlacklisted(stack: ItemStack) = stack.getItem match {
       case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(BuiltInRegistries.BLOCK.getKey(item.getBlock))

@@ -1,13 +1,12 @@
 package li.cil.oc.server.loot;
 
 import java.util.OptionalInt;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
+import java.util.List;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import li.cil.oc.util.ItemColorizer;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
@@ -16,15 +15,29 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
 
 public final class SetColor extends LootItemConditionalFunction {
+    private static final MapCodec<OptionalInt> COLOR_CODEC = Codec.INT
+            .validate(color -> color >= 0 && color <= 0xFFFFFF
+                    ? DataResult.success(color)
+                    : DataResult.error(() -> "Invalid RGB color: " + color))
+            .optionalFieldOf("color")
+            .xmap(optional -> optional.map(OptionalInt::of).orElseGet(OptionalInt::empty),
+                    color -> color.isPresent() ? java.util.Optional.of(color.getAsInt()) : java.util.Optional.empty());
+
+    public static final MapCodec<SetColor> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> commonFields(instance)
+                    .and(COLOR_CODEC.forGetter(setColor -> setColor.color))
+                    .apply(instance, SetColor::new)
+    );
+
     private final OptionalInt color;
 
-    private SetColor(LootItemCondition[] conditions, OptionalInt color) {
+    private SetColor(List<LootItemCondition> conditions, OptionalInt color) {
         super(conditions);
         this.color = color;
     }
 
     @Override
-    public @NotNull LootItemFunctionType getType() {
+    public @NotNull LootItemFunctionType<SetColor> getType() {
         return LootFunctions.SET_COLOR.get();
     }
 
@@ -69,23 +82,4 @@ public final class SetColor extends LootItemConditionalFunction {
         return new Builder();
     }
 
-    public static class Serializer extends LootItemConditionalFunction.Serializer<SetColor> {
-        @Override
-        public void serialize(@NotNull JsonObject dst, @NotNull SetColor src, @NotNull JsonSerializationContext ctx) {
-            super.serialize(dst, src, ctx);
-            src.color.ifPresent(v -> dst.add("color", new JsonPrimitive(v)));
-        }
-
-        @Override
-        @NotNull
-        public SetColor deserialize(JsonObject src, @NotNull JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-            if (src.has("color")) {
-                int color = GsonHelper.getAsInt(src, "color");
-                if (color < 0 || color > 0xFFFFFF) throw new JsonParseException("Invalid RGB color: " + color);
-                return new SetColor(conditions, OptionalInt.of(color));
-            } else {
-                return new SetColor(conditions, OptionalInt.empty());
-            }
-        }
-    }
 }

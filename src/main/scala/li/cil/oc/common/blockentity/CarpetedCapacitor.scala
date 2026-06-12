@@ -12,12 +12,13 @@ import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 
 class CarpetedCapacitor(pos: BlockPos, state: BlockState) 
-  extends Capacitor(pos, state) with traits.Tickable {
+  extends Capacitor(pos, state) with traits.Tickable with IBlockEntityExtension {
   private final lazy val deviceInfo = Map(
     DeviceAttribute.Class -> DeviceClass.Power,
     DeviceAttribute.Description -> "Battery",
