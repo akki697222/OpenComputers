@@ -8,11 +8,9 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
 class HoverBootsData extends ItemData(Constants.ItemName.HoverBoots) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    ItemUtils.getTag(stack) match {
-      case tag: CompoundTag => loadData(tag)
-    }
+    loadData(stack, provider)
   }
 
   var charge = 0.0
@@ -20,18 +18,10 @@ class HoverBootsData extends ItemData(Constants.ItemName.HoverBoots) {
   private final val ChargeTag = Settings.namespace + "charge"
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    loadData(nbt)
-  }
-
-  def loadData(nbt: CompoundTag): Unit = {
     charge = nbt.getDouble(ChargeTag)
   }
-
+  
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    saveData(nbt)
-  }
-
-  def saveData(nbt: CompoundTag): Unit = {
     nbt.putDouble(ChargeTag, charge)
   }
 }

@@ -139,7 +139,7 @@ object PacketHandler extends CommonPacketHandler {
       case player: ServerPlayer =>
         val heldItem = player.getItemInHand(InteractionHand.MAIN_HAND)
         heldItem.getItem match {
-          case drive: FileSystemLike => DriveData.setUnmanaged(heldItem, unmanaged, ServerLifecycleHooks.getCurrentServer.registryAccess())
+          case drive: FileSystemLike => DriveData.setUnmanaged(heldItem, unmanaged)
           case _ => // Invalid packet.
         }
       case _ => // Invalid packet.

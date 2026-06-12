@@ -204,7 +204,7 @@ object ExtendedRecipe {
 
     // Swapping EEPROM in devices.
     recraft(provider, craftedStack, inventory, mcu, stack => new MCUDataWrapper(stack))
-    recraft(provider, craftedStack, inventory, drone, stack => new DroneDataWrapper(stack, provider))
+    recraft(provider, craftedStack, inventory, drone, stack => new DroneDataWrapper(stack))
     recraft(provider, craftedStack, inventory, robot, stack => new RobotDataWrapper(stack))
     recraft(provider, craftedStack, inventory, tablet, stack => new TabletDataWrapper(stack))
 

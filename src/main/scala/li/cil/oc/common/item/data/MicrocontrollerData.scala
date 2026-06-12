@@ -16,7 +16,12 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks
 class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller) extends ItemData(itemName) {
   def this(stack: ItemStack) = {
     this()
-    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    loadData(stack)
+  }
+  
+  def this(stack: ItemStack, provider: HolderLookup.Provider) = {
+    this()
+    loadData(stack, provider)
   }
 
   var tier = Tier.One

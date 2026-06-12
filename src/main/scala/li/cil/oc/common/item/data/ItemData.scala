@@ -30,23 +30,21 @@ abstract class ItemData(val itemName: String) extends Persistable {
       }
     )
   }
-
+  
   def loadData(stack: ItemStack): Unit = {
-    val provider = if (FMLEnvironment.dist.isClient) {
-      ClientAccessHelper.getClientRegistryAccess
-    } else {
-      ServerLifecycleHooks.getCurrentServer.registryAccess()
-    }
-    loadData(stack, provider)
+    loadData(stack, ItemData.defaultProvider)
   }
 
   def saveData(stack: ItemStack): Unit = {
-    val provider = if (FMLEnvironment.dist.isClient) {
-      ClientAccessHelper.getClientRegistryAccess
-    } else {
-      ServerLifecycleHooks.getCurrentServer.registryAccess()
-    }
-    saveData(stack, provider)
+    saveData(stack, ItemData.defaultProvider)
+  }
+
+  def loadData(tag: CompoundTag): Unit = {
+    loadData(tag, ItemData.defaultProvider)
+  }
+
+  def saveData(tag: CompoundTag): Unit = {
+    saveData(tag, ItemData.defaultProvider)
   }
 
   def createItemStack() = {
@@ -61,5 +59,13 @@ abstract class ItemData(val itemName: String) extends Persistable {
       saveData(stack, provider)
       stack
     }
+  }
+}
+
+object ItemData {
+  def defaultProvider = if (FMLEnvironment.dist.isClient) {
+    ClientAccessHelper.getClientRegistryAccess
+  } else {
+    ServerLifecycleHooks.getCurrentServer.registryAccess()
   }
 }

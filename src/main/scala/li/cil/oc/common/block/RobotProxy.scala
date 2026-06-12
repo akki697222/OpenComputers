@@ -18,7 +18,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
-import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
+import net.minecraft.world.level.{LevelReader, BlockGetter => IBlockReader, Level => World}
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
@@ -43,9 +43,9 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   // ----------------------------------------------------------------------- //
 
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
+  override def getCloneItemStack(world: LevelReader, pos: BlockPos, state: BlockState): ItemStack =
     world.getBlockEntity(pos) match {
-      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack(player.registryAccess())
+      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack(world.registryAccess())
       case _ => ItemStack.EMPTY
     }
 

@@ -13,7 +13,7 @@ import net.minecraft.nbt.Tag
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class TabletData extends ItemData(Constants.ItemName.Tablet) {
-  def this(stack: ItemStack, provider: HolderLookup.Provider = ServerLifecycleHooks.getCurrentServer.registryAccess()) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
     loadData(stack, provider)
   }

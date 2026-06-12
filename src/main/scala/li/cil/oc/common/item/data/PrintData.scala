@@ -18,9 +18,9 @@ import net.minecraft.nbt.Tag
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class PrintData extends ItemData(Constants.BlockName.Print) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    loadData(stack, provider)
   }
 
   var label: Option[String] = None

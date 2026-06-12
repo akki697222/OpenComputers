@@ -10,9 +10,9 @@ import net.minecraft.nbt.Tag
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class RaidData extends ItemData(Constants.BlockName.Raid) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    loadData(stack, provider)
   }
 
   var disks = Array.empty[ItemStack]

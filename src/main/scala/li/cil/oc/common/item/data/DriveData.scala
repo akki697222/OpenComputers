@@ -8,9 +8,9 @@ import net.minecraft.core.HolderLookup
 import net.minecraft.world.entity.player.Player
 
 class DriveData extends ItemData(null) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack)
+    loadData(stack, provider)
   }
 
   var isUnmanaged = false

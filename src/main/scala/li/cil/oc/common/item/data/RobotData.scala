@@ -33,9 +33,9 @@ object RobotData {
 }
 
 class RobotData extends ItemData(Constants.BlockName.Robot) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    loadData(stack, provider)
   }
 
   var name = ""

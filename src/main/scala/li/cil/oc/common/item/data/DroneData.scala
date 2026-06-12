@@ -8,9 +8,9 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
 class DroneData extends MicrocontrollerData(Constants.ItemName.Drone) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack)
+    loadData(stack, provider)
   }
 
   var name = ""

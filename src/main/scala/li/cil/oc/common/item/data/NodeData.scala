@@ -9,11 +9,9 @@ import net.minecraft.nbt.CompoundTag
 
 // Generic one for items that are used as components; gets the items node info.
 class NodeData extends ItemData(null) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    ItemUtils.getTag(stack) match {
-      case tag: CompoundTag => loadData(tag)
-    }
+    loadData(stack, provider)
   }
 
   var address: Option[String] = None
@@ -23,10 +21,6 @@ class NodeData extends ItemData(null) {
   private final val DataTag = Settings.namespace + "data"
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    loadData(nbt)
-  }
-
-  def loadData(nbt: CompoundTag): Unit = {
     val nodeNbt = nbt.getCompound(DataTag).getCompound(NodeData.NodeTag)
     if (nodeNbt.contains(NodeData.AddressTag)) {
       address = Option(nodeNbt.getString(NodeData.AddressTag))
@@ -38,12 +32,8 @@ class NodeData extends ItemData(null) {
       visibility = Option(Visibility.values()(nodeNbt.getInt(NodeData.VisibilityTag)))
     }
   }
-
+  
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    saveData(nbt)
-  }
-
-  def saveData(nbt: CompoundTag): Unit = {
     if (!nbt.contains(DataTag)) {
       nbt.put(DataTag, new CompoundTag())
     }

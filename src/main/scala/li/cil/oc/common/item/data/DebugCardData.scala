@@ -8,9 +8,9 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
 class DebugCardData extends ItemData(Constants.ItemName.DebugCard) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack)
+    loadData(stack, provider)
   }
 
   var access: Option[AccessContext] = None

@@ -17,9 +17,9 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class NavigationUpgradeData extends ItemData(Constants.ItemName.NavigationUpgrade) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    loadData(stack, provider)
   }
 
   var map = new ItemStack(net.minecraft.world.item.Items.FILLED_MAP)

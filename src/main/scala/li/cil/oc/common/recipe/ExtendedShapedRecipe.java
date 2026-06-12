@@ -25,7 +25,7 @@ public class ExtendedShapedRecipe implements CraftingRecipe {
     @Override
     @NotNull
     public ItemStack assemble(@NotNull CraftingInput inv, @NotNull HolderLookup.Provider registries) {
-        return ExtendedRecipe.addNBTToResult(this, wrapped.assemble(inv, registries), inv);
+        return ExtendedRecipe.addNBTToResult(this, wrapped.assemble(inv, registries), inv, registries);
     }
 
     @Override

@@ -147,8 +147,8 @@ dependencies {
     }
 
     jarJar(implementation("com.typesafe:config:1.4.5"))
-    jarJar(implementation(":OC-LuaJ-20220907.1"))
-    jarJar(implementation(":OC-JNLua-Natives-20220928.1"))
+    jarJar(implementation(":OC-LuaJ:20220907.1"))
+    jarJar(implementation(":OC-JNLua-Natives:20220928.1"))
 
     def jeiSlug = "jei-${minecraft_version}"
 

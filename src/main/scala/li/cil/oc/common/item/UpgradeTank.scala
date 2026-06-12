@@ -4,6 +4,7 @@ import java.util
 import li.cil.oc.Settings
 import li.cil.oc.util.Tooltip
 import li.cil.oc.util.ExtendedItemStack._
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.{Properties, TooltipContext}
 import net.minecraft.world.item.ItemStack

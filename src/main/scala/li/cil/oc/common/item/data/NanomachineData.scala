@@ -9,12 +9,9 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 
 class NanomachineData extends ItemData(Constants.ItemName.Nanomachines) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ItemData.defaultProvider) = {
     this()
-    val nbt = ItemUtils.getTag(stack)
-    if(nbt != null) {
-      loadData(nbt)
-    }
+    loadData(stack, provider)
   }
 
   def this(controller: ControllerImpl) = {
@@ -32,10 +29,6 @@ class NanomachineData extends ItemData(Constants.ItemName.Nanomachines) {
   private final val ConfigurationTag = Settings.namespace + "configuration"
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    loadData(nbt)
-  }
-
-  def loadData(nbt: CompoundTag): Unit = {
     uuid = nbt.getString(UUIDTag)
     if (nbt.contains(ConfigurationTag)) {
       configuration = Option(nbt.getCompound(ConfigurationTag))
@@ -46,10 +39,6 @@ class NanomachineData extends ItemData(Constants.ItemName.Nanomachines) {
   }
 
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    saveData(nbt)
-  }
-
-  def saveData(nbt: CompoundTag): Unit = {
     nbt.putString(UUIDTag, uuid)
     configuration.foreach(nbt.put(ConfigurationTag, _))
   }

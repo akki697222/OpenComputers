@@ -10,7 +10,7 @@ import net.minecraft.core.{HolderLookup, NonNullList, RegistryAccess}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.inventory.CraftingContainer
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.crafting.{CraftingBookCategory, CraftingInput, CraftingRecipe, CraftingInput, Ingredient, Recipe, RecipeSerializer, RecipeType}
+import net.minecraft.world.item.crafting.{CraftingBookCategory, CraftingInput, CraftingRecipe, Ingredient, Recipe, RecipeSerializer, RecipeType}
 import net.minecraft.world.level.Level
 
 import scala.collection.JavaConverters

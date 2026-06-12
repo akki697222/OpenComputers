@@ -282,9 +282,6 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
     r.addVertex(stack.last.pose, x1, y1, 0).setColor(red / 255f, green / 255f, blue / 255f, alpha / 255f)
   }
 
-  @OnlyIn(Dist.CLIENT)
-  override def shouldRenderOffScreen(screen: Screen): Boolean = screen.isOrigin && (screen.width > 1 || screen.height > 1)
-
   private def playerDistanceSq(): Double = {
     val player = Minecraft.getInstance.player
     val bounds = getRenderBoundingBox(screen)

@@ -32,8 +32,6 @@ import net.neoforged.neoforge.client.event.{EntityRenderersEvent, RegisterKeyMap
 import net.neoforged.neoforge.common.NeoForge
 
 private[oc] class Proxy extends CommonProxy {
-  private val modBus = ModLoadingContext.get().getActiveContainer.getEventBus
-  
   modBus.register(this)
   modBus.register(classOf[GuiTypes])
   modBus.register(ModelInitialization)
