@@ -21,8 +21,8 @@ import li.cil.oc.common.blockentity.traits.Computer
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.Util
-import net.neoforged.eventbus.api.SubscribeEvent
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 import org.apache.logging.log4j.MarkerManager
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
@@ -375,7 +375,7 @@ object PacketHandler extends CommonPacketHandler {
               case _ => true
             }) {
               val nbt = new CompoundTag()
-              buffer.data.saveData(nbt)
+              buffer.data.saveData(nbt, entity.level().registryAccess())
               nbt.putInt("maxWidth", buffer.getMaximumWidth)
               nbt.putInt("maxHeight", buffer.getMaximumHeight)
               nbt.putInt("viewportWidth", buffer.getViewportWidth)

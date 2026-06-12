@@ -156,13 +156,13 @@ class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int)
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super[AbstractManagedEnvironment].loadData(nbt, provider)
-    super[ComponentInventory].loadData(nbt)
+    super[ComponentInventory].loadData(nbt, provider)
     connectComponents()
   }
 
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super[AbstractManagedEnvironment].saveData(nbt, provider)
-    super[ComponentInventory].saveData(nbt)
+    super[ComponentInventory].saveData(nbt, provider)
   }
 
   // ----------------------------------------------------------------------- //

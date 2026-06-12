@@ -20,9 +20,9 @@ class NetSplitter(props: Properties) extends RedstoneAware(props) {
   // ----------------------------------------------------------------------- //
 
   // NOTE: must not be final for immibis microblocks to work.
-  override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, trace: BlockRayTraceResult): ActionResultType = {
+  override def useWithoutItem(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hitResult: BlockRayTraceResult): ActionResultType = {
     if (Wrench.holdsApplicableWrench(player, pos)) {
-      val side = trace.getDirection
+      val side = hitResult.getDirection
       val sideToToggle = if (player.isCrouching) side.getOpposite else side
       world.getBlockEntity(pos) match {
         case splitter: blockentity.NetSplitter =>
@@ -34,6 +34,6 @@ class NetSplitter(props: Properties) extends RedstoneAware(props) {
         case _ => ActionResultType.PASS
       }
     }
-    else super.use(state, world, pos, player, hand, trace)
+    else super.useWithoutItem(state, world, pos, player, hitResult)
   }
 }

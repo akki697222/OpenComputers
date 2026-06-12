@@ -21,7 +21,7 @@ import net.minecraft.nbt.CompoundTag
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.ExperienceOrb
-import net.minecraft.world.item.enchantment.EnchantmentHelper
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.item.Items
 
 class UpgradeExperience(val host: EnvironmentHost with internal.Agent) extends AbstractManagedEnvironment with DeviceInfo {
@@ -93,9 +93,14 @@ class UpgradeExperience(val host: EnvironmentHost with internal.Agent) extends A
       xp += 3 + host.getEnvironmentLevel.random.nextInt(5) + host.getEnvironmentLevel.random.nextInt(5)
     }
     else {
-      for ((enchantment, level) <- EnchantmentHelper.getEnchantments(stack)) {
-        if (enchantment != null) {
-          xp += enchantment.getMinCost(level)
+      val enchantments = stack.getAllEnchantments(host.getEnvironmentLevel.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT))
+      val iter = enchantments.entrySet().iterator()
+      while (iter.hasNext) {
+        val entry = iter.next()
+        val holder = entry.getKey
+        val level = entry.getIntValue
+        if (holder != null) {
+          xp = xp + holder.value().getMinCost(level)
         }
       }
       if (xp <= 0) {

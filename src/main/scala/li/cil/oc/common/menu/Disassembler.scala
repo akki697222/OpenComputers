@@ -6,6 +6,7 @@ import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.template.DisassemblerTemplates
 import li.cil.oc.common.blockentity
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.Container

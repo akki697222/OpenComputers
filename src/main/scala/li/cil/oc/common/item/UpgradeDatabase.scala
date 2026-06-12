@@ -4,6 +4,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.common.container.DatabaseInventory
 import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.util.ExtendedItemStack._
 
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.Item

@@ -18,10 +18,9 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ServerLevelData
-import net.neoforged.common.MinecraftForge
-import net.neoforged.common.util.FakePlayer
-import net.neoforged.event.entity.player.PlayerInteractEvent
-import net.neoforged.eventbus.api.Event
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 
 import scala.collection.mutable
 
@@ -61,9 +60,9 @@ object DisintegrationProvider extends ScalaProvider("c4e7e3c2-8069-4fbb-b08e-74b
                 breakingMapNew += pos -> info
                 info.update(world, player, now)
               case None =>
-                val event = new PlayerInteractEvent.LeftClickBlock(player, pos.toBlockPos, player.getDirection)
-                MinecraftForge.EVENT_BUS.post(event)
-                val allowed = !event.isCanceled && event.getUseBlock != Event.Result.DENY && event.getUseItem != Event.Result.DENY
+                val event = new PlayerInteractEvent.LeftClickBlock(player, pos.toBlockPos, player.getDirection, PlayerInteractEvent.LeftClickBlock.Action.START)
+                NeoForge.EVENT_BUS.post(event)
+                val allowed = !event.asInstanceOf[net.neoforged.bus.api.ICancellableEvent].isCanceled()
                 val placingRestricted = world.getLevelData match {
                   case srvInfo: ServerLevelData => srvInfo.getGameType.isBlockPlacingRestricted
                   case _ => true // Means it's not a server world (somehow).

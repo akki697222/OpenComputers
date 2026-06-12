@@ -40,7 +40,7 @@ object ExtendedNBT {
   implicit def toNbt(value: ItemStack): CompoundTag = {
     val nbt = new CompoundTag()
     if (value != null) {
-      value.save(nbt)
+      value.save(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess(), nbt)
     }
     nbt
   }

@@ -1,6 +1,7 @@
 package li.cil.oc.util
 
 import li.cil.oc.Settings
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 

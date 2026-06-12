@@ -11,15 +11,16 @@ import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.Util
 
-import net.neoforged.common.util.FakePlayer
-import net.neoforged.event.entity.player.PlayerInteractEvent
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.bus.api.SubscribeEvent
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level

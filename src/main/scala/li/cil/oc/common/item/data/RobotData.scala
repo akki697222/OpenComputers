@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack
 
 import scala.io.Source
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
 
 object RobotData {
@@ -69,9 +70,9 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     robotEnergy = nbt.getInt(RobotEnergyTag)
     tier = nbt.getInt(TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(tag => ItemStack.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(ItemStack.EMPTY))
     containers = nbt.getList(ContainersTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(tag => ItemStack.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(ItemStack.EMPTY))
     if (nbt.contains(LightColorTag)) {
       lightColor = nbt.getInt(LightColorTag)
     }

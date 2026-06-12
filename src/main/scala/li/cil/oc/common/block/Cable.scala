@@ -59,12 +59,6 @@ class Cable(props: Properties) extends SimpleBlock(props) {
     )
   }
 
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity) =
-    world.getBlockEntity(pos) match {
-      case t: blockentity.Cable => t.createItemStack()
-      case _ => createItemStack()
-    }
-
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = Cable.shape(state)
 
   override def neighborChanged(state: BlockState, world: World, pos: BlockPos, other: Block, otherPos: BlockPos, moved: Boolean): Unit = {

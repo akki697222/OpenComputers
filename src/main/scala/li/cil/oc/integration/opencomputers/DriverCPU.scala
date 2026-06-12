@@ -9,6 +9,7 @@ import li.cil.oc.common.Tier
 import li.cil.oc.common.item
 import li.cil.oc.server.component
 import li.cil.oc.server.machine.luac.NativeLuaArchitecture
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 

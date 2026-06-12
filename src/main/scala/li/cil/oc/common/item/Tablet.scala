@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
 import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -29,6 +30,13 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.world.level.Level
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.event.level.LevelEvent
+import net.neoforged.neoforge.client.event.ClientTickEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
+
+import li.cil.oc.util.ExtendedItemStack._
 
 import java.util
 import java.util.UUID
@@ -85,7 +93,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
       case Some(state) => if (state) "_on" else "_off"
       case _ => ""
     }
-    new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Tablet + suffix, "inventory")
+    new ModelResourceLocation(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, Constants.ItemName.Tablet + suffix), "inventory")
   }
 
   def canCharge(stack: ItemStack): Boolean = true
@@ -247,8 +255,8 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       loadData(data)
       if (!getEnvironmentLevel.isClientSide) {
         val holderLookupProvider = getEnvironmentLevel.registryAccess()
-        tablet.loadData(provider = holderLookupProvider)
-        machine.loadData(provider = holderLookupProvider)
+        tablet.loadData(data, holderLookupProvider)
+        machine.loadData(data, holderLookupProvider)
       }
     }
   }
@@ -260,8 +268,12 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       if (!data.contains(Settings.namespace + "data")) {
         data.put(Settings.namespace + "data", new CompoundTag())
       }
-      data.setNewCompoundTag(Settings.namespace + "component", (nbt: CompoundTag) => tablet.saveData(nbt, provider))
-      data.setNewCompoundTag(Settings.namespace + "data", (nbt: CompoundTag) => machine.saveData(nbt, provider))
+      val componentTag = new CompoundTag()
+      tablet.saveData(componentTag, provider)
+      data.put(Settings.namespace + "component", componentTag)
+      val machineDataTag = new CompoundTag()
+      machine.saveData(machineDataTag, provider)
+      data.put(Settings.namespace + "data", machineDataTag)
 
       if (clearState) {
         // Force tablets into stopped state to avoid errors when trying to

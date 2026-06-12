@@ -33,6 +33,11 @@ import net.minecraft.world.level.block.piston.PistonBaseBlock
 import net.minecraft.world.level.{BaseCommandBlock, Level}
 import net.minecraft.world.phys.{BlockHitResult, Vec3}
 import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.CommonHooks
+import net.neoforged.bus.api.{EventPriority, SubscribeEvent, ICancellableEvent}
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.event.entity.player.PlayerEvent
 
 import java.util
 import java.util.UUID
@@ -120,7 +125,7 @@ object Player {
 }
 
 class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentLevel.asInstanceOf[ServerLevel], Player.profileFor(agent)) {
-  connection = new ServerGamePacketListenerImpl(server, FakeNetworkManager, this)
+  // NeoForge 1.21: FakePlayer already sets up connection internally
   val abilities = getAbilities
 
   abilities.mayfly = true
@@ -132,7 +137,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
 
   override def getStandingEyeHeight(pose: Pose, size: EntityDimensions) = 0f
 
-  override def getDimensions(pose: Pose) = new EntityDimensions(1, 1, true)
+  override def getDimensions(pose: Pose) = EntityDimensions.scalable(1.0f, 1.0f)
   refreshDimensions()
 
   {
@@ -186,22 +191,18 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
       case player: PlayerEntity if !canHarmPlayer(player) => // Avoid player damage.
       case _ =>
         val event = new RobotAttackEntityEvent.Pre(agent, entity)
-        MinecraftForge.EVENT_BUS.post(event)
+        NeoForge.EVENT_BUS.post(event)
         if (!event.isCanceled) {
           super.attack(entity)
-          MinecraftForge.EVENT_BUS.post(new RobotAttackEntityEvent.Post(agent, entity))
+          NeoForge.EVENT_BUS.post(new RobotAttackEntityEvent.Post(agent, entity))
         }
     })
   }
 
   override def interactOn(entity: Entity, hand: InteractionHand): InteractionResult = {
-    val cancel = try MinecraftForge.EVENT_BUS.post(new PlayerInteractEvent.EntityInteract(this, hand, entity)) catch {
-      case t: Throwable =>
-        if (!t.getStackTrace.exists(_.getClassName.startsWith("mods.battlegear2."))) {
-          OpenComputers.log.warn("Some event handler screwed up!", t)
-        }
-        false
-    }
+    val event = new PlayerInteractEvent.EntityInteract(this, hand, entity)
+    NeoForge.EVENT_BUS.post(event)
+    val cancel = event.isCanceled
     if(!cancel && callUsingItemInSlot(agent.equipmentInventory, 0, stack => {
       val result = isItemUseAllowed(stack) && (entity.interact(this, hand).consumesAction || (entity match {
         case living: LivingEntity if !getItemInHand(InteractionHand.MAIN_HAND).isEmpty => getItemInHand(InteractionHand.MAIN_HAND).interactLivingEntity(this, living, hand).consumesAction
@@ -211,7 +212,6 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
         if (getItemInHand(InteractionHand.MAIN_HAND).getCount <= 0) {
           val orig = getItemInHand(InteractionHand.MAIN_HAND)
           this.inventory.setItem(this.inventory.selected, ItemStack.EMPTY)
-          ForgeEventFactory.onPlayerDestroyItem(this, orig, hand)
         } else {
           // because of various hacks for IC2, we expect the in-hand result to be moved to our offhand buffer
           this.inventory.offhand.set(0, getItemInHand(InteractionHand.MAIN_HAND))
@@ -239,7 +239,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
       val canActivate = !state.isAir() && Settings.get.allowActivateBlocks
       val shouldActivate = canActivate && (!isCrouching || (item == null || item.doesSneakBypassUse(stack, level, pos, this)))
       val result =
-        if (shouldActivate && state.use(level, this, InteractionHand.OFF_HAND, new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)).consumesAction)
+        if (shouldActivate && state.useItemOn(stack, level, this, InteractionHand.OFF_HAND, new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)).consumesAction)
           ActivationType.BlockActivated
         else if (duration <= Double.MinPositiveValue && isItemUseAllowed(stack) && tryPlaceBlockWhileHandlingFunnySpecialCases(stack, pos, side, hitX, hitY, hitZ))
           ActivationType.ItemPlaced
@@ -282,39 +282,27 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   def fireRightClickBlock(pos: BlockPos, side: Direction): PlayerInteractEvent.RightClickBlock = {
     val hitVec = new Vec3(0.5 + side.getStepX * 0.5, 0.5 + side.getStepY * 0.5, 0.5 + side.getStepZ * 0.5)
     val event = new PlayerInteractEvent.RightClickBlock(this, InteractionHand.OFF_HAND, pos, new BlockHitResult(hitVec, side, pos, false))
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     event
   }
 
   def fireLeftClickBlock(pos: BlockPos, side: Direction): PlayerInteractEvent.LeftClickBlock = {
-    net.neoforged.common.ForgeHooks.onLeftClickBlock(this, pos, side)
+    CommonHooks.onLeftClickBlock(this, pos, side, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK)
   }
 
   def fireRightClickAir(): PlayerInteractEvent.RightClickItem = {
     val event = new PlayerInteractEvent.RightClickItem(this, InteractionHand.OFF_HAND)
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     event
   }
 
   private def trySetActiveHand(duration: Double): Boolean = {
     releaseUsingItem()
-    val entity = this
-    val durationHandler = new {
-      @SubscribeEvent(priority = EventPriority.LOWEST)
-      def onItemUseStart(startUse: LivingEntityUseItemEvent.Start): Unit = {
-        if (startUse.getEntity == entity && !startUse.isCanceled) {
-          startUse.setDuration(duration.toInt)
-        }
-      }
-    }
-    MinecraftForge.EVENT_BUS.register(durationHandler)
     try {
       startUsingItem(InteractionHand.OFF_HAND)
       isUsingItem
     } catch {
         case _: Exception => false
-    } finally {
-      MinecraftForge.EVENT_BUS.unregister(durationHandler)
     }
   }
 
@@ -330,7 +318,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
       return false
     }
 
-    val maxDuration = stack.getUseDuration
+    val maxDuration = stack.getUseDuration(this)
     val heldTicks = Math.max(0, Math.min(maxDuration, (duration * 20).toInt))
     agent.machine.pause(heldTicks / 20.0)
 
@@ -405,7 +393,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
     if (breakTime < 0) return breakTime
 
     val preEvent = new RobotBreakBlockEvent.Pre(agent, level, pos, breakTime * Settings.get.harvestRatio)
-    MinecraftForge.EVENT_BUS.post(preEvent)
+    NeoForge.EVENT_BUS.post(preEvent)
     if (preEvent.isCanceled) return 0
     val adjustedBreakTime = Math.max(0.05, preEvent.getBreakTime)
 
@@ -422,7 +410,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   })
 
   private def isItemUseAllowed(stack: ItemStack) = stack.isEmpty || {
-    (Settings.get.allowUseItemsWithDuration || stack.getUseDuration <= 0) && !ItemStack.isSameItem(stack, new ItemStack(Items.LEAD))
+    (Settings.get.allowUseItemsWithDuration || stack.getUseDuration(this) <= 0) && !ItemStack.isSameItem(stack, new ItemStack(Items.LEAD))
   }
 
   override def drop(stack: ItemStack, dropAround: Boolean, traceItem: Boolean): ItemEntity =
@@ -431,12 +419,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   private def shouldCancel(f: () => PlayerInteractEvent) = {
     try {
       val event = f()
-      event.isCanceled || (event match {
-        case rightClick: PlayerInteractEvent.RightClickBlock => rightClick.getUseBlock == Event.Result.DENY || rightClick.getUseItem == Event.Result.DENY
-        case leftClick: PlayerInteractEvent.LeftClickBlock => leftClick.getUseBlock == Event.Result.DENY || leftClick.getUseItem == Event.Result.DENY
-        case rightClick: PlayerInteractEvent.RightClickItem => rightClick.getResult == Event.Result.DENY
-        case _ => false
-      })
+      event.asInstanceOf[ICancellableEvent].isCanceled()
     }
     catch {
       case t: Throwable =>
@@ -473,7 +456,6 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
         }
         if (repair) {
           if (newStack.getCount > 0) tryRepair(newStack, oldStack)
-          else ForgeEventFactory.onPlayerDestroyItem(this, newStack, InteractionHand.OFF_HAND)
         }
       }
       collectDroppedItems(itemsBefore.asScala)
@@ -484,9 +466,9 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
     // Only if the underlying type didn't change.
     if (!stack.isEmpty && !oldStack.isEmpty && stack.getItem == oldStack.getItem) {
       val damageRate = new RobotUsedToolEvent.ComputeDamageRate(agent, oldStack, stack, Settings.get.itemDamageRate)
-      MinecraftForge.EVENT_BUS.post(damageRate)
+      NeoForge.EVENT_BUS.post(damageRate)
       if (damageRate.getDamageRate < 1) {
-        MinecraftForge.EVENT_BUS.post(new RobotUsedToolEvent.ApplyDamageRate(agent, oldStack, stack, damageRate.getDamageRate))
+        NeoForge.EVENT_BUS.post(new RobotUsedToolEvent.ApplyDamageRate(agent, oldStack, stack, damageRate.getDamageRate))
       }
     }
   }
@@ -494,7 +476,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   private def tryPlaceBlockWhileHandlingFunnySpecialCases(stack: ItemStack, pos: BlockPos, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = {
     !stack.isEmpty && stack.getCount > 0 && {
       val event = new RobotPlaceBlockEvent.Pre(agent, stack, level, pos)
-      MinecraftForge.EVENT_BUS.post(event)
+      NeoForge.EVENT_BUS.post(event)
       if (event.isCanceled) false
       else {
         val fakeEyeHeight = if (getXRot < 0 && isSomeKindOfPiston(stack)) 1.82 else 0
@@ -507,7 +489,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
         Player.detectPlayerInventoryChanges(this)
         setPos(getX, getY + fakeEyeHeight, getZ)
         if (didPlace.consumesAction) {
-          MinecraftForge.EVENT_BUS.post(new RobotPlaceBlockEvent.Post(agent, stack, level, pos))
+          NeoForge.EVENT_BUS.post(new RobotPlaceBlockEvent.Post(agent, stack, level, pos))
         }
         didPlace.consumesAction
       }
@@ -531,7 +513,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
         case _ => // This shouldn't happen... oh well.
       }
     }
-    MinecraftForge.EVENT_BUS.post(new RobotExhaustionEvent(agent, amount))
+    NeoForge.EVENT_BUS.post(new RobotExhaustionEvent(agent, amount))
   }
 
   override def closeContainer(): Unit = {}
@@ -619,7 +601,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
           val expGained: Int = PlayerInteractionManagerHelper.blockRemoving(player, pos)
           this.player.setPos(this.player.getX + side.getStepX / 2.0, this.player.getY, this.player.getZ + side.getStepZ / 2.0)
           if (expGained >= 0) {
-            MinecraftForge.EVENT_BUS.post(new RobotBreakBlockEvent.Post(agent, expGained))
+            NeoForge.EVENT_BUS.post(new RobotBreakBlockEvent.Post(agent, expGained))
           }
         })
       }

@@ -10,7 +10,7 @@ import li.cil.oc.server.machine.luaj.LuaJLuaArchitecture
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
-import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.bus.api.{IEventBus, SubscribeEvent}
 import net.neoforged.fml.event.lifecycle.{FMLCommonSetupEvent, FMLLoadCompleteEvent}
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 import net.neoforged.neoforge.network.registration.PayloadRegistrar
@@ -18,6 +18,8 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar
 import scala.jdk.CollectionConverters._
 
 class Proxy {
+  var modBus: IEventBus = _
+
   def preInit(): Unit = {
     OpenComputers.log.info("Initializing OpenComputers API.")
 

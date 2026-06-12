@@ -5,13 +5,14 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.integration.Mods
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.nbt.{CompoundTag, ListTag, StringTag, Tag}
 import net.minecraft.world.item
 import net.minecraft.world.item.Item
 import net.minecraft.tags.ItemTags
-import net.minecraft.world.item.enchantment.EnchantmentHelper
-import net.neoforged.registries.ForgeRegistries
+import net.minecraft.world.item.enchantment.{Enchantment, EnchantmentHelper}
+import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
@@ -55,7 +56,7 @@ object ConverterItemStack extends api.driver.Converter {
           output += "oreNames" -> tags
         }
 
-        val name = ForgeRegistries.ITEMS.getKey(stack.getItem).toString
+        val name = BuiltInRegistries.ITEM.getKey(stack.getItem).toString
 
         output += "damage" -> Int.box(stack.getDamageValue)
         output += "maxDamage" -> Int.box(stack.getMaxDamage)
@@ -83,15 +84,17 @@ object ConverterItemStack extends api.driver.Converter {
         }
 
         val enchantments = mutable.ArrayBuffer.empty[mutable.Map[String, Any]]
-        EnchantmentHelper.getEnchantments(stack).collect {
-          case (enchantment, level) =>
-            val name = ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString
-            val map = mutable.Map[String, Any](
-              "name" -> name,
-              "label" -> enchantment.getFullname(level),
-              "level" -> level
-            )
-            enchantments += map
+        val itemEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack)
+        for (entry <- itemEnchantments.entrySet().asScala) {
+          val enchantment = entry.getKey()
+          val level = entry.getIntValue()
+          val name = enchantment.unwrapKey().map(_.location().toString).orElse("unknown")
+          val map = mutable.Map[String, Any](
+            "name" -> name,
+            "label" -> Enchantment.getFullname(enchantment, level).getString,
+            "level" -> level
+          )
+          enchantments += map
         }
         if (enchantments.nonEmpty) {
           output += "enchantments" -> enchantments

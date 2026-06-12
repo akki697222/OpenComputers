@@ -1,6 +1,7 @@
 package li.cil.oc.common.item
 
 import li.cil.oc.Settings
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.BlockPosition
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties

@@ -6,7 +6,7 @@ import li.cil.oc.Settings
 import li.cil.oc.integration
 import net.neoforged.fml.ModList
 import net.neoforged.fml.ModContainer
-import net.neoforged.forgespi.language.MavenVersionAdapter
+import net.neoforged.neoforgespi.language.MavenVersionAdapter
 import org.apache.maven.artifact.versioning.ArtifactVersion
 
 import scala.collection.mutable
@@ -45,7 +45,7 @@ object Mods {
     //integration.tis3d.ModTIS3D,
     integration.mekanism.ModMekanism,
     integration.minecraft.ModMinecraft,
-    integration.projectred.ModProjectRed,
+    //integration.projectred.ModProjectRed,
     integration.computercraft.ModComputerCraft,
     integration.enderstorage.ModEnderStorage,
 

@@ -10,10 +10,10 @@ import li.cil.oc.api.prefab.DriverSidedTileEntity
 import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.item.{Item, ItemStack, RecordItem}
+import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.core.Direction
 import net.minecraft.core.BlockPos
-import net.minecraft.locale.Language
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity
 
@@ -30,17 +30,20 @@ object DriverRecordPlayer extends DriverSidedTileEntity {
 
     @Callback(doc = "function():string -- Get the title of the record currently in the jukebox.")
     def getRecord(context: Context, args: Arguments): Array[AnyRef] = {
-      val record = tileEntity.getFirstItem
-      if (!record.isEmpty && record.getItem.isInstanceOf[RecordItem]) {
-        result(Language.getInstance.getOrDefault(record.getItem.asInstanceOf[RecordItem].getDescriptionId))
+      val record = tileEntity.getTheItem
+      if (!record.isEmpty && record.has(DataComponents.JUKEBOX_PLAYABLE)) {
+        record.get(DataComponents.JUKEBOX_PLAYABLE).song().unwrap(tileEntity.getLevel.registryAccess()).map(_.value().description().getString).orElse(null) match {
+          case null => null
+          case name => result(name)
+        }
       }
       else null
     }
 
     @Callback(doc = "function() -- Start playing the record currently in the jukebox.")
     def play(context: Context, args: Arguments): Array[AnyRef] = {
-      val record = tileEntity.getFirstItem
-      if (!record.isEmpty && record.getItem.isInstanceOf[RecordItem]) {
+      val record = tileEntity.getTheItem
+      if (!record.isEmpty && record.has(DataComponents.JUKEBOX_PLAYABLE)) {
         tileEntity.getLevel.levelEvent(null, 1010, tileEntity.getBlockPos, Item.getId(record.getItem))
         result(true)
       }

@@ -17,7 +17,8 @@ import net.minecraft.core.BlockPos
 import net.minecraft.world.effect.MobEffect
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BeaconBlockEntity
-import net.neoforged.registries.ForgeRegistries
+import net.minecraft.core.Holder
+import net.minecraft.core.registries.BuiltInRegistries
 
 object DriverBeacon extends DriverSidedTileEntity {
   override def getTileEntityClass: Class[_] = classOf[BeaconBlockEntity]
@@ -45,9 +46,9 @@ object DriverBeacon extends DriverSidedTileEntity {
       result(getEffectName(tileEntity.secondaryPower))
     }
 
-    private def getEffectName(effect: MobEffect): String = {
-      val name = ForgeRegistries.MOB_EFFECTS.getKey(effect).toString
-      if (effect != null) name else null
+    private def getEffectName(effect: Holder[MobEffect]): String = {
+      val name = effect.unwrapKey().map(_.location().toString).orElse(null)
+      if (effect.value() != null) name else null
     }
   }
 

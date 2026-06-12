@@ -26,12 +26,6 @@ class ChameliumBlock(props: Properties) extends SimpleBlock(props) {
   }
   registerDefaultState(stateDefinition.any.setValue(ChameliumBlock.Color, DyeColor.BLACK))
 
-  override def getCloneItemStack(world: IBlockReader, pos: BlockPos, state: BlockState): ItemStack = {
-    val stack = new ItemStack(this)
-    stack.setDamageValue(state.getValue(ChameliumBlock.Color).getId)
-    stack
-  }
-
   override def getStateForPlacement(ctx: BlockItemUseContext): BlockState =
     defaultBlockState.setValue(ChameliumBlock.Color, DyeColor.byId(ctx.getItemInHand.getDamageValue))
 

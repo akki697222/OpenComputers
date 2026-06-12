@@ -42,7 +42,7 @@ object PeripheralProvider {
     event.registerBlockEntity(
       CAPABILITY_PERIPHERAL,
       TileEntityTypes.RELAY.get(),
-      (relay: Relay, _: Direction) => new RelayPeripheral(relay)
+      (relay: Relay, _: Direction) => new RelayPeripheral(relay): IPeripheral
     )
   }
 }

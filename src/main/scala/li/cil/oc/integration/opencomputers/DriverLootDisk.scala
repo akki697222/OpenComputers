@@ -7,10 +7,11 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.storage.LevelResource
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 // This is deprecated and kept for compatibility with old saves.
 // As of OC 1.5.10, loot disks are generated using normal floppies, and using
@@ -29,7 +30,7 @@ object DriverLootDisk extends Item {
           api.FileSystem.fromSaveDirectory(lootPath, 0, false)
         }
         else {
-          api.FileSystem.fromResource(new ResourceLocation(Settings.resourceDomain, lootPath))
+          api.FileSystem.fromResource(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, lootPath))
         }
       val label =
         if (dataTag(stack).contains(Settings.namespace + "fs.label")) {

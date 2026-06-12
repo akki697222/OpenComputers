@@ -1,3 +1,4 @@
+/*
 package li.cil.oc.integration.projectred
 
 import li.cil.oc.common.blockentity.traits.BundledRedstoneAware
@@ -21,3 +22,4 @@ object BundledProviderProjectRed extends IBundledTileInteraction {
     tileEntity.getBundledOutput(side).map(value => math.min(math.max(value, 0), 255).toByte)
   }
 }
+*/

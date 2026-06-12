@@ -39,3 +39,4 @@
 /.scalafmt.conf
 /font
 /src/data/resources/.cache
+.mimocode/

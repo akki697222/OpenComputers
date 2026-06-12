@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.{ResourceKey, ResourceLocation}
 import net.minecraft.core.{BlockPos, HolderLookup, Registry}
 import net.minecraft.world.item.trading.Merchant
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.ref.WeakReference

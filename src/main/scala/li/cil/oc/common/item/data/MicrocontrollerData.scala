@@ -8,6 +8,7 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
 
 class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller) extends ItemData(itemName) {
@@ -29,7 +30,7 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_)).filter(!_.isEmpty)
+      toTagArray[CompoundTag].map(tag => ItemStack.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(ItemStack.EMPTY)).filter(!_.isEmpty)
     storedEnergy = nbt.getInt(StoredEnergyTag)
 
     // Reserve slot for EEPROM if necessary, avoids having to resize the

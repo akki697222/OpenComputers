@@ -51,13 +51,6 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
     else null
   }
 
-  override def onArmorTick(stack: ItemStack, level: Level, player: Player): Unit = {
-    super.onArmorTick(stack, level, player)
-    if (!Settings.get.ignorePower && player.getEffect(MobEffects.MOVEMENT_SLOWDOWN) == null && getCharge(stack) == 0) {
-      player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1))
-    }
-  }
-
   override def onEntityItemUpdate(stack: ItemStack, entity: ItemEntity): Boolean = {
     if (entity != null && entity.level != null && !entity.level.isClientSide && ItemColorizer.hasColor(stack)) {
       val pos = entity.blockPosition

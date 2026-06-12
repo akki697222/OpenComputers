@@ -58,6 +58,8 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   var width, height = 1
 
+  var cachedBounds: Option[AABB] = None
+
   var origin = this
 
   val screens = mutable.Set(this)
@@ -81,6 +83,14 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
   // ----------------------------------------------------------------------- //
 
   def isOrigin = origin == this
+
+  def getRenderBoundingBox: AABB = {
+    cachedBounds.getOrElse {
+      val bb = new AABB(getBlockPos).expandTowards(width - 1, height - 1, 0)
+      cachedBounds = Some(bb)
+      bb
+    }
+  }
 
   def localPosition = {
     val lpos = project(this)

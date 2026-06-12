@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Rotation
 import net.minecraft.world.level.{BlockGetter, Level, LevelReader}
 import net.minecraft.world.{InteractionHand, InteractionResult}
 
-import net.neoforged.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.level.block.Blocks
 
@@ -21,7 +21,7 @@ class Wrench(props: Properties) extends Item(props) with traits.SimpleItem with 
       val state = world.getBlockState(pos)
       state.getBlock match {
         case block: SimpleBlock if block.rotateBlock(world, pos, side) =>
-          state.neighborChanged(world, pos, Blocks.AIR, pos, false)
+          state.onNeighborChange(world, pos, pos)
           player.swing(hand)
           if (!world.isClientSide) InteractionResult.sidedSuccess(world.isClientSide) else InteractionResult.PASS
         case _ =>

@@ -8,6 +8,7 @@ import li.cil.oc.api.internal.Robot
 import li.cil.oc.client.renderer.item.ItemUpgradeRenderer
 import li.cil.oc.common.blockentity
 import li.cil.oc.util.BlockPosition
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.LevelReader
@@ -93,7 +94,7 @@ trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
   protected def tooltipData = Seq.empty[Any]
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+  override def appendHoverText(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
     if (tooltipName.isDefined) {
       for (curr <- Tooltip.get(tooltipName.get, tooltipData: _*)) {
         tooltip.add(Component.literal(curr).setStyle(Tooltip.DefaultStyle))

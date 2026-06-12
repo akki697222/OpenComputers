@@ -9,7 +9,7 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.Registries
+import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.BucketItem
@@ -98,12 +98,13 @@ object ItemUtils {
 
   def loadTag(data: Array[Byte]): CompoundTag = {
     val bais = new ByteArrayInputStream(data)
-    NbtIo.readCompressed(bais)
+    NbtIo.readCompressed(bais, net.minecraft.nbt.NbtAccounter.unlimitedHeap())
   }
 
   def saveStack(stack: ItemStack): Array[Byte] = {
     val tag = new CompoundTag()
-    stack.save(tag)
+    val provider = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess()
+    stack.save(provider, tag)
     saveTag(tag)
   }
 
@@ -122,22 +123,24 @@ object ItemUtils {
         // to make it output fluids into fluiducts or such, sorry).
         !input.getItem.isInstanceOf[BucketItem]).toArray, outputSize)
 
-    def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(null).getCount
+    def getOutputSize(recipe: Recipe[?]) = recipe.getResultItem(net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess()).getCount
 
     def isInputBlacklisted(stack: ItemStack) = stack.getItem match {
-      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(Registries.BLOCK.getKey(item.getBlock))
-      case item: Item => Settings.get.disassemblerInputBlacklist.contains(Registries.ITEM.getKey(item))
+      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(BuiltInRegistries.BLOCK.getKey(item.getBlock))
+      case item: Item => Settings.get.disassemblerInputBlacklist.contains(BuiltInRegistries.ITEM.getKey(item))
       case _ => false
     }
 
-    val (ingredients, count) = manager.getAllRecipesFor[CraftingContainer, CraftingRecipe](RecipeType.CRAFTING).
-      filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack)).collect {
+    val provider = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer.registryAccess()
+    val recipes = manager.getAllRecipesFor[net.minecraft.world.item.crafting.CraftingInput, net.minecraft.world.item.crafting.CraftingRecipe](RecipeType.CRAFTING).
+      map(_.value()).
+      filter(recipe => !recipe.getResultItem(provider).isEmpty && ItemStack.isSameItem(recipe.getResultItem(provider), stack))
+    val matched: Option[(Array[ItemStack], Int)] = recipes.collectFirst {
       case recipe: ShapedRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
       case recipe: ShapelessRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
-    }.collectFirst {
-      case (inputs, outputSize) if !inputs.exists(isInputBlacklisted) => (inputs, outputSize)
-    } match {
-      case Some((inputs, outputSize)) => (inputs, outputSize)
+    }
+    val (ingredients, count) = matched match {
+      case Some(result) => result
       case _ => return Array.empty
     }
 

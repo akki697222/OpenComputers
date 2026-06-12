@@ -14,6 +14,7 @@ import net.minecraft.world.item.{TooltipFlag => ITooltipFlag}
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.{InteractionResult => ActionResultType}
@@ -38,14 +39,14 @@ class Print(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
-    super.tooltipBody(stack, world, tooltip, advanced)
+  override protected def tooltipBody(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
+    super.tooltipBody(stack, context, tooltip, advanced)
     val data = new PrintData(stack)
     data.tooltip.foreach(s => tooltip.addAll(s.linesIterator.map(ITextComponent.literal(_).setStyle(Tooltip.DefaultStyle)).toList.asJava))
   }
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
-    super.tooltipTail(stack, world, tooltip, advanced)
+  override protected def tooltipTail(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
+    super.tooltipTail(stack, context, tooltip, advanced)
     val data = new PrintData(stack)
     if (data.isBeaconBase) {
       tooltip.add(ITextComponent.literal(Localization.Tooltip.PrintBeaconBase).setStyle(Tooltip.DefaultStyle))
@@ -76,13 +77,6 @@ class Print(props: Properties) extends RedstoneAware(props) {
       }
       case _ => super.getLightBlock(state, world, pos)
     }
-
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack = {
-    world.getBlockEntity(pos) match {
-      case print: blockentity.Print => print.data.createItemStack()
-      case _ => ItemStack.EMPTY
-    }
-  }
 
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = {
     world.getBlockEntity(pos) match {
@@ -115,10 +109,10 @@ class Print(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, trace: BlockRayTraceResult): ActionResultType = {
+  override def useWithoutItem(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hitResult: BlockRayTraceResult): ActionResultType = {
     world.getBlockEntity(pos) match {
       case print: blockentity.Print => if (print.activate()) ActionResultType.sidedSuccess(world.isClientSide) else ActionResultType.PASS
-      case _ => super.use(state, world, pos, player, hand, trace)
+      case _ => super.useWithoutItem(state, world, pos, player, hitResult)
     }
   }
 

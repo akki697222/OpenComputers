@@ -9,6 +9,7 @@ import li.cil.oc.api
 import li.cil.oc.client.{Textures, gui}
 import li.cil.oc.common.component
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.client.Minecraft
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -26,8 +27,8 @@ class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
   def hasServer(stack: ItemStack) = stack.hasTag && stack.getTag.contains(Settings.namespace + "server")
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
+  override def appendHoverText(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
     if (hasServer(stack)) {
       val server = stack.getTag.getString(Settings.namespace + "server")
       tooltip.add(Component.literal("§8" + server.substring(0, 13) + "...§7"))

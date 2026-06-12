@@ -9,23 +9,41 @@ import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.server.{PacketSender, agent}
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.{BlockPosition, InventoryUtils, Tooltip}
+import net.minecraft.world.item.Item
 import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.Item
 import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.world.item.Item
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
+import net.minecraft.world.item.Item
 import net.minecraft.world.{InteractionHand => Hand}
+import net.minecraft.world.item.Item
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.Item
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.material.FluidState
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.storage.loot.LootParams
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
+import net.minecraft.world.item.Item
 import net.minecraft.world.phys.{HitResult => RayTraceResult}
+import net.minecraft.world.item.Item
 import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelectionContext, Shapes => VoxelShapes}
 
 import java.util
@@ -41,12 +59,6 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
   }
 
   // ----------------------------------------------------------------------- //
-
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
-    world.getBlockEntity(pos) match {
-      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack()
-      case _ => ItemStack.EMPTY
-    }
 
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = {
     world.getBlockEntity(pos) match {
@@ -66,19 +78,19 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipHead(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
-    super.tooltipHead(stack, world, tooltip, advanced)
+  override protected def tooltipHead(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipHead(stack, context, tooltip, advanced)
     addLines(stack, tooltip)
   }
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get("robot")) {
       tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }
   }
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
-    super.tooltipTail(stack, world, tooltip, flag)
+  override protected def tooltipTail(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, flag)
     if (KeyBindings.showExtendedTooltips) {
       val info = new RobotData(stack)
       val components = info.containers ++ info.components

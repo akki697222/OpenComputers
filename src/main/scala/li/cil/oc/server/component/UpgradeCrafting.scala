@@ -20,6 +20,7 @@ import net.minecraft.world.inventory
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.ResultContainer
 import net.minecraft.world.inventory.ResultSlot
+import net.minecraft.world.item.crafting.CraftingInput
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.Container
@@ -54,17 +55,19 @@ class UpgradeCrafting(val host: EnvironmentHost with internal.Robot) extends Abs
       copyItemsFromHost(player.inventory)
       var countCrafted = 0
       val manager = host.getEnvironmentLevel.getRecipeManager
-      val initialCraft = manager.getRecipeFor(RecipeType.CRAFTING, CraftingContainer: inventory.CraftingContainer, host.getEnvironmentLevel)
+      val craftingInput = CraftingInput.of(3, 3, (0 until 9).map(i => getItem(i)).toList)
+      val initialCraft = manager.getRecipeFor(RecipeType.CRAFTING, craftingInput, host.getEnvironmentLevel)
       if (initialCraft.isPresent) {
         def tryCraft() : Boolean = {
-          val craft = manager.getRecipeFor(RecipeType.CRAFTING, CraftingContainer: inventory.CraftingContainer, host.getEnvironmentLevel)
+          val craftInput = CraftingInput.of(3, 3, (0 until 9).map(i => getItem(i)).toList)
+          val craft = manager.getRecipeFor(RecipeType.CRAFTING, craftInput, host.getEnvironmentLevel)
           if (craft != initialCraft) {
             return false
           }
 
           val craftResult = new ResultContainer
           val craftingSlot = new ResultSlot(player, CraftingContainer, craftResult, 0, 0, 0)
-          val craftedResult = craft.get.assemble(this, null)
+          val craftedResult = craft.get.value().assemble(craftingInput, host.getEnvironmentLevel.registryAccess())
           craftResult.setItem(0, craftedResult)
           if (!craftingSlot.hasItem)
             return false

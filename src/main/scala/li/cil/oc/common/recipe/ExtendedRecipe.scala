@@ -13,17 +13,20 @@ import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.common.item.data.TabletData
 import li.cil.oc.server.machine.luac.LuaStateFactory
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.SideTracker
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.StringTag
+import net.minecraft.nbt.{CompoundTag, StringTag}
+import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.ItemTags
 import net.minecraft.world.inventory.CraftingContainer
 import net.minecraft.world.item.crafting.Recipe
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.util.control.Breaks._
@@ -59,9 +62,9 @@ object ExtendedRecipe {
 
     // EEPROM initialization.
     if (resultItemName == eeprom &&
-      resultStack.getCount == 1 && resultStack.hasTag &&
+      resultStack.getCount == 1 && resultStack.has(DataComponents.CUSTOM_DATA) &&
       recipe.getIngredients.size == 2) {
-      val nbt = resultStack.getTag.getCompound(Settings.namespace + "data")
+      val nbt = resultStack.get(DataComponents.CUSTOM_DATA).getUnsafe.getCompound(Settings.namespace + "data")
       // Load EEPROM code (if it's a string)
       val codeNbt = nbt.get(Settings.namespace + "eeprom")
       if (codeNbt != null && codeNbt.getType == StringTag.TYPE) {
@@ -92,7 +95,7 @@ object ExtendedRecipe {
           if (stack.getItem == Items.FILLED_MAP) {
             // Store information of the map used for crafting in the result.
             val nbt = driver.dataTag(craftedStack)
-            nbt.setNewCompoundTag(Settings.namespace + "map", stack.save)
+            nbt.put(Settings.namespace + "map", stack.save(ServerLifecycleHooks.getCurrentServer.registryAccess()))
           }
         })
     }
@@ -116,22 +119,22 @@ object ExtendedRecipe {
         // Formatting / loot to normal disk conversion, only keep coloring.
         val colorKey = Settings.namespace + "color"
         for (stack <- getItems(inventory)) {
-          if (api.Items.get(stack) != null && (api.Items.get(stack) == floppy || api.Items.get(stack).name == "lootDisk") && stack.hasTag) {
-            val oldData = stack.getTag
+          if (api.Items.get(stack) != null && (api.Items.get(stack) == floppy || api.Items.get(stack).name == "lootDisk") && stack.has(DataComponents.CUSTOM_DATA)) {
+            val oldData = stack.get(DataComponents.CUSTOM_DATA).getUnsafe
             if (oldData.contains(colorKey) && oldData.getInt(colorKey) != DyeColor.LIGHT_GRAY.getId) {
               nbt.put(colorKey, oldData.get(colorKey).copy())
             }
           }
         }
         if (nbt.isEmpty) {
-          craftedStack.setTag(null)
+          craftedStack.remove(DataComponents.CUSTOM_DATA)
         }
       }
       else if (getItems(inventory).forall(api.Items.get(_) == floppy)) {
         // Copy operation.
         for (stack <- getItems(inventory)) {
-          if (api.Items.get(stack) == floppy && stack.hasTag) {
-            val oldData = stack.getTag
+          if (api.Items.get(stack) == floppy && stack.has(DataComponents.CUSTOM_DATA)) {
+            val oldData = stack.get(DataComponents.CUSTOM_DATA).getUnsafe
             for (oldTagName <- oldData.getAllKeys.map(_.asInstanceOf[String]) if !nbt.contains(oldTagName)) {
               nbt.put(oldTagName, oldData.get(oldTagName).copy())
             }
@@ -187,11 +190,11 @@ object ExtendedRecipe {
       craftedStack.getCount == 2 &&
       recipe.getIngredients.size == 2) breakable {
       for (stack <- getItems(inventory)) {
-        if (api.Items.get(stack) == eeprom && stack.hasTag) {
-          val copy = stack.getTag.copy.asInstanceOf[CompoundTag]
+        if (api.Items.get(stack) == eeprom && stack.has(DataComponents.CUSTOM_DATA)) {
+          val copy = stack.get(DataComponents.CUSTOM_DATA).copyTag()
           // Erase node address, just in case.
           copy.getCompound(Settings.namespace + "data").getCompound("node").remove("address")
-          craftedStack.setTag(copy)
+          craftedStack.set(DataComponents.CUSTOM_DATA, CustomData.of(copy))
           break()
         }
       }

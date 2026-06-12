@@ -7,7 +7,7 @@ object Rarity {
   import MCRarity._
   private val lookup = Array(MCRarity.COMMON, MCRarity.UNCOMMON, MCRarity.RARE, MCRarity.EPIC)
   
-  val LEGENDARY: MCRarity = MCRarity.create("legendary", ChatFormatting.GOLD)
+  val LEGENDARY: MCRarity = MCRarity.EPIC
 
   def byTier(tier: Int) = lookup(tier max 0 min (lookup.length - 1))
 }

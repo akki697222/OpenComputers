@@ -14,7 +14,7 @@ import net.minecraft.world.level.{ItemLike, Level}
 /**
   * @author asie, Vexatos
   */
-class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(id, CraftingBookCategory.MISC) {
+class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(CraftingBookCategory.MISC) {
   val targetItem: Item = target.asItem()
 
   override def matches(crafting: CraftingContainer, level: Level): Boolean = {
@@ -39,10 +39,10 @@ class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecip
         if (dye.isEmpty)
           return ItemStack.EMPTY
 
-        val itemColor = Color.byTag(dye.get).getTextureDiffuseColors
-        val red = (itemColor(0) * 255.0F).toInt
-        val green = (itemColor(1) * 255.0F).toInt
-        val blue = (itemColor(2) * 255.0F).toInt
+        val itemColor = Color.byTag(dye.get).getTextureDiffuseColor
+        val red = (itemColor >> 16) & 0xFF
+        val green = (itemColor >> 8) & 0xFF
+        val blue = itemColor & 0xFF
         maximum += Math.max(red, Math.max(green, blue))
         color(0) += red
         color(1) += green

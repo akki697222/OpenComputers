@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
-import net.neoforged.registries.ForgeRegistries
+import net.minecraft.core.registries.BuiltInRegistries
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
@@ -339,11 +339,11 @@ class ArgumentsImpl(val args: Seq[AnyRef]) extends Arguments {
   }
 
   private def makeStack(name: String, damage: Int, tag: Option[CompoundTag]) = {
-    ForgeRegistries.ITEMS.getValue(new ResourceLocation(name)) match {
+    BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(name)) match {
       case item: Item =>
         val stack = new ItemStack(item, 1)
         stack.setDamageValue(damage)
-        tag.foreach(stack.setTag)
+        tag.foreach(t => stack.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY, (existing: net.minecraft.world.item.component.CustomData) => net.minecraft.world.item.component.CustomData.of(t)))
         stack
       case _ => throw new IllegalArgumentException("invalid item stack")
     }

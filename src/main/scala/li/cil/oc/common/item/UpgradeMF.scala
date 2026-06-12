@@ -5,6 +5,7 @@ import java.util
 import li.cil.oc.Localization
 import li.cil.oc.Settings
 import li.cil.oc.util.Tooltip
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack

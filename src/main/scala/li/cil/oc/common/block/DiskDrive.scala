@@ -14,6 +14,7 @@ import net.minecraft.world.item.{TooltipFlag => ITooltipFlag}
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.state.{StateDefinition => StateContainer}
 import net.minecraft.core.Direction
 import net.minecraft.world.{InteractionHand => Hand}
@@ -30,8 +31,8 @@ class DiskDrive(props: Properties) extends SimpleBlock(props) with traits.GUI {
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
-    super.tooltipTail(stack, world, tooltip, flag)
+  override protected def tooltipTail(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, flag)
     if (Mods.ComputerCraft.isModAvailable) {
       for (curr <- Tooltip.get(getClass.getSimpleName + ".CC")) tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }

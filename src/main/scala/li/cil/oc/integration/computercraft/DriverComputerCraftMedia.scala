@@ -21,7 +21,7 @@ object DriverComputerCraftMedia extends Item {
   override def createEnvironment(stack: ItemStack, host: EnvironmentHost) = if (!host.getEnvironmentLevel.isClientSide) {
     val address = addressFromTag(dataTag(stack))
     val mount = fromComputerCraft(stack.getItem.asInstanceOf[IMedia].createDataMount(stack, host.getEnvironmentLevel.asInstanceOf[ServerLevel]))
-    Option(oc.api.FileSystem.asManagedEnvironment(mount, new ComputerCraftLabel(stack), host, Settings.resourceDomain + ":floppy_access")) match {
+    Option(oc.api.FileSystem.asManagedEnvironment(mount, new ComputerCraftLabel(stack, host.getEnvironmentLevel.registryAccess()), host, Settings.resourceDomain + ":floppy_access")) match {
       case Some(environment) =>
         environment.node.asInstanceOf[oc.server.network.Node].address = address
         environment
@@ -44,10 +44,10 @@ object DriverComputerCraftMedia extends Item {
     }
     else java.util.UUID.randomUUID().toString
 
-  class ComputerCraftLabel(val stack: ItemStack) extends Label {
+  class ComputerCraftLabel(val stack: ItemStack, val provider: HolderLookup.Provider) extends Label {
     val media = stack.getItem.asInstanceOf[IMedia]
 
-    override def getLabel = media.getLabel(stack)
+    override def getLabel = media.getLabel(provider, stack)
 
     override def setLabel(value: String): Unit = {
       media.setLabel(stack, value)

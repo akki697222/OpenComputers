@@ -12,10 +12,10 @@ import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.neoforged.fluids.FluidStack
-import net.neoforged.fluids.IFluidTank
-import net.neoforged.fluids.capability.IFluidHandler.FluidAction
-import net.neoforged.fluids.capability.templates.FluidTank
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.IFluidTank
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
@@ -38,12 +38,12 @@ class UpgradeTank(val owner: EnvironmentHost, val capacity: Int) extends Abstrac
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadData(nbt, provider)
-    tank.readFromNBT(nbt, provider)
+    tank.readFromNBT(provider, nbt)
   }
 
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveData(nbt, provider)
-    tank.writeToNBT(nbt, provider)
+    tank.writeToNBT(provider, nbt)
   }
 
   // ----------------------------------------------------------------------- //

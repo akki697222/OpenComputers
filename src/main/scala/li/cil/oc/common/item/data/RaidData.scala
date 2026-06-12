@@ -6,6 +6,7 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
 
 class RaidData extends ItemData(Constants.BlockName.Raid) {
@@ -26,7 +27,7 @@ class RaidData extends ItemData(Constants.BlockName.Raid) {
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     disks = nbt.getList(DisksTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(tag => ItemStack.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(ItemStack.EMPTY))
     filesystem = nbt.getCompound(FileSystemTag)
     if (nbt.contains(LabelTag)) {
       label = Option(nbt.getString(LabelTag))

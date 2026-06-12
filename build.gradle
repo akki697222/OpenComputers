@@ -15,7 +15,7 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-neoForge  {
+neoForge {
     version = project.neoforge_version
 
     parchment {
@@ -56,14 +56,6 @@ neoForge  {
             data()
 
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/data/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
-    }
-}
-
-mixin {
-    mods {
-        "${mod_id}" {
-            sourceSet(sourceSets.main)
         }
     }
 }
@@ -219,12 +211,12 @@ afterEvaluate {
                 artifact(provider {
                     tasks.named("jar").get().outputs.files.singleFile
                 }) {
-                    builtBy tasks.named("reobfJar")
+                    builtBy tasks.named("jar")
                     classifier = null
                     extension = "jar"
                 }
                 artifact(tasks.named("apiJar")) {
-                    classifier = 'api'
+                    classifier = 'api' as Publication
                     extension = "jar"
                 }
                 artifact(tasks.named("apiSourcesJar")) {

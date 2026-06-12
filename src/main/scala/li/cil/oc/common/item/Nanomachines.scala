@@ -6,6 +6,7 @@ import com.google.common.base.Strings
 import li.cil.oc.api
 import li.cil.oc.common.item.data.NanomachineData
 import li.cil.oc.common.nanomachines.ControllerImpl
+import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
@@ -24,8 +25,8 @@ import net.minecraft.world.entity.LivingEntity
 
 class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem {
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
+  override def appendHoverText(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
     if (stack.hasTag) {
       val data = new NanomachineData(stack)
       if (!Strings.isNullOrEmpty(data.uuid)) {

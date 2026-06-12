@@ -3,6 +3,7 @@ package li.cil.oc.common.event
 import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.common.item.HoverBoots
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.effect.{MobEffectInstance, MobEffects}
 import net.minecraft.world.entity.ai.attributes.{AttributeModifier, Attributes}
 import net.minecraft.world.entity.player.Player
 import net.neoforged.bus.api.SubscribeEvent
@@ -49,6 +50,16 @@ object HoverBootsHandler {
       }
       if (hasHoverBoots && !player.onGround && player.fallDistance < 5 && player.getDeltaMovement.y < 0) {
         player.setDeltaMovement(player.getDeltaMovement.multiply(1, 0.9, 1))
+      }
+      if (hasHoverBoots && !Settings.get.ignorePower && player.getEffect(MobEffects.MOVEMENT_SLOWDOWN) == null) {
+        equippedArmor(player).foreach {
+          case stack if stack.getItem.isInstanceOf[HoverBoots] =>
+            val boots = stack.getItem.asInstanceOf[HoverBoots]
+            if (boots.getCharge(stack) == 0) {
+              player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1))
+            }
+          case _ =>
+        }
       }
     case _ => // Ignore.
   }

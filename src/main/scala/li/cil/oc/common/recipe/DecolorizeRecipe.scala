@@ -14,7 +14,7 @@ import net.minecraft.world.level.{ItemLike, Level}
 /**
   * @author Vexatos
   */
-class DecolorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(id, CraftingBookCategory.MISC) {
+class DecolorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(CraftingBookCategory.MISC) {
   val targetItem: Item = target.asItem()
 
   override def matches(crafting: CraftingContainer, level: Level): Boolean = {

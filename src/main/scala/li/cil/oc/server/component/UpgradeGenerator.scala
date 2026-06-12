@@ -18,7 +18,7 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraft.core.HolderLookup
-import net.neoforged.common.ForgeHooks
+import net.minecraft.world.item.crafting.RecipeType
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.item.ItemStack
@@ -52,7 +52,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     val count = args.optInteger(0, 64)
     val stack = host.mainInventory.getItem(host.selectedSlot)
     if (stack.isEmpty) return result((), "selected slot is empty")
-    if (ForgeHooks.getBurnTime(stack, null) <= 0) {
+    if (!stack.is(net.minecraft.tags.ItemTags.create(net.minecraft.resources.ResourceLocation.withDefaultNamespace("smeltable")))) {
       return result((), "selected slot does not contain fuel")
     }
     val container: ItemStack = stack.getCraftingRemainingItem
@@ -125,7 +125,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
       case requiredContainer if !requiredContainer.isEmpty && requiredContainer.getCount > 0 => previousSelectedItem match {
         case slotItem: ItemStack if !slotItem.isEmpty &&
           slotItem.getItem == requiredContainer.getItem &&
-          ItemStack.isSameItemSameTags(slotItem, requiredContainer) => slotItem.copy
+          ItemStack.isSameItemSameComponents(slotItem, requiredContainer) => slotItem.copy
         case _ => return result(false, "removing this fuel requires the appropriate container in the selected slot")
       }
       case _ => ItemStack.EMPTY // nothing to do, nothing required
@@ -166,7 +166,10 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     super.update()
     if (remainingTicks <= 0 && inventory.isDefined) {
       val stack = inventory.get
-      remainingTicks = ForgeHooks.getBurnTime(stack, null)
+      remainingTicks = {
+        if (stack.is(net.minecraft.tags.ItemTags.create(net.minecraft.resources.ResourceLocation.withDefaultNamespace("smeltable")))) 200
+        else 0
+      }
       if (remainingTicks > 0) {
         updateClient()
         stack.shrink(1)
@@ -214,9 +217,8 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadData(nbt, provider)
-      inventory = StackOption(ItemStack.of(nbt.getCompound("inventory")))
     if (nbt.contains(InventoryTag)) {
-      inventory = StackOption(ItemStack.of(nbt.getCompound(InventoryTag)))
+      inventory = StackOption(ItemStack.parseOptional(provider, nbt.getCompound(InventoryTag)))
     }
     remainingTicks = nbt.getInt(RemainingTicksTag)
   }
@@ -224,7 +226,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveData(nbt, provider)
     inventory match {
-      case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, stack.save)
+      case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, _ => stack.save(provider))
       case _ =>
     }
     if (remainingTicks > 0) {

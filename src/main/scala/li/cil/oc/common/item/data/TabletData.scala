@@ -7,6 +7,7 @@ import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
 
 class TabletData extends ItemData(Constants.ItemName.Tablet) {
@@ -35,7 +36,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     nbt.getList(ItemsTag, Tag.TAG_COMPOUND).foreach((slotNbt: CompoundTag) => {
       val slot = slotNbt.getByte(SlotTag)
       if (slot >= 0 && slot < items.length) {
-        items(slot) = ItemStack.of(slotNbt.getCompound(ItemTag))
+        items(slot) = ItemStack.CODEC.parse(NbtOps.INSTANCE, slotNbt.getCompound(ItemTag)).result().orElse(ItemStack.EMPTY)
       }
     })
     isRunning = nbt.getBoolean(IsRunningTag)
@@ -43,7 +44,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     maxEnergy = nbt.getDouble(MaxEnergyTag)
     tier = nbt.getInt(TierTag)
     if (nbt.contains(ContainerTag)) {
-      container = ItemStack.of(nbt.getCompound(ContainerTag))
+      container = ItemStack.CODEC.parse(NbtOps.INSTANCE, nbt.getCompound(ContainerTag)).result().orElse(ItemStack.EMPTY)
     }
   }
 
@@ -55,12 +56,12 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
         case (stack, slot) =>
           val slotNbt = new CompoundTag()
           slotNbt.putByte(SlotTag, slot.toByte)
-          slotNbt.setNewCompoundTag(ItemTag, stack.save)
+          slotNbt.put(ItemTag, stack.save(provider))
       })
     nbt.putBoolean(IsRunningTag, isRunning)
     nbt.putDouble(EnergyTag, energy)
     nbt.putDouble(MaxEnergyTag, maxEnergy)
     nbt.putInt(TierTag, tier)
-    if (!container.isEmpty) nbt.setNewCompoundTag(ContainerTag, container.save)
+    if (!container.isEmpty) nbt.put(ContainerTag, container.save(provider))
   }
 }
