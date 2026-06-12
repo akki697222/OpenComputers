@@ -179,8 +179,8 @@ class Raid(pos: BlockPos, state: BlockState)
     }
     nbt.put(PresenceTag, new ByteArrayTag(presenceArray))
 
-    if (label.getLabel != null) {
-      nbt.putString(LabelTag, label.getLabel)
+    if (label.getLabel(provider) != null) {
+      nbt.putString(LabelTag, label.getLabel(provider))
     }
   }
 
@@ -189,7 +189,7 @@ class Raid(pos: BlockPos, state: BlockState)
   class RaidLabel extends Label {
     var label = "raid"
 
-    override def getLabel = label
+    override def getLabel(provider: HolderLookup.Provider): String = label
 
     override def setLabel(value: String) = label = Option(value).map(_.take(16)).orNull
 

@@ -47,7 +47,7 @@ object DriverComputerCraftMedia extends Item {
   class ComputerCraftLabel(val stack: ItemStack) extends Label {
     val media = stack.getItem.asInstanceOf[IMedia]
 
-    override def getLabel = media.getLabel(stack)
+    override def getLabel(provider: HolderLookup.Provider): String = media.getLabel(provider, stack)
 
     override def setLabel(value: String): Unit = {
       media.setLabel(stack, value)

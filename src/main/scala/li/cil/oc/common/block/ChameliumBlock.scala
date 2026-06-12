@@ -1,32 +1,32 @@
 package li.cil.oc.common.block
 
+import com.mojang.serialization.MapCodec
+import li.cil.oc.common.block.ChameliumBlock.CODEC
 import li.cil.oc.{CreativeTab, OpenComputers}
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties
+import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, simpleCodec}
 import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.item.DyeColor
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.state.properties.EnumProperty
 import net.minecraft.world.level.block.state.{StateDefinition => StateContainer}
 import net.minecraft.core.BlockPos
-import net.minecraft.world.level.{BlockGetter => IBlockReader}
+import net.minecraft.world.level.{LevelReader, BlockGetter => IBlockReader}
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 
-object ChameliumBlock {
-  final val Color = EnumProperty.create("color", classOf[DyeColor])
-}
-
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = OpenComputers.ID)
 class ChameliumBlock(props: Properties) extends SimpleBlock(props) {
+  override def codec(): MapCodec[ChameliumBlock] = CODEC
+
   protected override def createBlockStateDefinition(builder: StateContainer.Builder[Block, BlockState]): Unit = {
     builder.add(ChameliumBlock.Color)
   }
   registerDefaultState(stateDefinition.any.setValue(ChameliumBlock.Color, DyeColor.BLACK))
 
-  override def getCloneItemStack(world: IBlockReader, pos: BlockPos, state: BlockState): ItemStack = {
+  override def getCloneItemStack(world: LevelReader, pos: BlockPos, state: BlockState): ItemStack = {
     val stack = new ItemStack(this)
     stack.setDamageValue(state.getValue(ChameliumBlock.Color).getId)
     stack
@@ -43,4 +43,9 @@ class ChameliumBlock(props: Properties) extends SimpleBlock(props) {
       e.accept(stack)
     }
   }
+}
+
+object ChameliumBlock {
+  final val CODEC = simpleCodec(new ChameliumBlock(_))
+  final val Color = EnumProperty.create("color", classOf[DyeColor])
 }

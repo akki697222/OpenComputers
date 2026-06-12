@@ -15,6 +15,7 @@ import net.minecraft.world.item.ItemStack
 import scala.io.Source
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object RobotData {
   val names = try {
@@ -34,7 +35,7 @@ object RobotData {
 class RobotData extends ItemData(Constants.BlockName.Robot) {
   def this(stack: ItemStack) = {
     this()
-    loadData(stack)
+    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
   }
 
   var name = ""
@@ -69,9 +70,9 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     robotEnergy = nbt.getInt(RobotEnergyTag)
     tier = nbt.getInt(TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get())
     containers = nbt.getList(ContainersTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get())
     if (nbt.contains(LightColorTag)) {
       lightColor = nbt.getInt(LightColorTag)
     }
@@ -89,7 +90,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     nbt.putInt(LightColorTag, lightColor)
   }
 
-  def copyItemStack() = {
+  def copyItemStack(provider: HolderLookup.Provider) = {
     val stack = createItemStack()
     // Forget all node addresses and so on. This is used when 'picking' a
     // robot in creative mode.
@@ -106,7 +107,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     // internal buffer. This is for creative use only, anyway.
     newInfo.totalEnergy = 0
     newInfo.robotEnergy = 50000
-    newInfo.saveData(stack)
+    newInfo.saveData(stack, provider)
     stack
   }
 }

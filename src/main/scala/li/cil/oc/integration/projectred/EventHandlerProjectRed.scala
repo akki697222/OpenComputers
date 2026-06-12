@@ -12,7 +12,7 @@ object EventHandlerProjectRed {
     stack.getItem match {
       case wrench: IScrewdriver =>
         if (changeDurability) {
-          wrench.damageScrewdriver(player, stack)
+          wrench.damageScrewdriver(player, InteractionHand.MAIN_HAND)
           true
         }
         else true

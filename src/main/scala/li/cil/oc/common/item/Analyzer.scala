@@ -9,22 +9,23 @@ import li.cil.oc.api.network.Analyzable
 import li.cil.oc.api.network._
 import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
-import li.cil.oc.util.BlockPosition
+import li.cil.oc.util.{BlockPosition, ItemUtils}
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.Util
-
-import net.neoforged.common.util.FakePlayer
-import net.neoforged.event.entity.player.PlayerInteractEvent
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.InteractionResultHolder
+import net.minecraft.world.item.component.CustomData
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 
 object Analyzer {
   private lazy val analyzer = api.Items.get(Constants.ItemName.Analyzer)
@@ -107,22 +108,26 @@ object Analyzer {
 
 class Analyzer(props: Properties) extends Item(props) with traits.SimpleItem {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
-    if (player.isCrouching && stack.hasTag) {
-      stack.removeTagKey(Settings.namespace + "clipboard")
+    if (player.isCrouching) {
+      CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {
+        data.remove(Settings.namespace + "clipboard")
+      })
     }
+
     super.use(stack, level, player)
   }
 
   override def onItemUse(stack: ItemStack, player: Player, position: BlockPosition, side: Direction, hitX: Float, hitY: Float, hitZ: Float) = {
     val world = player.level
+    val tag = ItemUtils.getTag(stack)
     world.getBlockEntity(position) match {
       case screen: blockentity.Screen if side == screen.facing =>
         if (player.isCrouching) {
           screen.copyToAnalyzer(hitX, hitY, hitZ)
         }
-        else if (stack.hasTag && stack.getTag.contains(Settings.namespace + "clipboard")) {
+        else if (tag != null && tag.contains(Settings.namespace + "clipboard")) {
           if (!world.isClientSide) {
-            screen.origin.buffer.clipboard(stack.getTag.getString(Settings.namespace + "clipboard"), player)
+            screen.origin.buffer.clipboard(tag.getString(Settings.namespace + "clipboard"), player)
           }
           true
         }

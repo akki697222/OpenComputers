@@ -6,7 +6,7 @@ import li.cil.oc.common.blockentity.{Relay, TileEntityTypes}
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.bus.api.SubscribeEvent
-import net.neoforged.neoforge.capabilities.{BlockCapability, RegisterCapabilitiesEvent}
+import net.neoforged.neoforge.capabilities.{BlockCapability, ICapabilityProvider, RegisterCapabilitiesEvent}
 import net.neoforged.neoforge.common.NeoForge
 
 object PeripheralProvider {
@@ -42,7 +42,13 @@ object PeripheralProvider {
     event.registerBlockEntity(
       CAPABILITY_PERIPHERAL,
       TileEntityTypes.RELAY.get(),
-      (relay: Relay, _: Direction) => new RelayPeripheral(relay)
+      // I could not get this to type-check correctly
+      // Scala is weird
+      RelayPeripheralProvider.asInstanceOf
     )
+  }
+
+  object RelayPeripheralProvider extends ICapabilityProvider[Relay, Direction, RelayPeripheral] {
+    override def getCapability(relay: Relay, c: Direction): RelayPeripheral = new RelayPeripheral(relay)
   }
 }

@@ -1,6 +1,7 @@
 package li.cil.oc.common.recipe;
 
 import com.google.gson.JsonObject;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class ExtendedShapelessRecipe implements CraftingRecipe {
     private ShapelessRecipe wrapped;
@@ -19,13 +21,13 @@ public class ExtendedShapelessRecipe implements CraftingRecipe {
     }
 
     @Override
-    public boolean matches(CraftingContainer inv, Level level) {
+    public boolean matches(@NonNull CraftingInput inv, @NonNull Level level) {
         return wrapped.matches(inv, level);
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer inv, @NotNull RegistryAccess registryAccess) {
-        return ExtendedRecipe.addNBTToResult(this, wrapped.assemble(inv, registryAccess), inv);
+    public ItemStack assemble(@NonNull CraftingInput inv, @NotNull HolderLookup.Provider provider) {
+        return ExtendedRecipe.addNBTToResult(this, wrapped.assemble(inv, provider), inv, provider);
     }
 
     @Override

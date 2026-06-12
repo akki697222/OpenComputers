@@ -131,7 +131,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   override def componentCount: Int = info.components.length
 
-  override def getComponentInSlot(index: Int): ManagedEnvironment = if (components.length > index) components(index).orNull else null
+  override def getComponentInSlot(index: Int): ManagedEnvironment = if (environmentComponents.length > index) environmentComponents(index).orNull else null
 
   override def player: net.minecraft.world.entity.player.Player = {
     agent.Player.updatePositionAndRotation(player_, facing, facing)
@@ -141,7 +141,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   override def synchronizeSlot(slot: Int): Unit = if (slot >= 0 && slot < getContainerSize) this.synchronized {
     val stack = getItem(slot)
-    components(slot) match {
+    environmentComponents(slot) match {
       case Some(component) =>
         // We're guaranteed to have a driver for entries.
         save(component, Driver.driverFor(stack, getClass), stack)
@@ -699,7 +699,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   // ----------------------------------------------------------------------- //
 
-  override def componentSlot(address: String): Int = components.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = environmentComponents.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   override def hasRedstoneCard: Boolean = (containerSlots ++ componentSlots).exists(slot => StackOption(getItem(slot)).fold(false)(DriverRedstoneCard.worksWith(_, getClass)))
 
@@ -727,9 +727,9 @@ class Robot(pos: BlockPos, state: BlockState)
         if (!stack.isEmpty) removed += stack
       }
       val copyComponentCount = math.min(getContainerSize, componentCount)
-      Array.copy(components, getContainerSize - copyComponentCount, components, realSize, copyComponentCount)
+      Array.copy(environmentComponents, getContainerSize - copyComponentCount, environmentComponents, realSize, copyComponentCount)
       for (slot <- math.max(0, getContainerSize - componentCount) until getContainerSize if slot < realSize || slot >= realSize + componentCount) {
-        components(slot) = None
+        environmentComponents(slot) = None
       }
       getContainerSize = realSize + componentCount
       if (getLevel != null && isServer) {
@@ -847,14 +847,14 @@ class Robot(pos: BlockPos, state: BlockState)
   // ----------------------------------------------------------------------- //
 
   def tryGetTank(tank: Int): Option[ManagedEnvironment with IFluidTank] = {
-    val tanks = components.collect {
+    val tanks = environmentComponents.collect {
       case Some(tank: IFluidTank) => tank
     }
     if (tank < 0 || tank >= tanks.length) None
     else Option(tanks(tank))
   }
 
-  def tankCount: Int = components.count {
+  def tankCount: Int = environmentComponents.count {
     case Some(tank: IFluidTank) => true
     case _ => false
   }

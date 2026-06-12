@@ -65,7 +65,7 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   Recipes.init(modBus)
   LootFunctions.init(modBus)
   EntityTypes.ENTITY_TYPES.register(modBus)
-  MenuTypes.MENU_TYPES.register(modBus)
+  MenuTypes.MENU.register(modBus)
   modBus.register(classOf[Capabilities])
   modBus.register(li.cil.oc.data.DataGenerators)
   modBus.register(CreativeTab)

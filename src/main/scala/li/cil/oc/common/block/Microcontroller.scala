@@ -30,10 +30,10 @@ import net.minecraft.world.{InteractionHand => Hand}
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.{HitResult => RayTraceResult}
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions
-import net.minecraft.world.level.{BlockGetter => IBlockReader}
-import net.minecraft.world.level.{Level => World}
+import net.minecraft.world.level.{LevelReader, BlockGetter => IBlockReader, Level => World}
 
 
 import scala.reflect.ClassTag
@@ -46,16 +46,16 @@ class Microcontroller(props: Properties)
 
   // ----------------------------------------------------------------------- //
 
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
+  override def getCloneItemStack(world: LevelReader, pos: BlockPos, state: BlockState): ItemStack =
     world.getBlockEntity(pos) match {
-      case mcu: blockentity.Microcontroller => mcu.info.copyItemStack()
+      case mcu: blockentity.Microcontroller => mcu.info.copyItemStack(world.registryAccess())
       case _ => ItemStack.EMPTY
     }
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
-    super.tooltipTail(stack, world, tooltip, advanced)
+  override protected def tooltipTail(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, advanced)
     if (KeyBindings.showExtendedTooltips) {
       val info = new MicrocontrollerData(stack)
       for (component <- info.components if !component.isEmpty) {

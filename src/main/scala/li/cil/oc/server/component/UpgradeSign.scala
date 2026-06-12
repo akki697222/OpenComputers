@@ -18,16 +18,15 @@ import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Direction
-import net.neoforged.common.MinecraftForge
-import net.neoforged.common.util.FakePlayerFactory
-import net.neoforged.eventbus.api.Event
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.util.FakePlayerFactory
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.block.entity.SignBlockEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.network.chat.Component
-import net.neoforged.event.level.BlockEvent
+import net.neoforged.neoforge.event.level.BlockEvent
 
 abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
   private final lazy val deviceInfo = Map(
@@ -69,7 +68,7 @@ abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
         lines.map(line => Component.literal(line)).copyToArray(getAllMessages(sign).toArray)
         host.getEnvironmentLevel.notifyBlockUpdate(sign.getBlockPos)
 
-        MinecraftForge.EVENT_BUS.post(new SignChangeEvent.Post(sign, lines))
+        NeoForge.EVENT_BUS.post(new SignChangeEvent.Post(sign, lines))
 
         result(getAllMessages(sign).mkString("\n"))
       case _ => result((), "no sign")
@@ -92,14 +91,14 @@ abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
       return false
     }
     val event = new BlockEvent.BreakEvent(host.getEnvironmentLevel, tileEntity.getBlockPos, tileEntity.getLevel.getBlockState(tileEntity.getBlockPos), player)
-    MinecraftForge.EVENT_BUS.post(event)
-    if (event.isCanceled || event.getResult == Event.Result.DENY) {
+    NeoForge.EVENT_BUS.post(event)
+    if (event.isCanceled) {
       return false
     }
 
     val signEvent = new SignChangeEvent.Pre(tileEntity, lines)
-    MinecraftForge.EVENT_BUS.post(signEvent)
-    !(signEvent.isCanceled || signEvent.getResult == Event.Result.DENY)
+    NeoForge.EVENT_BUS.post(signEvent)
+    !(signEvent.isCanceled)
   }
 
   override def onMessage(message: Message): Unit = {

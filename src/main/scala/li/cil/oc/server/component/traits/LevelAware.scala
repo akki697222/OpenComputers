@@ -4,12 +4,10 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.util.{BlockInventorySource, BlockPosition, EntityInventorySource, InventorySource}
 import li.cil.oc.util.ExtendedBlock._
-import net.neoforged.common.MinecraftForge
-import net.neoforged.common.util.FakePlayerFactory
-import net.neoforged.event.entity.player.PlayerInteractEvent
-import net.neoforged.eventbus.api.Event.Result
-import net.neoforged.fluids.IFluidBlock
-import net.neoforged.items.wrapper.InvWrapper
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.util.{FakePlayerFactory, TriState}
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
+import net.neoforged.neoforge.items.wrapper.InvWrapper
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.core.Direction
@@ -23,7 +21,7 @@ import net.minecraft.world.level.block.LiquidBlock
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.vehicle.Minecart
 import net.minecraft.world.phys.shapes.CollisionContext
-import net.neoforged.event.level.BlockEvent
+import net.neoforged.neoforge.event.level.BlockEvent
 
 trait LevelAware {
   def position: BlockPosition
@@ -40,8 +38,8 @@ trait LevelAware {
     try {
       val trace = new BlockHitResult(fakePlayer.position, face, blockPos.toBlockPos, false)
       val event = new PlayerInteractEvent.RightClickBlock(fakePlayer, InteractionHand.MAIN_HAND, blockPos.toBlockPos, trace)
-      MinecraftForge.EVENT_BUS.post(event)
-      !event.isCanceled && event.getUseBlock != Result.DENY
+      NeoForge.EVENT_BUS.post(event)
+      !event.isCanceled && event.getUseBlock != TriState.FALSE
     } catch {
       case t: Throwable =>
         OpenComputers.log.warn("Some event handler threw up while checking for permission to access a block.", t)
@@ -52,7 +50,7 @@ trait LevelAware {
   private def mayInteract(entity: Entity): Boolean = {
     try {
       val event = new PlayerInteractEvent.EntityInteract(fakePlayer, InteractionHand.MAIN_HAND, entity)
-      MinecraftForge.EVENT_BUS.post(event)
+      NeoForge.EVENT_BUS.post(event)
       !event.isCanceled
     } catch {
       case t: Throwable =>
@@ -99,14 +97,14 @@ trait LevelAware {
         if (state.isAir()) {
           (false, "air")
         }
-        else if (block.isInstanceOf[LiquidBlock] || block.isInstanceOf[IFluidBlock]) {
+        else if (block.isInstanceOf[LiquidBlock] || world.isFluidAtPosition(blockPos.toBlockPos, _ => true)) {
           val event = new BlockEvent.BreakEvent(world, blockPos.toBlockPos, state, fakePlayer)
-          MinecraftForge.EVENT_BUS.post(event)
+          NeoForge.EVENT_BUS.post(event)
           (event.isCanceled, "liquid")
         }
         else if (block.isReplaceable(blockPos)) {
           val event = new BlockEvent.BreakEvent(world, blockPos.toBlockPos, state, fakePlayer)
-          MinecraftForge.EVENT_BUS.post(event)
+          NeoForge.EVENT_BUS.post(event)
           (event.isCanceled, "replaceable")
         }
         else if (state.getCollisionShape(world, blockPos.toBlockPos, CollisionContext.empty).isEmpty) {

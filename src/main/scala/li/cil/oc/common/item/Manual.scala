@@ -1,16 +1,14 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
 import li.cil.oc.util.BlockPosition
 import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Item.{Properties, TooltipContext}
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
-
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -22,8 +20,8 @@ import net.minecraft.core.Direction
 
 class Manual(props: Properties) extends Item(props) with traits.SimpleItem {
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
     tooltip.add(Component.literal(ChatFormatting.DARK_GRAY.toString + "v" + OpenComputers.Version))
   }
 

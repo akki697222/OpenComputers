@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer, BlockEntityRendererProvider}
 import net.minecraft.client.renderer.{GameRenderer, MultiBufferSource}
 import net.minecraft.core.Direction
+import net.minecraft.world.phys.AABB
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.client.event.ClientTickEvent
 import org.joml.Quaternionf
@@ -257,5 +258,23 @@ class HologramRenderer extends BlockEntityRenderer[Hologram] {
     finally {
       VertexBuffer.unbind()
     }
+  }
+
+  private final val Sqrt2 = Math.sqrt(2)
+
+  override def getRenderBoundingBox(entity: Hologram) = {
+    val cx = entity.x + 0.5
+    val cy = entity.y + 0.5
+    val cz = entity.z + 0.5
+    val sh = entity.width / 16 * entity.scale * Sqrt2
+    // overscale to take into account 45 degree rotation
+    val sv = entity.height / 16 * entity.scale * Sqrt2
+    new AABB(
+      cx + (-0.5 + entity.translation.x) * sh,
+      cy + entity.translation.y * sv,
+      cz + (-0.5 + entity.translation.z) * sh,
+      cx + (0.5 + entity.translation.x) * sh,
+      cy + (1 + entity.translation.y) * sv,
+      cz + (0.5 + entity.translation.x) * sh)
   }
 }

@@ -5,15 +5,17 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller) extends ItemData(itemName) {
   def this(stack: ItemStack) = {
     this()
-    loadData(stack)
+    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
   }
 
   var tier = Tier.One
@@ -29,7 +31,7 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     tier = nbt.getByte(TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_)).filter(!_.isEmpty)
+      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get()).filter(!_.isEmpty)
     storedEnergy = nbt.getInt(StoredEnergyTag)
 
     // Reserve slot for EEPROM if necessary, avoids having to resize the
@@ -45,10 +47,10 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
     nbt.putInt(StoredEnergyTag, storedEnergy)
   }
 
-  def copyItemStack(): ItemStack = {
+  def copyItemStack(provider: HolderLookup.Provider): ItemStack = {
     val stack = createItemStack()
     val newInfo = new MicrocontrollerData(stack)
-    newInfo.saveData(stack)
+    newInfo.saveData(stack, provider)
     stack
   }
 }

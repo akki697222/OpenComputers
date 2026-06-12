@@ -26,6 +26,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.core.particles.ParticleOptions
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.level.Level
 import net.minecraft.sounds.SoundSource
 
@@ -457,7 +458,7 @@ object PacketSender {
     pb.writeInt(position.z)
     pb.writeDouble(velocity)
     pb.writeDirection(direction)
-    pb.writeRegistryEntry(ForgeRegistries.PARTICLE_TYPES, particleType.getType())
+    pb.writeRegistryEntry(BuiltInRegistries.PARTICLE_TYPE, particleType.getType())
     pb.writeByte(count.toByte)
 
     pb.sendToNearbyPlayers(position.world.get, position.x, position.y, position.z, Some(Settings.get.maxNetworkClientEffectPacketDistance / 2.0D))

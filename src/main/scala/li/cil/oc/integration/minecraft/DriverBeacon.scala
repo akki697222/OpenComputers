@@ -12,12 +12,10 @@ import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
-import net.minecraft.core.BlockPos
+import net.minecraft.core.{BlockPos, Direction, Holder}
 import net.minecraft.world.effect.MobEffect
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BeaconBlockEntity
-import net.neoforged.registries.ForgeRegistries
 
 object DriverBeacon extends DriverSidedTileEntity {
   override def getTileEntityClass: Class[_] = classOf[BeaconBlockEntity]
@@ -37,17 +35,18 @@ object DriverBeacon extends DriverSidedTileEntity {
 
     @Callback(doc = "function():string -- Get the name of the active primary effect.")
     def getPrimaryEffect(context: Context, args: Arguments): Array[AnyRef] = {
-      result(getEffectName(tileEntity.primaryPower))
+      result(tileEntity.primaryPower match {
+        case power: Holder[MobEffect] => power.getKey.toString
+        case _ => null
+      })
     }
 
     @Callback(doc = "function():string -- Get the name of the active secondary effect.")
     def getSecondaryEffect(context: Context, args: Arguments): Array[AnyRef] = {
-      result(getEffectName(tileEntity.secondaryPower))
-    }
-
-    private def getEffectName(effect: MobEffect): String = {
-      val name = ForgeRegistries.MOB_EFFECTS.getKey(effect).toString
-      if (effect != null) name else null
+      result(tileEntity.secondaryPower match {
+        case power: Holder[MobEffect] => power.getKey.toString
+        case _ => null
+      })
     }
   }
 

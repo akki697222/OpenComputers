@@ -1,4 +1,4 @@
-package li.cil.oc.integration.minecraftforge
+package li.cil.oc.integration.neoforge
 
 import li.cil.oc.api.Network
 import li.cil.oc.api.driver.DriverBlock

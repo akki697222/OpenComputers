@@ -7,13 +7,14 @@ import li.cil.oc.util.PackedColor
 import li.cil.oc.util.Tooltip
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
-import net.minecraft.world.phys.shapes.{CollisionContext => ISelectionContext, Shapes => VoxelShapes, VoxelShape}
+import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelectionContext, Shapes => VoxelShapes}
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -39,7 +40,7 @@ class FlatScreen(props: Properties, tier: Int, val isBack: Boolean) extends Scre
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape =
     shapeFor(mountFace(state))
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     val (w, h) = Settings.screenResolutionsByTier(tier)
     val depth = PackedColor.Depth.bits(Settings.screenDepthsByTier(tier))
     for (curr <- Tooltip.get("screen", w, h, depth)) {

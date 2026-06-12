@@ -18,6 +18,17 @@ object Chargeable {
   def convertForgeEnergyToOpenComputers(fe: Int): Double = fe / Settings.get.ratioForgeEnergy
   def convertOpenComputersToForgeEnergy(oc: Double): Int = (oc * Settings.get.ratioForgeEnergy).toInt
 
+  def applyCharge(amount: Double, current: Double, maximum: Double, save: Double => Unit): Double = {
+    val target = current + amount
+    val result = (target max 0) min maximum
+    val used = result - current
+    val unused = amount - used
+    if (used > Double.MinPositiveValue || used < -Double.MinPositiveValue) {
+      save(used)
+    }
+    unused
+  }
+  
   class Provider(val stack: ItemStack, val item: Chargeable) extends IEnergyStorage {
 
     override def receiveEnergy(maxReceive: Int, simulate: Boolean): Int =

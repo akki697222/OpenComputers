@@ -3,9 +3,9 @@ package li.cil.oc.common.template
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
-import net.neoforged.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -13,7 +13,7 @@ object TemplateBlacklist {
   private lazy val TheBlacklist = { // scnr
     val pattern = """^([^@]+)(?:@(\d+))?$""".r
     def parseDescriptor(id: String, meta: Int) = {
-      val item = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(id))
+      val item = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(id))
       if (item == null) {
         OpenComputers.log.warn(s"Bad assembler blacklist entry '$id', unknown item id.")
         None

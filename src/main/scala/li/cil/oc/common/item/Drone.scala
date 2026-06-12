@@ -6,6 +6,7 @@ import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.server.agent
 import li.cil.oc.util.{BlockPosition, Rarity, Tooltip}
 import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item.Properties
@@ -47,4 +48,6 @@ class Drone(props: Properties) extends Item(props) with traits.SimpleItem {
     stack.shrink(1)
     true
   }
+
+  override def createItemStack(amount: Int): ItemStack = super.createItemStack(amount)
 }

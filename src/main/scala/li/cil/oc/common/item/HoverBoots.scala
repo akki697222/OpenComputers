@@ -4,11 +4,13 @@ import li.cil.oc.Settings
 import li.cil.oc.client.renderer.item.HoverBootRenderer
 import li.cil.oc.common.item.data.HoverBootsData
 import li.cil.oc.util.ItemColorizer
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.effect.{MobEffectInstance, MobEffects}
 import net.minecraft.world.entity.{Entity, EquipmentSlot}
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.{ArmorItem, ArmorMaterials, ItemStack}
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.{Blocks, LayeredCauldronBlock}
@@ -23,7 +25,7 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
   override def setCharge(stack: ItemStack, amount: Double): Unit = {
     val data = new HoverBootsData(stack)
     data.charge = math.min(maxCharge(stack), math.max(0, amount))
-    data.saveData(stack)
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, data.saveData)
   }
 
   override def canCharge(stack: ItemStack): Boolean = true
@@ -32,7 +34,7 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
     val data = new HoverBootsData(stack)
     traits.Chargeable.applyCharge(amount, data.charge, Settings.get.bufferHoverBoots, used => if (!simulate) {
       data.charge += used
-      data.saveData(stack)
+      CustomData.update(DataComponents.CUSTOM_DATA, stack, data.saveData)
     })
   }
 
@@ -46,17 +48,17 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
   //  else super.getArmorModel(entityLiving, itemStack, armorSlot, _default)
   //}
 
-  override def getArmorTexture(stack: ItemStack, entity: Entity, slot: EquipmentSlot, subType: String): String = {
-    if (entity.level.isClientSide) HoverBootRenderer.texture.toString
-    else null
-  }
-
-  override def onArmorTick(stack: ItemStack, level: Level, player: Player): Unit = {
-    super.onArmorTick(stack, level, player)
-    if (!Settings.get.ignorePower && player.getEffect(MobEffects.MOVEMENT_SLOWDOWN) == null && getCharge(stack) == 0) {
-      player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1))
-    }
-  }
+//  override def getArmorTexture(stack: ItemStack, entity: Entity, slot: EquipmentSlot, subType: String): String = {
+//    if (entity.level.isClientSide) HoverBootRenderer.texture.toString
+//    else null
+//  }
+//
+//  override def onArmorTick(stack: ItemStack, level: Level, player: Player): Unit = {
+//    super.onArmorTick(stack, level, player)
+//    if (!Settings.get.ignorePower && player.getEffect(MobEffects.MOVEMENT_SLOWDOWN) == null && getCharge(stack) == 0) {
+//      player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20, 1))
+//    }
+//  }
 
   override def onEntityItemUpdate(stack: ItemStack, entity: ItemEntity): Boolean = {
     if (entity != null && entity.level != null && !entity.level.isClientSide && ItemColorizer.hasColor(stack)) {
@@ -88,7 +90,7 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
   override def isDamaged(stack: ItemStack): Boolean = true
 
   // Contradictory as it may seem with the above, this avoids actual damage value changing.
-  override def canBeDepleted: Boolean = false
+  //override def canBeDepleted: Boolean = false
 
   override def setDamage(stack: ItemStack, damage: Int): Unit = {
     // Subtract energy when taking damage instead of actually damaging the item.

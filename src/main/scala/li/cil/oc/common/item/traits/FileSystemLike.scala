@@ -1,13 +1,12 @@
 package li.cil.oc.common.item.traits
 
 import java.util
-
 import li.cil.oc.Localization
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.client.gui
 import li.cil.oc.common.item.data.DriveData
-import li.cil.oc.util.Tooltip
+import li.cil.oc.util.{ItemUtils, Tooltip}
 import net.minecraft.client.Minecraft
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -19,6 +18,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.item.Item.TooltipContext
 
 trait FileSystemLike extends SimpleItem {
   override protected def tooltipName = None
@@ -26,10 +26,10 @@ trait FileSystemLike extends SimpleItem {
   def kiloBytes: Int
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
-    if (stack.hasTag) {
-      val nbt = stack.getTag
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
+    val nbt = ItemUtils.getTag(stack)
+    if (nbt != null) {
       if (nbt.contains(Settings.namespace + "data")) {
         val data = nbt.getCompound(Settings.namespace + "data")
         if (data.contains(Settings.namespace + "fs.label")) {
@@ -43,14 +43,16 @@ trait FileSystemLike extends SimpleItem {
           }
         }
       }
-      val data = new DriveData(stack)
+
+      val data = new DriveData(stack, context.level().registryAccess())
       tooltip.add(Component.literal(Localization.Tooltip.DiskMode(data.isUnmanaged)).setStyle(Tooltip.DefaultStyle))
       tooltip.add(Component.literal(Localization.Tooltip.DiskLock(data.lockInfo)).setStyle(Tooltip.DefaultStyle))
     }
   }
 
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
-    if (!player.isCrouching && (!stack.hasTag || !stack.getTag.contains(Settings.namespace + "lootFactory"))) {
+    val tag = ItemUtils.getTag(stack)
+    if (!player.isCrouching && (tag == null || !tag.contains(Settings.namespace + "lootFactory"))) {
       if (level.isClientSide) showGui(stack, player)
       player.swing(InteractionHand.MAIN_HAND)
     }

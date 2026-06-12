@@ -32,6 +32,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.IntArrayTag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option[EnvironmentHost], val sound: Option[String], val speed: Int) extends AbstractManagedEnvironment with DeviceInfo {
   override val node = Network.newNode(this, Visibility.Network).
@@ -63,7 +64,7 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
 
   @Callback(direct = true, doc = """function():string -- Get the current label of the drive.""")
   def getLabel(context: Context, args: Arguments): Array[AnyRef] = fileSystem.synchronized {
-    if (label != null) result(label.getLabel) else null
+    if (label != null) result(label.getLabel(ServerLifecycleHooks.getCurrentServer.registryAccess())) else null
   }
 
   @Callback(doc = """function(value:string):string -- Sets the label of the drive. Returns the new value, which may be truncated.""")
@@ -71,7 +72,7 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
     if (label == null) throw new Exception("drive does not support labeling")
     if (args.checkAny(0) == null) label.setLabel(null)
     else label.setLabel(args.checkString(0))
-    result(label.getLabel)
+    result(label.getLabel(ServerLifecycleHooks.getCurrentServer.registryAccess()))
   }
 
   @Callback(direct = true, doc = """function():boolean -- Returns whether the file system is read-only.""")

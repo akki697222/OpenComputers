@@ -15,11 +15,12 @@ import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.phys.AABB
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class PrintData extends ItemData(Constants.BlockName.Print) {
   def this(stack: ItemStack) = {
     this()
-    loadData(stack)
+    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
   }
 
   var label: Option[String] = None

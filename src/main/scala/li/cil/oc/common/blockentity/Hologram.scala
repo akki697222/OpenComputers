@@ -439,24 +439,6 @@ class Hologram(pos: BlockPos, state: BlockState, var tier: Int)
 
   def getFadeStartDistanceSquared = scale / Settings.get.hologramMaxScaleByTier.max * Settings.get.hologramFadeStartDistance * Settings.get.hologramFadeStartDistance
 
-  private final val Sqrt2 = Math.sqrt(2)
-
-  override def getRenderBoundingBox = {
-    val cx = x + 0.5
-    val cy = y + 0.5
-    val cz = z + 0.5
-    val sh = width / 16 * scale * Sqrt2
-    // overscale to take into account 45 degree rotation
-    val sv = height / 16 * scale * Sqrt2
-    new AABB(
-      cx + (-0.5 + translation.x) * sh,
-      cy + translation.y * sv,
-      cz + (-0.5 + translation.z) * sh,
-      cx + (0.5 + translation.x) * sh,
-      cy + (1 + translation.y) * sv,
-      cz + (0.5 + translation.x) * sh)
-  }
-
   // ----------------------------------------------------------------------- //
 
   private def dataPath = node.address + "_data"

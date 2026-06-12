@@ -8,8 +8,11 @@ import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item.data.TabletData
 import li.cil.oc.util.ItemUtils
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.CustomData
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -47,7 +50,7 @@ object TabletTemplate extends Template {
     data.energy = Settings.get.bufferTablet
     data.maxEnergy = data.energy
     val stack = api.Items.get(Constants.ItemName.Tablet).createItemStack(1)
-    data.saveData(stack)
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, nbt => data.saveData(nbt, ServerLifecycleHooks.getCurrentServer.registryAccess()))
     val energy = Settings.get.tabletBaseCost + complexity(inventory) * Settings.get.tabletComplexityCost
 
     Array(stack, Double.box(energy))

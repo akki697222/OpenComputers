@@ -11,9 +11,8 @@ import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
-import net.neoforged.common.MinecraftForge
-import net.neoforged.event.entity.item.ItemTossEvent
-import net.neoforged.eventbus.api.Event.Result
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.item.ItemEntity
@@ -63,9 +62,9 @@ trait ContainerLevelControl extends ContainerAware with LevelAware with SideRest
           val dropped = inventory.removeItem(selectedSlot, count)
           val validator = (item: ItemEntity) => {
             val event = new ItemTossEvent(item, fakePlayer)
-            val canceled = MinecraftForge.EVENT_BUS.post(event)
-            val denied = event.hasResult && event.getResult == Result.DENY
-            !canceled && !denied
+            NeoForge.EVENT_BUS.post(event)
+            val cancelled = event.isCanceled
+            !cancelled
           }
           if (!dropped.isEmpty) {
             if (InventoryUtils.spawnStackInWorld(position, dropped, Some(facing), Some(validator)) == null)

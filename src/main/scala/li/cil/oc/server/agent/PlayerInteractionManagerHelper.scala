@@ -5,10 +5,10 @@ import net.minecraft.core.BlockPos
 import li.cil.oc.OpenComputers
 import li.cil.oc.api.network.Node
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
-import net.neoforged.common.MinecraftForge
-import net.neoforged.event.entity.player.PlayerEvent
-import net.neoforged.event.level.BlockEvent
-import net.neoforged.eventbus.api.{EventPriority, SubscribeEvent}
+import net.neoforged.bus.api.{EventPriority, SubscribeEvent}
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.event.entity.player.PlayerEvent
+import net.neoforged.neoforge.event.level.{BlockDropsEvent, BlockEvent}
 
 import scala.collection.convert.ImplicitConversionsToScala._
 
@@ -61,17 +61,17 @@ object PlayerInteractionManagerHelper {
       }
 
       @SubscribeEvent(priority = EventPriority.LOWEST)
-      def onExperienceBreakEvent(experienceBreakEvent: BlockEvent.BreakEvent): Unit = {
-        if (player == experienceBreakEvent.getPlayer) {
+      def onExperienceBreakEvent(blockDropsEvent: BlockDropsEvent): Unit = {
+        if (player == blockDropsEvent.getBreaker) {
           if (hasExperienceUpgrade) {
-            expToDrop += experienceBreakEvent.getExpToDrop
-            experienceBreakEvent.setExpToDrop(0)
+            expToDrop += blockDropsEvent.getDroppedExperience
+            blockDropsEvent.setDroppedExperience(0)
           }
         }
       }
     }
     val infBreaker = new BreakHandler(player)
-    MinecraftForge.EVENT_BUS.register(infBreaker)
+    NeoForge.EVENT_BUS.register(infBreaker)
     val buildLimit = player.level.getMaxBuildHeight;
     try {
       player.gameMode.handleBlockBreakAction(pos, ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, null, buildLimit, 0)
@@ -83,7 +83,7 @@ object PlayerInteractionManagerHelper {
         -1
       }
     } finally {
-      MinecraftForge.EVENT_BUS.unregister(infBreaker)
+      NeoForge.EVENT_BUS.unregister(infBreaker)
     }
   }
 }

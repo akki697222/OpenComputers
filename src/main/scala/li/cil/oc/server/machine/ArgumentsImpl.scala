@@ -1,16 +1,17 @@
 package li.cil.oc.server.machine
 
 import java.util
-
 import com.google.common.base.Charsets
 import li.cil.oc.api.machine.Arguments
 import li.cil.oc.util.ItemUtils
 import li.cil.oc.util.ResultWrapper
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
-import net.neoforged.registries.ForgeRegistries
+import net.minecraft.world.item.component.CustomData
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
@@ -339,11 +340,15 @@ class ArgumentsImpl(val args: Seq[AnyRef]) extends Arguments {
   }
 
   private def makeStack(name: String, damage: Int, tag: Option[CompoundTag]) = {
-    ForgeRegistries.ITEMS.getValue(new ResourceLocation(name)) match {
+    BuiltInRegistries.ITEM.get(ResourceLocation.parse(name)) match {
       case item: Item =>
         val stack = new ItemStack(item, 1)
         stack.setDamageValue(damage)
-        tag.foreach(stack.setTag)
+
+        for(tag <- tag) {
+          CustomData.set(DataComponents.CUSTOM_DATA, stack, tag)
+        }
+
         stack
       case _ => throw new IllegalArgumentException("invalid item stack")
     }

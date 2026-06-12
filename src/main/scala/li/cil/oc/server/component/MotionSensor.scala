@@ -27,6 +27,7 @@ import net.minecraft.world.phys.Vec3
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.phys.shapes.CollisionContext
 
 class MotionSensor(val host: EnvironmentHost) extends prefab.AbstractManagedEnvironment with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).
@@ -104,7 +105,7 @@ class MotionSensor(val host: EnvironmentHost) extends prefab.AbstractManagedEnvi
     val origin = new Vec3(x, y, z)
     val path = target.subtract(origin).normalize()
     val eye = origin.add(path)
-    val trace = world.clip(new ClipContext(eye, target, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, null))
+    val trace = world.clip(new ClipContext(eye, target, ClipContext.Block.COLLIDER, ClipContext.Fluid.ANY, null.asInstanceOf[CollisionContext]))
     trace.getType == HitResult.Type.MISS
   }
 

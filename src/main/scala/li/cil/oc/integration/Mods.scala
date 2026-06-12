@@ -1,12 +1,11 @@
 package li.cil.oc.integration
 
 import java.util.Optional
-
 import li.cil.oc.Settings
 import li.cil.oc.integration
 import net.neoforged.fml.ModList
 import net.neoforged.fml.ModContainer
-import net.neoforged.forgespi.language.MavenVersionAdapter
+import net.neoforged.neoforgespi.language.MavenVersionAdapter
 import org.apache.maven.artifact.versioning.ArtifactVersion
 
 import scala.collection.mutable
@@ -25,7 +24,7 @@ object Mods {
   val CoFHCore = new SimpleMod(IDs.CoFHCore)
   val ThermalFoundation = new SimpleMod(IDs.ThermalFoundation)
   val ComputerCraft = new SimpleMod(IDs.ComputerCraft)
-  val Forge = new SimpleMod(IDs.Forge)
+  val NeoForge = new SimpleMod(IDs.Forge)
   val JustEnoughItems = new SimpleMod(IDs.JustEnoughItems)
   val Mekanism = new SimpleMod(IDs.Mekanism)
   val Minecraft = new SimpleMod(IDs.Minecraft)
@@ -39,9 +38,9 @@ object Mods {
 
   val Proxies = Array(
     //integration.appeng.ModAppEng,
-    integration.cofh.tileentity.ModCoFHTileEntity,
-    integration.cofh.foundation.ModThermalFoundation,
-    integration.minecraftforge.ModMinecraftForge,
+    //integration.cofh.tileentity.ModCoFHTileEntity,
+    //integration.cofh.foundation.ModThermalFoundation,
+    integration.neoforge.ModNeoForge,
     //integration.tis3d.ModTIS3D,
     integration.mekanism.ModMekanism,
     integration.minecraft.ModMinecraft,

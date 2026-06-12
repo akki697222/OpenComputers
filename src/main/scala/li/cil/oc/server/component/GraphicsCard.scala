@@ -674,7 +674,7 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
           val nbtPage = new CompoundTag
           nbtPage.putInt(NBT_PAGE_IDX, idx)
           val data = new CompoundTag
-          page.data.saveData(data)
+          page.data.saveData(data, provider)
           nbtPage.put(NBT_PAGE_DATA, data)
           nbtPages.add(nbtPage)
         }

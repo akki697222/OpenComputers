@@ -29,6 +29,7 @@ import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
 import net.minecraft.server.level.{ServerLevel => ServerWorld}
 import net.minecraft.util.RandomSource
+import net.minecraft.world.item.Item.TooltipContext
 
 import scala.jdk.CollectionConverters._
 
@@ -38,14 +39,14 @@ class Print(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
-    super.tooltipBody(stack, world, tooltip, advanced)
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipBody(stack, context, tooltip, advanced)
     val data = new PrintData(stack)
     data.tooltip.foreach(s => tooltip.addAll(s.linesIterator.map(ITextComponent.literal(_).setStyle(Tooltip.DefaultStyle)).toList.asJava))
   }
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag) = {
-    super.tooltipTail(stack, world, tooltip, advanced)
+  override protected def tooltipTail(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, advanced)
     val data = new PrintData(stack)
     if (data.isBeaconBase) {
       tooltip.add(ITextComponent.literal(Localization.Tooltip.PrintBeaconBase).setStyle(Tooltip.DefaultStyle))

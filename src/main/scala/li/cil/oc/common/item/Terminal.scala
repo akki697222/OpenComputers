@@ -9,11 +9,12 @@ import li.cil.oc.api
 import li.cil.oc.client.{Textures, gui}
 import li.cil.oc.common.component
 import li.cil.oc.common.blockentity.traits.BaseBlockEntity
+import li.cil.oc.util.ItemUtils
 import net.minecraft.client.Minecraft
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Item.{Properties, TooltipContext}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
@@ -23,13 +24,14 @@ import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionHand
 
 class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
-  def hasServer(stack: ItemStack) = stack.hasTag && stack.getTag.contains(Settings.namespace + "server")
+  def hasServer(stack: ItemStack) = ItemUtils.getOrCreateTag(stack).contains(Settings.namespace + "server")
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
-    if (hasServer(stack)) {
-      val server = stack.getTag.getString(Settings.namespace + "server")
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
+    val data = ItemUtils.getOrCreateTag(stack)
+    if (data.contains(Settings.namespace + "server")) {
+      val server = data.getString(Settings.namespace + "server")
       tooltip.add(Component.literal("§8" + server.substring(0, 13) + "...§7"))
     }
   }
@@ -41,29 +43,26 @@ class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
 
 
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
-    if (!player.isCrouching && stack.hasTag) {
-      val key = stack.getTag.getString(Settings.namespace + "key")
-      val server = stack.getTag.getString(Settings.namespace + "server")
+    val data = ItemUtils.getTag(stack)
+    if (!player.isCrouching && data != null) {
+      val key = data.getString(Settings.namespace + "key")
+      val server = data.getString(Settings.namespace + "server")
       if (key != null && key.nonEmpty && server != null && server.nonEmpty) {
         if (level.isClientSide) {
-          if (stack.hasTag) {
-            val address = stack.getTag.getString(Settings.namespace + "server")
-            val key = stack.getTag.getString(Settings.namespace + "key")
-            if (!Strings.isNullOrEmpty(key) && !Strings.isNullOrEmpty(address)) {
-              component.TerminalServer.loaded.find(address) match {
-                case Some(term) if term != null && term.rack != null => term.rack match {
-                  case rack: BaseBlockEntity with api.internal.Rack => {
-                    def inRange = player.isAlive && !rack.isRemoved && player.distanceToSqr(rack.x + 0.5, rack.y + 0.5, rack.z + 0.5) < term.range * term.range
-                    if (inRange) {
-                      if (term.sidedKeys.contains(key)) showGui(stack, key, term, () => inRange)
-                      else player.displayClientMessage(Localization.Terminal.InvalidKey, true)
-                    }
-                    else player.displayClientMessage(Localization.Terminal.OutOfRange, true)
+          if (!Strings.isNullOrEmpty(key) && !Strings.isNullOrEmpty(server)) {
+            component.TerminalServer.loaded.find(server) match {
+              case Some(term) if term != null && term.rack != null => term.rack match {
+                case rack: BaseBlockEntity with api.internal.Rack => {
+                  def inRange = player.isAlive && !rack.isRemoved && player.distanceToSqr(rack.x + 0.5, rack.y + 0.5, rack.z + 0.5) < term.range * term.range
+                  if (inRange) {
+                    if (term.sidedKeys.contains(key)) showGui(stack, key, term, () => inRange)
+                    else player.displayClientMessage(Localization.Terminal.InvalidKey, true)
                   }
-                  case _ => // Eh?
+                  else player.displayClientMessage(Localization.Terminal.OutOfRange, true)
                 }
-                case _ => player.displayClientMessage(Localization.Terminal.OutOfRange, true)
+                case _ => // Eh?
               }
+              case _ => player.displayClientMessage(Localization.Terminal.OutOfRange, true)
             }
           }
         }
@@ -77,7 +76,7 @@ class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
   private def showGui(stack: ItemStack, key: String, term: component.TerminalServer, inRange: () => Boolean): Unit = {
     Minecraft.getInstance.pushGuiLayer(new gui.Screen(term.buffer, true, () => true, () => {
       // Check if someone else bound a term to our server.
-      if (stack.getTag.getString(Settings.namespace + "key") != key) Minecraft.getInstance.popGuiLayer
+      if (ItemUtils.getTag(stack).getString(Settings.namespace + "key") != key) Minecraft.getInstance.popGuiLayer
       // Check whether we're still in range.
       if (!inRange()) Minecraft.getInstance.popGuiLayer
       true

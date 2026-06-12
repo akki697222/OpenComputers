@@ -18,6 +18,7 @@ import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.capabilities.Capabilities
 import net.neoforged.neoforge.items.IItemHandler
 import net.neoforged.neoforge.items.IItemHandlerModifiable
+import net.neoforged.neoforge.items.wrapper.{InvWrapper, SidedInvWrapper}
 
 object InventoryUtils {
 
@@ -37,7 +38,7 @@ object InventoryUtils {
     !stackA.isEmpty && !stackB.isEmpty &&
       stackA.getItem == stackB.getItem &&
       (stackA.getDamageValue == stackB.getDamageValue) &&
-      (!checkNBT || ItemStack.isSameItemSameTags(stackA, stackB))
+      (!checkNBT || ItemStack.isSameItemSameComponents(stackA, stackB))
 
   /**
    * Retrieves an actual inventory implementation for a specified world coordinate,
@@ -50,8 +51,8 @@ object InventoryUtils {
         case Some(handler) => Some(BlockInventorySource(position, side, handler))
         case _ =>
           world.getEntitiesOfClass(classOf[Entity], position.bounds)
-            .filter(e => e.isAlive && e.getCapability(Capabilities.ItemHandler.ENTITY, side) != null)
-            .map(a => EntityInventorySource(a, side, a.getCapability(Capabilities.ItemHandler.ENTITY, side)))
+            .filter(e => e.isAlive && e.getCapability(Capabilities.ItemHandler.ENTITY) != null)
+            .map(a => EntityInventorySource(a, side, a.getCapability(Capabilities.ItemHandler.ENTITY)))
             .find(a => a != null && a.inventory != null)
       }
     case _ => None

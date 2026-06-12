@@ -1,7 +1,7 @@
 package li.cil.oc.common.blockentity
 
 import li.cil.oc.Settings
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
 
@@ -17,7 +17,7 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     origin = this
     screens.clear()
     screens += this
-    cachedBounds = None
+    //cachedBounds = None
   }
 
   def resize(side: Direction, facing: Direction): Boolean = {
@@ -38,7 +38,7 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     }
     if (oldWidth != width || oldHeight != height) {
       buffer.setAspectRatio(width, height)
-      cachedBounds = None
+      //cachedBounds = None
       setChanged()
       if (getLevel != null && !getLevel.isClientSide) {
         getLevel.sendBlockUpdated(getBlockPos, getBlockState, getBlockState, 3)
@@ -48,23 +48,23 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     else false
   }
 
-  override def loadForServer(nbt: CompoundTag): Unit = {
-    super.loadForServer(nbt)
+  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForServer(nbt, provider)
     loadSize(nbt)
   }
 
-  override def saveForServer(nbt: CompoundTag): Unit = {
-    super.saveForServer(nbt)
+  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForServer(nbt, provider)
     saveSize(nbt)
   }
 
-  override def loadForClient(nbt: CompoundTag): Unit = {
-    super.loadForClient(nbt)
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadForClient(nbt, provider)
     loadSize(nbt)
   }
 
-  override def saveForClient(nbt: CompoundTag): Unit = {
-    super.saveForClient(nbt)
+  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveForClient(nbt, provider)
     saveSize(nbt)
   }
 

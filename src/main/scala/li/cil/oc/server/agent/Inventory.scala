@@ -59,7 +59,7 @@ class Inventory(player: Player, val agent: internal.Agent) extends PlayerInvento
 
   override def getArmor(slot: Int): ItemStack = ItemStack.EMPTY
 
-  override def hurtArmor(source: DamageSource, damage: Float, slots: Array[Int]): Unit = {}
+  //override def hurtArmor(source: DamageSource, damage: Float, slots: Array[Int]): Unit = {}
 
   override def dropAll(): Unit = {}
 

@@ -7,11 +7,12 @@ import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class RaidData extends ItemData(Constants.BlockName.Raid) {
   def this(stack: ItemStack) = {
     this()
-    loadData(stack)
+    loadData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
   }
 
   var disks = Array.empty[ItemStack]
@@ -26,7 +27,7 @@ class RaidData extends ItemData(Constants.BlockName.Raid) {
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     disks = nbt.getList(DisksTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.of(_))
+      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get())
     filesystem = nbt.getCompound(FileSystemTag)
     if (nbt.contains(LabelTag)) {
       label = Option(nbt.getString(LabelTag))

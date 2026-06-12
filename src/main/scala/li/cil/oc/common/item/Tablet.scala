@@ -18,17 +18,25 @@ import li.cil.oc.{Constants, Localization, OpenComputers, Settings, api, client,
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.component.{DataComponentMap, DataComponents}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world._
 import net.minecraft.world.entity.player.{Inventory, Player}
 import net.minecraft.world.entity.{Entity, LivingEntity}
 import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.{Item, ItemStack}
 import net.minecraft.world.level.Level
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.client.event.ClientTickEvent
+import net.neoforged.neoforge.event.level.LevelEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import java.util
 import java.util.UUID
@@ -62,11 +70,11 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
     val data = new TabletData(stack)
     Rarity.byTier(data.tier)
   }
-
+  
   override def isBarVisible(stack: ItemStack) = true
 
   override def getBarWidth(stack: ItemStack): Int = {
-    if (stack.hasTag) {
+    if (stack.has(DataComponents.CUSTOM_DATA)) {
       val data = Tablet.Client.getWeak(stack) match {
         case Some(wrapper) => wrapper.data
         case _ => new TabletData(stack)
@@ -85,7 +93,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
       case Some(state) => if (state) "_on" else "_off"
       case _ => ""
     }
-    new ModelResourceLocation(Settings.resourceDomain, Constants.ItemName.Tablet + suffix, "inventory")
+    ModelResourceLocation.inventory(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, Constants.ItemName.Tablet + suffix))
   }
 
   def canCharge(stack: ItemStack): Boolean = true
@@ -95,7 +103,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
     val data = new TabletData(stack)
     traits.Chargeable.applyCharge(amount, data.energy, data.maxEnergy, used => if (!simulate) {
       data.energy += used
-      data.saveData(stack)
+      CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => data.saveData(tag, ServerLifecycleHooks.getCurrentServer.registryAccess()))
     })
   }
 
@@ -127,12 +135,12 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
     new InteractionResultHolder(InteractionResult.sidedSuccess(level.isClientSide), stack)
   }
 
-  override def getUseDuration(stack: ItemStack): Int = 72000
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 72000
 
   override def releaseUsing(stack: ItemStack, level: Level, entity: LivingEntity, duration: Int): Unit = {
     entity match {
       case player: Player =>
-        val didAnalyze = getUseDuration(stack) - duration >= TimeToAnalyze
+        val didAnalyze = getUseDuration(stack, entity) - duration >= TimeToAnalyze
         if (didAnalyze) {
           if (!level.isClientSide) {
             Tablet.currentlyAnalyzing match {
@@ -174,7 +182,7 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
               }
             }
             else {
-              Tablet.get(stack, player).components.collect {
+              Tablet.get(stack, player).environmentComponents.collect {
                 case Some(buffer: api.internal.TextBuffer) => buffer
               }.headOption match {
                 case Some(buffer: api.internal.TextBuffer) => showGui(buffer)
@@ -199,7 +207,9 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
   override def setCharge(stack: ItemStack, amount: Double): Unit = {
     val data = new TabletData(stack)
     data.energy = (0.0 max amount) min maxCharge(stack)
-    data.saveData(stack)
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, nbt => {
+      data.saveData(nbt, ServerLifecycleHooks.getCurrentServer.registryAccess())
+    })
   }
 }
 
@@ -241,43 +251,45 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override def toGlobal(value: Direction): Direction =
     RotationHelper.toGlobal(Direction.NORTH, facing, value)
 
-  def readFromNBT(): Unit = {
-    if (stack.hasTag) {
-      val data = stack.getTag
-      loadData(data)
+  def readFromNBT(provider: HolderLookup.Provider): Unit = {
+    val data = ItemUtils.getTag(stack)
+    if (data != null) {
+      loadData(data, provider)
       if (!getEnvironmentLevel.isClientSide) {
         val holderLookupProvider = getEnvironmentLevel.registryAccess()
-        tablet.loadData(provider = holderLookupProvider)
-        machine.loadData(provider = holderLookupProvider)
+        tablet.loadData(data.getCompound(Settings.namespace + "component"), provider = holderLookupProvider)
+        machine.loadData(data.getCompound(Settings.namespace + "data"), provider = holderLookupProvider)
       }
     }
   }
 
-  def writeToNBT(clearState: Boolean = true): Unit = {
-    val data = stack.getOrCreateTag
-    if (!getEnvironmentLevel.isClientSide) {
-      val provider = getEnvironmentLevel.registryAccess()
-      if (!data.contains(Settings.namespace + "data")) {
-        data.put(Settings.namespace + "data", new CompoundTag())
-      }
-      data.setNewCompoundTag(Settings.namespace + "component", (nbt: CompoundTag) => tablet.saveData(nbt, provider))
-      data.setNewCompoundTag(Settings.namespace + "data", (nbt: CompoundTag) => machine.saveData(nbt, provider))
+  def writeToNBT(provider: HolderLookup.Provider, clearState: Boolean = true): Unit = {
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {
+      if (!getEnvironmentLevel.isClientSide) {
+        val component = new CompoundTag();
+        tablet.saveData(component, provider);
+        data.put(Settings.namespace + "component", component);
 
-      if (clearState) {
-        // Force tablets into stopped state to avoid errors when trying to
-        // load deleted machine states.
-        data.getCompound(Settings.namespace + "data").remove("state")
+        val dataTag = new CompoundTag();
+        machine.saveData(dataTag, provider)
+        data.put(Settings.namespace + "data", dataTag);
+
+        if (clearState) {
+          // Force tablets into stopped state to avoid errors when trying to
+          // load deleted machine states.
+          data.getCompound(Settings.namespace + "data").remove("state")
+        }
       }
-    }
-    saveData(data)
+      saveData(data, provider)
+    })
   }
 
-  readFromNBT()
+  readFromNBT(player.registryAccess())
   if (!getEnvironmentLevel.isClientSide) {
     api.Network.joinNewNetwork(machine.node)
     val charge = Math.max(0, this.data.energy - tablet.node.globalBuffer)
     tablet.node.changeBuffer(charge)
-    writeToNBT()
+    writeToNBT(player.registryAccess())
   }
 
   // ----------------------------------------------------------------------- //
@@ -305,10 +317,10 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override protected def connectItemNode(node: Node): Unit = {
     super.connectItemNode(node)
     if (node != null) node.host match {
-      case buffer: api.internal.TextBuffer => components collect {
+      case buffer: api.internal.TextBuffer => environmentComponents collect {
         case Some(keyboard: api.internal.Keyboard) => buffer.node.connect(keyboard.node)
       }
-      case keyboard: api.internal.Keyboard => components collect {
+      case keyboard: api.internal.Keyboard => environmentComponents collect {
         case Some(buffer: api.internal.TextBuffer) => keyboard.node.connect(buffer.node)
       }
       case _ =>
@@ -341,7 +353,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override def stillValid(player: Player): Boolean = machine != null && machine.canInteract(player.getName.getString)
 
   override def setChanged(): Unit = {
-    data.saveData(stack)
+    data.saveData(stack, getEnvironmentLevel.registryAccess())
     player.getInventory.setChanged()
   }
 
@@ -375,7 +387,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       case slot if !getItem(slot).isEmpty && isComponentSlot(slot, getItem(slot)) => getItem(slot)
   }.asJava
 
-  override def componentSlot(address: String): Int = components.indexWhere(_.exists(env => env.node != null && env.node.address == address))
+  override def componentSlot(address: String): Int = environmentComponents.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
   override def onMachineConnect(node: Node): Unit = onConnect(node)
 
@@ -396,7 +408,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
       // in the component setup would otherwise be queued before the events that
       // caused this wrapper's initialization).
       connectComponents()
-      components collect {
+      environmentComponents collect {
         case Some(buffer: api.internal.TextBuffer) =>
           buffer.setMaximumColorDepth(api.internal.TextBuffer.ColorDepth.FourBit)
           buffer.setMaximumResolution(80, 25)
@@ -424,7 +436,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
         }
 
         if (machine.isRunning) {
-          components collect {
+          environmentComponents collect {
             case Some(buffer: api.internal.TextBuffer) =>
               buffer.setPowerState(true)
           }
@@ -435,13 +447,11 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    val provider = getEnvironmentLevel.registryAccess()
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     data.loadData(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    val provider = getEnvironmentLevel.registryAccess()
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     saveComponents()
     data.saveData(nbt, provider)
   }
@@ -453,19 +463,23 @@ object Tablet {
   var currentlyAnalyzing: Option[(BlockPosition, Direction, Float, Float, Float)] = None
 
   def getId(stack: ItemStack): Option[String] = {
-    if (stack.hasTag && stack.getTag.contains(Settings.namespace + "tablet", Tag.TAG_STRING)) {
-      Some(stack.getTag.getString(Settings.namespace + "tablet"))
+    val tag = ItemUtils.getTag(stack)
+    if (tag != null && tag.contains(Settings.namespace + "tablet", Tag.TAG_STRING)) {
+      Some(tag.getString(Settings.namespace + "tablet"))
     }
     else None
   }
 
   def getOrCreateId(stack: ItemStack): String = {
+    var id: String = null
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {
+      if (!data.contains(Settings.namespace + "tablet")) {
+        data.putString(Settings.namespace + "tablet", UUID.randomUUID().toString)
+      }
+      id = data.getString(Settings.namespace + "tablet")
+    })
 
-    val data = stack.getOrCreateTag
-    if (!data.contains(Settings.namespace + "tablet")) {
-      data.putString(Settings.namespace + "tablet", UUID.randomUUID().toString)
-    }
-    data.getString(Settings.namespace + "tablet")
+    id
   }
 
   def get(stack: ItemStack, holder: Player): TabletWrapper = {
@@ -543,7 +557,7 @@ object Tablet {
         // Force re-load on world change, in case some components store a
         // reference to the world object.
         if (holder.level != wrapper.getEnvironmentLevel) {
-          wrapper.writeToNBT(clearState = false)
+          wrapper.writeToNBT(holder.registryAccess(), clearState = false)
           wrapper.autoSave = false
           cache.invalidate(id)
           cache.cleanUp()
@@ -567,12 +581,12 @@ object Tablet {
       val tablet = e.getValue
       if (tablet.node != null) {
         // Server.
-        if (tablet.autoSave) tablet.writeToNBT()
+        if (tablet.autoSave) tablet.writeToNBT(tablet.player.registryAccess())
         tablet.machine.stop()
         for (node <- tablet.machine.node.network.nodes) {
           node.remove()
         }
-        if (tablet.autoSave) tablet.writeToNBT()
+        if (tablet.autoSave) tablet.writeToNBT(tablet.player.registryAccess())
         tablet.setChanged()
       }
     }
@@ -621,7 +635,7 @@ object Tablet {
     def saveAll(level: Level): Unit = {
       cache.synchronized {
         for (tablet <- cache.asMap.values if tablet.getEnvironmentLevel == level) {
-          tablet.writeToNBT()
+          tablet.writeToNBT(tablet.player.registryAccess())
         }
       }
     }

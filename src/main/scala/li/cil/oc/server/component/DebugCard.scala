@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.LiquidBlock
 import net.minecraft.commands.CommandSource
 import net.minecraft.commands.CommandSourceStack
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.entity.vehicle.AbstractMinecart
 import net.minecraft.world.entity.{Entity, LivingEntity}
 import net.minecraft.server.level.ServerPlayer
@@ -51,27 +52,26 @@ import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.Vec2
 import net.minecraft.world.phys.Vec3
 import net.minecraft.core.registries.{BuiltInRegistries, Registries}
-import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.{Component, Style}
 import net.minecraft.world.level.{GameType, Level, LevelSettings}
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.storage.ServerLevelData
-import net.neoforged.common.MinecraftForge
-import net.neoforged.common.util.FakePlayer
-import net.neoforged.common.util.FakePlayerFactory
-import net.neoforged.fluids.FluidStack
-import net.neoforged.fluids.IFluidBlock
-import net.neoforged.fluids.capability.IFluidHandler
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.util.FakePlayer
+import net.neoforged.neoforge.common.util.FakePlayerFactory
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.fml.ModList
-import net.neoforged.server.ServerLifecycleHooks
-import net.neoforged.registries.ForgeRegistries
-import net.neoforged.registries.IForgeRegistry
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.JavaConverters.{collectionAsScalaIterable, mapAsScalaMap}
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.numbers.StyledFormat
 import net.minecraft.world.entity.vehicle.Minecart
-import net.neoforged.event.level.BlockEvent
+import net.minecraft.world.item.component.CustomData
+import net.neoforged.neoforge.event.level.BlockEvent
 
 class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with DebugNode {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Neighbors).
@@ -216,14 +216,14 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
         if (state.isAir()) {
           result(false, "air", block)
         }
-        else if (block.isInstanceOf[LiquidBlock] || block.isInstanceOf[IFluidBlock]) {
+        else if (block.isInstanceOf[LiquidBlock] || world.isFluidAtPosition(position.toBlockPos, _ => true)) {
           val event = new BlockEvent.BreakEvent(world, position.toBlockPos, state, fakePlayer)
-          MinecraftForge.EVENT_BUS.post(event)
+          NeoForge.EVENT_BUS.post(event)
           result(event.isCanceled, "liquid", block)
         }
         else if (block.isReplaceable(position)) {
           val event = new BlockEvent.BreakEvent(world, position.toBlockPos, state, fakePlayer)
-          MinecraftForge.EVENT_BUS.post(event)
+          NeoForge.EVENT_BUS.post(event)
           result(event.isCanceled, "replaceable", block)
         }
         else if (state.getCollisionShape(world, position.toBlockPos, CollisionContext.empty).isEmpty) {
@@ -254,9 +254,10 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
       CommandMessages = None
       var value = 0
       for (command <- commands) {
-        value = ServerLifecycleHooks.getCurrentServer.getCommands.performPrefixedCommand(source, command.toString)
+        // FIXME This method no longer returns the command's return value
+        ServerLifecycleHooks.getCurrentServer.getCommands.performPrefixedCommand(source, command.toString)
       }
-      result(value, CommandMessages.orNull)
+      result(0, CommandMessages.orNull)
     }
   }
 
@@ -503,7 +504,7 @@ object DebugCard {
     @Callback(doc = """function(id:string, amount:number, meta:number[, nbt:string]):number -- Adds the item stack to the players inventory""")
     def insertItem(context: Context, args: Arguments): Array[AnyRef] =
       withPlayer(player => {
-        val item = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(args.checkString(0)))
+        val item = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(args.checkString(0)))
         if (item == null) {
           throw new IllegalArgumentException("invalid item id")
         }
@@ -512,7 +513,7 @@ object DebugCard {
         val tagJson = args.checkString(3)
         val tag = if (Strings.isNullOrEmpty(tagJson)) null else TagParser.parseTag(tagJson)
         val stack = new ItemStack(item, amount)
-        stack.setTag(tag)
+        CustomData.set(DataComponents.CUSTOM_DATA, stack, tag)
         result(InventoryUtils.addToPlayerInventory(stack, player))
       })
 
@@ -591,7 +592,7 @@ object DebugCard {
       val criteria = ObjectiveCriteria.byName(objType).orElseThrow(new Supplier[IllegalArgumentException] {
         override def get = new IllegalArgumentException("invalid criterion")
       })
-      scoreboard.addObjective(objName, criteria, Component.literal(objName), ObjectiveCriteria.RenderType.INTEGER)
+      scoreboard.addObjective(objName, criteria, Component.literal(objName), ObjectiveCriteria.RenderType.INTEGER, true, new StyledFormat(Style.EMPTY))
       null
     }
 
@@ -610,8 +611,8 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(name,objective)
-      score.setScore(scoreVal)
+      val score = scoreboard.getOrCreatePlayerScore(() => name, objective)
+      score.set(scoreVal)
       null
     }
 
@@ -620,8 +621,8 @@ object DebugCard {
       checkAccess()
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
-      val score = scoreboard.getOrCreatePlayerScore(name, objective)
-      result(score.getScore)
+      val score = scoreboard.getOrCreatePlayerScore(() => name, objective)
+      result(score.get)
     }
 
     @Callback(doc = """function(playerName:string, objectiveName:string, score:int) - Increases the score of a player for a certain objective""")
@@ -630,7 +631,7 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(name,objective)
+      val score = scoreboard.getOrCreatePlayerScore(() => name, objective)
       score.add(scoreVal)
       null
     }
@@ -641,7 +642,7 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(name,objective)
+      val score = scoreboard.getOrCreatePlayerScore(() => name, objective)
       score.add(-scoreVal)
       null
     }
@@ -745,7 +746,8 @@ object DebugCard {
     @Callback(doc = """function():number, number, number -- Get the current spawn point coordinates.""")
     def getSpawnPoint(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
-      result(world.getLevelData.getXSpawn, world.getLevelData.getYSpawn, world.getLevelData.getZSpawn)
+      val pos = world.getLevelData.getSpawnPos
+      result(pos.getX, pos.getY, pos.getZ)
     }
 
     @Callback(doc = """function(x:number, y:number, z:number) -- Set the spawn point coordinates.""")
@@ -755,9 +757,7 @@ object DebugCard {
       val y = args.checkInteger(1)
       val z = args.checkInteger(2)
       val info = world.getLevelData.asInstanceOf[ServerLevelData]
-      info.setXSpawn(x)
-      info.setYSpawn(y)
-      info.setZSpawn(z)
+      info.setSpawn(new BlockPos(x, y, z), 0)
       null
     }
 
@@ -820,7 +820,7 @@ object DebugCard {
       checkAccess()
       val blockPos = new BlockPos(args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))
       world.getBlockEntity(blockPos) match {
-        case tileEntity: BlockEntity => result(toNbt(nbt => tileEntity.saveWithFullMetadata()).toTypedMap)
+        case tileEntity: BlockEntity => result(toNbt(nbt => tileEntity.saveWithFullMetadata(world.registryAccess())).toTypedMap)
         case _ => null
       }
     }
@@ -834,7 +834,7 @@ object DebugCard {
         case tileEntity: BlockEntity =>
           typedMapToNbt(mapAsScalaMap(args.checkTable(3)).toMap) match {
             case nbt: CompoundTag =>
-              tileEntity.load(nbt)
+              tileEntity.loadWithComponents(nbt, world.registryAccess())
               tileEntity.setChanged()
               world.notifyBlockUpdate(blockPos)
               result(true)
@@ -874,7 +874,7 @@ object DebugCard {
     @Callback(doc = """function(x:number, y:number, z:number, id:string, meta:number):number -- Set the block at the specified coordinates.""")
     def setBlock(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
-      val block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(args.checkString(3)))
+      val block = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(args.checkString(3)))
       val metadata = args.checkInteger(4)
       result(world.setBlockAndUpdate(new BlockPos(args.checkInteger(0), args.checkInteger(1), args.checkInteger(2)), getStateFromMeta(block, metadata)))
     }
@@ -885,7 +885,7 @@ object DebugCard {
       checkAccess()
       val (xMin, yMin, zMin) = (args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))
       val (xMax, yMax, zMax) = (args.checkInteger(3), args.checkInteger(4), args.checkInteger(5))
-      val block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(args.checkString(3)))
+      val block = BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse(args.checkString(3)))
       val metadata = args.checkInteger(7)
       for (x <- math.min(xMin, xMax) to math.max(xMin, xMax)) {
         for (y <- math.min(yMin, yMax) to math.max(yMin, yMax)) {
@@ -903,7 +903,7 @@ object DebugCard {
     @Callback(doc = """function(id:string, count:number, damage:number, nbt:string, x:number, y:number, z:number, side:number):boolean - Insert an item stack into the inventory at the specified location. NBT tag is expected in JSON format.""")
     def insertItem(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
-      val item = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(args.checkString(0)))
+      val item = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(args.checkString(0)))
       if (item == null) {
         throw new IllegalArgumentException("invalid item id")
       }
@@ -916,7 +916,7 @@ object DebugCard {
       InventoryUtils.inventoryAt(position, side) match {
         case Some(inventory) =>
           val stack = new ItemStack(item, count)
-          stack.setTag(tag)
+          CustomData.set(DataComponents.CUSTOM_DATA, stack, tag)
           stack.setDamageValue(damage)
           result(InventoryUtils.insertIntoInventory(stack, inventory))
         case _ => result((), "no inventory")
@@ -941,7 +941,7 @@ object DebugCard {
     @Callback(doc = """function(id:string, amount:number, x:number, y:number, z:number, side:number):boolean - Insert some fluid into the tank at the specified location.""")
     def insertFluid(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
-      val fluid = ForgeRegistries.FLUIDS.getValue(ResourceLocation.tryParse(args.checkString(0)))
+      val fluid = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(args.checkString(0)))
       if (fluid == null) {
         throw new IllegalArgumentException("invalid fluid id")
       }

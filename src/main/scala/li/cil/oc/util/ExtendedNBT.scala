@@ -4,6 +4,7 @@ import com.google.common.base.Charsets
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt._
 import net.minecraft.core.Direction
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.JavaConverters.mapAsScalaMap
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -40,7 +41,7 @@ object ExtendedNBT {
   implicit def toNbt(value: ItemStack): CompoundTag = {
     val nbt = new CompoundTag()
     if (value != null) {
-      value.save(nbt)
+      value.save(ServerLifecycleHooks.getCurrentServer.registryAccess(), nbt)
     }
     nbt
   }

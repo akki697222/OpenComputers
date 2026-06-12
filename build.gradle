@@ -173,8 +173,9 @@ dependencies {
     runtimeOnly("maven.modrinth:modernfix:${modernfix_version}")
 
     // CoFH Core & Thermal
-    compileOnly("curse.maven:cofh-core-69162:4801048")
-    compileOnly("curse.maven:thermal-foundation-222880:4788649")
+    // not currently available for 1.21+
+//    compileOnly("curse.maven:cofh-core-69162:4801048")
+//    compileOnly("curse.maven:thermal-foundation-222880:4788649")
 
     compileOnly("org.appliedenergistics:appliedenergistics2:${ae2_version}:api")
     compileOnly("mekanism:Mekanism:${mekanism_version}:api")
@@ -184,6 +185,7 @@ dependencies {
     compileOnly("curse.maven:codechicken-lib-1-8-242818:5753868")
     compileOnly("curse.maven:ender-storage-1-8-245174:5292573")
     compileOnly("mrtjp:ProjectRed:${projred_version}:core")
+    compileOnly("mrtjp:ProjectRed:${projred_version}:api")
 
     testImplementation("org.scala-lang:scala-library:2.13.12")
     testImplementation("org.scalatest:scalatest_3:3.2.18")
@@ -308,7 +310,7 @@ tasks.named('jar', Jar).configure {
         exclude 'META-INF', 'META-INF/**'
     }
 
-    finalizedBy 'reobfJar'
+//    finalizedBy 'reobfJar'
 }
 
 tasks.register('apiJar', Jar) {

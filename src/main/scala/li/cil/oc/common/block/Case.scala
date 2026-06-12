@@ -1,6 +1,9 @@
 package li.cil.oc.common.block
 
+import com.mojang.serialization.{Codec, MapCodec}
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import li.cil.oc.Settings
+import li.cil.oc.common.block.Case.CODEC
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
@@ -9,13 +12,15 @@ import li.cil.oc.util.Tooltip
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent}
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
+import net.minecraft.util.ExtraCodecs
 import net.minecraft.world.{InteractionHand => Hand}
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties
+import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, propertiesCodec, simpleCodec}
 import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}
 import net.minecraft.world.level.material.FluidState
 
@@ -23,12 +28,14 @@ import java.util
 import scala.collection.convert.ImplicitConversionsToScala._
 
 class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with traits.PowerAcceptor with traits.StateAware with traits.GUI with traits.Tickable {
+  override def codec(): MapCodec[Case] = CODEC
+  
   protected override def createBlockStateDefinition(builder: StateContainer.Builder[Block, BlockState]): Unit =
     builder.add(PropertyRotatable.Facing, property.PropertyRunning.Running)
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get(getClass.getSimpleName.toLowerCase, slots)) {
       tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }
@@ -86,4 +93,11 @@ class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with t
   }
 
   override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.CASE.get()
+}
+
+object Case {
+  final val CODEC = RecordCodecBuilder.mapCodec[Case](b => b.group(
+    propertiesCodec(),
+    Codec.INT.fieldOf("tier").forGetter(b => b.tier)
+  ).apply(b, (prop, tier) => new Case(prop, tier)))
 }

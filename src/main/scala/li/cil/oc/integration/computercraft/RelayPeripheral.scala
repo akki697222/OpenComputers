@@ -14,6 +14,7 @@ import li.cil.oc.api.network.Component
 import li.cil.oc.common.blockentity.Relay
 import li.cil.oc.util.ResultWrapper._
 import net.minecraft.core.Direction
+import net.neoforged.neoforge.capabilities.ICapabilityProvider
 
 import scala.collection.JavaConverters.mapAsJavaMap
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -174,5 +175,4 @@ class RelayPeripheral(val relay: Relay) extends IDynamicPeripheral {
 
     override def consumeCallBudget(callCost: Double): Unit = {}
   }
-
 }

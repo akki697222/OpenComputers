@@ -21,6 +21,7 @@ import net.minecraft.world.level.storage.loot.LootParams
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
 
@@ -30,8 +31,8 @@ class Raid(props: Properties) extends SimpleBlock(props) with traits.GUI {
   protected override def createBlockStateDefinition(builder: StateContainer.Builder[Block, BlockState]) =
     builder.add(PropertyRotatable.Facing)
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
-    super.tooltipTail(stack, world, tooltip, advanced)
+  override protected def tooltipTail(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, advanced)
     if (KeyBindings.showExtendedTooltips) {
       val data = new RaidData(stack)
       for (disk <- data.disks if !disk.isEmpty) {
@@ -85,9 +86,10 @@ class Raid(props: Properties) extends SimpleBlock(props) with traits.GUI {
           if (tileEntity.items.exists(!_.isEmpty)) {
             val data = new RaidData()
             data.disks = tileEntity.items.clone()
-            tileEntity.filesystem.foreach(_.saveData(data.filesystem, tileEntity.getLevel.registryAccess()))
-            data.label = Option(tileEntity.label.getLabel)
-            data.saveData(stack)
+            val reg = tileEntity.getLevel.registryAccess()
+            tileEntity.filesystem.foreach(_.saveData(data.filesystem, reg))
+            data.label = Option(tileEntity.label.getLabel(reg))
+            data.saveData(stack, reg)
           }
           f.accept(stack)
         case _ =>

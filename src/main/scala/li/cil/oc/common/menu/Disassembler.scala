@@ -16,7 +16,10 @@ import net.minecraft.nbt.CompoundTag
 class Disassembler(id: Int, playerInventory: Inventory, val disassembler: Container)
   extends AbstractMenu(MenuTypes.DISASSEMBLER.get(), id, playerInventory, disassembler) {
 
-  private def allowDisassembling(stack: ItemStack) = !stack.isEmpty && (!stack.hasTag || !stack.getTag.getBoolean(Settings.namespace + "undisassemblable"))
+  private def allowDisassembling(stack: ItemStack) = {
+    val tag = ItemUtils.getTag(stack)
+    !stack.isEmpty && (tag == null || !tag.getBoolean(Settings.namespace + "undisassemblable"))
+  }
 
   override protected def getHostClass = classOf[blockentity.Disassembler]
 

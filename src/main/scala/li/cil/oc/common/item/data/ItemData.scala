@@ -12,14 +12,14 @@ import net.neoforged.fml.loading.FMLEnvironment
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 abstract class ItemData(val itemName: String) extends Persistable {
-  override def loadData(stack: ItemStack, provider: HolderLookup.Provider): Unit = {
+  def loadData(stack: ItemStack, provider: HolderLookup.Provider): Unit = {
     val data = stack.get(DataComponents.CUSTOM_DATA)
     if (data != null && !data.isEmpty) {
       loadData(data.copyTag(), provider)
     }
   }
 
-  override def saveData(stack: ItemStack, provider: HolderLookup.Provider): Unit = {
+  def saveData(stack: ItemStack, provider: HolderLookup.Provider): Unit = {
     stack.update(
       DataComponents.CUSTOM_DATA,
       CustomData.EMPTY,

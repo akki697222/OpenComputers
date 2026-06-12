@@ -10,7 +10,7 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.level.block.{Blocks, RedStoneWireBlock}
 import net.minecraft.core.Direction
-import net.neoforged.common.MinecraftForge
+import net.neoforged.neoforge.common.NeoForge
 
 object ModMinecraft extends ModProxy with RedstoneProvider {
   def getMod = Mods.Minecraft
@@ -53,7 +53,7 @@ object ModMinecraft extends ModProxy with RedstoneProvider {
 
     BundledRedstone.addProvider(this)
 
-    MinecraftForge.EVENT_BUS.register(EventHandlerVanilla)
+    NeoForge.EVENT_BUS.register(EventHandlerVanilla)
   }
 
   override def computeInput(pos: BlockPosition, side: Direction): Int = {

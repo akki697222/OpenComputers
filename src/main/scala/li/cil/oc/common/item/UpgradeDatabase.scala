@@ -4,7 +4,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.common.container.DatabaseInventory
 import li.cil.oc.common.menu.MenuTypes
-
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionResultHolder
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
+import net.minecraft.world.item.component.CustomData
 
 class UpgradeDatabase(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with traits.ItemTier {
   @Deprecated
@@ -36,7 +37,9 @@ class UpgradeDatabase(props: Properties, val tier: Int) extends Item(props) with
       player.swing(InteractionHand.MAIN_HAND)
     }
     else {
-      stack.removeTagKey(Settings.namespace + "items")
+      CustomData.update(DataComponents.CUSTOM_DATA, stack, data => {
+        data.remove(Settings.namespace + "items")
+      })
       player.swing(InteractionHand.MAIN_HAND)
     }
     new InteractionResultHolder(InteractionResult.sidedSuccess(level.isClientSide), stack)

@@ -15,7 +15,7 @@ import li.cil.oc.util.InventoryUtils
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.core.BlockPos
-import net.neoforged.items.IItemHandler
+import net.neoforged.neoforge.items.IItemHandler
 
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable

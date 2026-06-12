@@ -16,6 +16,7 @@ import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
 import net.minecraft.world.{InteractionHand => Hand}
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
 import net.minecraft.world.level.block.Blocks
@@ -44,7 +45,7 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity): ItemStack =
     world.getBlockEntity(pos) match {
-      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack()
+      case proxy: blockentity.RobotProxy => proxy.robot.info.copyItemStack(player.registryAccess())
       case _ => ItemStack.EMPTY
     }
 
@@ -66,19 +67,19 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipHead(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
-    super.tooltipHead(stack, world, tooltip, advanced)
+  override protected def tooltipHead(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+    super.tooltipHead(stack, context, tooltip, advanced)
     addLines(stack, tooltip)
   }
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get("robot")) {
       tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }
   }
 
-  override protected def tooltipTail(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
-    super.tooltipTail(stack, world, tooltip, flag)
+  override protected def tooltipTail(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], flag: ITooltipFlag): Unit = {
+    super.tooltipTail(stack, context, tooltip, flag)
     if (KeyBindings.showExtendedTooltips) {
       val info = new RobotData(stack)
       val components = info.containers ++ info.components

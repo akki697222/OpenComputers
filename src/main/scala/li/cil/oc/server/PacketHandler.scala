@@ -21,8 +21,6 @@ import li.cil.oc.common.blockentity.traits.Computer
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.Util
-import net.neoforged.eventbus.api.SubscribeEvent
-import net.neoforged.server.ServerLifecycleHooks
 import org.apache.logging.log4j.MarkerManager
 import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
@@ -32,6 +30,7 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object PacketHandler extends CommonPacketHandler {
   private val securityMarker = MarkerManager.getMarker("SuspiciousPackets")
@@ -140,7 +139,7 @@ object PacketHandler extends CommonPacketHandler {
       case player: ServerPlayer =>
         val heldItem = player.getItemInHand(InteractionHand.MAIN_HAND)
         heldItem.getItem match {
-          case drive: FileSystemLike => DriveData.setUnmanaged(heldItem, unmanaged)
+          case drive: FileSystemLike => DriveData.setUnmanaged(heldItem, unmanaged, ServerLifecycleHooks.getCurrentServer.registryAccess())
           case _ => // Invalid packet.
         }
       case _ => // Invalid packet.
@@ -375,7 +374,7 @@ object PacketHandler extends CommonPacketHandler {
               case _ => true
             }) {
               val nbt = new CompoundTag()
-              buffer.data.saveData(nbt)
+              buffer.data.saveData(nbt, ServerLifecycleHooks.getCurrentServer.registryAccess())
               nbt.putInt("maxWidth", buffer.getMaximumWidth)
               nbt.putInt("maxHeight", buffer.getMaximumHeight)
               nbt.putInt("viewportWidth", buffer.getViewportWidth)

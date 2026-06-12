@@ -6,8 +6,8 @@ import li.cil.oc.api.machine.Context
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.FluidUtils
 import li.cil.oc.util.ResultWrapper.result
-import net.neoforged.fluids.FluidStack
-import net.neoforged.fluids.capability.IFluidHandler.FluidAction
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 trait TankLevelControl extends TankAware with LevelAware with SideRestricted {
   @Callback(doc = "function(side:number [, tank:number]):boolean -- Compare the fluid in the selected tank with the fluid in the specified tank on the specified side. Returns true if equal.")
@@ -39,7 +39,7 @@ trait TankLevelControl extends TankAware with LevelAware with SideRestricted {
             case Some(handler) =>
               tank.getFluid match {
                 case stack: FluidStack =>
-                  val drained = handler.drain(new FluidStack(stack, amount), FluidAction.EXECUTE)
+                  val drained = handler.drain(new FluidStack(stack.getFluid, amount), FluidAction.EXECUTE)
                   if ((drained != null && drained.getAmount > 0) || amount == 0) {
                     val filled = tank.fill(drained, FluidAction.EXECUTE)
                     result(true, filled)
@@ -69,7 +69,7 @@ trait TankLevelControl extends TankAware with LevelAware with SideRestricted {
             case Some(handler) =>
               tank.getFluid match {
                 case stack: FluidStack =>
-                  val filled = handler.fill(new FluidStack(stack, amount), FluidAction.EXECUTE)
+                  val filled = handler.fill(new FluidStack(stack.getFluid, amount), FluidAction.EXECUTE)
                   if (filled > 0 || amount == 0) {
                     tank.drain(filled, FluidAction.EXECUTE)
                     result(true, filled)

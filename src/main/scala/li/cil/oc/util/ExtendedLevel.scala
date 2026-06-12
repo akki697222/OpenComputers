@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.Block
 import net.minecraft.tags.BlockTags
-import net.neoforged.common.Tags
 
 object ExtendedLevel {
 
@@ -59,8 +58,9 @@ object ExtendedLevel {
     def getBlockHarvestLevel(position: BlockPosition): Int = {
       val state = position.world.get.getBlockState(position.toBlockPos)
 
-      if (state.is(Tags.Blocks.NEEDS_NETHERITE_TOOL)) 4
-      else if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) 3
+      // FIXME?
+      /*if (state.is(Tags.Blocks.NEEDS_NETHERITE_TOOL)) 4
+      else */if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) 3
       else if (state.is(BlockTags.NEEDS_IRON_TOOL)) 2
       else if (state.is(BlockTags.NEEDS_STONE_TOOL)) 1
       else 0

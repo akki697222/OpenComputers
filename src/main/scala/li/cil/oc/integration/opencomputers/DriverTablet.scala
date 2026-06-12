@@ -9,14 +9,19 @@ import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.Slot
 import li.cil.oc.common.item.Tablet
 import li.cil.oc.common.item.data.TabletData
+import li.cil.oc.util.ItemUtils
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.{CompoundTag, Tag}
+import net.minecraft.world.item.component.CustomData
+
+import java.util.function.Consumer
 
 object DriverTablet extends Item {
-  override def worksWith(stack: ItemStack): Unit = isOneOf(stack,
+  override def worksWith(stack: ItemStack) = isOneOf(stack,
     api.Items.get(Constants.ItemName.Tablet))
 
-  override def createEnvironment(stack: ItemStack, host: EnvironmentHost): Unit =
+  override def createEnvironment(stack: ItemStack, host: EnvironmentHost) =
     if (host.getEnvironmentLevel != null && host.getEnvironmentLevel.isClientSide) null
     else {
       Tablet.Server.cache.invalidate(Tablet.getOrCreateId(stack))
@@ -37,14 +42,14 @@ object DriverTablet extends Item {
 
   override def slot(stack: ItemStack) = Slot.Tablet
 
-  override def dataTag(stack: ItemStack) = {
+  def mapToDataTag(stack: ItemStack, tag: CompoundTag): CompoundTag = {
     val data = new TabletData(stack)
     val index = data.items.indexWhere {
       case fs if !fs.isEmpty => DriverFileSystem.worksWith(fs)
       case _ => false
     }
-    if (index >= 0 && stack.hasTag && stack.getTag.contains(Settings.namespace + "items")) {
-      val baseTag = stack.getTag.getList(Settings.namespace + "items", Tag.TAG_COMPOUND).getCompound(index)
+    if (index >= 0 && tag != null && tag.contains(Settings.namespace + "items")) {
+      val baseTag = tag.getList(Settings.namespace + "items", Tag.TAG_COMPOUND).getCompound(index)
       if (!baseTag.contains("item")) {
         baseTag.put("item", new CompoundTag())
       }
@@ -59,5 +64,13 @@ object DriverTablet extends Item {
       stackTag.getCompound(Settings.namespace + "data")
     }
     else new CompoundTag()
+  }
+
+  override def dataTag(stack: ItemStack) = {
+    mapToDataTag(stack, ItemUtils.getTag(stack))
+  }
+
+  override def updateDataTag(stack: ItemStack, updater: Consumer[CompoundTag]): Unit = {
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, data => updater.accept(mapToDataTag(stack, data)))
   }
 }

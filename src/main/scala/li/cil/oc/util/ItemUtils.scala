@@ -8,30 +8,33 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
+import net.minecraft.core.HolderLookup
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.Registries
+import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.BucketItem
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.crafting.RecipeManager
-import net.minecraft.world.item.crafting.CraftingRecipe
-import net.minecraft.world.item.crafting.Recipe
-import net.minecraft.world.item.crafting.RecipeType
-import net.minecraft.world.item.crafting.Ingredient
-import net.minecraft.world.item.crafting.ShapedRecipe
-import net.minecraft.world.item.crafting.ShapelessRecipe
-import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.item.crafting.{CraftingInput, CraftingRecipe, Ingredient, Recipe, RecipeManager, RecipeType, ShapedRecipe, ShapelessRecipe}
+import net.minecraft.nbt.{CompoundTag, NbtAccounter, NbtIo}
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.inventory.CraftingContainer
 import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.level.block.state.BlockState
+import org.jspecify.annotations.Nullable
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 
 object ItemUtils {
+  @Nullable
+  def getTag(stack: ItemStack): CompoundTag = {
+    stack.get(DataComponents.CUSTOM_DATA) match {
+      case data: CustomData => data.copyTag()
+      case _ => null
+    }
+  }
+
   def getOrCreateTag(stack: ItemStack): CompoundTag = {
     stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag()
   }
@@ -98,12 +101,12 @@ object ItemUtils {
 
   def loadTag(data: Array[Byte]): CompoundTag = {
     val bais = new ByteArrayInputStream(data)
-    NbtIo.readCompressed(bais)
+    NbtIo.readCompressed(bais, NbtAccounter.unlimitedHeap())
   }
 
-  def saveStack(stack: ItemStack): Array[Byte] = {
+  def saveStack(stack: ItemStack, provider: HolderLookup.Provider): Array[Byte] = {
     val tag = new CompoundTag()
-    stack.save(tag)
+    stack.save(provider, tag)
     saveTag(tag)
   }
 
@@ -125,21 +128,23 @@ object ItemUtils {
     def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(null).getCount
 
     def isInputBlacklisted(stack: ItemStack) = stack.getItem match {
-      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(Registries.BLOCK.getKey(item.getBlock))
-      case item: Item => Settings.get.disassemblerInputBlacklist.contains(Registries.ITEM.getKey(item))
+      case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(BuiltInRegistries.BLOCK.getKey(item.getBlock))
+      case item: Item => Settings.get.disassemblerInputBlacklist.contains(BuiltInRegistries.ITEM.getKey(item))
       case _ => false
     }
 
-    val (ingredients, count) = manager.getAllRecipesFor[CraftingContainer, CraftingRecipe](RecipeType.CRAFTING).
-      filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack)).collect {
-      case recipe: ShapedRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
-      case recipe: ShapelessRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
-    }.collectFirst {
-      case (inputs, outputSize) if !inputs.exists(isInputBlacklisted) => (inputs, outputSize)
-    } match {
-      case Some((inputs, outputSize)) => (inputs, outputSize)
-      case _ => return Array.empty
-    }
+    val (ingredients, count) = manager.getAllRecipesFor[CraftingInput, CraftingRecipe](RecipeType.CRAFTING)
+      .map(_.value)
+      .filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack))
+      .collect {
+        case recipe: ShapedRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
+        case recipe: ShapelessRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
+      }.collectFirst {
+        case (inputs, outputSize) if !inputs.exists(isInputBlacklisted) => (inputs, outputSize)
+      } match {
+        case Some((inputs, outputSize)) => (inputs, outputSize)
+        case _ => return Array.empty
+      }
 
     // Avoid positive feedback loops.
     if (ingredients.exists(ingredient => ItemStack.isSameItem(ingredient, stack))) {

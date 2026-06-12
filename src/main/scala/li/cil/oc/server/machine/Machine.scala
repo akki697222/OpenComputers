@@ -41,7 +41,7 @@ import li.cil.oc.util.ThreadPoolFactory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt._
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.JavaConverters.mapAsJavaMap
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -59,7 +59,7 @@ import net.minecraft.nbt.ListTag
 import net.minecraft.client.server.IntegratedServer
 import net.minecraft.core.HolderLookup
 import net.neoforged.api.distmarker.Dist
-import net.neoforged.fml.DistExecutor
+import net.neoforged.fml.loading.FMLEnvironment
 
 class Machine(val host: MachineHost) extends AbstractManagedEnvironment with machine.Machine with Runnable with DeviceInfo {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Network).
@@ -992,10 +992,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
 
     server != null &&
       !server.isDedicatedServer &&
-      DistExecutor.unsafeCallWhenOn(
-        Dist.CLIENT,
-        () => () => ClientUtil.isPaused
-      )
+      (FMLEnvironment.dist.isClient && (() => { ClientUtil.isPaused })())
   }
 
   // This is a really high level lock that we only use for saving and loading.

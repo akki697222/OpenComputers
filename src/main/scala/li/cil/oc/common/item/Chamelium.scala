@@ -25,7 +25,7 @@ class Chamelium(props: Properties) extends Item(props) with traits.SimpleItem {
 
   override def getUseAnimation(stack: ItemStack): UseAnim = UseAnim.EAT
 
-  override def getUseDuration(stack: ItemStack): Int = 32
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 32
 
   override def finishUsingItem(stack: ItemStack, level: Level, player: LivingEntity): ItemStack = {
     if (!level.isClientSide) {

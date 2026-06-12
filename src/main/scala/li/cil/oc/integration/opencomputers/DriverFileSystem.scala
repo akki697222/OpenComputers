@@ -12,25 +12,29 @@ import li.cil.oc.common.item.{FloppyDisk, HardDiskDrive, SolidStateDrive}
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.server.component.Drive
 import li.cil.oc.server.fs.FileSystem.{ItemLabel, ReadOnlyLabel}
+import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object DriverFileSystem extends Item {
   val UUIDVerifier = """^([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$""".r
 
-  override def worksWith(stack: ItemStack) = isOneOf(stack,
-    api.Items.get(Constants.ItemName.HDDTier1),
-    api.Items.get(Constants.ItemName.HDDTier2),
-    api.Items.get(Constants.ItemName.HDDTier3),
-    api.Items.get(Constants.ItemName.HDDTier4),
-    api.Items.get(Constants.ItemName.SSDTier1),
-    api.Items.get(Constants.ItemName.SSDTier2),
-    api.Items.get(Constants.ItemName.SSDTier3),
-    api.Items.get(Constants.ItemName.Floppy)) &&
-    (!stack.hasTag || !stack.getTag.contains(Settings.namespace + "lootPath"))
+  override def worksWith(stack: ItemStack) = {
+    val tag = ItemUtils.getTag(stack)
+    isOneOf(stack,
+      api.Items.get(Constants.ItemName.HDDTier1),
+      api.Items.get(Constants.ItemName.HDDTier2),
+      api.Items.get(Constants.ItemName.HDDTier3),
+      api.Items.get(Constants.ItemName.HDDTier4),
+      api.Items.get(Constants.ItemName.SSDTier1),
+      api.Items.get(Constants.ItemName.SSDTier2),
+      api.Items.get(Constants.ItemName.SSDTier3),
+      api.Items.get(Constants.ItemName.Floppy)) &&
+      (tag == null || !tag.contains(Settings.namespace + "lootPath"))
+  }
 
   override def createEnvironment(stack: ItemStack, host: EnvironmentHost) =
     if (host.getEnvironmentLevel != null && host.getEnvironmentLevel.isClientSide) null
@@ -57,9 +61,10 @@ object DriverFileSystem extends Item {
     }
 
   private def createEnvironment(stack: ItemStack, capacity: Int, platterCount: Int, host: EnvironmentHost, speed: Int) = if (ServerLifecycleHooks.getCurrentServer != null) {
-    if (stack.hasTag && stack.getTag.contains(Settings.namespace + "lootFactory")) {
+    val tag = ItemUtils.getTag(stack)
+    if (tag != null && tag.contains(Settings.namespace + "lootFactory")) {
       // Loot disk, create file system using factory callback.
-      val lootFactory = ResourceLocation.tryParse(stack.getTag.getString(Settings.namespace + "lootFactory"))
+      val lootFactory = ResourceLocation.tryParse(tag.getString(Settings.namespace + "lootFactory"))
       Loot.factories.get(lootFactory) match {
         case Some(factory) =>
           val label =
@@ -80,7 +85,7 @@ object DriverFileSystem extends Item {
       val isSSD = stack.getItem.isInstanceOf[SolidStateDrive]
       val sound = if (isSSD) None
       else Some(Settings.resourceDomain + ":" + (if (isFloppy) "floppy_access" else "hdd_access"))
-      val drive = new DriveData(stack)
+      val drive = new DriveData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
       val environment = if (drive.isUnmanaged) {
         new Drive(capacity max 0, platterCount, label, Option(host), sound, speed, drive.isLocked)
       }
@@ -88,7 +93,7 @@ object DriverFileSystem extends Item {
         var fs = oc.api.FileSystem.fromSaveDirectory(address, capacity max 0, Settings.get.bufferChanges)
         if (drive.isLocked) {
           fs = oc.api.FileSystem.asReadOnly(fs)
-          label = new ReadOnlyLabel(label.getLabel)
+          label = new ReadOnlyLabel(label.getLabel(ServerLifecycleHooks.getCurrentServer.registryAccess()))
         }
         oc.api.FileSystem.asManagedEnvironment(fs, label, host, sound.orNull, speed)
       }
@@ -116,7 +121,7 @@ object DriverFileSystem extends Item {
   private class ReadWriteItemLabel(stack: ItemStack) extends ItemLabel(stack) {
     var label: Option[String] = None
 
-    override def getLabel = label.orNull
+    override def getLabel(provider: HolderLookup.Provider): String = label.orNull
 
     override def setLabel(value: String): Unit = {
       label = Option(value).map(_.take(16))

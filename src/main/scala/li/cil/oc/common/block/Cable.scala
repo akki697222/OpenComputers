@@ -1,36 +1,27 @@
 package li.cil.oc.common.block
 
+import com.mojang.serialization.MapCodec
 import li.cil.oc.common.block.property.PropertyCableConnection
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.{Capabilities}
+import li.cil.oc.common.Capabilities
+import li.cil.oc.common.block.Cable.CODEC
 import li.cil.oc.util.{Color, ItemColorizer}
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
-import net.minecraft.world.item.context.{
-  BlockPlaceContext => BlockItemUseContext
-}
+import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.item.{DyeColor, ItemStack}
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.{BlockEntity => TileEntity}
-import net.minecraft.world.level.block.state.BlockBehaviour.Properties
-import net.minecraft.world.level.block.state.{
-  BlockState,
-  StateDefinition => StateContainer
-}
-import net.minecraft.world.level.{
-  BlockGetter => IBlockReader,
-  Level => World,
-  LevelAccessor => IWorld
-}
-import net.minecraft.world.phys.shapes.{
-  VoxelShape,
-  CollisionContext => ISelectionContext,
-  Shapes => VoxelShapes
-}
+import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, simpleCodec}
+import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}
+import net.minecraft.world.level.{LevelReader, BlockGetter => IBlockReader, Level => World, LevelAccessor => IWorld}
+import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelectionContext, Shapes => VoxelShapes}
 import net.minecraft.world.phys.{HitResult => RayTraceResult}
 
 class Cable(props: Properties) extends SimpleBlock(props) {
+  override def codec(): MapCodec[Cable] = CODEC
+
   // For FMP part coloring.
   var colorMultiplierOverride: Option[Int] = None
 
@@ -59,7 +50,7 @@ class Cable(props: Properties) extends SimpleBlock(props) {
     )
   }
 
-  override def getCloneItemStack(state: BlockState, target: RayTraceResult, world: IBlockReader, pos: BlockPos, player: PlayerEntity) =
+  override def getCloneItemStack(world: LevelReader, pos: BlockPos, state: BlockState) =
     world.getBlockEntity(pos) match {
       case t: blockentity.Cable => t.createItemStack()
       case _ => createItemStack()
@@ -105,6 +96,8 @@ class Cable(props: Properties) extends SimpleBlock(props) {
 }
 
 object Cable {
+  final val CODEC = simpleCodec(new Cable(_))
+
   final val MIN = 0.375
   final val MAX = 1 - MIN
 

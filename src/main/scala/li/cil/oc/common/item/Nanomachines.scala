@@ -1,17 +1,16 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import com.google.common.base.Strings
 import li.cil.oc.api
 import li.cil.oc.common.item.data.NanomachineData
 import li.cil.oc.common.nanomachines.ControllerImpl
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Item.{Properties, TooltipContext}
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
-
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -24,9 +23,9 @@ import net.minecraft.world.entity.LivingEntity
 
 class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem {
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
-    if (stack.hasTag) {
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
+    if (stack.has(DataComponents.CUSTOM_DATA)) {
       val data = new NanomachineData(stack)
       if (!Strings.isNullOrEmpty(data.uuid)) {
         tooltip.add(Component.literal("§8" + data.uuid.substring(0, 13) + "...§7"))
@@ -41,7 +40,7 @@ class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem
 
   override def getUseAnimation(stack: ItemStack): UseAnim = UseAnim.EAT
 
-  override def getUseDuration(stack: ItemStack): Int = 32
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 32
 
   override def finishUsingItem(stack: ItemStack, level: Level, entity: LivingEntity): ItemStack = {
     entity match {

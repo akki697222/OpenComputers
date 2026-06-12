@@ -21,7 +21,8 @@ trait ComponentInventory extends Inventory with network.Environment {
   private var _components: Array[Option[ManagedEnvironment]] = _
   protected var isSizeInventoryReady: Boolean = true
 
-  def components: Array[Option[ManagedEnvironment]] = {
+  // renamed as to not conflict with Minecraft's components() method on some classes
+  def environmentComponents: Array[Option[ManagedEnvironment]] = {
     if (_components == null && isSizeInventoryReady) {
       _components = Array.fill[Option[ManagedEnvironment]](getContainerSize)(None)
     }
@@ -54,10 +55,10 @@ trait ComponentInventory extends Inventory with network.Environment {
   // ----------------------------------------------------------------------- //
 
   def connectComponents(): Unit = {
-    for (slot <- 0 until getContainerSize if slot >= 0 && slot < components.length) {
+    for (slot <- 0 until getContainerSize if slot >= 0 && slot < environmentComponents.length) {
       val stack = getItem(slot)
-      if (!stack.isEmpty && components(slot).isEmpty && isComponentSlot(slot, stack)) {
-        components(slot) = Option(Driver.driverFor(stack)) match {
+      if (!stack.isEmpty && environmentComponents(slot).isEmpty && isComponentSlot(slot, stack)) {
+        environmentComponents(slot) = Option(Driver.driverFor(stack)) match {
           case Some(driver) =>
             Option(driver.createEnvironment(stack, host)) match {
               case Some(component) =>
@@ -81,7 +82,7 @@ trait ComponentInventory extends Inventory with network.Environment {
     }
     // Make sure our node is connected.
     api.Network.joinNewNetwork(node)
-    components collect {
+    environmentComponents collect {
       case Some(component) =>
         applyLifecycleState(component, Lifecycle.LifecycleState.Initializing)
         connectItemNode(component.node)
@@ -90,7 +91,7 @@ trait ComponentInventory extends Inventory with network.Environment {
   }
 
   def disconnectComponents(): Unit = {
-    components collect {
+    environmentComponents collect {
       case Some(component) =>
         applyLifecycleState(component, Lifecycle.LifecycleState.Disposing)
         if (component.node != null) component.node.remove()
@@ -109,14 +110,14 @@ trait ComponentInventory extends Inventory with network.Environment {
     for (slot <- 0 until getContainerSize) {
       val stack = getItem(slot)
       if (!stack.isEmpty) {
-        if (slot >= components.length) {
+        if (slot >= environmentComponents.length) {
           // isSizeInventoryReady was added to resolve issues where an inventory was used before its
           // nbt data had been parsed. See https://github.com/MightyPirates/OpenComputers/issues/2522
           // If this error is hit again, perhaps another subtype needs to handle nbt loading like Case does
-          OpenComputers.log.error(s"ComponentInventory components length ${components.length} does not accommodate inventory size ${getContainerSize}")
+          OpenComputers.log.error(s"ComponentInventory components length ${environmentComponents.length} does not accommodate inventory size ${getContainerSize}")
           return
         } else {
-          components(slot) match {
+          environmentComponents(slot) match {
             case Some(component) =>
               // We're guaranteed to have a driver for entries.
               save(component, Driver.driverFor(stack), stack)
@@ -131,11 +132,11 @@ trait ComponentInventory extends Inventory with network.Environment {
 
   override def getMaxStackSize = 1
 
-  override protected def onItemAdded(slot: Int, stack: ItemStack) = if (slot >= 0 && slot < components.length && isComponentSlot(slot, stack)) {
+  override protected def onItemAdded(slot: Int, stack: ItemStack) = if (slot >= 0 && slot < environmentComponents.length && isComponentSlot(slot, stack)) {
     Option(Driver.driverFor(stack)).foreach(driver =>
       Option(driver.createEnvironment(stack, host)) match {
         case Some(component) => this.synchronized {
-          components(slot) = Some(component)
+          environmentComponents(slot) = Some(component)
           applyLifecycleState(component, Lifecycle.LifecycleState.Constructing)
           try {
             component.loadData(dataTag(driver, stack), host.getEnvironmentLevel.registryAccess())
@@ -155,15 +156,15 @@ trait ComponentInventory extends Inventory with network.Environment {
       })
   }
 
-  override protected def onItemRemoved(slot: Int, stack: ItemStack): Unit = if (slot >= 0 && slot < components.length) {
+  override protected def onItemRemoved(slot: Int, stack: ItemStack): Unit = if (slot >= 0 && slot < environmentComponents.length) {
     // Uninstall component previously in that slot.
-    components(slot) match {
+    environmentComponents(slot) match {
       case Some(component) => this.synchronized {
         // Note to self: we have to remove the node from the network *before*
         // saving, to allow file systems to close their handles before they
         // are saved (otherwise hard drives would restore all handles after
         // being installed into a different computer, even!)
-        components(slot) = None
+        environmentComponents(slot) = None
         updatingComponents -= component
         applyLifecycleState(component, Lifecycle.LifecycleState.Disposing)
         Option(component.node).foreach(_.remove())

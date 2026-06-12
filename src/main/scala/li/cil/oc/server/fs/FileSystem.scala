@@ -143,7 +143,7 @@ object FileSystem extends api.detail.FileSystemAPI {
   class ReadOnlyLabel(val label: String) extends Label {
     def setLabel(value: String) = throw new IllegalArgumentException("label is read only")
 
-    def getLabel = label
+    def getLabel(provider: HolderLookup.Provider): String = label
 
     private final val LabelTag = Settings.namespace + "fs.label"
 

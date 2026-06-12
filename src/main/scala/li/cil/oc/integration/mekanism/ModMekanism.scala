@@ -8,6 +8,6 @@ object ModMekanism extends ModProxy {
   override def getMod = Mods.Mekanism
 
   override def initialize(): Unit = {
-    api.Driver.add(ConverterGasStack)
+    api.Driver.add(ConverterChemicalStack)
   }
 }

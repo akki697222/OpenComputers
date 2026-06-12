@@ -21,6 +21,7 @@ import com.mojang.math.Axis
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer => TileEntityRenderer}
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 object ScreenRenderer extends BlockEntityRendererProvider[Screen] {
   override def create(ctx: BlockEntityRendererProvider.Context): ScreenRenderer =
@@ -275,15 +276,18 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
   }
 
   private def drawColoredQuad(stack: PoseStack, r: VertexConsumer, red: Int, green: Int, blue: Int, alpha: Int, x1: Float, y1: Float, x2: Float, y2: Float): Unit = {
-    r.vertex(stack.last.pose, x1, y2, 0).color(red, green, blue, alpha).endVertex()
-    r.vertex(stack.last.pose, x2, y2, 0).color(red, green, blue, alpha).endVertex()
-    r.vertex(stack.last.pose, x2, y1, 0).color(red, green, blue, alpha).endVertex()
-    r.vertex(stack.last.pose, x1, y1, 0).color(red, green, blue, alpha).endVertex()
+    r.addVertex(stack.last.pose, x1, y2, 0).setColor(red, green, blue, alpha)
+    r.addVertex(stack.last.pose, x2, y2, 0).setColor(red, green, blue, alpha)
+    r.addVertex(stack.last.pose, x2, y1, 0).setColor(red, green, blue, alpha)
+    r.addVertex(stack.last.pose, x1, y1, 0).setColor(red, green, blue, alpha)
   }
+
+  @OnlyIn(Dist.CLIENT)
+  override def shouldRenderOffScreen(screen: Screen): Boolean = screen.isOrigin && (screen.width > 1 || screen.height > 1)
 
   private def playerDistanceSq(): Double = {
     val player = Minecraft.getInstance.player
-    val bounds = screen.getRenderBoundingBox
+    val bounds = getRenderBoundingBox(screen)
 
     val px = player.getX
     val py = player.getY

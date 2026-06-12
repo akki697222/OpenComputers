@@ -47,7 +47,7 @@ class Item(value: Block, props: Properties) extends BlockItem(value, props) {
     // in the different robots, to avoid interference of screens e.g.
     val needsCopying = ctx.getPlayer.isCreative && api.Items.get(ctx.getItemInHand) == api.Items.get(Constants.BlockName.Robot)
     val ctxToUse = if (needsCopying) {
-      val stackToUse = new RobotData(ctx.getItemInHand).copyItemStack()
+      val stackToUse = new RobotData(ctx.getItemInHand).copyItemStack(ctx.getLevel.registryAccess())
       val hitResult = new BlockHitResult(ctx.getClickLocation, ctx.getClickedFace, ctx.getClickedPos, ctx.isInside)
       new BlockPlaceContext(ctx.getLevel, ctx.getPlayer, ctx.getHand, stackToUse, hitResult)
     }

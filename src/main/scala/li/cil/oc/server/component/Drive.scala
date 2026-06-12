@@ -25,10 +25,11 @@ import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.level.storage.LevelResource
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Option[EnvironmentHost], val sound: Option[String], val speed: Int, val isLocked: Boolean) extends AbstractManagedEnvironment with DeviceInfo {
   override val node = Network.newNode(this, Visibility.Network).
@@ -71,7 +72,7 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
 
   @Callback(direct = true, doc = """function():string -- Get the current label of the drive.""")
   def getLabel(context: Context, args: Arguments): Array[AnyRef] = this.synchronized {
-    if (label != null) result(label.getLabel) else null
+    if (label != null) result(label.getLabel(ServerLifecycleHooks.getCurrentServer.registryAccess())) else null
   }
 
   @Callback(doc = """function(value:string):string -- Sets the label of the drive. Returns the new value, which may be truncated.""")
@@ -80,7 +81,7 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
     if (label == null) throw new Exception("drive does not support labeling")
     if (args.checkAny(0) == null) label.setLabel(null)
     else label.setLabel(args.checkString(0))
-    result(label.getLabel)
+    result(label.getLabel(ServerLifecycleHooks.getCurrentServer.registryAccess()))
   }
 
   @Callback(direct = true, doc = """function():number -- Returns the total capacity of the drive, in bytes.""")

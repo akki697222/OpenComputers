@@ -7,18 +7,16 @@ import li.cil.oc.api.event.RobotRenderEvent.MountPoint
 import li.cil.oc.api.internal.Robot
 import li.cil.oc.client.renderer.item.ItemUpgradeRenderer
 import li.cil.oc.common.blockentity
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.Tooltip
+import li.cil.oc.util.{BlockPosition, ClientAccessHelper, ItemUtils, Rarity, Tooltip}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.LevelReader
 import net.minecraft.core.Direction
-import net.minecraft.world.{InteractionHand, InteractionResult}
+import net.minecraft.world.{InteractionHand, InteractionResult, InteractionResultHolder, item}
 import net.minecraft.core.BlockPos
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.level.Level
-import net.minecraft.world.InteractionResultHolder
 import net.minecraft.client.renderer.MultiBufferSource
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -27,9 +25,20 @@ import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import com.mojang.blaze3d.vertex.PoseStack
+import li.cil.oc.common.item.data.TabletData
+import net.minecraft.core.component.DataComponents
+import net.minecraft.world.item.Item.TooltipContext
 
 trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
   def createItemStack(amount: Int = 1) = new ItemStack(this, amount)
+
+  def getRarity(stack: ItemStack): item.Rarity = item.Rarity.COMMON
+
+  // bruh
+  override def verifyComponentsAfterLoad(stack: ItemStack): Unit = {
+    super.verifyComponentsAfterLoad(stack)
+    stack.set(DataComponents.RARITY, this.getRarity(stack))
+  }
 
   @Deprecated
   protected var unlocalizedName = getClass.getSimpleName.toLowerCase
@@ -93,7 +102,7 @@ trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
   protected def tooltipData = Seq.empty[Any]
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
     if (tooltipName.isDefined) {
       for (curr <- Tooltip.get(tooltipName.get, tooltipData: _*)) {
         tooltip.add(Component.literal(curr).setStyle(Tooltip.DefaultStyle))
@@ -112,8 +121,9 @@ trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
   protected def tooltipExtended(stack: ItemStack, tooltip: java.util.List[Component]): Unit = {}
 
   protected def tooltipCosts(stack: ItemStack, tooltip: java.util.List[Component]): Unit = {
-    if (stack.hasTag && stack.getTag.contains(Settings.namespace + "data")) {
-      val data = stack.getTag.getCompound(Settings.namespace + "data")
+    val tag = ItemUtils.getTag(stack)
+    if (tag != null && tag.contains(Settings.namespace + "data")) {
+      val data = tag.getCompound(Settings.namespace + "data")
       if (data.contains("node") && data.getCompound("node").contains("address")) {
         tooltip.add(Component.literal("§8" + data.getCompound("node").getString("address").substring(0, 13) + "...§7"))
       }

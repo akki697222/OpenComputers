@@ -6,12 +6,16 @@ import li.cil.oc.api
 import li.cil.oc.integration.Mods
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ItemUtils
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.{CompoundTag, ListTag, StringTag, Tag}
 import net.minecraft.world.item
 import net.minecraft.world.item.Item
 import net.minecraft.tags.ItemTags
-import net.minecraft.world.item.enchantment.EnchantmentHelper
-import net.neoforged.registries.ForgeRegistries
+import net.minecraft.world.item.component.ItemLore
+import net.minecraft.world.item.enchantment.{Enchantment, EnchantmentHelper}
+import net.neoforged.neoforge.capabilities.Capabilities
+import net.neoforged.neoforge.energy.IEnergyStorage
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
@@ -55,43 +59,46 @@ object ConverterItemStack extends api.driver.Converter {
           output += "oreNames" -> tags
         }
 
-        val name = ForgeRegistries.ITEMS.getKey(stack.getItem).toString
+        val name = BuiltInRegistries.ITEM.getKey(stack.getItem).toString
+        val tag = ItemUtils.getTag(stack)
 
         output += "damage" -> Int.box(stack.getDamageValue)
         output += "maxDamage" -> Int.box(stack.getMaxDamage)
         output += "size" -> Int.box(stack.getCount)
         output += "maxSize" -> Int.box(stack.getMaxStackSize)
-        output += "hasTag" -> Boolean.box(stack.hasTag)
+        output += "hasTag" -> Boolean.box(tag != null)
         output += "name" -> name
         output += "label" -> stack.getDisplayName.getString
 
-        // custom mod tags
-        if (stack.hasTag) {
-          val tags = stack.getTag
-
-          //Lore tags
-          withCompound(tags, "display", withList(_, "Lore", {
-              output += "lore" -> _.map((tag: StringTag) => tag.getAsString).mkString("\n")
-            })
-          )
-
-          withTag(tags, "Energy", Tag.TAG_INT, value => output += "Energy" -> value)
-
-          if (Settings.get.allowItemStackNBTTags) {
-            output += "tag" -> ItemUtils.saveTag(stack.getTag)
+        stack.get(DataComponents.LORE) match {
+          case lore: ItemLore => {
+            output += "lore" -> lore.lines().map(_.getString).mkString("\n")
           }
         }
 
+        stack.getCapability(Capabilities.EnergyStorage.ITEM) match {
+          case storage: IEnergyStorage => {
+            output += "Energy" -> Int.box(storage.getEnergyStored)
+          }
+        }
+
+        // custom mod tags
+        if (tag != null && Settings.get.allowItemStackNBTTags) {
+          output += "tag" -> ItemUtils.saveTag(tag)
+        }
+
         val enchantments = mutable.ArrayBuffer.empty[mutable.Map[String, Any]]
-        EnchantmentHelper.getEnchantments(stack).collect {
-          case (enchantment, level) =>
-            val name = ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString
-            val map = mutable.Map[String, Any](
-              "name" -> name,
-              "label" -> enchantment.getFullname(level),
-              "level" -> level
-            )
-            enchantments += map
+        EnchantmentHelper.getEnchantmentsForCrafting(stack).entrySet().collect { entry =>
+          val enchantment = entry.getKey
+          val level = entry.getIntValue
+
+          val name = enchantment.getKey
+          val map = mutable.Map[String, Any](
+            "name" -> name,
+            "label" -> Enchantment.getFullname(enchantment, level),
+            "level" -> level
+          )
+          enchantments += map
         }
         if (enchantments.nonEmpty) {
           output += "enchantments" -> enchantments

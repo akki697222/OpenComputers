@@ -18,7 +18,6 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraft.core.HolderLookup
-import net.neoforged.common.ForgeHooks
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.item.ItemStack
@@ -52,7 +51,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     val count = args.optInteger(0, 64)
     val stack = host.mainInventory.getItem(host.selectedSlot)
     if (stack.isEmpty) return result((), "selected slot is empty")
-    if (ForgeHooks.getBurnTime(stack, null) <= 0) {
+    if (stack.getBurnTime(null) <= 0) {
       return result((), "selected slot does not contain fuel")
     }
     val container: ItemStack = stack.getCraftingRemainingItem
@@ -125,7 +124,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
       case requiredContainer if !requiredContainer.isEmpty && requiredContainer.getCount > 0 => previousSelectedItem match {
         case slotItem: ItemStack if !slotItem.isEmpty &&
           slotItem.getItem == requiredContainer.getItem &&
-          ItemStack.isSameItemSameTags(slotItem, requiredContainer) => slotItem.copy
+          ItemStack.isSameItemSameComponents(slotItem, requiredContainer) => slotItem.copy
         case _ => return result(false, "removing this fuel requires the appropriate container in the selected slot")
       }
       case _ => ItemStack.EMPTY // nothing to do, nothing required
@@ -166,7 +165,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     super.update()
     if (remainingTicks <= 0 && inventory.isDefined) {
       val stack = inventory.get
-      remainingTicks = ForgeHooks.getBurnTime(stack, null)
+      remainingTicks = stack.getBurnTime(null)
       if (remainingTicks > 0) {
         updateClient()
         stack.shrink(1)
@@ -214,9 +213,9 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
 
   override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadData(nbt, provider)
-      inventory = StackOption(ItemStack.of(nbt.getCompound("inventory")))
+      inventory = StackOption(ItemStack.parse(provider, nbt.getCompound("inventory")).get())
     if (nbt.contains(InventoryTag)) {
-      inventory = StackOption(ItemStack.of(nbt.getCompound(InventoryTag)))
+      inventory = StackOption(ItemStack.parse(provider, nbt.getCompound(InventoryTag)).get())
     }
     remainingTicks = nbt.getInt(RemainingTicksTag)
   }
@@ -224,7 +223,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveData(nbt, provider)
     inventory match {
-      case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, stack.save)
+      case SomeStack(stack) => nbt.setNewCompoundTag(InventoryTag, tag => stack.save(provider, tag))
       case _ =>
     }
     if (remainingTicks > 0) {

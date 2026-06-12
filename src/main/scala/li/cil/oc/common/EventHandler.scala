@@ -115,7 +115,7 @@ object EventHandler {
     // ITS FUCKING SHITTY LANGUAGE EVER
     EventHandlerHelper.registerCapabilities(event)
 
-    integration.minecraftforge.EventHandlerMinecraftForge.onRegisterCapabilities(event)
+    integration.neoforge.EventHandlerNeoForge.onRegisterCapabilities(event)
   }
 
   @SubscribeEvent

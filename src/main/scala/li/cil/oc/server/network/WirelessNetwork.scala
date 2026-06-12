@@ -6,9 +6,9 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedBlock._
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.RTree
-import net.neoforged.event.level.ChunkEvent
-import net.neoforged.event.level.LevelEvent
-import net.neoforged.eventbus.api.SubscribeEvent
+import net.neoforged.neoforge.event.level.ChunkEvent
+import net.neoforged.neoforge.event.level.LevelEvent
+import net.neoforged.bus.api.SubscribeEvent
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable

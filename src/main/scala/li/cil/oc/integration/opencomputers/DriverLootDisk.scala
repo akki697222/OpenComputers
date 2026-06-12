@@ -7,29 +7,34 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
+import li.cil.oc.util.ItemUtils
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.storage.LevelResource
-import net.neoforged.server.ServerLifecycleHooks
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 // This is deprecated and kept for compatibility with old saves.
 // As of OC 1.5.10, loot disks are generated using normal floppies, and using
 // a factory system that allows third-party mods to register loot disks.
 object DriverLootDisk extends Item {
-  override def worksWith(stack: ItemStack) = isOneOf(stack,
-    api.Items.get(Constants.ItemName.Floppy)) &&
-    (stack.hasTag && stack.getTag.contains(Settings.namespace + "lootPath"))
+  override def worksWith(stack: ItemStack) = {
+    var tag = ItemUtils.getTag(stack)
+    isOneOf(stack,
+      api.Items.get(Constants.ItemName.Floppy)) &&
+      (tag != null && tag.contains(Settings.namespace + "lootPath"))
+  }
 
-  override def createEnvironment(stack: ItemStack, host: EnvironmentHost) =
-    if (!host.getEnvironmentLevel.isClientSide && stack.hasTag && ServerLifecycleHooks.getCurrentServer != null) {
-      val lootPath = Settings.savePath + "loot/" + stack.getTag.getString(Settings.namespace + "lootPath")
+  override def createEnvironment(stack: ItemStack, host: EnvironmentHost) = {
+    val tag = ItemUtils.getTag(stack)
+    if (!host.getEnvironmentLevel.isClientSide && tag != null && ServerLifecycleHooks.getCurrentServer != null) {
+      val lootPath = Settings.savePath + "loot/" + tag.getString(Settings.namespace + "lootPath")
       val savePath = ServerLifecycleHooks.getCurrentServer.getWorldPath(new LevelResource(lootPath)).toFile
       val fs =
         if (savePath.exists && savePath.isDirectory) {
           api.FileSystem.fromSaveDirectory(lootPath, 0, false)
         }
         else {
-          api.FileSystem.fromResource(new ResourceLocation(Settings.resourceDomain, lootPath))
+          api.FileSystem.fromResource(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, lootPath))
         }
       val label =
         if (dataTag(stack).contains(Settings.namespace + "fs.label")) {
@@ -39,6 +44,7 @@ object DriverLootDisk extends Item {
       api.FileSystem.asManagedEnvironment(fs, label, host, Settings.resourceDomain + ":floppy_access")
     }
     else null
+  }
 
   override def slot(stack: ItemStack) = Slot.Floppy
 }

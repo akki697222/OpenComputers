@@ -4,15 +4,18 @@ import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.common.Tier
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.Rarity
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class TabletData extends ItemData(Constants.ItemName.Tablet) {
-  def this(stack: ItemStack) = {
+  def this(stack: ItemStack, provider: HolderLookup.Provider = ServerLifecycleHooks.getCurrentServer.registryAccess()) = {
     this()
-    loadData(stack)
+    loadData(stack, provider)
   }
 
   var items = Array.fill[ItemStack](32)(ItemStack.EMPTY)
@@ -35,7 +38,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     nbt.getList(ItemsTag, Tag.TAG_COMPOUND).foreach((slotNbt: CompoundTag) => {
       val slot = slotNbt.getByte(SlotTag)
       if (slot >= 0 && slot < items.length) {
-        items(slot) = ItemStack.of(slotNbt.getCompound(ItemTag))
+        items(slot) = ItemStack.parse(provider, slotNbt.getCompound(ItemTag)).get()
       }
     })
     isRunning = nbt.getBoolean(IsRunningTag)
@@ -43,7 +46,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     maxEnergy = nbt.getDouble(MaxEnergyTag)
     tier = nbt.getInt(TierTag)
     if (nbt.contains(ContainerTag)) {
-      container = ItemStack.of(nbt.getCompound(ContainerTag))
+      container = ItemStack.parse(provider, nbt.getCompound(ContainerTag)).get()
     }
   }
 
@@ -55,12 +58,12 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
         case (stack, slot) =>
           val slotNbt = new CompoundTag()
           slotNbt.putByte(SlotTag, slot.toByte)
-          slotNbt.setNewCompoundTag(ItemTag, stack.save)
+          slotNbt.setNewCompoundTag(ItemTag, tag => stack.save(provider, tag))
       })
     nbt.putBoolean(IsRunningTag, isRunning)
     nbt.putDouble(EnergyTag, energy)
     nbt.putDouble(MaxEnergyTag, maxEnergy)
     nbt.putInt(TierTag, tier)
-    if (!container.isEmpty) nbt.setNewCompoundTag(ContainerTag, container.save)
+    if (!container.isEmpty) nbt.setNewCompoundTag(ContainerTag, tag => container.save(provider, tag))
   }
 }

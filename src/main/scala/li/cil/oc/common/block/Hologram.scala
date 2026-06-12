@@ -13,6 +13,7 @@ import net.minecraft.world.phys.shapes.{CollisionContext => ISelectionContext}
 import net.minecraft.world.phys.shapes.VoxelShape
 import net.minecraft.world.phys.shapes.{Shapes => VoxelShapes}
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 
@@ -27,7 +28,7 @@ class Hologram(props: Properties, val tier: Int) extends SimpleBlock(props) with
 
   // ----------------------------------------------------------------------- //
 
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get(getClass.getSimpleName.toLowerCase() + tier)) {
       tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }

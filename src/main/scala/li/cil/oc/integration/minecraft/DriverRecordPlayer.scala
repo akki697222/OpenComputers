@@ -10,12 +10,16 @@ import li.cil.oc.api.prefab.DriverSidedTileEntity
 import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.item.{Item, ItemStack, RecordItem}
-import net.minecraft.core.Direction
-import net.minecraft.core.BlockPos
+import net.minecraft.world.item.{Item, ItemStack, JukeboxPlayable, JukeboxSong}
+import net.minecraft.core.{BlockPos, Direction, Holder}
+import net.minecraft.core.component.DataComponents
 import net.minecraft.locale.Language
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity
+import net.neoforged.neoforge.server.ServerLifecycleHooks
+import org.jspecify.annotations.Nullable
+
+import java.util.function.{BiConsumer, BiFunction}
 
 object DriverRecordPlayer extends DriverSidedTileEntity {
   override def getTileEntityClass: Class[_] = classOf[JukeboxBlockEntity]
@@ -28,28 +32,40 @@ object DriverRecordPlayer extends DriverSidedTileEntity {
 
     override def priority = 0
 
+    @Nullable
+    private def getRecordComponent[T](fn: BiFunction[Holder[JukeboxSong], JukeboxPlayable, T]): Option[T] = {
+      val stack = tileEntity.getTheItem
+      stack.get(DataComponents.JUKEBOX_PLAYABLE) match {
+        case playable: JukeboxPlayable => {
+          val song = playable.song().unwrap(ServerLifecycleHooks.getCurrentServer.registryAccess())
+
+          if (song.isPresent) {
+            return Some(fn.apply(song.get(), playable))
+          }
+        }
+      }
+
+      null
+    }
+
     @Callback(doc = "function():string -- Get the title of the record currently in the jukebox.")
     def getRecord(context: Context, args: Arguments): Array[AnyRef] = {
-      val record = tileEntity.getFirstItem
-      if (!record.isEmpty && record.getItem.isInstanceOf[RecordItem]) {
-        result(Language.getInstance.getOrDefault(record.getItem.asInstanceOf[RecordItem].getDescriptionId))
-      }
-      else null
+      getRecordComponent((song, _) => {
+        result(song.value().description().getString)
+      }).orNull
     }
 
     @Callback(doc = "function() -- Start playing the record currently in the jukebox.")
     def play(context: Context, args: Arguments): Array[AnyRef] = {
-      val record = tileEntity.getFirstItem
-      if (!record.isEmpty && record.getItem.isInstanceOf[RecordItem]) {
-        tileEntity.getLevel.levelEvent(null, 1010, tileEntity.getBlockPos, Item.getId(record.getItem))
+      getRecordComponent((song, _) => {
+        tileEntity.getSongPlayer().play(tileEntity.getLevel, song)
         result(true)
-      }
-      else null
+      }).orNull
     }
 
     @Callback(doc = "function() -- Stop playing the record currently in the jukebox.")
     def stop(context: Context, args: Arguments): Array[AnyRef] = {
-      tileEntity.getLevel.levelEvent(1010, tileEntity.getBlockPos, 0)
+      tileEntity.getSongPlayer.stop(tileEntity.getLevel, tileEntity.getBlockState)
       null
     }
   }

@@ -13,6 +13,7 @@ import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.{Component => ITextComponent}
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.{BlockGetter => IBlockReader}
 import net.minecraft.world.level.{Level => World}
@@ -20,7 +21,7 @@ import net.minecraft.world.level.{Level => World}
 import scala.collection.convert.ImplicitConversionsToScala._
 
 class Disassembler(props: Properties) extends SimpleBlock(props) with traits.PowerAcceptor with traits.StateAware with traits.GUI with traits.Tickable {
-  override protected def tooltipBody(stack: ItemStack, world: IBlockReader, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
+  override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get(getClass.getSimpleName.toLowerCase, (Settings.get.disassemblerBreakChance * 100).toInt.toString)) {
       tooltip.add(ITextComponent.literal(curr).setStyle(Tooltip.DefaultStyle))
     }

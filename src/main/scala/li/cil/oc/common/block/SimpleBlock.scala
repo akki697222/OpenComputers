@@ -1,5 +1,7 @@
 package li.cil.oc.common.block
 
+import com.mojang.serialization.MapCodec
+
 import java.util
 import li.cil.oc.common.blockentity
 import li.cil.oc.common.blockentity.traits.Colored
@@ -10,8 +12,7 @@ import li.cil.oc.util.Color
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.{RenderShape => BlockRenderType}
-import net.minecraft.world.level.block.{BaseEntityBlock => ContainerBlock}
+import net.minecraft.world.level.block.{Block, BaseEntityBlock => ContainerBlock, RenderShape => BlockRenderType}
 import net.minecraft.world.item.{TooltipFlag => ITooltipFlag}
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
@@ -24,6 +25,7 @@ import net.minecraft.world.{InteractionHand, InteractionResult, ItemInteractionR
 import net.minecraft.core.BlockPos
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.network.chat.Component
+import net.minecraft.world.item.Item.TooltipContext
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.{Level => World}
@@ -55,22 +57,22 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
   // ----------------------------------------------------------------------- //
 
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, world: BlockGetter, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
-    tooltipHead(stack, world, tooltip, flag)
-    tooltipBody(stack, world, tooltip, flag)
-    tooltipTail(stack, world, tooltip, flag)
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
+    tooltipHead(stack, context, tooltip, flag)
+    tooltipBody(stack, context, tooltip, flag)
+    tooltipTail(stack, context, tooltip, flag)
   }
 
-  protected def tooltipHead(stack: ItemStack, world: BlockGetter, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
+  protected def tooltipHead(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
   }
 
-  protected def tooltipBody(stack: ItemStack, world: BlockGetter, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
+  protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
     for (curr <- Tooltip.get(getClass.getSimpleName.toLowerCase)) {
       tooltip.add(Component.literal(curr).setStyle(Tooltip.DefaultStyle))
     }
   }
 
-  protected def tooltipTail(stack: ItemStack, world: BlockGetter, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
+  protected def tooltipTail(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: ITooltipFlag): Unit = {
   }
 
   // ----------------------------------------------------------------------- //
@@ -124,7 +126,7 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
     super.getDrops(state, newCtx)
   }
 
-  override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity): Unit = {
+  override def playerWillDestroy(world: World, pos: BlockPos, state: BlockState, player: PlayerEntity) = {
     if (!world.isClientSide && player.isCreative) world.getBlockEntity(pos) match {
       case inventory: Inventory => inventory.dropAllSlots()
       case _ => // Ignore.

@@ -18,7 +18,6 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.inventory.Slot
-import net.neoforged.common.util.FakePlayer
 import net.minecraft.world.inventory.ContainerListener
 import net.minecraft.nbt.CompoundTag
 import net.neoforged.api.distmarker.OnlyIn
@@ -85,7 +84,7 @@ abstract class AbstractMenu(selfType: MenuType[_ <: AbstractMenu], id: Int, val 
 
     if (!toStack.isEmpty) {
       if (toStackSize < maxStackSize &&
-          ItemStack.isSameItemSameTags(fromStack, toStack) &&
+          ItemStack.isSameItemSameComponents(fromStack, toStack) &&
           itemsMoved > 0) {
         toStack.grow(from.remove(itemsMoved).getCount)
       } else return false

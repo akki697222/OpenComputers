@@ -3,10 +3,11 @@ package li.cil.oc.common.recipe
 import li.cil.oc.util.Color
 import li.cil.oc.util.ItemColorizer
 import li.cil.oc.util.StackOption
-import net.minecraft.core.RegistryAccess
+import net.minecraft.core.{HolderLookup, RegistryAccess}
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.util.FastColor.ARGB32
 import net.minecraft.world.inventory.CraftingContainer
-import net.minecraft.world.item.crafting.{CraftingBookCategory, CustomRecipe}
+import net.minecraft.world.item.crafting.{CraftingBookCategory, CraftingInput, CustomRecipe}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.{ItemLike, Level}
@@ -14,23 +15,23 @@ import net.minecraft.world.level.{ItemLike, Level}
 /**
   * @author asie, Vexatos
   */
-class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(id, CraftingBookCategory.MISC) {
+class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecipe(CraftingBookCategory.MISC) {
   val targetItem: Item = target.asItem()
 
-  override def matches(crafting: CraftingContainer, level: Level): Boolean = {
-    val stacks = (0 until crafting.getContainerSize).flatMap(i => StackOption(crafting.getItem(i)))
+  override def matches(crafting: CraftingInput, level: Level): Boolean = {
+    val stacks = (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i)))
     val targets = stacks.filter(stack => stack.getItem == targetItem)
     val other = stacks.filterNot(targets.contains(_))
     targets.size == 1 && other.nonEmpty && other.forall(Color.isDye)
   }
 
-  override def assemble(crafting: CraftingContainer, registryAccess: RegistryAccess): ItemStack = {
+  override def assemble(crafting: CraftingInput, provider: HolderLookup.Provider): ItemStack = {
     var targetStack: ItemStack = ItemStack.EMPTY
     val color = Array[Int](0, 0, 0)
     var colorCount = 0
     var maximum = 0
 
-    (0 until crafting.getContainerSize).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
+    (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i))).foreach { stack =>
       if (stack.getItem == targetItem) {
         targetStack = stack.copy()
         targetStack.setCount(1)
@@ -39,10 +40,10 @@ class ColorizeRecipe(id: ResourceLocation, target: ItemLike) extends CustomRecip
         if (dye.isEmpty)
           return ItemStack.EMPTY
 
-        val itemColor = Color.byTag(dye.get).getTextureDiffuseColors
-        val red = (itemColor(0) * 255.0F).toInt
-        val green = (itemColor(1) * 255.0F).toInt
-        val blue = (itemColor(2) * 255.0F).toInt
+        val itemColor = Color.byTag(dye.get).getTextureDiffuseColor()
+        val red = ARGB32.red(itemColor)
+        val green = ARGB32.green(itemColor)
+        val blue = ARGB32.blue(itemColor)
         maximum += Math.max(red, Math.max(green, blue))
         color(0) += red
         color(1) += green

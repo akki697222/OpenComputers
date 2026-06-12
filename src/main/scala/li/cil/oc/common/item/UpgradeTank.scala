@@ -5,7 +5,7 @@ import java.util
 import li.cil.oc.Settings
 import li.cil.oc.util.Tooltip
 import net.minecraft.world.item.Item
-import net.minecraft.world.item.Item.Properties
+import net.minecraft.world.item.Item.{Properties, TooltipContext}
 import net.minecraft.world.item.ItemStack
 import net.neoforged.fluids.FluidStack
 import net.neoforged.api.distmarker.Dist
@@ -17,10 +17,10 @@ import net.minecraft.world.level.Level
 
 class UpgradeTank(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier {
   @OnlyIn(Dist.CLIENT)
-  override def appendHoverText(stack: ItemStack, level: Level, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
-    super.appendHoverText(stack, level, tooltip, flag)
-    if (stack.hasTag) {
-      FluidStack.loadFluidStackFromNBT(stack.getTag.getCompound(Settings.namespace + "data")) match {
+  override def appendHoverText(stack: ItemStack, context: TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
+    super.appendHoverText(stack, context, tooltip, flag)
+    if (stack.has(DataComponents.CUSTOM_DATA)) {
+      FluidStack.parse(context.level().registryAccess(), stack.get(DataComponents.CUSTOM_DATA).copyTag().getCompound(Settings.namespace + "data")).get() match {
         case stack: FluidStack =>
           tooltip.add(Component.literal(stack.getDisplayName.getString + ": " + stack.getAmount + "/16000").setStyle(Tooltip.DefaultStyle))
         case _ =>

@@ -1,14 +1,15 @@
-package li.cil.oc.integration.minecraftforge
+package li.cil.oc.integration.neoforge
 
-import li.cil.oc.common.blockentity.traits.PowerAcceptor
+import li.cil.oc.common.blockentity.traits.{BaseBlockEntity, PowerAcceptor}
 import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.integration.util.Power
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
-import net.neoforged.neoforge.capabilities.{Capabilities, RegisterCapabilitiesEvent}
+import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
+import net.neoforged.neoforge.capabilities.{Capabilities, ICapabilityProvider, RegisterCapabilitiesEvent}
 import net.neoforged.neoforge.energy.IEnergyStorage
 
-object EventHandlerMinecraftForge {
+object EventHandlerNeoForge {
 
   // Called from EventHandler.onRegisterCapabilities
   def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
@@ -24,10 +25,17 @@ object EventHandlerMinecraftForge {
       TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
       TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
     ).foreach { beType =>
-      event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get(), (be, side) => be match {
+      event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get().asInstanceOf[BlockEntityType[_]], EnergyCapabilityProvider.asInstanceOf)
+    }
+  }
+
+
+  object EnergyCapabilityProvider extends ICapabilityProvider[IEnergyStorage, Direction, EnergyStorageImpl] {
+    override def getCapability(be: IEnergyStorage, side: Direction): EnergyStorageImpl = {
+      be match {
         case pa: PowerAcceptor if pa.canConnectPower(side) => new EnergyStorageImpl(pa, side)
         case _ => null
-      })
+      }
     }
   }
 

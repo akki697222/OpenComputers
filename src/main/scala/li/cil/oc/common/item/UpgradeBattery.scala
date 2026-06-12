@@ -3,9 +3,11 @@ package li.cil.oc.common.item
 import li.cil.oc.Settings
 import li.cil.oc.api.driver.item.Chargeable
 import li.cil.oc.common.item.data.NodeData
+import net.minecraft.core.component.DataComponents
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.CustomData
 
 
 class UpgradeBattery(props: Properties, val tier: Int) extends Item(props) with traits.SimpleItem with traits.ItemTier with traits.Chargeable {
@@ -36,7 +38,7 @@ class UpgradeBattery(props: Properties, val tier: Int) extends Item(props) with 
     }
     traits.Chargeable.applyCharge(amount, buffer, Settings.get.bufferCapacitorUpgrades(tier), used => if (!simulate) {
       data.buffer = Option(buffer + used)
-      data.saveData(stack)
+      CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => data.saveData(tag))
     })
   }
 
@@ -47,7 +49,7 @@ class UpgradeBattery(props: Properties, val tier: Int) extends Item(props) with 
   override def setCharge(stack: ItemStack, amount: Double): Unit = {
     val data = new NodeData(stack)
     data.buffer = Option((0.0 max amount) min maxCharge(stack))
-    data.saveData(stack)
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => data.saveData(tag))
   }
 
   override def canExtract(stack: ItemStack): Boolean = true

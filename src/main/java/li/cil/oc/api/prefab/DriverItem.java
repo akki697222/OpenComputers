@@ -6,6 +6,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.component.CustomData;
 
+import java.util.function.Consumer;
+
 /**
  * If you wish to create item components such as the network card or hard drives
  * you will need an item driver.
@@ -48,12 +50,21 @@ public abstract class DriverItem implements li.cil.oc.api.driver.DriverItem {
     @Override
     public CompoundTag dataTag(final ItemStack stack) {
         final CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-        // This is the suggested key under which to store item component data.
-        // You are free to change this as you please.
-        if (!nbt.contains("oc:data")) {
-            nbt.put("oc:data", new CompoundTag());
-        }
+
         return nbt.getCompound("oc:data");
+    }
+
+    @Override
+    public void updateDataTag(ItemStack stack, Consumer<CompoundTag> updater) {
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, nbt -> {
+            // This is the suggested key under which to store item component data.
+            // You are free to change this as you please.
+            if (!nbt.contains("oc:data")) {
+                nbt.put("oc:data", new CompoundTag());
+            }
+
+            updater.accept(nbt.getCompound("oc:data"));
+        });
     }
 
     // Convenience methods provided for HostAware drivers.

@@ -46,9 +46,9 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
-import net.neoforged.common.MinecraftForge
-import net.neoforged.common.world.ForgeChunkManager
-import net.neoforged.fml.DistExecutor
+import net.neoforged.fml.loading.FMLEnvironment
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object ModOpenComputers extends ModProxy {
   override def getMod = Mods.OpenComputers
@@ -90,26 +90,26 @@ object ModOpenComputers extends ModProxy {
     api.IMC.registerProgramDiskLabel("opl-flash", "openloader", "Lua 5.2", "Lua 5.3", "LuaJ")
     api.IMC.registerProgramDiskLabel("oppm", "oppm", "Lua 5.2", "Lua 5.3", "LuaJ")
 
-    ForgeChunkManager.setForcedChunkLoadingCallback(OpenComputers.ID, ChunkloaderUpgradeHandler)
+    //ForgeChunkManager.setForcedChunkLoadingCallback(OpenComputers.ID, ChunkloaderUpgradeHandler)
 
-    MinecraftForge.EVENT_BUS.register(EventHandler)
-    MinecraftForge.EVENT_BUS.register(NanomachinesHandler.Common)
-    MinecraftForge.EVENT_BUS.register(Tablet)
-    MinecraftForge.EVENT_BUS.register(Analyzer)
-    MinecraftForge.EVENT_BUS.register(AngelUpgradeHandler)
-    MinecraftForge.EVENT_BUS.register(ChunkloaderUpgradeHandler)
-    MinecraftForge.EVENT_BUS.register(ExperienceUpgradeHandler)
-    MinecraftForge.EVENT_BUS.register(FileSystemAccessHandler)
-    MinecraftForge.EVENT_BUS.register(HoverBootsHandler)
-    MinecraftForge.EVENT_BUS.register(Loot)
-    MinecraftForge.EVENT_BUS.register(NetworkActivityHandler)
-    MinecraftForge.EVENT_BUS.register(RobotCommonHandler)
-    MinecraftForge.EVENT_BUS.register(SaveHandler)
-    MinecraftForge.EVENT_BUS.register(Waypoints)
-    MinecraftForge.EVENT_BUS.register(WirelessNetwork)
-    MinecraftForge.EVENT_BUS.register(WirelessNetworkCardHandler)
-    MinecraftForge.EVENT_BUS.register(li.cil.oc.client.ComponentTracker)
-    MinecraftForge.EVENT_BUS.register(li.cil.oc.server.ComponentTracker)
+    NeoForge.EVENT_BUS.register(EventHandler)
+    NeoForge.EVENT_BUS.register(NanomachinesHandler.Common)
+    NeoForge.EVENT_BUS.register(Tablet)
+    NeoForge.EVENT_BUS.register(Analyzer)
+    NeoForge.EVENT_BUS.register(AngelUpgradeHandler)
+    NeoForge.EVENT_BUS.register(ChunkloaderUpgradeHandler)
+    NeoForge.EVENT_BUS.register(ExperienceUpgradeHandler)
+    NeoForge.EVENT_BUS.register(FileSystemAccessHandler)
+    NeoForge.EVENT_BUS.register(HoverBootsHandler)
+    NeoForge.EVENT_BUS.register(Loot)
+    NeoForge.EVENT_BUS.register(NetworkActivityHandler)
+    NeoForge.EVENT_BUS.register(RobotCommonHandler)
+    NeoForge.EVENT_BUS.register(SaveHandler)
+    NeoForge.EVENT_BUS.register(Waypoints)
+    NeoForge.EVENT_BUS.register(WirelessNetwork)
+    NeoForge.EVENT_BUS.register(WirelessNetworkCardHandler)
+    NeoForge.EVENT_BUS.register(li.cil.oc.client.ComponentTracker)
+    NeoForge.EVENT_BUS.register(li.cil.oc.server.ComponentTracker)
 
     api.Driver.add(ConverterNanomachines)
     api.Driver.add(ConverterLinkedCard)
@@ -319,7 +319,9 @@ object ModOpenComputers extends ModProxy {
     api.Nanomachines.addProvider(PotionProvider)
     api.Nanomachines.addProvider(MagnetProvider)
 
-    DistExecutor.runWhenOn(Dist.CLIENT, () => () => initializeClient())
+    if(FMLEnvironment.dist.isClient) {
+      initializeClient()
+    }
   }
 
   @OnlyIn(Dist.CLIENT)
@@ -375,7 +377,7 @@ object ModOpenComputers extends ModProxy {
 
   private def blacklistHost(host: Class[_], itemNames: String*): Unit = {
     for (itemName <- itemNames) try {
-      api.IMC.blacklistHost(itemName, host, api.Items.get(itemName).createItemStack(1))
+      api.IMC.blacklistHost(itemName, host, api.Items.get(itemName).createItemStack(1), ServerLifecycleHooks.getCurrentServer.registryAccess())
     } catch {
       case t: Throwable => OpenComputers.log.warn(s"Error blacklisting '$itemName' for '${host.getSimpleName}.", t)
     }

@@ -9,7 +9,10 @@ object UpgradeExperience {
 
   def getExperience(nbt: CompoundTag): Double = nbt.getDouble(XpTag) max 0
 
-  def getExperience(stack: ItemStack): Double = if (!stack.hasTag) 0 else getExperience(stack.getTag)
+  def getExperience(stack: ItemStack): Double = {
+    val tag = ItemUtils.getTag(stack)
+    if (tag == null) 0 else getExperience(tag)
+  }
 
   def setExperience(nbt: CompoundTag, experience: Double): Unit = nbt.putDouble(XpTag, experience)
 

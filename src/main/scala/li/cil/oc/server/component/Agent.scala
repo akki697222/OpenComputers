@@ -22,12 +22,12 @@ import net.minecraft.world.{Container, InteractionHand}
 import net.minecraft.world.entity.{Entity, LivingEntity, Pose}
 import net.minecraft.world.phys.{BlockHitResult, EntityHitResult, HitResult, Vec3}
 import net.minecraft.world.level.ClipContext
-import net.neoforged.common.MinecraftForge
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.player
 import net.minecraft.world.entity.vehicle.Minecart
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.NeoForge
 
 trait Agent extends traits.LevelControl with traits.ContainerControl with traits.ContainerLevelControl with traits.TankAware with traits.TankControl with traits.TankLevelControl {
   def agent: internal.Agent
@@ -64,7 +64,7 @@ trait Agent extends traits.LevelControl with traits.ContainerControl with traits
 
   def canPlaceInAir: Boolean = {
     val event = new RobotPlaceInAirEvent(agent)
-    MinecraftForge.EVENT_BUS.post(event)
+    NeoForge.EVENT_BUS.post(event)
     event.isAllowed
   }
 
