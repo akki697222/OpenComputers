@@ -7,7 +7,7 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.prefab.DriverSidedTileEntity
-import li.cil.oc.integration.ManagedTileEntityEnvironment
+import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
@@ -24,7 +24,7 @@ object DriverCommandBlock extends DriverSidedTileEntity {
   override def createEnvironment(world: Level, pos: BlockPos, side: Direction): ManagedEnvironment =
     new Environment(world.getBlockEntity(pos).asInstanceOf[CommandBlockEntity])
 
-  final class Environment(tileEntity: CommandBlockEntity) extends ManagedTileEntityEnvironment[CommandBlockEntity](tileEntity, "command_block") with NamedBlock {
+  final class Environment(tileEntity: CommandBlockEntity) extends ManagedBlockEntityEnvironment[CommandBlockEntity](tileEntity, "command_block") with NamedBlock {
     override def preferredName = "command_block"
 
     override def priority = 0

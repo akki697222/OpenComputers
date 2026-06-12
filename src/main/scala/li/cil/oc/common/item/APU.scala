@@ -12,9 +12,11 @@ class APU(props: Properties, val tier: Int) extends Item(props) with traits.Simp
   @Deprecated
   override def getDescriptionId = super.getDescriptionId + tier
 
-  override def cpuTier = math.min(Tier.Three, tier + 1)
+  override protected def tierFromDriver(stack: ItemStack) = cpuTier
 
-  override def gpuTier = tier
+  override def cpuTier = math.min(Tier.Four, tier + 1)
+
+  override def gpuTier = math.min(Tier.Four, tier)
 
   override protected def tooltipName = Option(unlocalizedName)
 

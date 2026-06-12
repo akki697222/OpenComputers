@@ -44,7 +44,7 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
   var lastFileSystemAccess = 0L
   var lastNetworkActivity = 0L
 
-  setColor(Color.rgbValues(Color.byTier(tier)))
+  setColor(Color.byTier(tier))
 
   private final lazy val deviceInfo = Map(
     DeviceAttribute.Class -> DeviceClass.System,
@@ -65,7 +65,7 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
 
   override def energyThroughput = Settings.get.caseRate(tier)
 
-  def isCreative = tier == Tier.Four
+  def isCreative = tier == Tier.Five
 
   // ----------------------------------------------------------------------- //
 
@@ -102,8 +102,8 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
   private final val TierTag = Settings.namespace + "tier"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min 3
-    setColor(Color.rgbValues(Color.byTier(tier)))
+    tier = nbt.getByte(TierTag) max 0 min Tier.Five
+    setColor(Color.byTier(tier))
     super.loadForServer(nbt, provider)
     isSizeInventoryReady = true
   }

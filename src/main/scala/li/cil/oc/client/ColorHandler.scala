@@ -28,13 +28,14 @@ object ColorHandler {
     register((state, world, pos, tintIndex) => if (pos == null) 0xFFFFFFFF else world.getBlockEntity(pos) match {
       case colored: Colored => colored.getColor
       case _ => state.getBlock match {
-        case block: block.Case => Color.rgbValues(Color.byTier(block.tier))
+        case block: block.Case => Color.byTier(block.tier)
         case _ => 0xFFFFFFFF
       }
     },
       api.Items.get(Constants.BlockName.CaseTier1).block(),
       api.Items.get(Constants.BlockName.CaseTier2).block(),
       api.Items.get(Constants.BlockName.CaseTier3).block(),
+      api.Items.get(Constants.BlockName.CaseTier4).block(),
       api.Items.get(Constants.BlockName.CaseCreative).block())
 
     register((state, world, pos, tintIndex) => Color.rgbValues(state.getValue(block.ChameliumBlock.Color)),
@@ -44,7 +45,7 @@ object ColorHandler {
       api.Items.get(Constants.BlockName.Print).block())
 
     register((state, world, pos, tintIndex) => state.getBlock match {
-      case block: block.Screen => Color.rgbValues(Color.byTier(block.tier))
+      case block: block.Screen => Color.byTier(block.tier)
       case _ => 0xFFFFFFFF
     },
       api.Items.get(Constants.BlockName.ScreenTier1).block(),
@@ -54,10 +55,11 @@ object ColorHandler {
     register((stack, tintIndex) => if (ItemColorizer.hasColor(stack)) ItemColorizer.getColor(stack) else tintIndex,
       api.Items.get(Constants.BlockName.Cable).block())
 
-    register((stack, tintIndex) => Color.rgbValues(Color.byTier(ItemUtils.caseTier(stack))),
+    register((stack, tintIndex) => Color.byTier(ItemUtils.caseTier(stack)),
       api.Items.get(Constants.BlockName.CaseTier1).block(),
       api.Items.get(Constants.BlockName.CaseTier2).block(),
       api.Items.get(Constants.BlockName.CaseTier3).block(),
+      api.Items.get(Constants.BlockName.CaseTier4).block(),
       api.Items.get(Constants.BlockName.CaseCreative).block())
 
     register((stack, tintIndex) => Color.rgbValues(DyeColor.byId(stack.getDamageValue)),

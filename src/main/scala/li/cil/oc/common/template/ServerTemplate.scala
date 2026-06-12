@@ -12,7 +12,8 @@ object ServerTemplate {
   def selectDisassembler(stack: ItemStack) =
     api.Items.get(stack) == api.Items.get(Constants.ItemName.ServerTier1) ||
       api.Items.get(stack) == api.Items.get(Constants.ItemName.ServerTier2) ||
-      api.Items.get(stack) == api.Items.get(Constants.ItemName.ServerTier3)
+      api.Items.get(stack) == api.Items.get(Constants.ItemName.ServerTier3) ||
+      api.Items.get(stack) == api.Items.get(Constants.ItemName.ServerTier4)
 
   def disassemble(stack: ItemStack, ingredients: Array[ItemStack]) = {
     val info = new ServerInventory {

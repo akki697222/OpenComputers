@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object UpdateCheck {
-  private val releasesUrl = new URL("https://api.github.com/repos/MightyPirates/OpenComputers/releases")
+  private val releasesUrl = new URL("https://api.github.com/repos/akki697222/OpenComputers-CE/releases")
 
   var info = Future {
     initialize()

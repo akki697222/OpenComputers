@@ -229,7 +229,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   var autoSave = true
   ////
 
-  def isCreative: Boolean = data.tier == Tier.Four
+  def isCreative: Boolean = data.tier == Tier.Five
 
   def items: Array[ItemStack] = data.items
 

@@ -255,6 +255,7 @@ object ModelInitialization {
       Constants.BlockName.ScreenTier1 -> (_ => ScreenModel),
       Constants.BlockName.ScreenTier2 -> (_ => ScreenModel),
       Constants.BlockName.ScreenTier3 -> (_ => ScreenModel),
+      Constants.BlockName.ScreenTier4 -> (_ => ScreenModel),
       Constants.BlockName.Rack        -> (parent => new ServerRackModel(parent))
     )
 

@@ -57,18 +57,18 @@ class Settings(val config: Config) {
   val eepromSize = config.getInt("computer.eepromSize") max 0
   val eepromDataSize = config.getInt("computer.eepromDataSize") max 0
   val cpuComponentSupport = config.getIntList("computer.cpuComponentCount").asScala.toArray match {
-    case Array(tier1, tier2, tier3, tierCreative) =>
-      Array(tier1: Int, tier2: Int, tier3: Int, tierCreative: Int)
+    case Array(tier1, tier2, tier3, tier4, tierCreative) =>
+      Array(tier1: Int, tier2: Int, tier3: Int, tier4: Int, tierCreative: Int)
     case _ =>
       OpenComputers.log.warn("Bad number of CPU component counts, ignoring.")
-      Array(8, 12, 16, 1024)
+      Array(8, 12, 16, 20, 1024)
   }
   val callBudgets = config.getDoubleList("computer.callBudgets").asScala.toArray match {
-    case Array(tier1, tier2, tier3) =>
-      Array(tier1: Double, tier2: Double, tier3: Double)
+    case Array(tier1, tier2, tier3, tier4) =>
+      Array(tier1: Double, tier2: Double, tier3: Double, tier4: Double)
     case _ =>
       OpenComputers.log.warn("Bad number of call budgets, ignoring.")
-      Array(0.5, 1.0, 1.5)
+      Array(0.5, 1.0, 1.5, 2.0)
   }
   val canComputersBeOwned = config.getBoolean("computer.canComputersBeOwned")
   val maxUsers = config.getInt("computer.maxUsers") max 0
@@ -83,11 +83,11 @@ class Settings(val config: Config) {
   val defaultLua53 = config.getBoolean("computer.lua.defaultLua53")
   val enableLua54 = config.getBoolean("computer.lua.enableLua54")
   val ramSizes = config.getIntList("computer.lua.ramSizes").asScala.toArray match {
-    case Array(tier1, tier2, tier3, tier4, tier5, tier6) =>
-      Array(tier1: Int, tier2: Int, tier3: Int, tier4: Int, tier5: Int, tier6: Int)
+    case Array(tier1, tier2, tier3, tier4, tier5, tier6, tier7, tier8) =>
+      Array(tier1: Int, tier2: Int, tier3: Int, tier4: Int, tier5: Int, tier6: Int, tier7: Int, tier8: Int)
     case _ =>
       OpenComputers.log.warn("Bad number of RAM sizes, ignoring.")
-      Array(192, 256, 384, 512, 768, 1024)
+      Array(128, 256, 512, 1024, 2048, 4096, 8192, 16384)
   }
   val ramScaleFor64Bit = config.getDouble("computer.lua.ramScaleFor64Bit") max 1
   val maxTotalRam = config.getInt("computer.lua.maxTotalRam") max 0
@@ -234,11 +234,11 @@ class Settings(val config: Config) {
   val accessPointRate = config.getDouble("power.rate.accessPoint") max 0
   val assemblerRate = config.getDouble("power.rate.assembler") max 0
   val caseRate = (config.getDoubleList("power.rate.case").asScala.toArray match {
-    case Array(tier1, tier2, tier3) =>
-      Array(tier1: Double, tier2: Double, tier3: Double)
+    case Array(tier1, tier2, tier3, tier4) =>
+      Array(tier1: Double, tier2: Double, tier3: Double, tier4: Double)
     case _ =>
       OpenComputers.log.warn("Bad number of computer case conversion rates, ignoring.")
-      Array(5.0, 10.0, 20.0)
+      Array(5.0, 10.0, 20.0, 30.0)
   }) ++ Array(9001.0)
   // Creative case.
   val chargerRate = config.getDouble("power.rate.charger") max 0
@@ -274,18 +274,25 @@ class Settings(val config: Config) {
   val fileCost = config.getInt("filesystem.fileCost") max 0
   val bufferChanges = config.getBoolean("filesystem.bufferChanges")
   val hddSizes = config.getIntList("filesystem.hddSizes").asScala.toArray match {
-    case Array(tier1, tier2, tier3) =>
-      Array(tier1: Int, tier2: Int, tier3: Int)
+    case Array(tier1, tier2, tier3, tier4) =>
+      Array(tier1: Int, tier2: Int, tier3: Int, tier4: Int)
     case _ =>
       OpenComputers.log.warn("Bad number of HDD sizes, ignoring.")
-      Array(1024, 2048, 4096)
+      Array(2048, 4096, 8192, 16384)
   }
-  val hddPlatterCounts = config.getIntList("filesystem.hddPlatterCounts").asScala.toArray match {
+  val ssdSizes = config.getIntList("filesystem.ssdSizes").asScala.toArray match {
     case Array(tier1, tier2, tier3) =>
       Array(tier1: Int, tier2: Int, tier3: Int)
     case _ =>
+      OpenComputers.log.warn("Bad number of SSD sizes, ignoring.")
+      Array(4096, 8192, 16384)
+  }
+  val hddPlatterCounts = config.getIntList("filesystem.hddPlatterCounts").asScala.toArray match {
+    case Array(tier1, tier2, tier3, tier4) =>
+      Array(tier1: Int, tier2: Int, tier3: Int, tier4: Int)
+    case _ =>
       OpenComputers.log.warn("Bad number of HDD platter counts, ignoring.")
-      Array(2, 4, 6)
+      Array(2, 4, 6, 8)
   }
   val floppySize = config.getInt("filesystem.floppySize") max 0
   val tmpSize = config.getInt("filesystem.tmpSize") max 0
@@ -321,18 +328,18 @@ class Settings(val config: Config) {
   // ----------------------------------------------------------------------- //
   // hologram
   val hologramMaxScaleByTier = config.getDoubleList("hologram.maxScale").asScala.toArray match {
-    case Array(tier1, tier2) =>
-      Array((tier1: Double) max 1.0, (tier2: Double) max 1.0)
+    case Array(tier1, tier2, tier3) =>
+      Array((tier1: Double) max 1.0, (tier2: Double) max 1.0, (tier3: Double) max 1.0)
     case _ =>
       OpenComputers.log.warn("Bad number of hologram max scales, ignoring.")
-      Array(3.0, 4.0)
+      Array(3.0, 4.0, 5.0)
   }
   val hologramMaxTranslationByTier = config.getDoubleList("hologram.maxTranslation").asScala.toArray match {
-    case Array(tier1, tier2) =>
-      Array((tier1: Double) max 0.0, (tier2: Double) max 0.0)
+    case Array(tier1, tier2, tier3) =>
+      Array((tier1: Double) max 0.0, (tier2: Double) max 0.0, (tier3: Double) max 0.0)
     case _ =>
       OpenComputers.log.warn("Bad number of hologram max translations, ignoring.")
-      Array(0.25, 0.5)
+      Array(0.25, 0.5, 0.75)
   }
   val hologramSetRawDelay = config.getDouble("hologram.setRawDelay") max 0
   val hologramLight = config.getBoolean("hologram.emitLight")
@@ -381,7 +388,7 @@ class Settings(val config: Config) {
   val dataCardSoftLimit = config.getInt("misc.dataCardSoftLimit") max 0
   val dataCardHardLimit = config.getInt("misc.dataCardHardLimit") max 0
   val dataCardTimeout = config.getDouble("misc.dataCardTimeout") max 0
-  val serverRackSwitchTier = (config.getInt("misc.serverRackSwitchTier") - 1) max Tier.None min Tier.Three
+  val serverRackSwitchTier = (config.getInt("misc.serverRackSwitchTier") - 1) max Tier.None min Tier.Four
   val redstoneDelay = config.getDouble("misc.redstoneDelay") max 0
   val tradingRange = config.getDouble("misc.tradingRange") max 0
   val mfuRange = config.getInt("misc.mfuRange") max 0 min 128
@@ -475,10 +482,10 @@ class Settings(val config: Config) {
 
   // >= 1.7.6
   val vramSizes: Array[Double] = config.getDoubleList("gpu.vramSizes").asScala.toArray match {
-    case Array(tier1, tier2, tier3) => Array(tier1: Double, tier2: Double, tier3: Double)
+    case Array(tier1, tier2, tier3, tier4) => Array(tier1: Double, tier2: Double, tier3: Double, tier4: Double)
     case _ =>
-      OpenComputers.log.warn("Bad number of VRAM sizes (expected 3), ignoring.")
-      Array(1, 2, 3)
+      OpenComputers.log.warn("Bad number of VRAM sizes (expected 4), ignoring.")
+      Array(1, 2, 3, 4)
   }
 
   val bitbltCost: Double = if (config.hasPath("gpu.bitbltCost")) config.getDouble("gpu.bitbltCost") else 0.5
@@ -516,9 +523,9 @@ object Settings {
   val namespace = "oc:"
   val savePath = "opencomputers/"
   val scriptPath: String = "/assets/" + resourceDomain + "/lua/"
-  val screenResolutionsByTier: Array[(Int, Int)] = Array((50, 16), (80, 25), (160, 50))
-  val screenDepthsByTier: Array[api.internal.TextBuffer.ColorDepth] = Array(api.internal.TextBuffer.ColorDepth.OneBit, api.internal.TextBuffer.ColorDepth.FourBit, api.internal.TextBuffer.ColorDepth.EightBit)
-  val deviceComplexityByTier: Array[Int] = Array(12, 24, 32, 9001)
+  val screenResolutionsByTier: Array[(Int, Int)] = Array((50, 16), (80, 25), (160, 50), (190, 60))
+  val screenDepthsByTier: Array[api.internal.TextBuffer.ColorDepth] = Array(api.internal.TextBuffer.ColorDepth.OneBit, api.internal.TextBuffer.ColorDepth.FourBit, api.internal.TextBuffer.ColorDepth.EightBit, api.internal.TextBuffer.ColorDepth.SixteenBit)
+  val deviceComplexityByTier: Array[Int] = Array(12, 24, 32, 48, 9001)
   var rTreeDebugRenderer = false
   var blockRenderId: Int = -1
   private val forbiddenConfigLists: List[String] = List(
@@ -789,4 +796,3 @@ object Settings {
       default.getOrElse(new java.util.LinkedList[Integer]())
   }
 }
-

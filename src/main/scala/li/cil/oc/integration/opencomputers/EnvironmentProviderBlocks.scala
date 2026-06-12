@@ -23,13 +23,13 @@ object EnvironmentProviderBlocks extends EnvironmentProvider {
   override def getEnvironment(stack: ItemStack): Class[_] = stack.getItem match {
     case block: BlockItem if block.getBlock != null =>
       if (isOneOf(block.getBlock, Constants.BlockName.Assembler)) classOf[blockentity.Assembler]
-      else if (isOneOf(block.getBlock, Constants.BlockName.CaseTier1, Constants.BlockName.CaseTier2, Constants.BlockName.CaseTier3, Constants.BlockName.CaseCreative, Constants.BlockName.Microcontroller)) classOf[Machine]
-      else if (isOneOf(block.getBlock, Constants.BlockName.HologramTier1, Constants.BlockName.HologramTier2)) classOf[blockentity.Hologram]
+      else if (isOneOf(block.getBlock, Constants.BlockName.CaseTier1, Constants.BlockName.CaseTier2, Constants.BlockName.CaseTier3, Constants.BlockName.CaseTier4, Constants.BlockName.CaseCreative, Constants.BlockName.Microcontroller)) classOf[Machine]
+      else if (isOneOf(block.getBlock, Constants.BlockName.HologramTier1, Constants.BlockName.HologramTier2, Constants.BlockName.HologramTier3)) classOf[blockentity.Hologram]
       else if (isOneOf(block.getBlock, Constants.BlockName.Printer)) classOf[blockentity.Printer]
       else if (isOneOf(block.getBlock, Constants.BlockName.Relay)) classOf[blockentity.Relay]
       else if (isOneOf(block.getBlock, Constants.BlockName.Redstone)) if (BundledRedstone.isAvailable) classOf[component.Redstone.Bundled] else classOf[component.Redstone.Vanilla]
       else if (isOneOf(block.getBlock, Constants.BlockName.ScreenTier1)) classOf[common.component.TextBuffer]: Class[_ <: Environment]
-      else if (isOneOf(block.getBlock, Constants.BlockName.ScreenTier2, Constants.BlockName.ScreenTier3)) classOf[common.component.Screen]
+      else if (isOneOf(block.getBlock, Constants.BlockName.ScreenTier2, Constants.BlockName.ScreenTier3, Constants.BlockName.ScreenTier4)) classOf[common.component.Screen]
       else if (isOneOf(block.getBlock, Constants.BlockName.Robot)) classOf[component.Robot]: Class[_ <: Environment]
       else if (isOneOf(block.getBlock, Constants.BlockName.Waypoint)) classOf[blockentity.Waypoint]: Class[_ <: Environment]
       else null

@@ -84,7 +84,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   override def tier: Int = info.tier
 
-  def isCreative: Boolean = tier == Tier.Four
+  def isCreative: Boolean = tier == Tier.Five
 
   val equipmentInventory = new InventoryProxy {
     override def inventory: Robot = Robot.this
@@ -335,7 +335,7 @@ class Robot(pos: BlockPos, state: BlockState)
     super.updateEntity()
     if (isServer) {
       if (getLevel.getGameTime % Settings.get.tickFrequency == 0) {
-        if (info.tier == 3) {
+        if (isCreative) {
           bot.node.changeBuffer(Double.PositiveInfinity)
         }
         globalBuffer = bot.node.globalBuffer

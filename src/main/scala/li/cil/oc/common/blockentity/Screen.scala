@@ -10,6 +10,7 @@ import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.client.renderer.block.ScreenModel
+import li.cil.oc.common.Tier
 import net.minecraft.client.Minecraft
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
@@ -69,7 +70,7 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   private val lastWalked = mutable.WeakHashMap.empty[Entity, (Int, Int)]
 
-  setColor(Color.rgbValues(Color.byTier(tier)))
+  setColor(Color.byTier(tier))
 
   @OnlyIn(Dist.CLIENT)
   override def canConnect(side: Direction) = side != facing
@@ -303,8 +304,8 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
   private final val InvertTouchModeTag = Settings.namespace + "invertTouchMode"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min 2
-    setColor(Color.rgbValues(Color.byTier(tier)))
+    tier = nbt.getByte(TierTag) max 0 min Tier.Four
+    setColor(Color.byTier(tier))
     super.loadForServer(nbt, provider)
     hadRedstoneInput = nbt.getBoolean(HadRedstoneInputTag)
     invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
@@ -319,12 +320,13 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   @OnlyIn(Dist.CLIENT) 
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min 2
+    tier = nbt.getByte(TierTag) max 0 min Tier.Four
     super.loadForClient(nbt, provider)
     requestModelDataUpdate()
     invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
   }
 
+  @OnlyIn(Dist.CLIENT)
   override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putByte(TierTag, tier.toByte)
     super.saveForClient(nbt, provider)

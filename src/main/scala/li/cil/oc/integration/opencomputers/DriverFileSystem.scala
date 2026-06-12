@@ -8,8 +8,7 @@ import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Loot
 import li.cil.oc.common.Slot
-import li.cil.oc.common.item.FloppyDisk
-import li.cil.oc.common.item.HardDiskDrive
+import li.cil.oc.common.item.{FloppyDisk, HardDiskDrive, SolidStateDrive}
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.server.component.Drive
 import li.cil.oc.server.fs.FileSystem.{ItemLabel, ReadOnlyLabel}
@@ -26,6 +25,10 @@ object DriverFileSystem extends Item {
     api.Items.get(Constants.ItemName.HDDTier1),
     api.Items.get(Constants.ItemName.HDDTier2),
     api.Items.get(Constants.ItemName.HDDTier3),
+    api.Items.get(Constants.ItemName.HDDTier4),
+    api.Items.get(Constants.ItemName.SSDTier1),
+    api.Items.get(Constants.ItemName.SSDTier2),
+    api.Items.get(Constants.ItemName.SSDTier3),
     api.Items.get(Constants.ItemName.Floppy)) &&
     (!stack.hasTag || !stack.getTag.contains(Settings.namespace + "lootPath"))
 
@@ -33,12 +36,14 @@ object DriverFileSystem extends Item {
     if (host.getEnvironmentLevel != null && host.getEnvironmentLevel.isClientSide) null
     else stack.getItem match {
       case hdd: HardDiskDrive => createEnvironment(stack, hdd.kiloBytes * 1024, hdd.platterCount, host, hdd.tier + 2)
+      case ssd: SolidStateDrive => createEnvironment(stack, ssd.kiloBytes * 1048, 1, host, ssd.tier + 4)
       case disk: FloppyDisk => createEnvironment(stack, Settings.get.floppySize * 1024, 1, host, 1)
       case _ => null
     }
 
   override def slot(stack: ItemStack) =
     stack.getItem match {
+      case ssd: SolidStateDrive => Slot.HDD
       case hdd: HardDiskDrive => Slot.HDD
       case disk: FloppyDisk => Slot.Floppy
       case _ => throw new IllegalArgumentException()
@@ -47,13 +52,14 @@ object DriverFileSystem extends Item {
   override def tier(stack: ItemStack) =
     stack.getItem match {
       case hdd: HardDiskDrive => hdd.tier
+      case ssd: SolidStateDrive => ssd.tier
       case _ => 0
     }
 
   private def createEnvironment(stack: ItemStack, capacity: Int, platterCount: Int, host: EnvironmentHost, speed: Int) = if (ServerLifecycleHooks.getCurrentServer != null) {
     if (stack.hasTag && stack.getTag.contains(Settings.namespace + "lootFactory")) {
       // Loot disk, create file system using factory callback.
-      val lootFactory = new ResourceLocation(stack.getTag.getString(Settings.namespace + "lootFactory"))
+      val lootFactory = ResourceLocation.tryParse(stack.getTag.getString(Settings.namespace + "lootFactory"))
       Loot.factories.get(lootFactory) match {
         case Some(factory) =>
           val label =
@@ -71,10 +77,12 @@ object DriverFileSystem extends Item {
       val address = addressFromTag(dataTag(stack))
       var label: api.fs.Label = new ReadWriteItemLabel(stack)
       val isFloppy = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy)
-      val sound = Settings.resourceDomain + ":" + (if (isFloppy) "floppy_access" else "hdd_access")
+      val isSSD = stack.getItem.isInstanceOf[SolidStateDrive]
+      val sound = if (isSSD) None
+      else Some(Settings.resourceDomain + ":" + (if (isFloppy) "floppy_access" else "hdd_access"))
       val drive = new DriveData(stack)
       val environment = if (drive.isUnmanaged) {
-        new Drive(capacity max 0, platterCount, label, Option(host), Option(sound), speed, drive.isLocked)
+        new Drive(capacity max 0, platterCount, label, Option(host), sound, speed, drive.isLocked)
       }
       else {
         var fs = oc.api.FileSystem.fromSaveDirectory(address, capacity max 0, Settings.get.bufferChanges)
@@ -82,7 +90,7 @@ object DriverFileSystem extends Item {
           fs = oc.api.FileSystem.asReadOnly(fs)
           label = new ReadOnlyLabel(label.getLabel)
         }
-        oc.api.FileSystem.asManagedEnvironment(fs, label, host, sound, speed)
+        oc.api.FileSystem.asManagedEnvironment(fs, label, host, sound.orNull, speed)
       }
       if (environment != null && environment.node != null) {
         environment.node.asInstanceOf[oc.server.network.Node].address = address

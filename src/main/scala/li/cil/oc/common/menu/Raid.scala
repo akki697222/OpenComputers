@@ -12,8 +12,8 @@ class Raid(id: Int, playerInventory: Inventory, raid: Container)
 
   override protected def getHostClass = classOf[blockentity.Raid]
 
-  addSlotToContainer(60, 23, Slot.HDD, Tier.Three)
-  addSlotToContainer(80, 23, Slot.HDD, Tier.Three)
-  addSlotToContainer(100, 23, Slot.HDD, Tier.Three)
+  addSlotToContainer(60, 23, Slot.HDD, Tier.Seven)
+  addSlotToContainer(80, 23, Slot.HDD, Tier.Seven)
+  addSlotToContainer(100, 23, Slot.HDD, Tier.Seven)
   addPlayerInventorySlots(8, 84)
 }

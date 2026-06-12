@@ -10,6 +10,8 @@ class ComponentBus(props: Properties, val tier: Int) extends Item(props) with tr
   @Deprecated
   override def getDescriptionId = super.getDescriptionId + tier
 
+  override protected def tierFromDriver(stack: ItemStack) = tier
+
   override protected def tooltipName = Option(unlocalizedName)
 
   override protected def tooltipData = Seq(Settings.get.cpuComponentSupport(tier))

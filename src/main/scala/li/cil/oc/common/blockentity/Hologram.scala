@@ -93,7 +93,7 @@ class Hologram(pos: BlockPos, state: BlockState, var tier: Int)
   var rotationSpeedY = 0f
   var rotationSpeedZ = 0f
 
-  final val colorsByTier = Array(Array(0x00FF00), Array(0x0000FF, 0x00FF00, 0xFF0000)) // 0xBBGGRR for rendering convenience
+  final val colorsByTier = Array(Array(0x00FF00), Array(0x0000FF, 0x00FF00, 0xFF0000), Array(0x0000FF, 0x00FF00, 0xFF0000)) // 0xBBGGRR for rendering convenience
 
   // This is a def and not a val for loading (where the tier comes from the nbt and is always 0 here).
   def colors = colorsByTier(tier)
@@ -479,7 +479,7 @@ class Hologram(pos: BlockPos, state: BlockState, var tier: Int)
   private final val HasPowerTag = Settings.namespace + "hasPower"
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min 1
+    tier = nbt.getByte(TierTag) max 0 min 2
     super.loadForServer(nbt, provider)
     val tag = SaveHandler.loadNBT(nbt, dataPath)
     tag.getIntArray(VolumeTag).copyToArray(volume)

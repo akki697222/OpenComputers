@@ -58,7 +58,9 @@ neoForge  {
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/data/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
+}
 
+mixin {
     mods {
         "${mod_id}" {
             sourceSet(sourceSets.main)
@@ -169,7 +171,7 @@ dependencies {
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cct_version}")
     runtimeOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cct_version}")
     runtimeOnly("maven.modrinth:modernfix:${modernfix_version}")
-    
+
     // CoFH Core & Thermal
     compileOnly("curse.maven:cofh-core-69162:4801048")
     compileOnly("curse.maven:thermal-foundation-222880:4788649")
@@ -189,13 +191,59 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = mod_group_id
+            artifactId = mod_id
+            version = project.version
+        }
+    }
+
+    repositories {
+        maven {
+            name = "akkiserver"
+            url = "https://maven.akkiserver.uk/releases/"
+            credentials {
+                username = findProperty("maven_user")
+                password = findProperty("maven_password")
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifact(provider {
+                    tasks.named("jar").get().outputs.files.singleFile
+                }) {
+                    builtBy tasks.named("reobfJar")
+                    classifier = null
+                    extension = "jar"
+                }
+                artifact(tasks.named("apiJar")) {
+                    classifier = 'api'
+                    extension = "jar"
+                }
+                artifact(tasks.named("apiSourcesJar")) {
+                    classifier = 'sources'
+                    extension = "jar"
+                }
+            }
+        }
+    }
+}
+
 tasks.register('updateBuildNumber') {
     mustRunAfter 'clean'
     doLast {
-        def buildFile = file('build.txt')
-        if (!buildFile.exists()) buildFile.text = '0'
-        def nextNum = buildFile.text.trim().toInteger() + 1
-        buildFile.text = nextNum.toString()
+        def f = file('build.txt')
+        if (!f.exists()) f.text = '0'
+        def next = f.text.trim().toInteger() + 1
+        f.text = next.toString()
+        project.version = "${minecraft_version}-${mod_version}-${next}"
     }
 }
 
@@ -263,6 +311,19 @@ tasks.named('jar', Jar).configure {
     finalizedBy 'reobfJar'
 }
 
+tasks.register('apiJar', Jar) {
+    archiveClassifier = 'api'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    include 'li/cil/oc/api/**'
+}
+
+tasks.register('apiSourcesJar', Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allJava
+    include 'li/cil/oc/api/**'
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
@@ -270,11 +331,4 @@ tasks.withType(JavaCompile).configureEach {
 tasks.withType(ScalaCompile).configureEach {
     scalaCompileOptions.forkOptions.memoryMaximumSize = '2g'
     scalaCompileOptions.forkOptions.jvmArgs = ['-Xss4m']
-}
-
-idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
 }

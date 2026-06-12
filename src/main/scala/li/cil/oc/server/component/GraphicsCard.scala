@@ -12,7 +12,7 @@ import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.util.{ExtendedUnicodeHelper, PackedColor}
 import net.minecraft.nbt.{CompoundTag, ListTag}
-import li.cil.oc.common.component
+import li.cil.oc.common.{Tier, component}
 import li.cil.oc.common.component.GpuTextBuffer
 import net.minecraft.core.HolderLookup
 
@@ -63,17 +63,17 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
 
   private def screen(f: (api.internal.TextBuffer) => Array[AnyRef]): Array[AnyRef] = screen(bufferIndex, f)
 
-  final val setBackgroundCosts = Array(1.0 / 32, 1.0 / 64, 1.0 / 128)
-  final val setForegroundCosts = Array(1.0 / 32, 1.0 / 64, 1.0 / 128)
-  final val setPaletteColorCosts = Array(1.0 / 2, 1.0 / 8, 1.0 / 16)
-  final val setCosts = Array(1.0 / 64, 1.0 / 128, 1.0 / 256)
-  final val copyCosts = Array(1.0 / 16, 1.0 / 32, 1.0 / 64)
-  final val fillCosts = Array(1.0 / 32, 1.0 / 64, 1.0 / 128)
+  final val setBackgroundCosts   = Array(1.0 / 32,  1.0 / 64,  1.0 / 128, 1.0 / 256)
+  final val setForegroundCosts   = Array(1.0 / 32,  1.0 / 64,  1.0 / 128, 1.0 / 256)
+  final val setPaletteColorCosts = Array(1.0 / 2,   1.0 / 8,   1.0 / 16,  1.0 / 32)
+  final val setCosts             = Array(1.0 / 64,  1.0 / 128, 1.0 / 256, 1.0 / 512)
+  final val copyCosts            = Array(1.0 / 16,  1.0 / 32,  1.0 / 64,  1.0 / 128)
+  final val fillCosts            = Array(1.0 / 32,  1.0 / 64,  1.0 / 128, 1.0 / 256)
   // These are dirty page bitblt budget costs
   // a single bitblt can send a screen of data, which is n*set calls where set is writing an entire line
   // So for each tier, we multiple the set cost with the number of lines the screen may have
   final val bitbltCost: Double = Settings.get.bitbltCost * scala.math.pow(2, tier)
-  final val totalVRAM: Double = (maxResolution._1 * maxResolution._2) * Settings.get.vramSizes(0 max tier min 2)
+  final val totalVRAM: Double = (maxResolution._1 * maxResolution._2) * Settings.get.vramSizes(0 max tier min (Settings.get.vramSizes.length - 1))
 
   var budgetExhausted: Boolean = false // for especially expensive calls, bitblt
 
@@ -89,13 +89,23 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
     DeviceAttribute.Clock -> clockInfo
   )
 
+  private final lazy val deviceInfoT4 = Map(
+    DeviceAttribute.Class -> DeviceClass.Display,
+    DeviceAttribute.Description -> "Graphics controller",
+    DeviceAttribute.Vendor -> Constants.DeviceInfo.ViridiaComputronics,
+    DeviceAttribute.Product -> "VC VR4000XT",
+    DeviceAttribute.Capacity -> capacityInfo,
+    DeviceAttribute.Width -> widthInfo,
+    DeviceAttribute.Clock -> clockInfo
+  )
+
   def capacityInfo: String = (maxResolution._1 * maxResolution._2).toString
 
-  def widthInfo: String = Array("1", "4", "8").apply(maxDepth.ordinal())
+  def widthInfo: String = Array("1", "4", "8", "16").apply(maxDepth.ordinal())
 
   def clockInfo: String = ((2000 / setBackgroundCosts(tier)).toInt / 100).toString + "/" + ((2000 / setForegroundCosts(tier)).toInt / 100).toString + "/" + ((2000 / setPaletteColorCosts(tier)).toInt / 100).toString + "/" + ((2000 / setCosts(tier)).toInt / 100).toString + "/" + ((2000 / copyCosts(tier)).toInt / 100).toString + "/" + ((2000 / fillCosts(tier)).toInt / 100).toString
 
-  override def getDeviceInfo: util.Map[String, String] = deviceInfo
+  override def getDeviceInfo: util.Map[String, String] = if (tier == Tier.Four) deviceInfoT4 else deviceInfo
 
   // ----------------------------------------------------------------------- //
 

@@ -7,7 +7,7 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.prefab.DriverSidedTileEntity
-import li.cil.oc.integration.ManagedTileEntityEnvironment
+import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.ItemStack
@@ -22,7 +22,7 @@ object DriverBrewingStand extends DriverSidedTileEntity {
   override def createEnvironment(world: Level, pos: BlockPos, side: Direction): ManagedEnvironment =
     new Environment(world.getBlockEntity(pos).asInstanceOf[BrewingStandBlockEntity])
 
-  final class Environment(tileEntity: BrewingStandBlockEntity) extends ManagedTileEntityEnvironment[BrewingStandBlockEntity](tileEntity, "brewing_stand") with NamedBlock {
+  final class Environment(tileEntity: BrewingStandBlockEntity) extends ManagedBlockEntityEnvironment[BrewingStandBlockEntity](tileEntity, "brewing_stand") with NamedBlock {
     override def preferredName = "brewing_stand"
 
     override def priority = 0

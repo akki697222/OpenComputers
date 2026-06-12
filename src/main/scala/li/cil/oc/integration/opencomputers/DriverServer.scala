@@ -16,6 +16,7 @@ object DriverServer extends Item with HostAware {
     api.Items.get(Constants.ItemName.ServerTier1),
     api.Items.get(Constants.ItemName.ServerTier2),
     api.Items.get(Constants.ItemName.ServerTier3),
+    api.Items.get(Constants.ItemName.ServerTier4),
     api.Items.get(Constants.ItemName.ServerCreative))
 
   override def createEnvironment(stack: ItemStack, host: EnvironmentHost): ManagedEnvironment = host match {

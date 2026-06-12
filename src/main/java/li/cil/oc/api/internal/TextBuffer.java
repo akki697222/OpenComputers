@@ -665,6 +665,11 @@ public interface TextBuffer extends ManagedEnvironment, Persistable {
         /**
          * 240 colors, 16 color palette, defaults to grayscale.
          */
-        EightBit
+        EightBit,
+
+        /** 
+         * 65536 colors (16-bit high color).
+         */
+        SixteenBit
     }
 }

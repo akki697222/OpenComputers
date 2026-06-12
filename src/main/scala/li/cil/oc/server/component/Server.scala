@@ -213,7 +213,7 @@ class Server(val rack: api.internal.Rack, val slot: Int) extends Environment wit
       }
       wasRunning = isRunning
       hadErrored = hasErrored
-      if (tier == Tier.Four) node.asInstanceOf[Connector].changeBuffer(Double.PositiveInfinity)
+      if (tier == Tier.Five) node.asInstanceOf[Connector].changeBuffer(Double.PositiveInfinity)
     }
 
     updateComponents()

@@ -19,12 +19,12 @@ class Memory(val tier: Int) extends AbstractManagedEnvironment with DeviceInfo {
     create()
 
   private final lazy val deviceInfo = Map(
-    DeviceAttribute.Class -> DeviceClass.Memory,
-    DeviceAttribute.Description -> "Memory bank",
-    DeviceAttribute.Vendor -> Constants.DeviceInfo.DefaultVendor,
-    DeviceAttribute.Product -> "Multipurpose RAM Type",
-    DeviceAttribute.Clock -> (Settings.get.callBudgets(tier) * 1000).toInt.toString
-  )
+      DeviceAttribute.Class -> DeviceClass.Memory,
+      DeviceAttribute.Description -> "Memory bank",
+      DeviceAttribute.Vendor -> Constants.DeviceInfo.DefaultVendor,
+      DeviceAttribute.Product -> "Multipurpose RAM Type",
+      DeviceAttribute.Clock -> (Settings.get.callBudgets(tier) * 1000).toInt.toString
+    )
 
   override def getDeviceInfo: util.Map[String, String] = deviceInfo
 }

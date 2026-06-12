@@ -72,24 +72,29 @@ object ItemUtils {
     if (descriptor == api.Items.get(Constants.BlockName.CaseTier1)) Tier.One
     else if (descriptor == api.Items.get(Constants.BlockName.CaseTier2)) Tier.Two
     else if (descriptor == api.Items.get(Constants.BlockName.CaseTier3)) Tier.Three
-    else if (descriptor == api.Items.get(Constants.BlockName.CaseCreative)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.BlockName.CaseTier4)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.BlockName.CaseCreative)) Tier.Five
     else if (descriptor == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier1)) Tier.One
     else if (descriptor == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier2)) Tier.Two
-    else if (descriptor == api.Items.get(Constants.ItemName.MicrocontrollerCaseCreative)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier3)) Tier.Three
+    else if (descriptor == api.Items.get(Constants.ItemName.MicrocontrollerCaseCreative)) Tier.Five
     else if (descriptor == api.Items.get(Constants.ItemName.DroneCaseTier1)) Tier.One
     else if (descriptor == api.Items.get(Constants.ItemName.DroneCaseTier2)) Tier.Two
-    else if (descriptor == api.Items.get(Constants.ItemName.DroneCaseCreative)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.ItemName.DroneCaseTier3)) Tier.Three
+    else if (descriptor == api.Items.get(Constants.ItemName.DroneCaseCreative)) Tier.Five
     else if (descriptor == api.Items.get(Constants.ItemName.ServerTier1)) Tier.One
     else if (descriptor == api.Items.get(Constants.ItemName.ServerTier2)) Tier.Two
     else if (descriptor == api.Items.get(Constants.ItemName.ServerTier3)) Tier.Three
-    else if (descriptor == api.Items.get(Constants.ItemName.ServerCreative)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.ItemName.ServerTier4)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.ItemName.ServerCreative)) Tier.Five
     else if (descriptor == api.Items.get(Constants.ItemName.TabletCaseTier1)) Tier.One
     else if (descriptor == api.Items.get(Constants.ItemName.TabletCaseTier2)) Tier.Two
-    else if (descriptor == api.Items.get(Constants.ItemName.TabletCaseCreative)) Tier.Four
+    else if (descriptor == api.Items.get(Constants.ItemName.TabletCaseTier3)) Tier.Three
+    else if (descriptor == api.Items.get(Constants.ItemName.TabletCaseCreative)) Tier.Five
     else Tier.None
   }
 
-  def caseNameWithTierSuffix(name: String, tier: Int): String = name + (if (tier == Tier.Four) "creative" else (tier + 1).toString)
+  def caseNameWithTierSuffix(name: String, tier: Int): String = name + (if (tier == Tier.Five) "creative" else (tier + 1).toString)
 
   def loadTag(data: Array[Byte]): CompoundTag = {
     val bais = new ByteArrayInputStream(data)

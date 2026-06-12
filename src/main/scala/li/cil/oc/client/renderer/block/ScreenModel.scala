@@ -88,7 +88,7 @@ object ScreenModel extends SmartBlockModelBase {
           Textures.Block.Screen.SingleFront(0)
         else
           Textures.Block.Screen.Single(side.ordinal())
-      java.util.List.of(bakeQuad(if (side != null) side else Direction.SOUTH, Textures.getSprite(result), Some(Color.rgbValues(color)), 0))
+      java.util.List.of(bakeQuad(if (side != null) side else Direction.SOUTH, Textures.getSprite(result), Some(color), 0))
     }
   }
 

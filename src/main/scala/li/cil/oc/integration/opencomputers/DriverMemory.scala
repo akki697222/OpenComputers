@@ -1,8 +1,6 @@
 package li.cil.oc.integration.opencomputers
 
-import li.cil.oc.Constants
-import li.cil.oc.Settings
-import li.cil.oc.api
+import li.cil.oc.{Constants, Settings, api}
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item
@@ -23,7 +21,9 @@ object DriverMemory extends Item with api.driver.item.Memory with api.driver.ite
     api.Items.get(Constants.ItemName.RAMTier3),
     api.Items.get(Constants.ItemName.RAMTier4),
     api.Items.get(Constants.ItemName.RAMTier5),
-    api.Items.get(Constants.ItemName.RAMTier6))
+    api.Items.get(Constants.ItemName.RAMTier6),
+    api.Items.get(Constants.ItemName.RAMTier7),
+    api.Items.get(Constants.ItemName.RAMTier8))
 
   override def createEnvironment(stack: ItemStack, host: api.network.EnvironmentHost) = new component.Memory(tier(stack))
 
@@ -35,5 +35,5 @@ object DriverMemory extends Item with api.driver.item.Memory with api.driver.ite
       case _ => Tier.One
     }
 
-  override def getCallBudget(stack: ItemStack): Double = Settings.get.callBudgets(tier(stack) max Tier.One min Tier.Three)
+  override def getCallBudget(stack: ItemStack): Double = Settings.get.callBudgets(tier(stack) max Tier.One min Tier.Four)
 }

@@ -1,7 +1,7 @@
 ![Welcome to OpenComputers](assets/misc/banner.png)
 
 > [!IMPORTANT]
-> This is a Community Edition and fork of OpenComputers. Not a official Project.
+> This is a Community Edition and fork of OpenComputers. Not an official Project.
 
 Thanks to the original author Sangar, Vexatos, payonel, magik6k, Lord Joda, and all GitHub contributors.
 
@@ -62,10 +62,11 @@ Also, and this should go without saying, your contributed code will also fall un
 To use [the API][api] in your own mod, either get the API JAR from the [build server][github-actions], or if you're using [Gradle](http://gradle.org/), add a dependency to the maven repo:
 ```groovy
 repositories {
-    maven { url = "http://maven.cil.li/" }
+    maven { url = "https://maven.akkiserver.uk/releases/" }
 }
+
 dependencies {
-    compile "li.cil.oc:OpenComputers:MC1.7.10-1.5.+:api"
+    compileOnly "li.cil.oc:opencomputers:${minecraft_version}-${oc_version}:api"
 }
 ```
 Adjust the version number accordingly to the version you'd like to build against.
@@ -84,10 +85,8 @@ Want to tinker with the mod itself? Here is how - for IntelliJ IDEA users.
 - Make sure you have the Scala plugin enabled.
 
 Clone the repository, then in it run  
-`gradlew setupDecompWorkspace`  
-to setup the workspace, including assets and such, then  
-`gradlew idea`  
-to create an IntelliJ IDEA project.
+`gradlew genIntellijRuns`  
+to setup the workspace and create an IntelliJ IDEA project.
 
 Open the project and you will be asked to *import the Gradle project* (check your Event Log if you missed the pop-up). **Do so**. This will configure additionally referenced libraries.
 

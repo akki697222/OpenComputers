@@ -15,6 +15,7 @@ object DriverComponentBus extends Item with Processor {
     api.Items.get(Constants.ItemName.ComponentBusTier1),
     api.Items.get(Constants.ItemName.ComponentBusTier2),
     api.Items.get(Constants.ItemName.ComponentBusTier3),
+    api.Items.get(Constants.ItemName.ComponentBusTier4),
     api.Items.get(Constants.ItemName.ComponentBusCreative))
 
   override def createEnvironment(stack: ItemStack, host: EnvironmentHost) = null
@@ -24,7 +25,7 @@ object DriverComponentBus extends Item with Processor {
   // Clamp item tier because the creative bus needs to fit into tier 3 slots.
   override def tier(stack: ItemStack) =
     stack.getItem match {
-      case bus: item.ComponentBus => bus.tier min Tier.Three
+      case bus: item.ComponentBus => bus.tier min Tier.Four
       case _ => Tier.One
     }
 

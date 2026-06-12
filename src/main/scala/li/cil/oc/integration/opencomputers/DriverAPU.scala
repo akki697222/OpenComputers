@@ -14,6 +14,7 @@ object DriverAPU extends DriverCPU with HostAware {
   override def worksWith(stack: ItemStack) = isOneOf(stack,
     api.Items.get(Constants.ItemName.APUTier1),
     api.Items.get(Constants.ItemName.APUTier2),
+    api.Items.get(Constants.ItemName.APUTier3),
     api.Items.get(Constants.ItemName.APUCreative))
 
   override def createEnvironment(stack: ItemStack, host: EnvironmentHost) =
@@ -22,6 +23,7 @@ object DriverAPU extends DriverCPU with HostAware {
       case Tier.One => new component.APU(Tier.One)
       case Tier.Two => new component.APU(Tier.Two)
       case Tier.Three => new component.APU(Tier.Three)
+      case Tier.Four => new component.APU(Tier.Four)
       case _ => null
     }
 

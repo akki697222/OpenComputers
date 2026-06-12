@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "opencomputers:block/holoscreen3"
+    },
+    "facing=south": {
+      "model": "opencomputers:block/holoscreen3",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "opencomputers:block/holoscreen3",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "opencomputers:block/holoscreen3",
+      "y": 270
+    }
+  }
+}

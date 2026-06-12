@@ -43,9 +43,9 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
   lazy val buffer = {
     val screenItem = api.Items.get(Constants.BlockName.ScreenTier1).createItemStack(1)
     val buffer = api.Driver.driverFor(screenItem, getClass).createEnvironment(screenItem, this).asInstanceOf[api.internal.TextBuffer]
-    val (maxWidth, maxHeight) = Settings.screenResolutionsByTier(Tier.Three)
+    val (maxWidth, maxHeight) = Settings.screenResolutionsByTier(Tier.Four)
     buffer.setMaximumResolution(maxWidth, maxHeight)
-    buffer.setMaximumColorDepth(Settings.screenDepthsByTier(Tier.Three))
+    buffer.setMaximumColorDepth(Settings.screenDepthsByTier(Tier.Four))
     buffer
   }
 
