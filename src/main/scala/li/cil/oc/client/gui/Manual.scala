@@ -15,7 +15,6 @@ import org.lwjgl.glfw.GLFW
 
 import scala.jdk.CollectionConverters._
 
-// 1.20.1: TextComponent.EMPTY → Component.empty()
 class Manual extends screens.Screen(Component.empty()) with traits.Window {
   final val documentMaxWidth = 230
   final val documentMaxHeight = 176
@@ -158,8 +157,8 @@ class Manual extends screens.Screen(Component.empty()) with traits.Window {
     super.keyPressed(keyCode, scanCode, mods)
   }
 
-  override def mouseScrolled(mouseX: Double, mouseY: Double, scroll: Double): Boolean = {
-    if (scroll < 0) scrollDown()
+  override def mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean = {
+    if (scrollX < 0) scrollDown()
     else scrollUp()
     true
   }

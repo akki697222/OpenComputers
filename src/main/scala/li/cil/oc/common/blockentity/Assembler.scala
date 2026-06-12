@@ -29,12 +29,14 @@ import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.network.chat
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Assembler(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.ASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
-  with traits.Inventory with SidedEnvironment with traits.StateAware with traits.Tickable with DeviceInfo with MenuProvider {
+  with traits.Inventory with SidedEnvironment with traits.StateAware with traits.Tickable with DeviceInfo with MenuProvider
+    with IBlockEntityExtension {
 
   val node = api.Network.newNode(this, Visibility.Network).
     withComponent("assembler").

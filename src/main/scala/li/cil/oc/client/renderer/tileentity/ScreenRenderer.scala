@@ -212,7 +212,7 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def shouldRenderOffScreen: Boolean = screen.isOrigin && (screen.width > 1 || screen.height > 1)
+  override def shouldRenderOffScreen(screen: Screen): Boolean = screen.isOrigin && (screen.width > 1 || screen.height > 1)
 
   private def renderHolo(stack: PoseStack, buffer: MultiBufferSource): Unit = {
     RenderSystem.setShaderColor(1, 1, 1, 1)

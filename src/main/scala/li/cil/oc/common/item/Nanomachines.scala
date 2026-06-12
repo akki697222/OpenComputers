@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import com.google.common.base.Strings
 import li.cil.oc.api
 import li.cil.oc.common.item.data.NanomachineData
@@ -12,7 +11,6 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
-
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -22,8 +20,9 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.UseAnim
 import net.minecraft.world.entity.LivingEntity
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem {
+class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   @OnlyIn(Dist.CLIENT)
   override def appendHoverText(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
     super.appendHoverText(stack, context, tooltip, flag)
@@ -42,7 +41,7 @@ class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem
 
   override def getUseAnimation(stack: ItemStack): UseAnim = UseAnim.EAT
 
-  override def getUseDuration(stack: ItemStack): Int = 32
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 32
 
   override def finishUsingItem(stack: ItemStack, level: Level, entity: LivingEntity): ItemStack = {
     entity match {

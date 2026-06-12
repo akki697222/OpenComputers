@@ -15,22 +15,21 @@ import li.cil.oc.util.StackOption._
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.{MenuProvider, WorldlyContainer}
-import net.minecraft.world.entity.player.{
-  Inventory => PlayerInventory,
-  Player => PlayerEntity
-}
+import net.minecraft.world.entity.player.{Inventory => PlayerInventory, Player => PlayerEntity}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import java.util
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Printer(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.PRINTER.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable
-  with SidedEnvironment with traits.StateAware with traits.Tickable with WorldlyContainer with DeviceInfo with MenuProvider {
+  with SidedEnvironment with traits.StateAware with traits.Tickable with WorldlyContainer with DeviceInfo with MenuProvider
+    with IBlockEntityExtension {
 
   val node: ComponentConnector = api.Network.newNode(this, Visibility.Network).
     withComponent("printer3d").

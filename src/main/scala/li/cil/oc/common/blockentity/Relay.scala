@@ -21,12 +21,14 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.mutable
 
 class Relay(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.RELAY.get(), pos, state) with traits.Hub with traits.ComponentInventory
-  with traits.PowerAcceptor with Analyzable with WirelessEndpoint with QuantumNetwork.QuantumNode with MenuProvider {
+  with traits.PowerAcceptor with Analyzable with WirelessEndpoint with QuantumNetwork.QuantumNode with MenuProvider
+    with IBlockEntityExtension {
 
   lazy final val WirelessNetworkCardTier1: ItemInfo = api.Items.get(Constants.ItemName.WirelessNetworkCardTier1)
   lazy final val WirelessNetworkCardTier2: ItemInfo = api.Items.get(Constants.ItemName.WirelessNetworkCardTier2)

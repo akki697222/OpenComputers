@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import li.cil.oc.Localization
 import li.cil.oc.Settings
 import li.cil.oc.util.Tooltip
@@ -9,7 +8,6 @@ import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.core.BlockPos
@@ -18,8 +16,9 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.network.chat.Component
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class UpgradeMF(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier {
+class UpgradeMF(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier with IItemExtension {
   override def onItemUseFirst(stack: ItemStack, player: Player, level: Level, pos: BlockPos, side: Direction, hitX: Float, hitY: Float, hitZ: Float, hand: InteractionHand): InteractionResult = {
     if (!player.level.isClientSide && player.isCrouching) {
       val data = stack.getOrCreateTag

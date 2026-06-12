@@ -28,11 +28,13 @@ import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Case(pos: BlockPos, state: BlockState, var tier: Int)
-  extends BlockEntity(TileEntityTypes.CASE.get(), pos, state) with traits.PowerAcceptor with traits.Computer with traits.Colored with internal.Case with DeviceInfo with MenuProvider {
+  extends BlockEntity(TileEntityTypes.CASE.get(), pos, state) with traits.PowerAcceptor with traits.Computer
+    with traits.Colored with internal.Case with DeviceInfo with MenuProvider with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = {
     this(pos, state, 0)
     // If no tier was defined when constructing this case, then we don't yet know the inventory size

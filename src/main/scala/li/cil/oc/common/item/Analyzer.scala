@@ -17,7 +17,6 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.core.Direction
 import net.minecraft.Util
-
 import net.neoforged.neoforge.common.util.FakePlayer
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent
 import net.neoforged.bus.api.SubscribeEvent
@@ -26,6 +25,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.Level
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.InteractionResultHolder
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
 object Analyzer {
   private lazy val analyzer = api.Items.get(Constants.ItemName.Analyzer)
@@ -106,7 +106,7 @@ object Analyzer {
   }
 }
 
-class Analyzer(props: Properties) extends Item(props) with traits.SimpleItem {
+class Analyzer(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     if (player.isCrouching && stack.hasTag) {
       stack.removeTagKey(Settings.namespace + "clipboard")

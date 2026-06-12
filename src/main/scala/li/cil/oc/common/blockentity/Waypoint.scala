@@ -16,9 +16,10 @@ import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Waypoint(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.WAYPOINT.get(), pos, state) with traits.Environment with traits.Rotatable with traits.RedstoneAware with traits.Tickable {
+  extends BlockEntity(TileEntityTypes.WAYPOINT.get(), pos, state) with traits.Environment with traits.Rotatable with traits.RedstoneAware with traits.Tickable with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.Network).
     withComponent("waypoint").
     create()

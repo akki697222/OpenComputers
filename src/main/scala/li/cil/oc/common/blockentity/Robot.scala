@@ -53,6 +53,7 @@ import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.network.chat
 import net.minecraft.world.item.component.ItemAttributeModifiers
 import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
@@ -65,7 +66,8 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 // old proxy, which will be cleaned up by Minecraft like any other tile entity.
 class Robot(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state) with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock
-  with IFluidHandler with internal.Robot with InventorySelection with TankSelection with MenuProvider {
+  with IFluidHandler with internal.Robot with InventorySelection with TankSelection with MenuProvider
+    with IBlockEntityExtension {
 
   var proxy: RobotProxy = _
 
@@ -152,7 +154,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   def containerSlots: Range.Inclusive = 1 to info.containers.length
 
-  def componentSlots: Range = getContainerSize - componentCount until getContainerSize
+  def componentSlotRange: Range = getContainerSize - componentCount until getContainerSize
 
   def inventorySlots: Range = equipmentInventory.getContainerSize until (equipmentInventory.getContainerSize + mainInventory.getContainerSize)
 
@@ -544,7 +546,7 @@ class Robot(pos: BlockPos, state: BlockState)
     if (node == this.node) {
       node.remove()
       bot.node.remove()
-      for (slot <- componentSlots) {
+      for (slot <- componentSlotRange) {
         Option(getComponentInSlot(slot)).foreach(_.node.remove())
       }
     }
@@ -643,7 +645,7 @@ class Robot(pos: BlockPos, state: BlockState)
     super.connectItemNode(node)
     if (node != null) node.host match {
       case buffer: api.internal.TextBuffer =>
-        for (slot <- componentSlots) {
+        for (slot <- componentSlotRange) {
           getComponentInSlot(slot) match {
             case keyboard: api.internal.Keyboard => buffer.node.connect(keyboard.node)
             case gpu: li.cil.oc.server.component.GraphicsCard => buffer.node.connect(gpu.node)
@@ -651,7 +653,7 @@ class Robot(pos: BlockPos, state: BlockState)
           }
         }
       case keyboard: api.internal.Keyboard =>
-        for (slot <- componentSlots) {
+        for (slot <- componentSlotRange) {
           getComponentInSlot(slot) match {
             case buffer: api.internal.TextBuffer => keyboard.node.connect(buffer.node)
             case _ =>
@@ -661,7 +663,7 @@ class Robot(pos: BlockPos, state: BlockState)
     }
   }
 
-  override def isComponentSlot(slot: Int, stack: ItemStack): Boolean = (containerSlots ++ componentSlots) contains slot
+  override def isComponentSlot(slot: Int, stack: ItemStack): Boolean = (containerSlots ++ componentSlotRange) contains slot
 
   def containerSlotType(slot: Int): String = if (containerSlots contains slot) {
     val stack = info.containers(slot - 1)
@@ -701,9 +703,9 @@ class Robot(pos: BlockPos, state: BlockState)
 
   override def componentSlot(address: String): Int = componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
-  override def hasRedstoneCard: Boolean = (containerSlots ++ componentSlots).exists(slot => StackOption(getItem(slot)).fold(false)(DriverRedstoneCard.worksWith(_, getClass)))
+  override def hasRedstoneCard: Boolean = (containerSlots ++ componentSlotRange).exists(slot => StackOption(getItem(slot)).fold(false)(DriverRedstoneCard.worksWith(_, getClass)))
 
-  private def computeInventorySize() = math.min(maxInventorySize, (containerSlots ++ componentSlots).foldLeft(0)((acc, slot) => acc + (StackOption(getItem(slot)) match {
+  private def computeInventorySize() = math.min(maxInventorySize, (containerSlots ++ componentSlotRange).foldLeft(0)((acc, slot) => acc + (StackOption(getItem(slot)) match {
     case SomeStack(stack) => Option(Driver.driverFor(stack, getClass)) match {
       case Some(driver: item.Inventory) => driver.inventoryCapacity(stack)
       case _ => 0

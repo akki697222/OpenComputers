@@ -346,7 +346,7 @@ class RobotRenderer extends TileEntityRenderer[blockentity.RobotProxy] {
       lazy val wildcardRenderers = mutable.Buffer.empty[(ItemStack, UpgradeRenderer)]
       lazy val slotMapping       = Array.fill(mountPoints.length)(null: (ItemStack, UpgradeRenderer))
 
-      val renderers = (robot.componentSlots ++ robot.containerSlots).map(robot.getItem).collect {
+      val renderers = (robot.componentSlotRange ++ robot.containerSlots).map(robot.getItem).collect {
         case stack if !stack.isEmpty && stack.getItem.isInstanceOf[UpgradeRenderer] =>
           (stack, stack.getItem.asInstanceOf[UpgradeRenderer])
       }

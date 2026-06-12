@@ -22,8 +22,9 @@ import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionHand
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Terminal(props: Properties) extends Item(props) with traits.SimpleItem {
+class Terminal(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   def hasServer(stack: ItemStack) = stack.hasTag && stack.getTag.contains(Settings.namespace + "server")
 
   @OnlyIn(Dist.CLIENT)

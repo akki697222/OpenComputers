@@ -21,13 +21,15 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.{Container, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import java.util
 import scala.collection.immutable.ArraySeq
 
 class Rack(pos: BlockPos, state: BlockState)
   extends BlockEntity(TileEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
-  with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider {
+  with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider
+    with IBlockEntityExtension {
 
   var isRelayEnabled = false
   val lastData = new Array[CompoundTag](getContainerSize)

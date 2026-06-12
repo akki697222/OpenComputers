@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import li.cil.oc.Settings
 import li.cil.oc.Settings.DebugCardAccess
 import li.cil.oc.common.item.data.DebugCardData
@@ -9,7 +8,6 @@ import li.cil.oc.server.component.{DebugCard => CDebugCard}
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
-
 import net.minecraft.world.level.Level
 import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionResult
@@ -17,8 +15,9 @@ import net.minecraft.world.InteractionHand
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.player.Player
 import net.minecraft.Util
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class DebugCard(props: Properties) extends Item(props) with traits.SimpleItem {
+class DebugCard(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override protected def tooltipExtended(stack: ItemStack, tooltip: util.List[Component]): Unit = {
     super.tooltipExtended(stack, tooltip)
     val data = new DebugCardData(stack)

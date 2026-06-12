@@ -24,13 +24,15 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity
 import net.minecraft.network.chat.{Component => MCComponent}
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
   extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state)
-  with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock with WorldlyContainer with IFluidHandler with internal.Robot {
+  with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock with WorldlyContainer with IFluidHandler with internal.Robot
+    with IBlockEntityExtension{
 
   def this(pos: BlockPos, state: BlockState) = this(pos, state, new Robot(pos, state))
 

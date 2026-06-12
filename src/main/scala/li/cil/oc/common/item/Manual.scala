@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util
-
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
 import li.cil.oc.util.BlockPosition
@@ -10,7 +9,6 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
-
 import net.minecraft.world.level.Level
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.TooltipFlag
@@ -19,8 +17,9 @@ import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.InteractionResult
 import net.minecraft.ChatFormatting
 import net.minecraft.core.Direction
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Manual(props: Properties) extends Item(props) with traits.SimpleItem {
+class Manual(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   @OnlyIn(Dist.CLIENT)
   override def appendHoverText(stack: ItemStack, context: Item.TooltipContext, tooltip: util.List[Component], flag: TooltipFlag): Unit = {
     super.appendHoverText(stack, context, tooltip, flag)

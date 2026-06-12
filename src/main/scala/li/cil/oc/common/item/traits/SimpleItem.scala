@@ -28,8 +28,9 @@ import net.neoforged.api.distmarker.OnlyIn
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import com.mojang.blaze3d.vertex.PoseStack
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-trait SimpleItem extends Item with api.driver.item.UpgradeRenderer {
+trait SimpleItem extends Item with api.driver.item.UpgradeRenderer with IItemExtension {
   def createItemStack(amount: Int = 1) = new ItemStack(this, amount)
 
   @Deprecated

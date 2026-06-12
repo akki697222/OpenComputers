@@ -10,9 +10,11 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Cable(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.CABLE.get(), pos, state) with traits.Environment with traits.NotAnalyzable with traits.ImmibisMicroblock with traits.Colored {
+  extends BlockEntity(TileEntityTypes.CABLE.get(), pos, state) 
+    with traits.Environment with traits.NotAnalyzable with traits.ImmibisMicroblock with traits.Colored with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.None).create()
 
   setColor(Color.rgbValues(DyeColor.LIGHT_GRAY))

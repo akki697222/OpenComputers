@@ -241,7 +241,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   // ----------------------------------------------------------------------- //
 
-  override def internalComponents(): Iterable[ItemStack] = info.components
+  override def internalComponents(): java.lang.Iterable[ItemStack] = info.components.iterator.to(Iterable).asJava
 
   override def componentSlot(address: String): Int = components.componentSlots.indexWhere(_.exists(env => env.node != null && env.node.address == address))
 
@@ -345,7 +345,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   def lightColor_=(value: Int): Unit = entityData.set(Drone.DataLightColor, Int.box(value))
 
-  override def lerpTo(x: Double, y: Double, z: Double, yaw: Float, pitch: Float, posRotationIncrements: Int, teleport: Boolean): Unit = {
+  override def lerpTo(x: Double, y: Double, z: Double, yaw: Float, pitch: Float, posRotationIncrements: Int): Unit = {
     // Only set exact position if we're too far away from the server's
     // position, otherwise keep interpolating. This removes jitter and
     // is good enough for drones.

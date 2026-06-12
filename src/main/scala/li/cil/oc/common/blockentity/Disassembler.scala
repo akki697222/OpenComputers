@@ -31,6 +31,7 @@ import net.minecraft.nbt.Tag
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
@@ -38,7 +39,8 @@ import scala.collection.mutable.ArrayBuffer
 
 class Disassembler(pos: BlockPos, state: BlockState) 
   extends BlockEntity(TileEntityTypes.DISASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
-  with traits.Inventory with traits.StateAware with traits.PlayerInputAware with traits.Tickable with DeviceInfo with MenuProvider {
+  with traits.Inventory with traits.StateAware with traits.PlayerInputAware with traits.Tickable with DeviceInfo with MenuProvider
+    with IBlockEntityExtension {
 
   val node: Connector = api.Network.newNode(this, Visibility.None).
     withConnector(Settings.get.bufferConverter).

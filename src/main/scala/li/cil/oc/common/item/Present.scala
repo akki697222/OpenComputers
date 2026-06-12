@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import java.util.Random
-
 import li.cil.oc.Constants
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
@@ -11,7 +10,6 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.RecipeManager
-
 
 import scala.collection.mutable
 import net.minecraft.world.item.CreativeModeTab
@@ -23,8 +21,9 @@ import net.minecraft.world.InteractionResult
 import net.minecraft.world.level.block.SoundType
 import net.minecraft.sounds.SoundSource
 import net.minecraft.sounds.SoundEvents
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Present(props: Properties) extends Item(props) with traits.SimpleItem {
+class Present(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     if (stack.getCount > 0) {
       stack.shrink(1)

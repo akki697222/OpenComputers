@@ -606,7 +606,7 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name) },objective)
+      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name); override def getScoreboardName: String = name },objective)
       score.set(scoreVal)
       null
     }
@@ -616,7 +616,7 @@ object DebugCard {
       checkAccess()
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
-      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name) }, objective)
+      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name); override def getScoreboardName: String = name }, objective)
       result(score.get)
     }
 
@@ -626,7 +626,7 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name) }, objective)
+      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name); override def getScoreboardName: String = name }, objective)
       score.set(score.get + scoreVal)
       null
     }
@@ -637,7 +637,7 @@ object DebugCard {
       val name = args.checkString(0)
       val objective = scoreboard.getObjective(args.checkString(1))
       val scoreVal = args.checkInteger(2)
-      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name) }, objective)
+      val score = scoreboard.getOrCreatePlayerScore(new net.minecraft.world.scores.ScoreHolder { override def getDisplayName: Component = Component.literal(name); override def getScoreboardName: String = name }, objective)
       score.set(score.get - scoreVal)
       null
     }

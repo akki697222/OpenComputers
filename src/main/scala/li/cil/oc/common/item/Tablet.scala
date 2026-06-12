@@ -18,7 +18,7 @@ import li.cil.oc.{Constants, Localization, OpenComputers, Settings, api, client,
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
@@ -35,8 +35,8 @@ import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.client.event.ClientTickEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 import net.neoforged.neoforge.server.ServerLifecycleHooks
-
 import li.cil.oc.util.ExtendedItemStack._
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
 import java.util
 import java.util.UUID
@@ -45,7 +45,7 @@ import scala.collection.JavaConverters.asJavaIterable
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.jdk.CollectionConverters._
 
-class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with traits.Chargeable {
+class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with traits.Chargeable with IItemExtension {
   final val TimeToAnalyze = 10
 
   // ----------------------------------------------------------------------- //
@@ -64,11 +64,6 @@ class Tablet(props: Properties) extends Item(props) with traits.SimpleItem with 
         }
       }
     }
-  }
-
-  override def getRarity(stack: ItemStack): item.Rarity = {
-    val data = new TabletData(stack)
-    Rarity.byTier(data.tier)
   }
 
   override def isBarVisible(stack: ItemStack) = true
@@ -251,10 +246,10 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
 
   def readFromNBT(): Unit = {
     if (stack.hasTag) {
+      val holderLookupProvider = getEnvironmentLevel.registryAccess()
       val data = stack.getTag
-      loadData(data)
+      loadData(data, holderLookupProvider)
       if (!getEnvironmentLevel.isClientSide) {
-        val holderLookupProvider = getEnvironmentLevel.registryAccess()
         tablet.loadData(data, holderLookupProvider)
         machine.loadData(data, holderLookupProvider)
       }
@@ -262,9 +257,9 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   }
 
   def writeToNBT(clearState: Boolean = true): Unit = {
+    val provider = getEnvironmentLevel.registryAccess()
     val data = stack.getOrCreateTag
     if (!getEnvironmentLevel.isClientSide) {
-      val provider = getEnvironmentLevel.registryAccess()
       if (!data.contains(Settings.namespace + "data")) {
         data.put(Settings.namespace + "data", new CompoundTag())
       }
@@ -281,7 +276,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
         data.getCompound(Settings.namespace + "data").remove("state")
       }
     }
-    saveData(data)
+    saveData(data, provider)
   }
 
   readFromNBT()
@@ -447,13 +442,11 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    val provider = getEnvironmentLevel.registryAccess()
+  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     data.loadData(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag): Unit = {
-    val provider = getEnvironmentLevel.registryAccess()
+  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     saveComponents()
     data.saveData(nbt, provider)
   }

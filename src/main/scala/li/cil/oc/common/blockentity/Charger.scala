@@ -34,13 +34,15 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.jdk.CollectionConverters._
 import scala.collection.mutable
 
 class Charger(pos: BlockPos, state: BlockState)
   extends BlockEntity(TileEntityTypes.CHARGER.get(), pos, state) with traits.Environment with traits.PowerAcceptor with traits.RedstoneAware
-  with traits.Rotatable with traits.ComponentInventory with traits.Tickable with Analyzable with traits.StateAware with DeviceInfo with MenuProvider {
+  with traits.Rotatable with traits.ComponentInventory with traits.Tickable with Analyzable with traits.StateAware with DeviceInfo with MenuProvider
+    with IBlockEntityExtension {
 
   val node: Connector = api.Network.newNode(this, Visibility.None).
     withConnector(Settings.get.bufferConverter).

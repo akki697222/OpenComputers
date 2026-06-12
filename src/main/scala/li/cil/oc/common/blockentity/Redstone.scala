@@ -15,9 +15,10 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
-class Redstone(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.REDSTONE_IO.get(), pos, state) with traits.Environment with traits.BundledRedstoneAware with traits.Tickable {
+class Redstone(pos: BlockPos, state: BlockState) extends BlockEntity(TileEntityTypes.REDSTONE_IO.get(), pos, state) 
+  with traits.Environment with traits.BundledRedstoneAware with traits.Tickable with IBlockEntityExtension {
   val instance: RedstoneVanilla =
     if (BundledRedstone.isAvailable)
       new component.Redstone.Bundled(this)

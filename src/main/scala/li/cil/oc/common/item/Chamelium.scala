@@ -1,7 +1,6 @@
 package li.cil.oc.common.item
 
 import li.cil.oc.Settings
-
 import net.minecraft.world.level.Level
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.entity.LivingEntity
@@ -14,8 +13,9 @@ import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.Item
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class Chamelium(props: Properties) extends Item(props) with traits.SimpleItem {
+class Chamelium(props: Properties) extends Item(props) with traits.SimpleItem with IItemExtension {
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     if (Settings.get.chameliumEdible) {
       player.startUsingItem(if (player.getItemInHand(InteractionHand.MAIN_HAND) == stack) InteractionHand.MAIN_HAND else InteractionHand.OFF_HAND)
@@ -25,7 +25,7 @@ class Chamelium(props: Properties) extends Item(props) with traits.SimpleItem {
 
   override def getUseAnimation(stack: ItemStack): UseAnim = UseAnim.EAT
 
-  override def getUseDuration(stack: ItemStack): Int = 32
+  override def getUseDuration(stack: ItemStack, entity: LivingEntity): Int = 32
 
   override def finishUsingItem(stack: ItemStack, level: Level, player: LivingEntity): ItemStack = {
     if (!level.isClientSide) {
