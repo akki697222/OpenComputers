@@ -372,7 +372,7 @@ object Items extends ItemAPI {
     registerItem(new item.Microchip(defaultProps, Tier.One), Constants.ItemName.ChipTier1)
     registerItem(new item.Microchip(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.ChipTier2)
     registerItem(new item.Microchip(defaultProps.rarity(Rarity.RARE), Tier.Three), Constants.ItemName.ChipTier3)
-    registerItem(new item.Microchip(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.ChipTier4)
+    registerItem(new item.Microchip(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.ChipTier4)
     registerItem(new item.ALU(defaultProps), Constants.ItemName.Alu)
     registerItem(new item.ControlUnit(defaultProps), Constants.ItemName.ControlUnit)
     registerItem(new item.Disk(defaultProps), Constants.ItemName.Disk)
@@ -391,7 +391,7 @@ object Items extends ItemAPI {
     registerItem(new item.MicrocontrollerCase(defaultProps.rarity(Rarity.EPIC), Tier.Five), Constants.ItemName.MicrocontrollerCaseCreative)
     registerItem(new item.DroneCase(defaultProps, Tier.One), Constants.ItemName.DroneCaseTier1)
     registerItem(new item.DroneCase(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.DroneCaseTier2)
-    registerItem(new item.DroneCase(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Three), Constants.ItemName.DroneCaseTier3)
+    registerItem(new item.DroneCase(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Three), Constants.ItemName.DroneCaseTier3)
     registerItem(new item.DroneCase(defaultProps.rarity(Rarity.EPIC), Tier.Five), Constants.ItemName.DroneCaseCreative)
 
     registerItem(new item.InkCartridgeEmpty(defaultProps.stacksTo(1)), Constants.ItemName.InkCartridgeEmpty)
@@ -422,12 +422,12 @@ object Items extends ItemAPI {
     registerItem(new item.CPU(defaultProps, Tier.One), Constants.ItemName.CPUTier1)
     registerItem(new item.CPU(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.CPUTier2)
     registerItem(new item.CPU(defaultProps.rarity(Rarity.RARE), Tier.Three), Constants.ItemName.CPUTier3)
-    registerItem(new item.CPU(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.CPUTier4)
+    registerItem(new item.CPU(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.CPUTier4)
 
     registerItem(new item.ComponentBus(defaultProps, Tier.One), Constants.ItemName.ComponentBusTier1)
     registerItem(new item.ComponentBus(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.ComponentBusTier2)
     registerItem(new item.ComponentBus(defaultProps.rarity(Rarity.RARE), Tier.Three), Constants.ItemName.ComponentBusTier3)
-    registerItem(new item.ComponentBus(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.ComponentBusTier4)
+    registerItem(new item.ComponentBus(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.ComponentBusTier4)
 
     registerItem(new item.Memory(defaultProps, Tier.One), Constants.ItemName.RAMTier1)
     registerItem(new item.Memory(defaultProps, Tier.Two), Constants.ItemName.RAMTier2)
@@ -435,18 +435,18 @@ object Items extends ItemAPI {
     registerItem(new item.Memory(defaultProps.rarity(Rarity.UNCOMMON), Tier.Four), Constants.ItemName.RAMTier4)
     registerItem(new item.Memory(defaultProps.rarity(Rarity.RARE), Tier.Five), Constants.ItemName.RAMTier5)
     registerItem(new item.Memory(defaultProps.rarity(Rarity.RARE), Tier.Six), Constants.ItemName.RAMTier6)
-    registerItem(new item.Memory(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Seven), Constants.ItemName.RAMTier7)
-    registerItem(new item.Memory(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Eight), Constants.ItemName.RAMTier8)
+    registerItem(new item.Memory(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Seven), Constants.ItemName.RAMTier7)
+    registerItem(new item.Memory(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Eight), Constants.ItemName.RAMTier8)
 
     registerItem(new item.Server(defaultProps.stacksTo(1).rarity(Rarity.EPIC), Tier.Five), Constants.ItemName.ServerCreative)
     registerItem(new item.Server(defaultProps.stacksTo(1), Tier.One), Constants.ItemName.ServerTier1)
     registerItem(new item.Server(defaultProps.stacksTo(1).rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.ServerTier2)
     registerItem(new item.Server(defaultProps.stacksTo(1).rarity(Rarity.RARE), Tier.Three), Constants.ItemName.ServerTier3)
-    registerItem(new item.Server(defaultProps.stacksTo(1).rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.ServerTier4)
+    registerItem(new item.Server(defaultProps.stacksTo(1).rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.ServerTier4)
 
     registerItem(new item.APU(defaultProps.rarity(Rarity.UNCOMMON), Tier.One), Constants.ItemName.APUTier1)
     registerItem(new item.APU(defaultProps.rarity(Rarity.RARE), Tier.Two), Constants.ItemName.APUTier2)
-    registerItem(new item.APU(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Three), Constants.ItemName.APUTier3)
+    registerItem(new item.APU(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Three), Constants.ItemName.APUTier3)
     registerItem(new item.APU(defaultProps.rarity(Rarity.EPIC), Tier.Five), Constants.ItemName.APUCreative)
 
     // 1.6
@@ -463,7 +463,7 @@ object Items extends ItemAPI {
     registerItem(new item.GraphicsCard(defaultProps, Tier.One), Constants.ItemName.GraphicsCardTier1)
     registerItem(new item.GraphicsCard(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.GraphicsCardTier2)
     registerItem(new item.GraphicsCard(defaultProps.rarity(Rarity.RARE), Tier.Three), Constants.ItemName.GraphicsCardTier3)
-    registerItem(new item.GraphicsCard(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.GraphicsCardTier4)
+    registerItem(new item.GraphicsCard(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.GraphicsCardTier4)
     registerItem(new item.RedstoneCard(defaultProps, Tier.One), Constants.ItemName.RedstoneCardTier1)
     registerItem(new item.RedstoneCard(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.RedstoneCardTier2)
     registerItem(new item.NetworkCard(defaultProps), Constants.ItemName.NetworkCard)
@@ -535,11 +535,11 @@ object Items extends ItemAPI {
     registerItem(new item.HardDiskDrive(defaultProps, Tier.One), Constants.ItemName.HDDTier1)
     registerItem(new item.HardDiskDrive(defaultProps.rarity(Rarity.UNCOMMON), Tier.Two), Constants.ItemName.HDDTier2)
     registerItem(new item.HardDiskDrive(defaultProps.rarity(Rarity.RARE), Tier.Three), Constants.ItemName.HDDTier3)
-    registerItem(new item.HardDiskDrive(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Four), Constants.ItemName.HDDTier4)
+    registerItem(new item.HardDiskDrive(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Four), Constants.ItemName.HDDTier4)
 
     registerItem(new item.SolidStateDrive(defaultProps.rarity(Rarity.UNCOMMON), Tier.One), Constants.ItemName.SSDTier1)
     registerItem(new item.SolidStateDrive(defaultProps.rarity(Rarity.RARE), Tier.Two), Constants.ItemName.SSDTier2)
-    registerItem(new item.SolidStateDrive(defaultProps.rarity(OCRarity.LEGENDARY.getValue), Tier.Three), Constants.ItemName.SSDTier3)
+    registerItem(new item.SolidStateDrive(defaultProps.rarity(OCRarity.LEGENDARY), Tier.Three), Constants.ItemName.SSDTier3)
   }
 
   private def initPostStorage(): Unit = {
