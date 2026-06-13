@@ -25,17 +25,12 @@ object EventHandlerNeoForge {
       TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
       TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
     ).foreach { beType =>
-      event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get().asInstanceOf[BlockEntityType[_]], EnergyCapabilityProvider.asInstanceOf)
-    }
-  }
-
-
-  object EnergyCapabilityProvider extends ICapabilityProvider[IEnergyStorage, Direction, EnergyStorageImpl] {
-    override def getCapability(be: IEnergyStorage, side: Direction): EnergyStorageImpl = {
-      be match {
-        case pa: PowerAcceptor if pa.canConnectPower(side) => new EnergyStorageImpl(pa, side)
-        case _ => null
-      }
+      event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get().asInstanceOf[BlockEntityType[_]], (be: BlockEntity, side: Direction) => {
+        be match {
+          case pa: PowerAcceptor if pa.canConnectPower(side) => new EnergyStorageImpl(pa, side): IEnergyStorage
+          case _ => null
+        }
+      })
     }
   }
 

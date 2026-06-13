@@ -55,9 +55,9 @@ object ModelInitialization {
     registerBlockRemapping(Constants.BlockName.Robot,             RobotBlockLocation,           RobotItemLocation)
     registerBlockRemapping(Constants.BlockName.RobotAfterimage,   RobotAfterimageBlockLocation, null)
 
-    registerDroneModel()
-    registerTabletModel()
-    registerTerminalModel()
+    //registerDroneModel()
+    //registerTabletModel()
+    //registerTerminalModel()
 
     registerItemColors()
   }

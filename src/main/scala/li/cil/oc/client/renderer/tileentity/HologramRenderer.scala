@@ -33,7 +33,7 @@ object HologramRenderer extends BlockEntityRendererProvider[Hologram] {
     .build[Hologram, VertexBuffer]()
 
   @SubscribeEvent
-  def onClientTick(e: ClientTickEvent): Unit = cache.cleanUp()
+  def onClientTick(e: ClientTickEvent.Pre): Unit = cache.cleanUp()
 }
 
 class HologramRenderer extends BlockEntityRenderer[Hologram] {

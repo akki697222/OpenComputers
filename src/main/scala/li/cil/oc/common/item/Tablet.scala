@@ -500,7 +500,7 @@ object Tablet {
   }
 
   @SubscribeEvent
-  def onClientTick(e: ClientTickEvent): Unit = {
+  def onClientTick(e: ClientTickEvent.Pre): Unit = {
     Client.cleanUp()
     ServerLifecycleHooks.getCurrentServer match {
       case integrated: IntegratedServer if Minecraft.getInstance.isPaused =>
@@ -513,7 +513,7 @@ object Tablet {
   }
 
   @SubscribeEvent
-  def onServerTick(e: ServerTickEvent): Unit = {
+  def onServerTick(e: ServerTickEvent.Pre): Unit = {
     Server.cleanUp()
   }
 

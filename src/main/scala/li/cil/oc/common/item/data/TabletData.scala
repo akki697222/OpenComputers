@@ -53,13 +53,14 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
   override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.setNewTagList(ItemsTag,
       items.zipWithIndex collect {
-        case (stack, slot) if !stack.isEmpty => (stack, slot)
+        case (stack, slot) => (stack, slot)
       } map {
-        case (stack, slot) =>
+        case (stack, slot) if !stack.isEmpty =>
           val slotNbt = new CompoundTag()
           slotNbt.putByte(SlotTag, slot.toByte)
           slotNbt.put(ItemTag, stack.save(provider))
-      })
+        case _ => null
+      } filter(_ != null))
     nbt.putBoolean(IsRunningTag, isRunning)
     nbt.putDouble(EnergyTag, energy)
     nbt.putDouble(MaxEnergyTag, maxEnergy)

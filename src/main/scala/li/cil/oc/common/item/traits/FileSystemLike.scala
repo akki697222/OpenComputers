@@ -5,6 +5,7 @@ import li.cil.oc.Localization
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.client.gui
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.{ItemUtils, Tooltip}
@@ -53,7 +54,7 @@ trait FileSystemLike extends SimpleItem {
 
   override def use(stack: ItemStack, level: Level, player: Player): InteractionResultHolder[ItemStack] = {
     val tag = ItemUtils.getTag(stack)
-    if (!player.isCrouching && (tag == null || !tag.contains(Settings.namespace + "lootFactory"))) {
+    if (!player.isCrouching && (tag == null || !stack.has(OCComponents.LOOT_DISK))) {
       if (level.isClientSide) showGui(stack, player)
       player.swing(InteractionHand.MAIN_HAND)
     }

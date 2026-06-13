@@ -11,6 +11,7 @@ import li.cil.oc.api.fs.FileSystem
 import li.cil.oc.common
 import li.cil.oc.common.{EventHandler, Loot, Tier, item}
 import li.cil.oc.common.block.SimpleBlock
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.common.item.data.HoverBootsData
 import li.cil.oc.common.item.data.MicrocontrollerData
@@ -36,6 +37,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import li.cil.oc.util.ExtendedItemStack._
 
+import java.nio.ByteBuffer
+
 object Items extends ItemAPI {
   val ITEMS: DeferredRegister[Item] =
     DeferredRegister.create(Registries.ITEM, Settings.resourceDomain)
@@ -49,7 +52,7 @@ object Items extends ItemAPI {
     "wlancard" -> Constants.ItemName.WirelessNetworkCardTier2
   )
 
-  override def get(name: String): ItemInfo = descriptors.get(name).orNull
+  override def get(name: String): ItemInfo = descriptors.get(aliases.get(name).getOrElse(name)).orNull
 
   override def get(stack: ItemStack): ItemInfo = names.get(getBlockOrItem(stack)) match {
     case Some(name) => get(name)
@@ -178,22 +181,25 @@ object Items extends ItemAPI {
   }
 
   override def registerEEPROM(name: String, code: Array[Byte], data: Array[Byte], readonly: Boolean): ItemStack = {
+    val stack = createEEPROM(name, code, data, readonly)
+    registeredItems += stack
+    stack.copy()
+  }
+
+  private def createEEPROM(name: String, code: Array[Byte], data: Array[Byte], readonly: Boolean): ItemStack = {
     val stack = get(Constants.ItemName.EEPROM).createItemStack(1)
-    val nbt = stack.getOrCreateTagElement(Settings.namespace + "data")
     if (name != null) {
-      nbt.putString(Settings.namespace + "label", name.trim.take(24))
+      stack.set(OCComponents.LABEL, name.trim.take(24))
     }
     if (code != null) {
-      nbt.putByteArray(Settings.namespace + "eeprom", code.take(Settings.get.eepromSize))
+      stack.set(OCComponents.EEPROM_CODE, ByteBuffer.wrap(code.take(Settings.get.eepromSize)))
     }
     if (data != null) {
-      nbt.putByteArray(Settings.namespace + "userdata", data.take(Settings.get.eepromDataSize))
+      stack.set(OCComponents.EEPROM_DATA, ByteBuffer.wrap(data.take(Settings.get.eepromDataSize)))
     }
-    nbt.putBoolean(Settings.namespace + "readonly", readonly)
+    stack.set(OCComponents.READONLY, Boolean.box(readonly))
 
-    registeredItems += stack
-
-    stack.copy()
+    stack
   }
 
   // ----------------------------------------------------------------------- //
@@ -345,9 +351,9 @@ object Items extends ItemAPI {
     initSpecial()
 
     // Register aliases.
-    for ((k, v) <- aliases) {
-      descriptors.getOrElseUpdate(k, descriptors(v))
-    }
+    //for ((k, v) <- aliases) {
+    //  descriptors.getOrElseUpdate(k, descriptors(v))
+    //}
 
     // DeferredRegister listens at HIGHEST priority, so our LOW-priority listener
     // runs after all items are registered — safe to call ro.get() / createItemStack.
@@ -546,7 +552,7 @@ object Items extends ItemAPI {
     val luaBios = {
       val code = new Array[Byte](4 * 1024)
       val count = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + "bios.lua").read(code)
-      registerEEPROM("EEPROM (Lua BIOS)", code.take(count), null, readonly = false)
+      createEEPROM("EEPROM (Lua BIOS)", code.take(count), null, readonly = false)
     }
     registerStack(luaBios, Constants.ItemName.LuaBios)
   }

@@ -93,6 +93,9 @@ object ModOpenComputers extends ModProxy {
     // ForgeChunkManager removed in NeoForge 1.21, chunk loading callback needs alternative approach
     // ForgeChunkManager.setForcedChunkLoadingCallback(OpenComputers.ID, ChunkloaderUpgradeHandler)
 
+    OpenComputers.proxy.modBus.addListener(EventHandler.onRegisterCapabilities)
+    OpenComputers.proxy.modBus.addListener(ChunkloaderUpgradeHandler.onRegisterTicketControllers)
+
     NeoForge.EVENT_BUS.register(EventHandler)
     NeoForge.EVENT_BUS.register(NanomachinesHandler.Common)
     NeoForge.EVENT_BUS.register(Tablet)

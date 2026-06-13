@@ -145,7 +145,7 @@ object PetRenderer {
   }
 
   @SubscribeEvent
-  def tickStart(e: ClientTickEvent) = {
+  def tickStart(e: ClientTickEvent.Pre) = {
     petLocations.cleanUp()
     for (pet <- petLocations.asMap.values) {
       pet.update()

@@ -31,7 +31,6 @@ object ChunkloaderUpgradeHandler {
 
   def claimTicket(addr: String) = parseAddress(addr).flatMap(restoredTickets.remove)
 
-  @SubscribeEvent
   def onRegisterTicketControllers(event: RegisterTicketControllersEvent): Unit = {
     ticketController = new TicketController(
       ResourceLocation.fromNamespaceAndPath(OpenComputers.ID, "chunkloader"),

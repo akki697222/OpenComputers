@@ -21,6 +21,7 @@ import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.client.event.ModelEvent.ModifyBakingResult
+import net.neoforged.neoforge.client.event.TextureAtlasStitchedEvent
 import net.neoforged.neoforge.client.model.data.{ModelData, ModelProperty}
 
 import scala.jdk.CollectionConverters._
@@ -79,10 +80,12 @@ object NetSplitterModel extends SmartBlockModelBase {
   }
 
   @SubscribeEvent
-  def onModifyBakingResult(event: ModifyBakingResult): Unit = {
-    val blockAtlas = Minecraft.getInstance().getModelManager.getAtlas(InventoryMenu.BLOCK_ATLAS)
-    if (blockAtlas != null) {
-      initBaseModel(blockAtlas)
+  def onTextureAtlasStitched(event: TextureAtlasStitchedEvent): Unit = {
+    if (event.getAtlas.location() == InventoryMenu.BLOCK_ATLAS) {
+      val blockAtlas = event.getAtlas
+      if (blockAtlas != null) {
+        initBaseModel(blockAtlas)
+      }
     }
   }
 

@@ -16,7 +16,7 @@ import scala.collection.convert.ImplicitConversionsToScala._
 
 object HoverBootsHandler {
   @SubscribeEvent
-  def onLivingUpdate(e: EntityTickEvent): Unit = e.getEntity match {
+  def onLivingUpdate(e: EntityTickEvent.Post): Unit = e.getEntity match {
     case player: Player if !player.isInstanceOf[FakePlayer] =>
       val nbt = player.getPersistentData
       val hadHoverBoots = nbt.getBoolean(Settings.namespace + "hasHoverBoots")

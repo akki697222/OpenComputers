@@ -3,6 +3,7 @@ package li.cil.oc
 import java.nio.file.Paths
 import li.cil.oc.common.IMC
 import li.cil.oc.common.Proxy
+import li.cil.oc.common.block.ChameliumBlock
 import li.cil.oc.common.capabilities.Capabilities
 import li.cil.oc.common.entity.EntityTypes
 import li.cil.oc.common.init.Blocks
@@ -10,6 +11,7 @@ import li.cil.oc.common.init.Items
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.recipe.Recipes
 import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.integration.Mods
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.ThreadPoolFactory
@@ -39,13 +41,7 @@ object OpenComputers {
 
   final val log: Logger = LogManager.getLogger(Name)
 
-  lazy val proxy: Proxy = {
-    val cls = Environment.get.getDist match {
-      case Dist.CLIENT => Class.forName("li.cil.oc.client.Proxy")
-      case _ => Class.forName("li.cil.oc.common.Proxy")
-    }
-    cls.getConstructor().newInstance().asInstanceOf[Proxy]
-  }
+  var proxy: Proxy = _
 
   private var instance: Option[OpenComputers] = None
 
@@ -57,7 +53,16 @@ object OpenComputers {
 
 @Mod(OpenComputers.ID)
 class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
+  OpenComputers.proxy = {
+    val cls = Environment.get.getDist match {
+      case Dist.CLIENT => Class.forName("li.cil.oc.client.Proxy")
+      case _ => Class.forName("li.cil.oc.common.ServerProxy")
+    }
+    cls.getConstructor(classOf[IEventBus]).newInstance(modBus).asInstanceOf[Proxy]
+  }
+
   modBus.register(this)
+  OCComponents.REGISTRAR.register(modBus)
   Items.init(modBus)
   Blocks.init(modBus)
   CreativeTab.CREATIVE_TABS.register(modBus)
@@ -66,16 +71,19 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   LootFunctions.init(modBus)
   EntityTypes.ENTITY_TYPES.register(modBus)
   MenuTypes.MENU.register(modBus)
-  modBus.register(classOf[Capabilities])
+  //modBus.register(classOf[Capabilities])
   modBus.register(li.cil.oc.data.DataGenerators)
   modBus.register(CreativeTab)
   OpenComputers.instance = Some(this)
-  NeoForge.EVENT_BUS.register(OpenComputers.proxy)
+  //NeoForge.EVENT_BUS.register(OpenComputers.proxy)
   modBus.register(OpenComputers.proxy)
   Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
-  OpenComputers.proxy.modBus = modBus
   OpenComputers.proxy.preInit()
   NeoForge.EVENT_BUS.register(ThreadPoolFactory)
+
+  // these used to use @EventBusSubscriber but Scala makes this impossible on NeoForge
+  modBus.register(ChameliumBlock)
+
   Mods.preInit() // Must happen after loading Settings but before registry events are fired.
 
   @SubscribeEvent

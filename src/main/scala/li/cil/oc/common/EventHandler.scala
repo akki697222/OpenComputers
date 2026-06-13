@@ -109,7 +109,6 @@ object EventHandler {
     }
   }
 
-  @SubscribeEvent
   def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
     // FUCK YOU SCALA
     // ITS FUCKING SHITTY LANGUAGE EVER
@@ -318,7 +317,7 @@ object EventHandler {
   }
 
   @SubscribeEvent
-  def onItemEntityPickup(e: ItemEntityPickupEvent): Unit = {
+  def onItemEntityPickup(e: ItemEntityPickupEvent.Post): Unit = {
     val entity = e.getItemEntity
     Option(entity).flatMap(e => Option(e.getItem)) match {
       case Some(stack) =>

@@ -22,7 +22,7 @@ object PeripheralProvider {
     // The RegisterCapabilitiesEvent listener must be on the MOD event bus, not FORGE bus.
     // This is called from the mod's mod-bus setup; if using a separate mod-bus object,
     // register via the mod event bus directly.
-    NeoForge.EVENT_BUS.register(this)
+    OpenComputers.proxy.modBus.register(this)
   }
 
   private def isComputerCraftPresent(): Boolean = {

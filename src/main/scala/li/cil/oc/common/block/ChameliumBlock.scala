@@ -1,6 +1,7 @@
 package li.cil.oc.common.block
 
 import com.mojang.serialization.MapCodec
+import li.cil.oc.api.Items
 import li.cil.oc.common.block.ChameliumBlock.CODEC
 import li.cil.oc.{CreativeTab, OpenComputers}
 import net.minecraft.world.level.block.Block
@@ -17,7 +18,6 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = OpenComputers.ID)
 class ChameliumBlock(props: Properties) extends SimpleBlock(props) {
   override def codec(): MapCodec[ChameliumBlock] = CODEC
 
@@ -34,18 +34,18 @@ class ChameliumBlock(props: Properties) extends SimpleBlock(props) {
 
   override def getStateForPlacement(ctx: BlockItemUseContext): BlockState =
     defaultBlockState.setValue(ChameliumBlock.Color, DyeColor.byId(ctx.getItemInHand.getDamageValue))
-
-  @SubscribeEvent
-  def onBuildCreativeTab(e: BuildCreativeModeTabContentsEvent): Unit = {
-    if (e.getTabKey == CreativeTab.CREATIVE_TABS.getRegistryKey) {
-      val stack = new ItemStack(this, 1)
-      stack.setDamageValue(defaultBlockState.getValue(ChameliumBlock.Color).getId)
-      e.accept(stack)
-    }
-  }
 }
 
 object ChameliumBlock {
   final val CODEC = simpleCodec(new ChameliumBlock(_))
   final val Color = EnumProperty.create("color", classOf[DyeColor])
+
+  @SubscribeEvent
+  def onBuildCreativeTab(e: BuildCreativeModeTabContentsEvent): Unit = {
+    if (e.getTabKey == CreativeTab.CREATIVE_TABS.getRegistryKey) {
+      val stack = Items.get("opencomputers:chamelium_block").createItemStack(1)
+      stack.setDamageValue(DyeColor.WHITE.getId)
+      e.accept(stack)
+    }
+  }
 }

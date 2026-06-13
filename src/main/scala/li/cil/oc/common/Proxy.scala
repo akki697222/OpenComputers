@@ -17,8 +17,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar
 
 import scala.jdk.CollectionConverters._
 
-class Proxy {
-  var modBus: IEventBus = _
+class Proxy(val modBus: IEventBus) {
 
   def preInit(): Unit = {
     OpenComputers.log.info("Initializing OpenComputers API.")
@@ -67,6 +66,12 @@ class Proxy {
     }): Runnable)
   }
 
+  def registerModel(instance: Item, id: String): Unit = {}
+
+  def registerModel(instance: Block, id: String): Unit = {}
+}
+
+class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
   @SubscribeEvent
   def postInit(e: FMLLoadCompleteEvent): Unit = {
     // Don't allow driver registration after this point, to avoid issues.
@@ -88,8 +93,4 @@ class Proxy {
       }
     )
   }
-
-  def registerModel(instance: Item, id: String): Unit = {}
-
-  def registerModel(instance: Block, id: String): Unit = {}
 }

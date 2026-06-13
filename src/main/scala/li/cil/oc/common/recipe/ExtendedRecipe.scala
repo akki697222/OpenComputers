@@ -6,6 +6,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.detail.ItemInfo
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.common.item.data.MicrocontrollerData
 import li.cil.oc.common.item.data.PrintData
@@ -31,6 +32,7 @@ import net.minecraft.world.item.component.CustomData
 import net.minecraft.world.item.crafting.{CraftingInput, Recipe}
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
+import java.nio.ByteBuffer
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.util.control.Breaks._
 
@@ -75,7 +77,7 @@ object ExtendedRecipe {
         val codePath = codeNbt.asInstanceOf[StringTag].getAsString
         val code = new Array[Byte](Settings.get.eepromSize)
         val count = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + codePath).read(code)
-        nbt.putByteArray(Settings.namespace + "eeprom", code.take(count))
+        resultStack.set(OCComponents.EEPROM_CODE, ByteBuffer.wrap(code.take(count)))
       }
       // Load EEPROM data (if it's a string)
       val dataNbt = nbt.get(Settings.namespace + "userdata")
@@ -83,7 +85,7 @@ object ExtendedRecipe {
         val dataPath = dataNbt.asInstanceOf[StringTag].getAsString
         val data = new Array[Byte](Settings.get.eepromDataSize)
         val count = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + dataPath).read(data)
-        nbt.putByteArray(Settings.namespace + "userdata", data.take(count))
+        resultStack.set(OCComponents.EEPROM_DATA, ByteBuffer.wrap(data.take(count)))
       }
     }
 

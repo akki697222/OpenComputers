@@ -4,6 +4,7 @@ import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Loot
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.util.{ItemUtils, StackOption}
 import net.minecraft.core.{HolderLookup, NonNullList, RegistryAccess}
@@ -43,7 +44,7 @@ class LootDiskCyclingRecipe(val bookCategory: CraftingBookCategory) extends Craf
     }
   }
 
-  def getLootFactoryName(stack: ItemStack): String = ItemUtils.getOrCreateTag(stack).getString(Settings.namespace + "lootFactory")
+  def getLootFactoryName(stack: ItemStack): ResourceLocation = stack.get(OCComponents.LOOT_DISK.get())
 
   def collectStacks(crafting: CraftingInput): immutable.IndexedSeq[ItemStack] = (0 until crafting.size()).flatMap(i => StackOption(crafting.getItem(i)))
 

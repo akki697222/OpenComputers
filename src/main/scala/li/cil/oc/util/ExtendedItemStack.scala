@@ -1,6 +1,8 @@
 package li.cil.oc.util
 
-import net.minecraft.core.component.DataComponents
+import li.cil.oc.common.datacomponents.Migrator
+import li.cil.oc.common.item.data.ItemData
+import net.minecraft.core.component.{DataComponentType, DataComponents}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
@@ -43,6 +45,27 @@ object ExtendedItemStack {
         tag.remove(key)
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
       }
+    }
+
+    def getComponent[T](dataComponent: DataComponentType[T]): Option[T] = {
+      stack.get(dataComponent) match {
+        case null => if(this.hasTag) {
+          var result: Option[T] = None
+          
+          CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => {
+            result = Migrator.perform(dataComponent, tag, ItemData.defaultProvider) collect {
+              case value => stack.set(dataComponent, value)
+            }
+          })
+          
+          result
+        } else None
+        case realValue => Some(realValue)
+      }
+    }
+
+    def setComponent[T](implicit ev: Null <:< T, dataComponent: DataComponentType[T], value: Option[T]): Unit = {
+      stack.set(dataComponent, value.orNull)
     }
   }
 }

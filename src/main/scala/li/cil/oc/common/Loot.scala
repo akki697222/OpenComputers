@@ -8,6 +8,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.fs.FileSystem
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.init.Items
 import li.cil.oc.util.Color
 import net.minecraft.core.component.DataComponents
@@ -60,7 +61,7 @@ object Loot {
 
   val disksForClient = mutable.ArrayBuffer.empty[ItemStack]
 
-  def isLootDisk(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy) && stack.has(DataComponents.CUSTOM_DATA) && stack.get(DataComponents.CUSTOM_DATA).getUnsafe.contains(Settings.namespace + "lootFactory", Tag.TAG_STRING)
+  def isLootDisk(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy) && stack.has(OCComponents.LOOT_DISK.get())
 
   def randomDisk(rng: Random) =
     if (disksForSampling.nonEmpty) Some(disksForSampling(rng.nextInt(disksForSampling.length)))
@@ -73,12 +74,12 @@ object Loot {
     data.putString(Settings.namespace + "fs.label", name)
 
     val stack = Items.get(Constants.ItemName.Floppy).createItemStack(1)
-    val nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe
-    nbt.put(Settings.namespace + "data", data)
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, nbt => {
+      nbt.put(Settings.namespace + "data", data)
+    })
 
-    // Store this top level, so it won't get wiped on save.
-    nbt.putString(Settings.namespace + "lootFactory", loc.toString)
-    nbt.putInt(Settings.namespace + "color", color.getId)
+    stack.set(OCComponents.LOOT_DISK, loc)
+    stack.set(OCComponents.DISK_COLOR, color)
 
     Loot.factories += loc -> factory
 

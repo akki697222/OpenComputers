@@ -214,7 +214,7 @@ object Audio {
   }
 
   @SubscribeEvent
-  def onTick(e: ClientTickEvent): Unit = {
+  def onTick(e: ClientTickEvent.Pre): Unit = {
     update()
   }
 }

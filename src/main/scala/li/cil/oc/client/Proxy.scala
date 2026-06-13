@@ -25,13 +25,13 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.Item
-import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.bus.api.{IEventBus, SubscribeEvent}
 import net.neoforged.fml.ModLoadingContext
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
 import net.neoforged.neoforge.common.NeoForge
 
-private[oc] class Proxy extends CommonProxy {
+private[oc] class Proxy(modBus: IEventBus) extends CommonProxy(modBus) {
   modBus.register(this)
   modBus.register(classOf[GuiTypes])
   modBus.register(ModelInitialization)

@@ -8,6 +8,7 @@ import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Loot
 import li.cil.oc.common.Slot
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.{FloppyDisk, HardDiskDrive, SolidStateDrive}
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.server.component.Drive
@@ -62,10 +63,9 @@ object DriverFileSystem extends Item {
     }
 
   private def createEnvironment(stack: ItemStack, capacity: Int, platterCount: Int, host: EnvironmentHost, speed: Int) = if (ServerLifecycleHooks.getCurrentServer != null) {
-    val tag = ItemUtils.getTag(stack)
-    if (tag != null && tag.contains(Settings.namespace + "lootFactory")) {
+    val lootFactory = stack.get(OCComponents.LOOT_DISK.get())
+    if (lootFactory != null) {
       // Loot disk, create file system using factory callback.
-      val lootFactory = ResourceLocation.tryParse(tag.getString(Settings.namespace + "lootFactory"))
       Loot.factories.get(lootFactory) match {
         case Some(factory) =>
           val label =
