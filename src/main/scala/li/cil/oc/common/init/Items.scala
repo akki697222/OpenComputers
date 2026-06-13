@@ -197,7 +197,7 @@ object Items extends ItemAPI {
     if (data != null) {
       stack.set(OCComponents.EEPROM_DATA, ByteBuffer.wrap(data.take(Settings.get.eepromDataSize)))
     }
-    stack.set(OCComponents.READONLY, Boolean.box(readonly))
+    stack.set(OCComponents.READONLY, readonly)
 
     stack
   }
@@ -240,7 +240,7 @@ object Items extends ItemAPI {
       safeGetStack(Constants.ItemName.SignUpgrade),
       safeGetStack(Constants.ItemName.PistonUpgrade),
 
-      safeGetStack(Constants.ItemName.RedstoneCardTier2),
+      safeGetStack(Constants.ItemName.RedstoneCardTier1),
       safeGetStack(Constants.ItemName.WirelessNetworkCardTier2),
 
       LuaStateFactory.setDefaultArch(safeGetStack(Constants.ItemName.CPUTier3)),
