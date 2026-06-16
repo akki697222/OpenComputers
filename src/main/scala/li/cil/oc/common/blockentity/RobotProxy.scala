@@ -13,6 +13,7 @@ import li.cil.oc.api.network._
 import li.cil.oc.common.container.InventoryProxy
 import li.cil.oc.common.blockentity.traits.RedstoneAware
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
+import net.minecraft.core.component.DataComponentHolder
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.item.ItemStack
@@ -24,6 +25,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity
 import net.minecraft.network.chat.{Component => MCComponent}
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
@@ -180,9 +182,9 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
     robot.saveForServer(nbt, provider)
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.saveData(nbt, provider)
+  override def saveData(holder: MutableDataComponentHolder): Unit = robot.saveData(holder)
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadData(nbt, provider)
+  override def loadData(holder: DataComponentHolder): Unit = robot.loadData(holder)
 
   @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadForClient(nbt, provider)

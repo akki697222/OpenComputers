@@ -26,6 +26,7 @@ import li.cil.oc.common.container.ItemStackInventory
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.InventoryUtils
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.{Direction, HolderLookup}
@@ -37,6 +38,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.player.Inventory
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int) 
   extends AbstractManagedEnvironment with ItemStackInventory with ComponentInventory with RackMountable with Analyzable with DeviceInfo with MenuProvider {
@@ -154,15 +156,15 @@ class DiskDriveMountable(val rack: api.internal.Rack, val slot: Int)
   // ----------------------------------------------------------------------- //
   // Persistable
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super[AbstractManagedEnvironment].loadData(nbt, provider)
-    super[ComponentInventory].loadData(nbt, provider)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super[AbstractManagedEnvironment].loadData(holder)
+    super[ComponentInventory].loadData(holder)
     connectComponents()
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super[AbstractManagedEnvironment].saveData(nbt, provider)
-    super[ComponentInventory].saveData(nbt, provider)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super[AbstractManagedEnvironment].saveData(holder)
+    super[ComponentInventory].saveData(holder)
   }
 
   // ----------------------------------------------------------------------- //

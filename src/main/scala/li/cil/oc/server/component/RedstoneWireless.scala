@@ -111,10 +111,6 @@ trait RedstoneWireless extends RedstoneSignaller with DeviceInfo {
 
   // ----------------------------------------------------------------------- //
 
-  private final val WirelessFrequencyTag = "wirelessFrequency"
-  private final val WirelessInputTag = "wirelessInput"
-  private final val WirelessOutputTag = "wirelessOutput"
-
   override def loadData(holder: DataComponentHolder): Unit = {
     super.loadData(holder)
 

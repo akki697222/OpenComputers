@@ -17,6 +17,8 @@ import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ColorRGBA
 import net.minecraft.world.item.{DyeColor, ItemStack}
+import net.neoforged.neoforge.fluids.FluidStack
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank
 
 import java.nio.ByteBuffer
 import java.util.function.Supplier
@@ -254,6 +256,10 @@ private object Migrators {
       case compoundTag: CompoundTag => ItemStack.parse(provider, compoundTag).toScala
     }
 
+    def fluidStack(name: Identifier) = value[FluidStack](name) {
+      case compoundTag: CompoundTag => FluidStack.parse(provider, compoundTag).toScala
+    }
+
     def itemStackList(name: Identifier) = value[List[ItemStack]](name) {
       case tag: ListTag if TagTypes.getType(tag.getElementType) == CompoundTag.TYPE =>
         Some((0 until tag.size()).map(i => ItemStack.parse(provider, tag.get(i))).filter(_.isPresent).map(_.get).toList)
@@ -350,6 +356,7 @@ private object Migrators {
   // disks & drives
   register(OCComponents.UNMANAGED) { _.boolean(oc -> "unmanaged").andRemove }
   register(OCComponents.LOCK) { _.string(oc -> "lock").andRemove }
+  register(OCComponents.HEAD_POS) { _.int("headPos").andRemove }
 
   // eeprom stuff
   register(OCComponents.EEPROM_CODE) { _.compound[ByteBuffer](oc -> "data") { _.byteBuffer(oc -> "eeprom").andRemove } }
@@ -381,6 +388,21 @@ private object Migrators {
       () => de.enumeration("visibility", Visibility.values()).andRemove
     )
   }
+
+  // network cards
+  register(OCComponents.OPEN_PORTS) { _.intArray("openPorts").andRemove }
+
+  register(OCComponents.WAKE_MESSAGE) { de =>
+    composeAndRemove[WakeMessage] { by =>
+      val message = by(de.string("wakeMessage"))
+      val fuzzy = by(de.boolean("wakeMessageFuzzy"))
+
+      WakeMessage(message, fuzzy)
+    }
+  }
+
+  register(OCComponents.TUNNEL) { _.string(oc -> "tunnel").andRemove }
+  register(OCComponents.STRENGTH) { _.double("strength").andRemove }
 
   // text buffers
   register(OCComponents.TEXT_BUFFER) { de =>
@@ -439,76 +461,84 @@ private object Migrators {
 
   // the complicated one
   register(OCComponents.MACHINE) { de =>
-    composeAndRemove[MachineData] { by =>
-      val state = by(de.enumerationArray("state", Machine.State.values.toArray))
-      val users = by(de.stringList("users") orElse List.empty)
-      val message = by(de.string("message").optional)
-      
-      val components = by(de.list[MachineData.Component]("components") { de => 
-        composeValue[MachineData.Component] { by =>
-          val address = by(de.string("address"))
-          val name = by(de.string("name"))
-          MachineData.Component(address, name)
-        }
-      })
-      
-      val signals = by(de.list[MachineData.Signal]("signals") { de => 
-        composeValue[MachineData.Signal] { by =>
-          val name = by(de.string("name"))
-          val args = by(de.compound[List[Signal.Value]]("args") { de =>
-            composeValue[List[Signal.Value]] { by =>
-              // the encoding of this is weird
-              //
-              // it stores a "length" tag with the number of items, then each
-              // item is stored with the name "arg" + i
-              //
-              // who knows why the author didn't just use an array, but oh well
-              val length = by(de.int("length"))
-              val args = (0 until length).map(i => by(de.value[Signal.Value]("arg" + i) {
-                case tag: ByteTag if tag.getAsByte == -1 => Some(Signal.Null)
-                case tag: ByteTag => Some(Signal.Boolean(tag.getAsByte == 1))
-                case tag: LongTag => Some(Signal.Long(tag.getAsLong))
-                case tag: DoubleTag => Some(Signal.Double(tag.getAsDouble))
-                case tag: StringTag => Some(Signal.StringValue(tag.getAsString))
-                case tag: ByteArrayTag => Some(Signal.ByteArray(ByteBuffer.wrap(tag.getAsByteArray)))
-                case tag: ListTag =>
-                  // contrary to the tag name, this is a string map
-                  val data = mutable.Map.empty[String, String]
-                  for(i <- 0 until tag.size by 2) {
-                    data += tag.getString(i) -> tag.getString(i + 1)
-                  }
-                  Some(Signal.StringMap(data.toMap))
-                case tag: CompoundTag =>Some(Signal.Compound(tag))
-                case _ => Some(Signal.Null)
-              }))
-              
-              args.toList
-            }
-          })
-          
-          Signal(name, args)
-        }
-      })
-      
-      val uptime = by(de.long("uptime") orElse 0)
-      val cpuTotal = by(de.long("cpuTotal") orElse 0)
-      val remainingPause = by(de.int("remainingPause") orElse 0)
-      
-      // must be last as this will remove the already consumed data
-      val architecture = by.remaining(de)
+    def decomposeMachine(de: Deserializer[MachineData]) = {
+      composeAndRemove[MachineData] { by =>
+        val state = by(de.enumerationArray("state", Machine.State.values.toArray))
+        val users = by(de.stringList("users") orElse List.empty)
+        val message = by(de.string("message").optional)
 
-      MachineData(
-        state,
-        users.toSet,
-        message,
-        components,
-        architecture,
-        signals,
-        uptime,
-        cpuTotal,
-        remainingPause
-      )
+        val components = by(de.list[MachineData.Component]("components") { de =>
+          composeValue[MachineData.Component] { by =>
+            val address = by(de.string("address"))
+            val name = by(de.string("name"))
+            MachineData.Component(address, name)
+          }
+        })
+
+        val signals = by(de.list[Signal]("signals") { de =>
+          composeValue[Signal] { by =>
+            val name = by(de.string("name"))
+            val args = by(de.compound[List[Signal.Value]]("args") { de =>
+              composeValue[List[Signal.Value]] { by =>
+                // the encoding of this is weird
+                //
+                // it stores a "length" tag with the number of items, then each
+                // item is stored with the name "arg" + i
+                //
+                // who knows why the author didn't just use an array, but oh well
+                val length = by(de.int("length"))
+                val args = (0 until length).map(i => by(de.value[Signal.Value]("arg" + i) {
+                  case tag: ByteTag if tag.getAsByte == -1 => Some(Signal.Null)
+                  case tag: ByteTag => Some(Signal.Boolean(tag.getAsByte == 1))
+                  case tag: LongTag => Some(Signal.Long(tag.getAsLong))
+                  case tag: DoubleTag => Some(Signal.Double(tag.getAsDouble))
+                  case tag: StringTag => Some(Signal.StringValue(tag.getAsString))
+                  case tag: ByteArrayTag => Some(Signal.ByteArray(ByteBuffer.wrap(tag.getAsByteArray)))
+                  case tag: ListTag =>
+                    // contrary to the tag name, this is a string map
+                    val data = mutable.Map.empty[String, String]
+                    for (i <- 0 until tag.size by 2) {
+                      data += tag.getString(i) -> tag.getString(i + 1)
+                    }
+                    Some(Signal.StringMap(data.toMap))
+                  case tag: CompoundTag => Some(Signal.Compound(tag))
+                  case _ => Some(Signal.Null)
+                }))
+
+                args.toList
+              }
+            })
+
+            Signal(name, args)
+          }
+        })
+
+        val uptime = by(de.long("uptime") orElse 0)
+        val cpuTotal = by(de.long("cpuTotal") orElse 0)
+        val remainingPause = by(de.int("remainingPause") orElse 0)
+
+        // must be last as this will remove the already consumed data
+        val architecture = by.remaining(de)
+
+        MachineData(
+          state,
+          users.toSet,
+          message,
+          components,
+          architecture,
+          signals,
+          uptime,
+          cpuTotal,
+          remainingPause
+        )
+      }
     }
+
+    first(
+      () => decomposeMachine(de),
+      () => de.compound(oc -> "machine")(decomposeMachine),
+      () => de.compound("machine")(decomposeMachine),
+    )
   }
 
   // print data (also complicated)
@@ -618,7 +648,9 @@ private object Migrators {
     )
   }
 
-  register(OCComponents.FILESYSTEM_HANDLES) { de =>
+  register(OCComponents.ROBOT_ROM_FILESYSTEM_DATA) { _.compoundTag("romRobot").andRemove }
+
+  register(OCComponents.HANDLES) { de =>
     def decomposeOwners(de: Deserializer[(String, Set[Int])]): Option[(String, Set[Int])] = {
       composeAndRemove[(String, Set[Int])] { by =>
         by(de.string("address")) -> by(de.intArray("handles")).toSet
@@ -660,6 +692,16 @@ private object Migrators {
       }.andRemove
     }
   }
+
+  // leash upgrade
+  register(OCComponents.LEASHED_ENTITIES) { _.stringList("leashedEntities").andRemove.map(v => v.map(UUID.fromString)) }
+
+  // tank upgrade
+  register(OCComponents.TANK) { de => FluidStack.parse(de.provider, de.tag).toScala }
+
+  // generator upgrade
+  register(OCComponents.FUEL_INVENTORY) { _.itemStack("inventory").andRemove }
+  register(OCComponents.FUEL_TICKS_REMAINING) { _.int("remainingTicks").andRemove }
 
   // debug card
   register(OCComponents.DEBUG_CARD_ACCESS_CONTEXT) { de =>

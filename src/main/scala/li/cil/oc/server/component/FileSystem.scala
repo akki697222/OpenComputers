@@ -298,7 +298,7 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
   override def loadData(holder: DataComponentHolder): Unit = {
     super.loadData(holder)
 
-    for(handles <- holder.getComponent(OCComponents.FILESYSTEM_HANDLES)) {
+    for(handles <- holder.getComponent(OCComponents.HANDLES)) {
       owners ++= handles.map { case k -> v => k -> v.to(mutable.Set) }
     }
 
@@ -319,7 +319,7 @@ class FileSystem(val fileSystem: IFileSystem, var label: Label, val host: Option
     }
 
     if(!SaveHandler.savingForClients) {
-      holder.setComponent(OCComponents.FILESYSTEM_HANDLES, Map.from(owners.map { case k -> v => k -> v.toSet }))
+      holder.setComponent(OCComponents.HANDLES, Map.from(owners.map { case k -> v => k -> v.toSet }))
       holder.updateComponent(OCComponents.FILESYSTEM_DATA, new CompoundTag(), fileSystem.saveData)
     }
   }

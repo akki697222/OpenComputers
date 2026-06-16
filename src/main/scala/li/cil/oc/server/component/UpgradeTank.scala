@@ -1,22 +1,20 @@
 package li.cil.oc.server.component
 
-import java.util
 import li.cil.oc.Constants
-import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
-import li.cil.oc.api.driver.DeviceInfo.DeviceClass
 import li.cil.oc.api.Network
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.api.network.Visibility
-import li.cil.oc.api.prefab
+import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
+import li.cil.oc.api.network.{EnvironmentHost, Visibility}
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
-import net.neoforged.neoforge.fluids.FluidStack
-import net.neoforged.neoforge.fluids.IFluidTank
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
+import net.neoforged.neoforge.common.MutableDataComponentHolder
+import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank
 
+import java.util
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class UpgradeTank(val owner: EnvironmentHost, val capacity: Int) extends AbstractManagedEnvironment with IFluidTank with DeviceInfo {
@@ -36,14 +34,14 @@ class UpgradeTank(val owner: EnvironmentHost, val capacity: Int) extends Abstrac
 
   val tank = new FluidTank(capacity)
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    tank.readFromNBT(provider, nbt)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    tank.setFluid(holder.getComponent(OCComponents.TANK) getOrElse FluidStack.EMPTY)
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    tank.writeToNBT(provider, nbt)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    holder.setComponent(OCComponents.TANK, tank.getFluid)
   }
 
   // ----------------------------------------------------------------------- //

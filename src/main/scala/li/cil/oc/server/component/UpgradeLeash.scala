@@ -16,10 +16,13 @@ import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.common.EventHandler
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.Mob
 import net.minecraft.nbt.CompoundTag
@@ -29,6 +32,7 @@ import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class UpgradeLeash(val host: Entity) extends AbstractManagedEnvironment with traits.LevelAware with DeviceInfo {
   override val node = Network.newNode(this, Visibility.Network).
@@ -90,12 +94,10 @@ class UpgradeLeash(val host: Entity) extends AbstractManagedEnvironment with tra
     leashedEntities.clear()
   }
 
-  private final val LeashedEntitiesTag = "leashedEntities"
-
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    leashedEntities ++= nbt.getList(LeashedEntitiesTag, Tag.TAG_STRING).
-      map((s: StringTag) => UUID.fromString(s.getAsString))
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    for(entities <- holder.getComponent(OCComponents.LEASHED_ENTITIES))
+      leashedEntities ++= entities
     // Re-acquire leashed entities. Need to do this manually because leashed
     // entities only remember their leashee if it's an LivingEntity...
     EventHandler.scheduleServer(() => {
@@ -114,8 +116,8 @@ class UpgradeLeash(val host: Entity) extends AbstractManagedEnvironment with tra
     })
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    nbt.setNewTagList(LeashedEntitiesTag, leashedEntities.map(_.toString))
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    holder.setComponent(OCComponents.LEASHED_ENTITIES, leashedEntities.toList)
   }
 }

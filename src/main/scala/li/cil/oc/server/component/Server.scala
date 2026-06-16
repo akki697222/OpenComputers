@@ -1,42 +1,29 @@
 package li.cil.oc.server.component
 
-import java.lang.Iterable
-import java.util
-import li.cil.oc.Constants
-import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
-import li.cil.oc.api.driver.DeviceInfo.DeviceClass
-import li.cil.oc.OpenComputers
-import li.cil.oc.api
-import li.cil.oc.api.Machine
+import li.cil.oc.{Constants, api}
 import li.cil.oc.api.component.RackBusConnectable
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.internal
+import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
+import li.cil.oc.api.{Machine, internal}
 import li.cil.oc.api.internal.Rack
-import li.cil.oc.api.machine
 import li.cil.oc.api.machine.MachineHost
-import li.cil.oc.api.network.Analyzable
-import li.cil.oc.api.network.Environment
-import li.cil.oc.api.network.Message
-import li.cil.oc.api.network.Node
-import li.cil.oc.common.InventorySlots
-import li.cil.oc.common.Slot
-import li.cil.oc.common.Tier
+import li.cil.oc.api.network.{Analyzable, Environment, Message, Node}
+import li.cil.oc.common.container.{ComponentInventory, ServerInventory}
+import li.cil.oc.common.{InventorySlots, Slot, Tier, item}
 import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.container.ComponentInventory
-import li.cil.oc.common.container.ServerInventory
-import li.cil.oc.common.item
 import li.cil.oc.server.network.Connector
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.ExtendedNBT._
-import net.minecraft.world.item.ItemStack
+import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.{Direction, HolderLookup}
-
-import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.entity.player.Player
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.neoforged.neoforge.common.MutableDataComponentHolder
+
+import java.util
+import scala.collection.convert.ImplicitConversionsToJava._
 
 class Server(val rack: api.internal.Rack, val slot: Int) extends Environment with MachineHost with ServerInventory with ComponentInventory with Analyzable with internal.Server with DeviceInfo {
   lazy val machine: api.machine.Machine = Machine.create(this)
@@ -76,19 +63,17 @@ class Server(val rack: api.internal.Rack, val slot: Int) extends Environment wit
   override def onMessage(message: Message): Unit = {
   }
 
-  private final val MachineTag = "machine"
-
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    if (!rack.getEnvironmentLevel.isClientSide) {
-      machine.loadData(nbt.getCompound(MachineTag), provider)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    if(!rack.getEnvironmentLevel.isClientSide) {
+      machine.loadData(holder)
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    if (!rack.getEnvironmentLevel.isClientSide) {
-      nbt.setNewCompoundTag(MachineTag, (nbt: CompoundTag) => machine.saveData(nbt, provider))
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    if(!rack.getEnvironmentLevel.isClientSide) {
+      machine.saveData(holder)
     }
   }
 

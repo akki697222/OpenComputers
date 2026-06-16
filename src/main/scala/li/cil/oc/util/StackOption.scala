@@ -96,4 +96,9 @@ sealed abstract class StackOption(stack: ItemStack) extends Product with Seriali
 
   def toLeft[X](right: => X): Either[ItemStack, X] =
     if (isEmpty) Right(right) else Left(this.get)
+
+  def toOption: Option[ItemStack] = this match {
+    case StackOption.EmptyStack => None
+    case SomeStack(stack) => Some(stack)
+  }
 }

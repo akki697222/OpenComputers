@@ -10,15 +10,19 @@ import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
 import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network.{EnvironmentHost, Message, Node, Visibility}
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.BlockPosition
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.server.PacketSender
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.IntArrayTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.jdk.CollectionConverters._
 
@@ -263,27 +267,17 @@ class AudioCard(private val host: EnvironmentHost) extends AbstractManagedEnviro
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    nbt.getList("owners", Tag.TAG_COMPOUND).forEach {
-      case ownerNbt: CompoundTag =>
-        val address = ownerNbt.getString("address")
-        if (address != "") {
-          owners += address -> ownerNbt.getIntArray("handles").to(mutable.Set)
-        }
-      case _ =>
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+
+    for(owners <- holder.getComponent(OCComponents.HANDLES)) {
+      this.owners ++= owners.map { case k -> v => k -> v.to(mutable.Set) }
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = synchronized {
-    super.saveData(nbt, provider)
-    val ownersNbt = new ListTag()
-    for ((address, handles) <- owners) {
-      val ownerNbt = new CompoundTag()
-      ownerNbt.putString("address", address)
-      ownerNbt.put("handles", new IntArrayTag(handles.toArray))
-      ownersNbt.add(ownerNbt)
-    }
-    nbt.put("owners", ownersNbt)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+
+    holder.setComponent(OCComponents.HANDLES, Map.from(owners.map { case k -> v => k -> v.toSet }))
   }
 }

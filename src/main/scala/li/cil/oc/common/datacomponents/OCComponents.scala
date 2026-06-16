@@ -15,6 +15,7 @@ import net.minecraft.network.codec.{ByteBufCodecs, StreamCodec}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ColorRGBA
 import net.minecraft.world.item.{DyeColor, ItemStack}
+import net.neoforged.neoforge.fluids.FluidStack
 import net.neoforged.neoforge.registries.{DeferredHolder, DeferredRegister}
 
 import java.nio.ByteBuffer
@@ -73,13 +74,23 @@ object OCComponents {
   val LIGHT_COLOR: Type[ColorRGBA] = persistentShared("light_color", ColorRGBA.CODEC, ScalaStreamCodec.COLOR_RGBA)
   val PRINT: Type[PrintData] = persistentShared("print", PrintData.CODEC, PrintData.STREAM_CODEC)
   val FILESYSTEM_DATA: Type[CompoundTag] = persistent("filesystem", CompoundTag.CODEC)
-  val FILESYSTEM_HANDLES: Type[Map[String, Set[Int]]] = persistent("filesystem_handles", ScalaCodec.map(Codec.STRING, ScalaCodec.set(ScalaCodec.INT)))
+  val ROBOT_ROM_FILESYSTEM_DATA: Type[CompoundTag] = persistent("robot_rom_filesystem", CompoundTag.CODEC)
+  val HANDLES: Type[Map[String, Set[Int]]] = persistent("handles", ScalaCodec.map(Codec.STRING, ScalaCodec.set(ScalaCodec.INT)))
   val COMPOUND_DRIVER: Type[(Long, Map[String, CompoundStorage])] = persistent("compound_driver", ScalaCodec.pair(ScalaCodec.LONG -> ScalaCodec.map(Codec.STRING, CompoundStorage.CODEC)))
   val PALETTE: Type[Array[Int]] = persistentShared("palette", ScalaCodec.INT_ARRAY, ScalaStreamCodec.INT_ARRAY)
   val GRAPHICS_CARD: Type[GraphicsCardState] = persistent("graphics_card", GraphicsCardState.CODEC)
   val VIDEO_RAM: Type[List[(Int, CompoundStorage)]] = persistent("video_ram", ScalaCodec.list(ScalaCodec.pair(ScalaCodec.INT -> CompoundStorage.CODEC)))
   val WAKE_THRESHOLD: Type[Int] = persistent("wake_threshold", ScalaCodec.INT)
   val WIRELESS_REDSTONE_STATE: Type[WirelessRedstoneState] = persistent("wireless_redstone_state", WirelessRedstoneState.CODEC)
+  val LEASHED_ENTITIES: Type[List[UUID]] = persistent("leashed_entities", ScalaCodec.list(UUIDUtil.CODEC))
+  val OPEN_PORTS: Type[Array[Int]] = persistent("open_ports", ScalaCodec.INT_ARRAY)
+  val WAKE_MESSAGE: Type[WakeMessage] = persistent("wake_message", WakeMessage.CODEC)
+  val TUNNEL: Type[String] = persistent("tunnel", Codec.STRING)
+  val STRENGTH: Type[Double] = persistent("strength", ScalaCodec.DOUBLE)
+  val HEAD_POS: Type[Int] = persistent("head_position", ScalaCodec.INT)
+  val TANK: Type[FluidStack] = persistent("tank", FluidStack.CODEC)
+  val FUEL_INVENTORY: Type[ItemStack] = persistent("fuel_inventory", ItemStack.CODEC)
+  val FUEL_TICKS_REMAINING: Type[Int] = persistent("fuel_ticks_remaining", ScalaCodec.INT)
   val DEBUG_CARD_ACCESS_CONTEXT: Type[AccessContext] = persistent("debug_card/access_context", AccessContext.CODEC)
   val DEBUG_CARD_REMOTE_NODE_POSITION: Type[BlockPos] = persistent("debug_card/remote_node", BlockPos.CODEC)
 }

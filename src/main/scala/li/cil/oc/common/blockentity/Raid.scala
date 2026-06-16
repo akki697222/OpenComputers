@@ -216,16 +216,6 @@ class Raid(pos: BlockPos, state: BlockState)
     override def saveData(holder: MutableDataComponentHolder): Unit = {
       holder.setComponent(OCComponents.LABEL, label)
     }
-
-    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-      if (nbt.contains(Settings.namespace + "label")) {
-        label = nbt.getString(Settings.namespace + "label")
-      }
-    }
-
-    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-      nbt.putString(Settings.namespace + "label", label)
-    }
   }
 
 }

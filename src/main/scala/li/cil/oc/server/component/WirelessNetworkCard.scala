@@ -14,10 +14,14 @@ import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network._
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.language.implicitConversions
@@ -121,18 +125,16 @@ abstract class WirelessNetworkCard(host: EnvironmentHost) extends NetworkCard(ho
 
   // ----------------------------------------------------------------------- //
 
-  private final val StrengthTag = "strength"
-
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    if (nbt.contains(StrengthTag)) {
-      strength = nbt.getDouble(StrengthTag) max 0 min maxWirelessRange
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    for(strength <- holder.getComponent(OCComponents.STRENGTH)) {
+      this.strength = strength
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    nbt.putDouble(StrengthTag, strength)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    holder.setComponent(OCComponents.STRENGTH, strength)
   }
 }
 

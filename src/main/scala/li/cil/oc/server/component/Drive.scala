@@ -20,15 +20,18 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Visibility
-import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.level.storage.LevelResource
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Option[EnvironmentHost], val sound: Option[String], val speed: Int, val isLocked: Boolean) extends AbstractManagedEnvironment with DeviceInfo {
@@ -137,11 +140,26 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
 
   // ----------------------------------------------------------------------- //
 
-  private final val HeadPosTag = "headPos"
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    loadDriveContents()
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
-    super.loadData(nbt, provider)
+    for(headPos <- holder.getComponent(OCComponents.HEAD_POS))
+      this.headPos = headPos
 
+    if(label != null) label.loadData(holder)
+  }
+
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    saveDriveContents()
+
+    holder.setComponent(OCComponents.HEAD_POS, headPos)
+
+    if(label != null) label.saveData(holder)
+  }
+
+  def loadDriveContents(): Unit = {
     if (node.address != null) try {
       val path = savePath
       if (path.exists()) {
@@ -158,17 +176,9 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
     catch {
       case t: Throwable => OpenComputers.log.warn(s"Failed loading drive contents for '${node.address}'.", t)
     }
-
-    headPos = nbt.getInt(HeadPosTag) max 0 min sectorToHeadPos(sectorCount)
-
-    if (label != null) {
-      label.loadData(nbt, provider)
-    }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
-    super.saveData(nbt, provider)
-
+  def saveDriveContents(): Unit = {
     if (node.address != null) try {
       val path = savePath
       path.getParentFile.mkdirs()
@@ -180,12 +190,6 @@ class Drive(val capacity: Int, val platterCount: Int, val label: Label, host: Op
     }
     catch {
       case t: Throwable => OpenComputers.log.warn(s"Failed saving drive contents for '${node.address}'.", t)
-    }
-
-    nbt.putInt(HeadPosTag, headPos)
-
-    if (label != null) {
-      label.saveData(nbt, provider)
     }
   }
 

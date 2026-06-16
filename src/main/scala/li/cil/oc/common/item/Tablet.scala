@@ -18,7 +18,7 @@ import li.cil.oc.{Constants, Localization, OpenComputers, Settings, api, client,
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.core.component.DataComponents
+import net.minecraft.core.component.{DataComponentHolder, DataComponents}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
@@ -34,6 +34,7 @@ import net.minecraft.world.level.Level
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.client.event.ClientTickEvent
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IItemExtension
 import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
@@ -447,13 +448,13 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    data.loadData(nbt, provider)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    data.loadData(holder)
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
     saveComponents()
-    data.saveData(nbt, provider)
+    data.saveData(holder)
   }
 }
 

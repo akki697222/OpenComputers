@@ -14,15 +14,19 @@ import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network._
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends AbstractManagedEnvironment with DeviceInfo {
   override val node = Network.newNode(this, Visibility.Network).
@@ -208,26 +212,17 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     }
   }
 
-  private final val InventoryTag = "inventory"
-  private final val RemainingTicksTag = "remainingTicks"
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-      inventory = StackOption(ItemStack.parse(provider, nbt.getCompound("inventory")).get())
-    if (nbt.contains(InventoryTag)) {
-      inventory = StackOption(ItemStack.parse(provider, nbt.getCompound(InventoryTag)).get())
-    }
-    remainingTicks = nbt.getInt(RemainingTicksTag)
+    inventory = StackOption(holder.getComponent(OCComponents.FUEL_INVENTORY))
+    remainingTicks = holder.getComponent(OCComponents.FUEL_TICKS_REMAINING) getOrElse 0
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    inventory match {
-      case SomeStack(stack) => nbt.put(InventoryTag, stack.save(provider))
-      case _ =>
-    }
-    if (remainingTicks > 0) {
-      nbt.putInt(RemainingTicksTag, remainingTicks)
-    }
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+
+    holder.setComponent(OCComponents.FUEL_INVENTORY, inventory.toOption)
+    holder.setComponent(OCComponents.FUEL_TICKS_REMAINING, Option.when(remainingTicks > 0) { remainingTicks })
   }
 }

@@ -8,6 +8,7 @@ import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.driver.DeviceInfo
+import li.cil.oc.api.fs.FileSystem
 import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
@@ -16,12 +17,15 @@ import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
 import li.cil.oc.common.ToolDurabilityProviders
 import li.cil.oc.common.blockentity
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedArguments._
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.{Direction, HolderLookup}
@@ -29,6 +33,7 @@ import net.minecraft.resources.ResourceLocation
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class Robot(val agent: blockentity.Robot) extends AbstractManagedEnvironment with Agent with DeviceInfo {
   override val node = api.Network.newNode(this, Visibility.Network).
@@ -158,13 +163,22 @@ class Robot(val agent: blockentity.Robot) extends AbstractManagedEnvironment wit
 
   private final val RomRobotTag = "romRobot"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    romRobot.foreach(_.loadData(nbt.getCompound(RomRobotTag), provider))
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+
+    for(rom <- romRobot;
+        tag <- holder.getComponent(OCComponents.ROBOT_ROM_FILESYSTEM_DATA)) {
+      rom.asInstanceOf[FileSystem].loadData(tag)
+    }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    romRobot.foreach(fs => nbt.setNewCompoundTag(RomRobotTag, (nbt: CompoundTag) => fs.saveData(nbt, provider)))
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+
+    for(rom <- romRobot) {
+      val tag = new CompoundTag()
+      rom.asInstanceOf[FileSystem].saveData(tag)
+      holder.setComponent(OCComponents.ROBOT_ROM_FILESYSTEM_DATA, tag)
+    }
   }
 }
