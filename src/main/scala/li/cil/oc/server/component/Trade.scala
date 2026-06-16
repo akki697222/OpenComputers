@@ -7,6 +7,7 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.prefab.AbstractValue
 import li.cil.oc.common.EventHandler
 import li.cil.oc.util.InventoryUtils
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.trading.MerchantOffer
@@ -21,6 +22,7 @@ import scala.ref.WeakReference
 import net.minecraft.world.Container
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.registries.Registries
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class Trade(val info: TradeInfo) extends AbstractValue {
   def this() = this(new TradeInfo())
@@ -37,9 +39,9 @@ class Trade(val info: TradeInfo) extends AbstractValue {
 
   // Queue the load because when load is called we can't access the world yet
   // and we need to access it to get the Robot's TileEntity / Drone's Entity.
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = EventHandler.scheduleServer(() => info.loadData(nbt))
+  override def loadData(holder: DataComponentHolder, nbt: CompoundTag, provider: HolderLookup.Provider): Unit = EventHandler.scheduleServer(() => info.loadData(nbt))
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = info.saveData(nbt)
+  override def saveData(holder: MutableDataComponentHolder, nbt: CompoundTag, provider: HolderLookup.Provider): Unit = info.saveData(nbt)
 
   @Callback(doc = "function():number -- Returns a sort index of the merchant that provides this trade")
   def getMerchantId(context: Context, arguments: Arguments): Array[AnyRef] =

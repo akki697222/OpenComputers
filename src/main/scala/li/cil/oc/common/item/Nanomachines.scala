@@ -59,7 +59,7 @@ class Nanomachines(props: Properties) extends Item(props) with traits.SimpleItem
                   if (!Strings.isNullOrEmpty(data.uuid)) {
                     controller.uuid = data.uuid
                   }
-                  controller.configuration.loadData(nbt, level.registryAccess())
+                  controller.configuration.loadData(nbt)
                 case _ => controller.reconfigure()
               }
             case controller => controller.reconfigure() // Huh.

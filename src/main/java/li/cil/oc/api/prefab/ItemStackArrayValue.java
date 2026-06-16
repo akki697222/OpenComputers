@@ -4,10 +4,13 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.MutableDataComponentHolder;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -72,7 +75,7 @@ public class ItemStackArrayValue extends AbstractValue {
 	}
 
 	@Override
-	public void loadData(CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+	public void loadData(DataComponentHolder holder, @NonNull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
 		if (nbt.contains(ARRAY_KEY, TAGLIST_ID)){
 			ListTag tagList = nbt.getList(ARRAY_KEY,COMPOUND_ID);
 			this.array = new ItemStack[tagList.size()];
@@ -90,7 +93,7 @@ public class ItemStackArrayValue extends AbstractValue {
 	}
 
 	@Override
-	public void saveData(@NotNull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
+	public void saveData(MutableDataComponentHolder holder, @NotNull CompoundTag nbt, @Nonnull HolderLookup.Provider provider) {
 
 		CompoundTag nullnbt = new CompoundTag();
 

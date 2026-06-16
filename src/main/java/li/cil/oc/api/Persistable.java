@@ -1,30 +1,262 @@
 package li.cil.oc.api;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.*;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.common.MutableDataComponentHolder;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
+import static net.minecraft.core.component.DataComponents.*;
 
 /**
  * An object that can be persisted to an NBT tag and restored back from it.
  */
 public interface Persistable {
     /**
-     * Restores a previous state of the object from the specified NBT tag.
+     * Explicitly tells this instance to load its data from the provided
+     * {@link DataComponentHolder}. This could be anything really,
+     * {@linkplain #loadData(CompoundTag, HolderLookup.Provider) including
+     * entities}.
      *
-     * @param nbt      the tag to read the state from.
-     * @param provider
+     * <p>If you're trying to load data from a {@link BlockEntity}, see
+     * {@link #holder(BlockEntity)}</p>
+     *
+     * <p>You should almost <b>never</b> throw an exception from this method.
+     * If something is wrong, correct it or pretend it doesn't exist and move on.
+     * Only instances of {@link UnrecoverablePersistanceException} may be thrown
+     * which indicate data is known to be present, but it is not in a format that
+     * could be understood at all <b>and</b> loading a default state is not possible.</p>
+     *
+     * @param holder The holder to load from.
+     * @see #loadData(CompoundTag, HolderLookup.Provider)
      */
-    void loadData(@Nonnull CompoundTag nbt, @Nonnull HolderLookup.Provider provider);
+    @ApiStatus.AvailableSince("1.9; NeoForge 1.21.1+")
+    void loadData(DataComponentHolder holder) throws UnrecoverablePersistanceException;
 
     /**
-     * Saves the current state of the object into the specified NBT tag.
-     * <br>
-     * This should write the state in such a way that it can be restored when
-     * {@link #loadData} is called with that tag.
+     * Explicitly tells this instance to make sure the data stored in
+     * <code>holder</code> reflects the current state. The provided holder
+     * could be anything really,
+     * {@linkplain #loadData(CompoundTag, HolderLookup.Provider) including entities}.
      *
-     * @param nbt      the tag to save the state to.
-     * @param provider
+     * <p>If you're trying to load data from a {@link BlockEntity}, see
+     * {@link #holder(BlockEntity)}</p>
+     *
+     * <p>There is no good reason to throw an exception in this method. It will
+     * probably cause data corruption and cause your players to pull their hair
+     * out over losing stuff. 10/10 would not recommend.</p>
+     *
+     * @param holder The mutable holder to save to. In some cases, this may be
+     *               completely empty at the time of the call. Others, it may
+     *               be an {@link ItemStack} that contains Minecraft's
+     *               {@linkplain DataComponents registered data components}.
+     *
+     *               <p>Make sure you don't overwrite things you shouldn't.
+     *               Register your own components if you need to.</p>
      */
-    void saveData(@Nonnull CompoundTag nbt, @Nonnull HolderLookup.Provider provider);
+    @ApiStatus.AvailableSince("1.9; NeoForge 1.21.1+")
+    void saveData(MutableDataComponentHolder holder);
+
+    /**
+     * This alternative to {@link #loadData(DataComponentHolder)}
+     * is provided to help simplify {@link Entity} implementations, which
+     * may not store data in a neat and tidy {@link DataComponentMap}.
+     *
+     * <p>Implementations of {@link BlockEntity} <b>should</b> instead use
+     * {@link Persistable#holder(BlockEntity)}, as block
+     * entities need just a bit of extra work to get to that
+     * {@link DataComponentMap} goodness.</p>
+     *
+     * <p>You may wish to override this method. Don't. Only Entities might
+     * see your overridden version and any relevant migration is better
+     * suited to be placed in {@link Entity#readAdditionalSaveData}.
+     * If you absolutely must, always call super.</p>
+     *
+     * <p>You may wish to call this method with a subtag to avoid potential
+     * conflicts with other parts of the code. When loading, if the tag does
+     * not already exist, <b>please still call this method with an empty tag!</b></p>
+     *
+     * @param tag The tag.
+     * @param provider A {@link HolderLookup.Provider} provided by the game.
+     *                 On {@link Entity} instances, this can be accessed via
+     *                 <code>this.level().registryAccess()</code>.
+     */
+    @OverridingMethodsMustInvokeSuper
+    @ApiStatus.NonExtendable
+    @ApiStatus.Obsolete(since = "OpenComputers 1.9, NeoForge 1.21.1+")
+    default void loadData(CompoundTag tag, HolderLookup.Provider provider) throws UnrecoverablePersistanceException {
+        loadData(new NbtComponentHolder(tag, provider));
+    }
+
+    /**
+     * This alternative to {@link #saveData(MutableDataComponentHolder)}
+     * is provided to help simplify {@link Entity} implementations, which
+     * may not store data in a neat and tidy {@link DataComponentMap}.
+     *
+     * <p>Implementations of {@link BlockEntity} <b>should</b> instead use
+     * {@link Persistable#holder(BlockEntity)}, as block
+     * entities need just a bit of extra work to get to that
+     * {@link DataComponentMap} goodness.</p>
+     *
+     * <p>You may wish to override this method. Don't. Only Entities might
+     * see your overridden version and any relevant migration is better
+     * suited to be placed in {@link Entity#readAdditionalSaveData}.
+     * If you absolutely must, always call super.</p>
+     *
+     * <p>You may wish to call this method with a subtag to avoid potential
+     * conflicts with other parts of the code.</p>
+     *
+     * @param tag The tag.
+     * @param provider A {@link HolderLookup.Provider} provided by the game.
+     *                 On {@link Entity} instances, this can be accessed via
+     *                 <code>this.level().registryAccess()</code>.
+     */
+    @OverridingMethodsMustInvokeSuper
+    @ApiStatus.NonExtendable
+    @ApiStatus.Obsolete(since = "1.9; NeoForge 1.21.1+")
+    default void saveData(CompoundTag tag, HolderLookup.Provider provider) {
+        var holder = new MutableNbtComponentHolder();
+        saveData(holder);
+        holder.save(tag, provider);
+    }
+
+    @ApiStatus.Internal
+    interface BlockEntityMutableComponentHolder extends MutableDataComponentHolder, AutoCloseable {}
+
+    @Contract(value = "_ -> new", pure = true)
+    @ApiStatus.AvailableSince("1.9; NeoForge 1.21.1+")
+    static @NonNull MutableDataComponentHolder holder(@NonNull BlockEntity blockEntity) {
+        return new BlockEntityMutableComponentHolder() {
+            private final DataComponentMap original = blockEntity.collectComponents();
+            private final PatchedDataComponentMap patched = new PatchedDataComponentMap(original);
+
+            @Override
+            public void close() {
+                blockEntity.applyComponents(original, patched.asPatch());
+            }
+
+            @Override
+            public @Nullable <T> T set(@NonNull DataComponentType<? super T> componentType, @Nullable T value) {
+                return patched.set(componentType, value);
+            }
+
+            @Override
+            public @Nullable <T> T remove(@NonNull DataComponentType<? extends T> componentType) {
+                return patched.remove(componentType);
+            }
+
+            @Override
+            public void applyComponents(@NonNull DataComponentPatch patch) {
+                patched.applyPatch(patch);
+            }
+
+            @Override
+            public void applyComponents(@NonNull DataComponentMap components) {
+                patched.setAll(components);
+            }
+
+            @Override
+            public @NonNull DataComponentMap getComponents() {
+                return patched;
+            }
+        };
+    }
+
+    /**
+     * Equivalent to <code>v.loadData(Persistable.holder(map))</code>
+     * 
+     * @see #loadData(DataComponentHolder) 
+     */
+    default void loadData(DataComponentMap map) throws UnrecoverablePersistanceException {
+        loadData(holder(map));
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    @ApiStatus.AvailableSince("1.9; NeoForge 1.21.1+")
+    static @NonNull DataComponentHolder holder(@NonNull DataComponentMap map) {
+        return new DataComponentHolder() {
+            @Override
+            public @NonNull DataComponentMap getComponents() {
+                return DataComponentMap.EMPTY;
+            }
+        };
+    }
+
+    @ApiStatus.AvailableSince("1.9; NeoForge 1.21.1+")
+    DataComponentHolder EMPTY_HOLDER = holder(DataComponentMap.EMPTY);
+}
+
+class NbtComponentHolder implements DataComponentHolder {
+    protected final PatchedDataComponentMap components = new PatchedDataComponentMap(DataComponentMap.EMPTY);
+    private final @Nullable CompoundTag tag;
+
+    protected NbtComponentHolder() {
+        tag = null;
+    }
+
+    public NbtComponentHolder(@NonNull CompoundTag tag, HolderLookup.Provider provider) {
+        this.tag = tag;
+        components.applyPatch(DataComponentPatch.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow());
+    }
+
+    @Override
+    public @Nullable <T> T get(DataComponentType<? extends T> component) {
+        if (tag == null || component != CUSTOM_DATA || components.has(CUSTOM_DATA)) {
+            return DataComponentHolder.super.get(component);
+        } else {
+            // this is safe, as we know the component type is CUSTOM_DATA
+            // which must be DataComponentType<CustomData>, making <T> = <CustomData>
+            //noinspection unchecked
+            return (T) components.set(CUSTOM_DATA, CustomData.of(tag));
+        }
+    }
+
+    @Override
+    public @NonNull DataComponentMap getComponents() {
+        return components;
+    }
+}
+
+class MutableNbtComponentHolder extends NbtComponentHolder implements MutableDataComponentHolder {
+    public MutableNbtComponentHolder() {
+        super();
+    }
+
+    public MutableNbtComponentHolder(CompoundTag tag, HolderLookup.Provider provider) {
+        super(tag, provider);
+    }
+
+    @Override
+    public @Nullable <T> T set(@NonNull DataComponentType<? super T> componentType, @Nullable T value) {
+        return components.set(componentType, value);
+    }
+
+    @Override
+    public @Nullable <T> T remove(@NonNull DataComponentType<? extends T> componentType) {
+        return components.remove(componentType);
+    }
+
+    @Override
+    public void applyComponents(@NonNull DataComponentPatch patch) {
+        components.applyPatch(patch);
+    }
+
+    @Override
+    public void applyComponents(@NonNull DataComponentMap components) {
+        this.components.setAll(components);
+    }
+
+    public void save(CompoundTag tag, HolderLookup.@NonNull Provider provider) {
+        DataComponentPatch.CODEC.encode(this.components.asPatch(), provider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
+    }
 }

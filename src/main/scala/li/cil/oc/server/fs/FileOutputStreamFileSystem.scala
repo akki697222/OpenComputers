@@ -43,8 +43,8 @@ trait FileOutputStreamFileSystem extends FileInputStreamFileSystem with OutputSt
 
   // ----------------------------------------------------------------------- //
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
+  override def saveData(nbt: CompoundTag): Unit = {
+    super.saveData(nbt)
     root.mkdirs()
     root.setLastModified(System.currentTimeMillis())
   }

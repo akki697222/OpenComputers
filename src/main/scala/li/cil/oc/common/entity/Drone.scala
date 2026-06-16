@@ -6,8 +6,9 @@ import li.cil.oc.api.driver.item
 import li.cil.oc.api.internal.MultiTank
 import li.cil.oc.api.machine.{Context, MachineHost}
 import li.cil.oc.api.network._
-import li.cil.oc.api.{Driver, Machine, internal}
+import li.cil.oc.api.{Driver, Machine, Persistable, internal}
 import li.cil.oc.common.container.{ComponentInventory, Inventory}
+import li.cil.oc.common.datacomponents.{DroneState, OCComponents, Owner}
 import li.cil.oc.common.item.data.DroneData
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.{EventHandler, menu}
@@ -15,13 +16,16 @@ import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.{agent, component}
 import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.{BlockPosition, InventoryUtils}
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.syncher.{EntityDataAccessor, EntityDataSerializers, SynchedEntityData}
 import net.minecraft.server.level.{ServerEntity, ServerLevel, ServerPlayer}
+import net.minecraft.util.ColorRGBA
 import net.minecraft.world.entity._
 import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.player.Player
@@ -33,6 +37,7 @@ import net.minecraft.world.level.portal.DimensionTransition
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.{InteractionHand, InteractionResult, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.fluids.IFluidTank
 
 import java.lang
@@ -48,7 +53,7 @@ object Drone {
   val DataSelectedSlot: EntityDataAccessor[Integer] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.INT)
   val DataCurrentEnergy: EntityDataAccessor[Integer] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.INT)
   val DataMaxEnergy: EntityDataAccessor[Integer] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.INT)
-  val DataStatusText: EntityDataAccessor[String] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.STRING)
+  val DataStatusText: EntityDataAccessor[Component] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.COMPONENT)
   val DataInventorySize: EntityDataAccessor[Integer] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.INT)
   val DataLightColor: EntityDataAccessor[Integer] = SynchedEntityData.defineId(classOf[Drone], EntityDataSerializers.INT)
 }
@@ -58,7 +63,7 @@ abstract class DroneInventory(val drone: Drone) extends Inventory
 // internal.Rotatable is also in internal.Drone, but it wasn't since the start
 // so this is to ensure it is implemented here, in the very unlikely case that
 // someone decides to ship that specific version of the API.
-class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, level) with MachineHost with internal.Drone with internal.Rotatable with Analyzable with Context {
+class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, level) with MachineHost with internal.Drone with internal.Rotatable with Analyzable with Context with Persistable {
   override def getEnvironmentLevel: Level = level
   
   // Some basic constants.
@@ -268,7 +273,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
     builder.define(Drone.DataSelectedSlot, Int.box(0))
     builder.define(Drone.DataCurrentEnergy, Int.box(0))
     builder.define(Drone.DataMaxEnergy, Int.box(100))
-    builder.define(Drone.DataStatusText, "")
+    builder.define(Drone.DataStatusText, Component.empty())
     builder.define(Drone.DataInventorySize, Int.box(0))
     builder.define(Drone.DataLightColor, Int.box(0x66DD55))
   }
@@ -316,7 +321,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   def globalBufferSize: Integer = entityData.get(Drone.DataMaxEnergy)
 
-  def statusText: String = entityData.get(Drone.DataStatusText)
+  def statusText: Component = entityData.get(Drone.DataStatusText)
 
   def inventorySize: Int = entityData.get(Drone.DataInventorySize) & 0xFF
 
@@ -339,7 +344,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
 
   def globalBufferSize_=(value: Int): Unit = entityData.set(Drone.DataMaxEnergy, Int.box(value))
 
-  def statusText_=(value: String): Unit = entityData.set(Drone.DataStatusText, Option(value).fold("")(_.linesIterator.map(_.take(10)).take(2).mkString("\n")))
+  def statusText_=(value: Component): Unit = entityData.set(Drone.DataStatusText, value)
 
   def inventorySize_=(value: Int): Unit = entityData.set(Drone.DataInventorySize, Int.box(value.toByte))
 
@@ -579,31 +584,70 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
   override def getAddEntityPacket(entityTrackerEntry: ServerEntity) =
     new ClientboundAddEntityPacket(this, entityTrackerEntry)
 
+  override def loadData(holder: DataComponentHolder): Unit = {
+    info.loadData(holder)
+
+    if(!getEnvironmentLevel.isClientSide) {
+      machine.loadData(holder)
+      control.loadData(holder)
+      components.loadData(holder)
+      mainInventory.loadData(holder)
+    }
+
+    for(Owner(name, id) <- holder.getComponent(OCComponents.OWNER)) {
+      ownerName = name
+      ownerUUID = id
+    }
+
+    for(DroneState(x, y, z, accel, slot, tank) <- holder.getComponent(OCComponents.DRONE_STATE)) {
+      targetX = x
+      targetY = y
+      targetZ = z
+      targetAcceleration = accel
+      setSelectedSlot(slot & 0xFF)
+      setSelectedTank(tank & 0xFF)
+    }
+
+    for(text <- holder.getComponent(OCComponents.STATUS_TEXT)) {
+      statusText = text
+    }
+
+    for(color <- holder.getComponent(OCComponents.LIGHT_COLOR)) {
+      lightColor = color.rgba
+    }
+  }
+
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    info.saveData(holder)
+
+    if(!getEnvironmentLevel.isClientSide) {
+      machine.saveData(holder)
+      control.saveData(holder)
+      components.saveData(holder)
+      mainInventory.saveData(holder)
+    }
+
+    holder.set(OCComponents.OWNER, Owner(ownerName, ownerUUID))
+    holder.set(OCComponents.DRONE_STATE, DroneState(
+      targetX,
+      targetY,
+      targetZ,
+      targetAcceleration,
+      selectedSlot.toByte,
+      selectedTank.toByte
+    ))
+
+    holder.set(OCComponents.STATUS_TEXT, statusText)
+    holder.set(OCComponents.LIGHT_COLOR, new ColorRGBA(lightColor))
+  }
+
   override protected def readAdditionalSaveData(nbt: CompoundTag): Unit = {
     val provider = this.level.registryAccess()
-    info.loadData(nbt.getCompound("info"), provider)
+    this.loadData(nbt, provider)
+
     inventorySize = computeInventorySize()
     if (!getEnvironmentLevel.isClientSide) {
-      machine.loadData(nbt.getCompound("machine"), provider)
-      control.loadData(nbt.getCompound("control"), provider)
-      components.loadData(nbt.getCompound("components"), provider)
-      mainInventory.loadData(nbt.getCompound("inventory"), provider)
-
       wireThingsTogether()
-    }
-    targetX = nbt.getFloat("targetX")
-    targetY = nbt.getFloat("targetY")
-    targetZ = nbt.getFloat("targetZ")
-    targetAcceleration = nbt.getFloat("targetAcceleration")
-    setSelectedSlot(nbt.getByte("selectedSlot") & 0xFF)
-    setSelectedTank(nbt.getByte("selectedTank") & 0xFF)
-    statusText = nbt.getString("statusText")
-    lightColor = nbt.getInt("lightColor")
-    if (nbt.contains("owner")) {
-      ownerName = nbt.getString("owner")
-    }
-    if (nbt.contains("ownerUuid")) {
-      ownerUUID = UUID.fromString(nbt.getString("ownerUuid"))
     }
   }
 
@@ -612,22 +656,7 @@ class Drone(selfType: EntityType[Drone], level: Level) extends Entity(selfType, 
     val provider = this.level.registryAccess()
     components.saveComponents()
     info.storedEnergy = globalBuffer.toInt
-    nbt.setNewCompoundTag("info", (nbt: CompoundTag) => info.saveData(nbt, provider))
-    if (!getEnvironmentLevel.isClientSide) {
-      nbt.setNewCompoundTag("machine", (nbt: CompoundTag) => machine.saveData(nbt, provider))
-      nbt.setNewCompoundTag("control", (nbt: CompoundTag) => control.saveData(nbt, provider))
-      nbt.setNewCompoundTag("components", tag => components.saveData(tag, provider))
-      nbt.setNewCompoundTag("inventory", tag => mainInventory.saveData(tag, provider))
-    }
-    nbt.putFloat("targetX", targetX)
-    nbt.putFloat("targetY", targetY)
-    nbt.putFloat("targetZ", targetZ)
-    nbt.putFloat("targetAcceleration", targetAcceleration)
-    nbt.putByte("selectedSlot", selectedSlot.toByte)
-    nbt.putByte("selectedTank", selectedTank.toByte)
-    nbt.putString("statusText", statusText)
-    nbt.putInt("lightColor", lightColor)
-    nbt.putString("owner", ownerName)
-    nbt.putString("ownerUuid", ownerUUID.toString)
+
+    this.saveData(nbt, provider)
   }
 }

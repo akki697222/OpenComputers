@@ -3,12 +3,16 @@ package li.cil.oc.server.fs
 import java.io
 import java.io.FileNotFoundException
 import li.cil.oc.api.fs.Mode
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 
 import scala.collection.mutable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 trait VirtualFileSystem extends OutputStreamFileSystem {
   protected val root = new VirtualDirectory
@@ -126,23 +130,22 @@ trait VirtualFileSystem extends OutputStreamFileSystem {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    //println(s"Loading file data, NBT contains root: ${nbt.contains("root")}")
-    if (nbt.contains("root", 10)) {
+  override def loadData(nbt: CompoundTag): Unit = {
+    if(nbt.contains("root", Tag.TAG_COMPOUND)) {
       root.loadData(nbt.getCompound("root"))
     }
-    if (!this.isInstanceOf[Buffered]) root.loadData(nbt)
-    super.loadData(nbt, provider) // Last to ensure streams can be re-opened.
+
+    if(!this.isInstanceOf[Buffered]) root.loadData(nbt)
+    super.loadData(nbt) // Last to ensure streams can be re-opened.
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider) // First to allow flushing.
-    if (!this.isInstanceOf[Buffered]) {
+  override def saveData(nbt: CompoundTag): Unit = {
+    super.saveData(nbt) // First to allow flushing.
+    if(!this.isInstanceOf[Buffered]) {
       val fsNbt = new CompoundTag()
       root.saveData(fsNbt)
       nbt.put("root", fsNbt)
     }
-    if (!this.isInstanceOf[Buffered]) root.saveData(nbt)
   }
 
   // ----------------------------------------------------------------------- //

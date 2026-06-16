@@ -2,6 +2,7 @@ package li.cil.oc.common.component.traits
 
 import li.cil.oc.common.component
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
 
 import scala.collection.mutable
@@ -39,9 +40,9 @@ trait VideoRamDevice {
 
   def removeAllBuffers(): Int = removeBuffers(bufferIndexes())
 
-  def loadBuffer(address: String, id: Int, nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  def loadBuffer(address: String, id: Int, holder: DataComponentHolder): Unit = {
     val src = new li.cil.oc.util.TextBuffer(width = 1, height = 1, li.cil.oc.util.PackedColor.SingleBitFormat)
-    src.loadData(nbt, provider)
+    src.loadData(holder)
     addBuffer(component.GpuTextBuffer.wrap(address, id, src))
   }
 

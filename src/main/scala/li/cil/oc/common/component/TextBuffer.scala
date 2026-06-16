@@ -12,21 +12,24 @@ import li.cil.oc.client.renderer.font.TextBufferRenderData
 import li.cil.oc.client.{ComponentTracker => ClientComponentTracker, PacketSender => ClientPacketSender}
 import li.cil.oc.common._
 import li.cil.oc.common.component.traits.VideoRamRasterizer
-import li.cil.oc.common.item.data.NodeData
+import li.cil.oc.common.datacomponents.{CompoundStorage, MaximumVideoMode, OCComponents, VideoMode}
 import li.cil.oc.server.component.Keyboard
 import li.cil.oc.server.{ComponentTracker => ServerComponentTracker, PacketSender => ServerPacketSender}
-import li.cil.oc.{Constants, OpenComputers, Settings, api, util}
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.{BlockPosition, PackedColor, SideTracker}
+import li.cil.oc.{Constants, OpenComputers, Settings, api, util}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.MultiBufferSource
-import net.minecraft.core.HolderLookup
-import net.minecraft.core.component.DataComponents
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.core.BlockPos
+import net.minecraft.core.component.{DataComponentHolder, DataComponents}
+import net.minecraft.nbt.{CompoundTag, NbtOps}
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.component.CustomData
+import net.minecraft.world.level.ChunkPos
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.bus.api.SubscribeEvent
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.event.level.{ChunkEvent, LevelEvent}
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -418,64 +421,50 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   // ----------------------------------------------------------------------- //
 
   private def bufferPath = node.address + "_buffer"
-  private final val IsOnTag = Settings.namespace + "isOn"
-  private final val HasPowerTag = Settings.namespace + "hasPower"
-  private final val MaxWidthTag = Settings.namespace + "maxWidth"
-  private final val MaxHeightTag = Settings.namespace + "maxHeight"
-  private final val MaxDepthTag = Settings.namespace + "maxDepth"
-  private final val PreciseTag = Settings.namespace + "precise"
-  private final val ViewportWidthTag = Settings.namespace + "viewportWidth"
-  private final val ViewportHeightTag = Settings.namespace + "viewportHeight"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    if (SideTracker.isClient) {
-      if (!Strings.isNullOrEmpty(proxy.nodeAddress)) return // Only load once.
-      proxy.nodeAddress = nbt.getCompound(NodeData.NodeTag).getString(NodeData.AddressTag)
-      TextBuffer.registerClientBuffer(this)
-    }
-    else {
-      if (nbt.contains(NodeData.BufferTag)) {
-        data.loadData(nbt.getCompound(NodeData.BufferTag), provider)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    for(address <- holder.getComponent(OCComponents.ADDRESS)) {
+      if (SideTracker.isClient) {
+        if (!Strings.isNullOrEmpty(proxy.nodeAddress)) return // Only load once.
+        proxy.nodeAddress = address
+        TextBuffer.registerClientBuffer(this)
       }
-      else if (!Strings.isNullOrEmpty(node.address)) {
-        data.loadData(SaveHandler.loadNBT(nbt, bufferPath), provider)
+      else {
+        holder.getComponent(OCComponents.TEXT_BUFFER) match {
+          case Some(_) => data.loadData(holder)
+          case None => data.loadData(SaveHandler.loadNBT(host.getEnvironmentLevel.dimension().location(), new ChunkPos(new BlockPos(host.xPosition().toInt, host.yPosition().toInt, host.zPosition().toInt)), bufferPath), host.getEnvironmentLevel.registryAccess())
+        }
       }
     }
 
-    if (nbt.contains(IsOnTag)) {
-      isDisplaying = nbt.getBoolean(IsOnTag)
-    }
-    if (nbt.contains(HasPowerTag)) {
-      hasPower = nbt.getBoolean(HasPowerTag)
-    }
-    if (nbt.contains(MaxWidthTag) && nbt.contains(MaxHeightTag)) {
-      val maxWidth = nbt.getInt(MaxWidthTag)
-      val maxHeight = nbt.getInt(MaxHeightTag)
+    for(isOnComponent <- holder.getComponent(OCComponents.IS_ON))
+      isDisplaying = isOnComponent
+    for(isPoweredComponent <- holder.getComponent(OCComponents.IS_POWERED))
+      hasPower = isPoweredComponent
+
+    for(MaximumVideoMode(maxWidth, maxHeight, depth) <- holder.getComponent(OCComponents.MAX_VIDEO_MODE)) {
       maxResolution = (maxWidth, maxHeight)
-    }
-    // Restore maxDepth so that getMaximumColorDepth() returns the correct tier
-    // even if setMaximumColorDepth() was not called after construction (e.g.
-    // when the buffer lazy val was initialised before load(nbt) ran).
-    if (nbt.contains(MaxDepthTag)) {
+
+      // Restore maxDepth so that getMaximumColorDepth() returns the correct tier
+      // even if setMaximumColorDepth() was not called after construction (e.g.
+      // when the buffer lazy val was initialised before load(nbt) ran).
       val depthValues = api.internal.TextBuffer.ColorDepth.values
-      val ordinal = nbt.getInt(MaxDepthTag) min (depthValues.length - 1) max 0
+      val ordinal = depth min (depthValues.length - 1) max 0
       maxDepth = depthValues(ordinal)
     }
-    precisionMode = nbt.getBoolean(PreciseTag)
 
-    if (nbt.contains(ViewportWidthTag)) {
-      val vpw = nbt.getInt(ViewportWidthTag)
-      val vph = nbt.getInt(ViewportHeightTag)
-      viewport = (vpw min data.width max 1, vph min data.height max 1)
-    } else {
-      viewport = data.size
+    precisionMode = holder.getOrDefault(OCComponents.IS_PRECISE, false)
+
+    viewport = holder.getComponent(OCComponents.VIDEO_MODE) match {
+      case Some(VideoMode(vpw, vph)) => (vpw min data.width max 1, vph min data.height max 1)
+      case None => data.size
     }
   }
 
   // Null check for Waila (and other mods that may call this client side).
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = if (node != null) {
-    super.saveData(nbt, provider)
+  override def saveData(holder: MutableDataComponentHolder): Unit = if (node != null) {
+    super.saveData(holder)
     // Happy thread synchronization hack! Here's the problem: GPUs allow direct
     // calls for modifying screens to give a more responsive experience. This
     // causes the following problem: when saving, if the screen is saved first,
@@ -493,15 +482,12 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
       }
     }
 
-    SaveHandler.scheduleSave(host, nbt, bufferPath, tag => data.saveData(tag, provider))
-    nbt.putBoolean(IsOnTag, isDisplaying)
-    nbt.putBoolean(HasPowerTag, hasPower)
-    nbt.putInt(MaxWidthTag, maxResolution._1)
-    nbt.putInt(MaxHeightTag, maxResolution._2)
-    nbt.putInt(MaxDepthTag, maxDepth.ordinal)
-    nbt.putBoolean(PreciseTag, precisionMode)
-    nbt.putInt(ViewportWidthTag, viewport._1)
-    nbt.putInt(ViewportHeightTag, viewport._2)
+    SaveHandler.scheduleSave(host, new CompoundTag(), bufferPath, tag => data.saveData(tag, host.getEnvironmentLevel.registryAccess()))
+    holder.setComponent(OCComponents.IS_ON, isDisplaying)
+    holder.setComponent(OCComponents.IS_POWERED, hasPower)
+    holder.setComponent(OCComponents.MAX_VIDEO_MODE, MaximumVideoMode(maxResolution._1, maxResolution._2, maxDepth.ordinal))
+    holder.setComponent(OCComponents.IS_PRECISE, precisionMode)
+    holder.setComponent(OCComponents.VIDEO_MODE, VideoMode(viewport._1, viewport._2))
   }
 }
 
@@ -815,9 +801,9 @@ object TextBuffer {
     override def onBufferRamInit(ram: component.GpuTextBuffer): Unit = {
       super.onBufferRamInit(ram)
       owner.host.markChanged()
-      val nbt = new CompoundTag()
-      ram.saveData(nbt, owner.host.getEnvironmentLevel.registryAccess())
-      owner.synchronized(ServerPacketSender.appendTextBufferRamInit(owner.pendingCommands, ram.owner, ram.id, nbt))
+      val nbt = new CompoundStorage()
+      ram.saveData(nbt)
+      owner.synchronized(ServerPacketSender.appendTextBufferRamInit(owner.pendingCommands, ram.owner, ram.id, CompoundStorage.CODEC.encode(nbt, NbtOps.INSTANCE, new CompoundTag()).getOrThrow().asInstanceOf[CompoundTag]))
     }
 
     override def onBufferRamDestroy(ram: component.GpuTextBuffer): Unit = {

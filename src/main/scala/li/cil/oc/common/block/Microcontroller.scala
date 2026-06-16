@@ -48,7 +48,7 @@ class Microcontroller(props: Properties)
 
   override def getCloneItemStack(world: LevelReader, pos: BlockPos, state: BlockState): ItemStack =
     world.getBlockEntity(pos) match {
-      case mcu: blockentity.Microcontroller => mcu.info.copyItemStack(world.registryAccess())
+      case mcu: blockentity.Microcontroller => mcu.info.copyItemStack()
       case _ => ItemStack.EMPTY
     }
 

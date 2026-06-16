@@ -64,12 +64,4 @@ object DriverTablet extends Item {
     }
     else new CompoundTag()
   }
-
-  override def dataTag(stack: ItemStack) = {
-    mapToDataTag(stack, ItemUtils.getTag(stack))
-  }
-
-  override def updateDataTag(stack: ItemStack, updater: Consumer[CompoundTag]): Unit = {
-    CustomData.update(DataComponents.CUSTOM_DATA, stack, data => updater.accept(mapToDataTag(stack, data)))
-  }
 }

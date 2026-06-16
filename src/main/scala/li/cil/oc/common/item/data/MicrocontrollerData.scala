@@ -4,41 +4,37 @@ import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.common.Tier
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.NbtOps
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller) extends ItemData(itemName) {
-  def this(stack: ItemStack) = {
+  def this(stack: DataComponentHolder) = {
     this()
     loadData(stack)
   }
-  
-  def this(stack: ItemStack, provider: HolderLookup.Provider) = {
-    this()
-    loadData(stack, provider)
-  }
 
   var tier = Tier.One
-
   var components: Array[ItemStack] = Array[ItemStack](ItemStack.EMPTY)
-
   var storedEnergy = 0
 
   private final val TierTag = Settings.namespace + "tier"
   private final val ComponentsTag = Settings.namespace + "components"
   private final val StoredEnergyTag = Settings.namespace + "storedEnergy"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag)
-    components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get()).filter(!_.isEmpty)
-    storedEnergy = nbt.getInt(StoredEnergyTag)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    tier = (holder.getComponent(OCComponents.TIER).getOrElse(default = 0)).asInstanceOf[Byte].toInt
+    components = holder.getComponent(OCComponents.COMPONENTS).getOrElse(List.empty).filter(!_.isEmpty).toArray
+    storedEnergy = holder.getComponent(OCComponents.STORED_ENERGY) getOrElse 0
 
     // Reserve slot for EEPROM if necessary, avoids having to resize the
     // components array in the MCU tile entity, which isn't possible currently.
@@ -47,16 +43,16 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.putByte(TierTag, tier.toByte)
-    nbt.setNewTagList(ComponentsTag, components.filter(!_.isEmpty).toIterable)
-    nbt.putInt(StoredEnergyTag, storedEnergy)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.TIER, tier.toByte)
+    holder.setComponent(OCComponents.COMPONENTS, components.toList)
+    holder.setComponent(OCComponents.STORED_ENERGY, storedEnergy)
   }
 
-  def copyItemStack(provider: HolderLookup.Provider): ItemStack = {
+  def copyItemStack(): ItemStack = {
     val stack = createItemStack()
     val newInfo = new MicrocontrollerData(stack)
-    newInfo.saveData(stack, provider)
+    newInfo.saveData(stack)
     stack
   }
 }

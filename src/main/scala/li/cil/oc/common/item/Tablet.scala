@@ -12,17 +12,17 @@ import li.cil.oc.common.item.data.TabletData
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.{Slot, Tier, menu}
 import li.cil.oc.integration.opencomputers.DriverScreen
-import li.cil.oc.server.component
+import li.cil.oc.server.component.{Tablet => TabletComponent}
 import li.cil.oc.util._
 import li.cil.oc.{Constants, Localization, OpenComputers, Settings, api, client, server}
 import net.minecraft.client.Minecraft
 import net.minecraft.client.resources.model.ModelResourceLocation
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.core.component.{DataComponentMap, DataComponents}
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.nbt.{CompoundTag, Tag}
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world._
 import net.minecraft.world.entity.player.{Inventory, Player}
@@ -34,11 +34,10 @@ import net.minecraft.world.level.Level
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.client.event.ClientTickEvent
+import net.neoforged.neoforge.common.extensions.IItemExtension
 import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 import net.neoforged.neoforge.server.ServerLifecycleHooks
-import li.cil.oc.util.ExtendedItemStack._
-import net.neoforged.neoforge.common.extensions.IItemExtension
 
 import java.util
 import java.util.UUID
@@ -225,7 +224,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
 
   val data = new TabletData()
 
-  val tablet: component.Tablet = if (getEnvironmentLevel.isClientSide) null else new component.Tablet(this)
+  val tablet: TabletComponent = if (getEnvironmentLevel.isClientSide) null else new TabletComponent(this)
 
   //// Client side only
   private var isInitialized = !getEnvironmentLevel.isClientSide
@@ -258,8 +257,8 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
     if (data != null) {
       loadData(data, provider)
       if (!getEnvironmentLevel.isClientSide) {
-        tablet.loadData(data.getCompound(Settings.namespace + "component"), provider)
-        machine.loadData(data.getCompound(Settings.namespace + "data"), provider)
+        tablet.loadData(stack)
+        machine.loadData(stack)
       }
     }
   }
@@ -354,7 +353,7 @@ class TabletWrapper(var stack: ItemStack, var player: Player) extends ComponentI
   override def stillValid(player: Player): Boolean = machine != null && machine.canInteract(player.getName.getString)
 
   override def setChanged(): Unit = {
-    data.saveData(stack, getEnvironmentLevel.registryAccess())
+    data.saveData(stack)
     player.getInventory.setChanged()
   }
 

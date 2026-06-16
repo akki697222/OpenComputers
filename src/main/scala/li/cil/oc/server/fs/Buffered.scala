@@ -49,7 +49,7 @@ trait Buffered extends OutputStreamFileSystem {
 
   private var saving: Option[Future[_]] = None
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def loadData(nbt: CompoundTag): Unit = {
     saving.foreach(f => try {
       f.get(120L, TimeUnit.SECONDS)
     } catch {
@@ -57,7 +57,7 @@ trait Buffered extends OutputStreamFileSystem {
       case e: CancellationException => // NO-OP
     })
     loadFiles(nbt)
-    super.loadData(nbt, provider)
+    super.loadData(nbt)
   }
 
   private def loadFiles(nbt: CompoundTag): Unit = this.synchronized {
@@ -101,8 +101,8 @@ trait Buffered extends OutputStreamFileSystem {
     else recurse("", fileRoot)
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
+  override def saveData(nbt: CompoundTag): Unit = {
+    super.saveData(nbt)
     saving = Buffered.fileSaveHandler.withPool(_.submit(new Runnable {
       override def run(): Unit = saveFiles()
     }))

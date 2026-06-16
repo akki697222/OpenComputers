@@ -3,6 +3,7 @@ package li.cil.oc.common.item
 import java.util
 import li.cil.oc.Localization
 import li.cil.oc.Settings
+import li.cil.oc.common.datacomponents.{MFCoords, OCComponents}
 import li.cil.oc.util.Tooltip
 import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.world.item.Item
@@ -21,18 +22,13 @@ import net.neoforged.neoforge.common.extensions.IItemExtension
 class UpgradeMF(props: Properties) extends Item(props) with traits.SimpleItem with traits.ItemTier with IItemExtension {
   override def onItemUseFirst(stack: ItemStack, player: Player, level: Level, pos: BlockPos, side: Direction, hitX: Float, hitY: Float, hitZ: Float, hand: InteractionHand): InteractionResult = {
     if (!player.level.isClientSide && player.isCrouching) {
-      val data = stack.getOrCreateTag
-      data.putString(Settings.namespace + "dimension", level.dimension.location.toString)
-      data.putIntArray(Settings.namespace + "coord", Array(pos.getX, pos.getY, pos.getZ, side.ordinal()))
+      stack.set(OCComponents.MF_COORD, MFCoords(level.dimension.location, pos, side))
       return InteractionResult.sidedSuccess(player.level.isClientSide)
     }
     super.onItemUseFirst(stack, player, level, pos, side, hitX, hitY, hitZ, hand)
   }
 
   override protected def tooltipExtended(stack: ItemStack, tooltip: util.List[Component]): Unit = {
-    tooltip.add(Component.literal(Localization.Tooltip.MFULinked(stack.getTag match {
-      case data: CompoundTag => data.contains(Settings.namespace + "coord")
-      case _ => false
-    })).setStyle(Tooltip.DefaultStyle))
+    tooltip.add(Component.literal(Localization.Tooltip.MFULinked(stack.has(OCComponents.MF_COORD))).setStyle(Tooltip.DefaultStyle))
   }
 }

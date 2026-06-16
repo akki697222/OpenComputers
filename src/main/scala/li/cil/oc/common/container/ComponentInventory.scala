@@ -9,10 +9,13 @@ import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.network.Node
 import li.cil.oc.api.util.Lifecycle
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.integration.opencomputers.Item
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToScala._
 import scala.collection.mutable
@@ -64,7 +67,7 @@ trait ComponentInventory extends Inventory with network.Environment {
               case Some(component) =>
                 applyLifecycleState(component, Lifecycle.LifecycleState.Constructing)
                 try {
-                  component.loadData(dataTag(driver, stack), host.getEnvironmentLevel.registryAccess())
+                  component.loadData(stack)
                 }
                 catch {
                   case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while loading.", e)
@@ -101,9 +104,12 @@ trait ComponentInventory extends Inventory with network.Environment {
 
   // ----------------------------------------------------------------------- //
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def component: DataComponentType[List[ItemStack]] =
+    OCComponents.COMPONENTS.get()
+
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
     saveComponents()
-    super.saveData(nbt, provider) // Save items after updating their tags.
+    super.saveData(holder)
   }
 
   def saveComponents(): Unit = {
@@ -139,7 +145,7 @@ trait ComponentInventory extends Inventory with network.Environment {
           componentSlots(slot) = Some(component)
           applyLifecycleState(component, Lifecycle.LifecycleState.Constructing)
           try {
-            component.loadData(dataTag(driver, stack), host.getEnvironmentLevel.registryAccess())
+            component.loadData(stack)
           } catch {
             case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while loading.", e)
           }
@@ -193,13 +199,7 @@ trait ComponentInventory extends Inventory with network.Environment {
 
   protected def save(component: ManagedEnvironment, driver: ItemDriver, stack: ItemStack): Unit = {
     try {
-      val tag = dataTag(driver, stack)
-      // Clear the tag compound before saving to get the same behavior as
-      // in tile entities (otherwise entries have to be cleared manually).
-      for (key <- tag.getAllKeys.map(_.asInstanceOf[String])) {
-        tag.remove(key)
-      }
-      component.saveData(tag, host.getEnvironmentLevel.registryAccess())
+      component.saveData(stack)
     } catch {
       case e: Throwable => OpenComputers.log.warn(s"An item component of type '${component.getClass.getName}' (provided by driver '${driver.getClass.getName}') threw an error while saving.", e)
     }

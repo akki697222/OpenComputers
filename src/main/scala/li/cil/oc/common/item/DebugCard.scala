@@ -43,7 +43,7 @@ class DebugCard(props: Properties) extends Item(props) with traits.SimpleItem wi
           case _ => ""
         }))
 
-      data.saveData(stack, level.registryAccess())
+      data.saveData(stack)
       player.swing(InteractionHand.MAIN_HAND)
     }
     new InteractionResultHolder(InteractionResult.sidedSuccess(level.isClientSide), stack)

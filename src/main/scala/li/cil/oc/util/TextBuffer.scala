@@ -2,8 +2,13 @@ package li.cil.oc.util
 
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.api.Persistable
+import li.cil.oc.common.datacomponents.{OCComponents, TextBufferContents}
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt._
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import java.lang
 
@@ -15,7 +20,7 @@ import java.lang
  * relatively fast updates, given a smart algorithm (using copy()/fill()
  * instead of set()ing everything).
  */
-class TextBuffer(var width: Int, var height: Int, initialFormat: PackedColor.ColorFormat) {
+class TextBuffer(var width: Int, var height: Int, initialFormat: PackedColor.ColorFormat) extends Persistable {
   def this(size: (Int, Int), format: PackedColor.ColorFormat) = this(size._1, size._2, format)
 
   private var _format = initialFormat
@@ -259,52 +264,42 @@ class TextBuffer(var width: Int, var height: Int, initialFormat: PackedColor.Col
     }
   }
 
-  def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    val maxResolution = math.max(Settings.screenResolutionsByTier.last._1, Settings.screenResolutionsByTier.last._2)
-    val w = nbt.getInt("width") min maxResolution max 1
-    val h = nbt.getInt("height") min maxResolution max 1
-    size = (w, h)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    for(TextBufferContents(width, height, depthTag, foreground, foregroundIsPalette, background, backgroundIsPalette, buffer, color) <- holder.getComponent(OCComponents.TEXT_BUFFER)) {
+      size = (width, height)
 
-    val b = nbt.getList("buffer", Tag.TAG_STRING)
-    for (i <- 0 until math.min(h, b.size)) {
-      val value = b.getString(i)
-      val valueIt = value.codePoints.iterator()
-      var j = 0
-      while (j < buffer(i).length && valueIt.hasNext) {
-        buffer(i)(j) = valueIt.nextInt()
-        j += 1
+      for (i <- 0 until math.min(height, buffer.size)) {
+        val value = buffer(i)
+        val valueIt = value.codePoints.iterator()
+        var j = 0
+        while (j < buffer(i).length && valueIt.hasNext) {
+          this.buffer(i)(j) = valueIt.nextInt()
+          j += 1
+        }
       }
-    }
 
-    val depth = api.internal.TextBuffer.ColorDepth.values.apply(nbt.getInt("depth") min (api.internal.TextBuffer.ColorDepth.values.length - 1) max 0)
-    _format = PackedColor.Depth.format(depth)
-    _format.loadData(nbt, provider)
-    foreground = PackedColor.Color(nbt.getInt("foreground"), nbt.getBoolean("foregroundIsPalette"))
-    background = PackedColor.Color(nbt.getInt("background"), nbt.getBoolean("backgroundIsPalette"))
+      val depth = api.internal.TextBuffer.ColorDepth.values.apply(depthTag min (api.internal.TextBuffer.ColorDepth.values.length - 1) max 0)
+      _format = PackedColor.Depth.format(depth)
+      _format.loadData(holder)
+      this.foreground = PackedColor.Color(foreground, foregroundIsPalette)
+      this.background = PackedColor.Color(background, backgroundIsPalette)
 
-    if (!NbtDataStream.getShortArray(nbt, "colors", color, w, h)) {
-      NbtDataStream.getIntArrayLegacy(nbt, "color", color, w, h)
+      this.color = color.sized(width, height)
     }
   }
 
-  def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.putInt("width", width)
-    nbt.putInt("height", height)
-
-    val b = new ListTag()
-    for (i <- 0 until height) {
-      b.add(StringTag.valueOf(lineToString(i)))
-    }
-    nbt.put("buffer", b)
-
-    nbt.putInt("depth", _format.depth.ordinal)
-    _format.saveData(nbt, provider)
-    nbt.putInt("foreground", _foreground.value)
-    nbt.putBoolean("foregroundIsPalette", _foreground.isPalette)
-    nbt.putInt("background", _background.value)
-    nbt.putBoolean("backgroundIsPalette", _background.isPalette)
-
-    NbtDataStream.setShortArray(nbt, "colors", color.flatten.map(identity))
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.TEXT_BUFFER, TextBufferContents(
+      width,
+      height,
+      _format.depth.ordinal,
+      _foreground.value,
+      _foreground.isPalette,
+      _background.value,
+      _background.isPalette,
+      List.tabulate[String](height) { lineToString },
+      new TextBufferContents.ShortArray(color)
+    ))
   }
 
   def lineToString(y: Int): String = {

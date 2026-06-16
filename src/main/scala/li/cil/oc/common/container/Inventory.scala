@@ -1,15 +1,20 @@
 package li.cil.oc.common.container
 
 import li.cil.oc.Settings
+import li.cil.oc.api.Persistable
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.StackOption
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.{DataComponentHolder, DataComponentType}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.nbt.Tag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
-trait Inventory extends SimpleInventory {
+trait Inventory extends SimpleInventory with Persistable {
   def items: Array[ItemStack]
 
   def updateItems(slot: Int, stack: ItemStack): Unit = items(slot) = StackOption(stack).orEmpty
@@ -57,31 +62,23 @@ trait Inventory extends SimpleInventory {
 
   // ----------------------------------------------------------------------- //
 
-  private final val ItemsTag = Settings.namespace + "items"
-  private final val SlotTag = "slot"
-  private final val ItemTag = "item"
-
-  def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.getList(ItemsTag, Tag.TAG_COMPOUND).foreach((tag: CompoundTag) => {
-      if (tag.contains(SlotTag)) {
-        val slot = tag.getByte(SlotTag).toInt
-        if (slot >= 0 && slot < items.length) {
-          updateItems(slot, ItemStack.parseOptional(provider, tag.getCompound(ItemTag)))
-        }
-      }
-    })
+  def loadFrom(value: Iterable[ItemStack]): Unit = {
+    for (item <- value; i <- 0 until (value.size max items.length)) {
+      items(i) = item
+    }
   }
 
-  def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.setNewTagList(ItemsTag,
-      items.zipWithIndex collect {
-        case (stack, slot) if !stack.isEmpty => (stack, slot)
-      } map {
-        case (stack, slot) =>
-          val slotNbt = new CompoundTag()
-          slotNbt.putByte(SlotTag, slot.toByte)
-          slotNbt.setNewCompoundTag(ItemTag, _ => stack.save(provider))
-      })
+  def component: DataComponentType[List[ItemStack]] =
+    OCComponents.CONTENTS.get()
+
+  override def loadData(holder: DataComponentHolder): Unit = {
+    for(items <- holder.getComponent(this.component)) {
+      loadFrom(items)
+    }
+  }
+
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(this.component, items.toList)
   }
 
   // ----------------------------------------------------------------------- //

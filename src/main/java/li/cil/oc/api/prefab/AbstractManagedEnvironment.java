@@ -1,12 +1,12 @@
 package li.cil.oc.api.prefab;
 
+import li.cil.oc.api.DataComponents;
+import li.cil.oc.api.UnrecoverablePersistanceException;
 import li.cil.oc.api.network.ManagedEnvironment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.core.component.DataComponentHolder;
+import net.neoforged.neoforge.common.MutableDataComponentHolder;
 
 /**
  * Simple base implementation of the {@link ManagedEnvironment} interface, so
@@ -49,14 +49,14 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
     }
 
     @Override
-    public void loadData(final CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
-        if (node() != null && nbt.contains(NODE_TAG, Tag.TAG_COMPOUND)) {
-            node().loadData(nbt.getCompound(NODE_TAG), provider);
+    public void loadData(DataComponentHolder holder) throws UnrecoverablePersistanceException {
+        if (node() != null && holder.has(DataComponents.NODE)) {
+            node().loadData(holder);
         }
     }
 
     @Override
-    public void saveData(final @NotNull CompoundTag nbt, @NotNull HolderLookup.Provider provider) {
+    public void saveData(MutableDataComponentHolder holder) {
         if (node() != null) {
             // Force joining a network when saving and we're not in one yet, so that
             // the address is embedded in the saved data that gets sent to the client,
@@ -64,16 +64,10 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
             // client (for example keyboard and screen/text buffer).
             if (node().address() == null) {
                 li.cil.oc.api.Network.joinNewNetwork(node());
-
-                final CompoundTag nodeTag = new CompoundTag();
-                node().saveData(nodeTag, provider);
-                nbt.put(NODE_TAG, nodeTag);
-
+                node().saveData(holder);
                 node().remove();
             } else {
-                final CompoundTag nodeTag = new CompoundTag();
-                node().saveData(nodeTag, provider);
-                nbt.put(NODE_TAG, nodeTag);
+                node().saveData(holder);
             }
         }
     }

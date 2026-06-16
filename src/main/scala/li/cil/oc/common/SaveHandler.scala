@@ -117,6 +117,16 @@ object SaveHandler {
 
   def loadNBT(nbt: CompoundTag, name: String): CompoundTag = {
     val data = load(nbt, name)
+    parseNBT(data)
+  }
+  
+  def loadNBT(dimension: ResourceLocation, chunk: ChunkPos, name: String): CompoundTag = {
+    waitForSaveToComplete(name)
+    val data = load(dimension, chunk, name)
+    parseNBT(data)
+  }
+
+  private def parseNBT(data: Array[Byte]) = {
     if (data.length > 0) try {
       val bais = new ByteArrayInputStream(data)
       val dis = new DataInputStream(bais)
@@ -137,6 +147,12 @@ object SaveHandler {
     val dimension = nbt.getString("dimension")
     val chunk = new ChunkPos(nbt.getInt("chunkX"), nbt.getInt("chunkZ"))
 
+    waitForSaveToComplete(name)
+
+    load(ResourceLocation.tryParse(dimension), chunk, name)
+  }
+
+  private def waitForSaveToComplete(name: String) = {
     // Wait for the latest save task for the requested file to complete.
     // This prevents the chance of loading an outdated version
     // of this file.
@@ -147,9 +163,10 @@ object SaveHandler {
       case e: CancellationException => // NO-OP
     })
     saving.remove(name)
-
-    load(ResourceLocation.tryParse(dimension), chunk, name)
   }
+
+  def scheduleSave(dimension: ResourceLocation, chunk: ChunkPos, name: String, data: CompoundTag => Unit): Unit =
+    scheduleSave(dimension, chunk, name, writeNBT(data))
 
   def scheduleSave(dimension: ResourceLocation, chunk: ChunkPos, name: String, data: Array[Byte]): Unit = {
     if (chunk == null) throw new IllegalArgumentException("chunk is null")

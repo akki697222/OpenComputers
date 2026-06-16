@@ -65,10 +65,10 @@ trait Capacity extends OutputStreamFileSystem {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def loadData(nbt: CompoundTag): Unit = {
     try {
       ignoreCapacity = true
-      super.loadData(nbt, provider)
+      super.loadData(nbt)
     } finally {
       ignoreCapacity = false
     }
@@ -76,8 +76,8 @@ trait Capacity extends OutputStreamFileSystem {
     used = computeSize("/")
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
+  override def saveData(nbt: CompoundTag): Unit = {
+    super.saveData(nbt)
 
     // For the tooltip.
     nbt.putLong("capacity.used", used)

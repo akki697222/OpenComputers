@@ -57,7 +57,7 @@ class Drone(state: menu.Drone, playerInventory: Inventory, name: Component)
 
   override def render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, dt: Float): Unit = {
     powerButton.toggled = inventoryContainer.isRunning
-    bufferRenderer.dirty = inventoryContainer.statusText.linesIterator.zipWithIndex.exists {
+    bufferRenderer.dirty = inventoryContainer.statusText.getString.linesIterator.zipWithIndex.exists {
       case (line, i) => buffer.set(0, i, line, vertical = false)
     }
     super.render(graphics, mouseX, mouseY, dt)

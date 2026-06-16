@@ -26,7 +26,7 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
   override def setCharge(stack: ItemStack, amount: Double): Unit = {
     val data = new HoverBootsData(stack)
     data.charge = math.min(maxCharge(stack), math.max(0, amount))
-    CustomData.update(DataComponents.CUSTOM_DATA, stack, data.saveData(_))
+    data.saveData(stack)
   }
 
   override def canCharge(stack: ItemStack): Boolean = true
@@ -35,7 +35,7 @@ class HoverBoots(props: Properties) extends ArmorItem(ArmorMaterials.DIAMOND, Ar
     val data = new HoverBootsData(stack)
     traits.Chargeable.applyCharge(amount, data.charge, Settings.get.bufferHoverBoots, used => if (!simulate) {
       data.charge += used
-      CustomData.update(DataComponents.CUSTOM_DATA, stack, data.saveData(_))
+      data.saveData(stack)
     })
   }
 

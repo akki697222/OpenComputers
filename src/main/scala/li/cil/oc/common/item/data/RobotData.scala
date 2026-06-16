@@ -6,15 +6,21 @@ import li.cil.oc.Constants
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.common.datacomponents.{OCComponents, RobotChargeInfo}
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ItemUtils
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.{DataComponentHolder, DataComponents}
 import net.minecraft.world.item.ItemStack
 
 import scala.io.Source
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
+import net.minecraft.network.chat.Component
+import net.minecraft.util.ColorRGBA
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object RobotData {
@@ -38,20 +44,17 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     loadData(stack, provider)
   }
 
-  var name = ""
+  var name: Component = Component.empty()
 
   // Overall energy including components.
   var totalEnergy = 0
 
   // Energy purely stored in robot component - this is what we have to restore manually.
   var robotEnergy = 0
-
   var tier = 0
 
   var components = Array.empty[ItemStack]
-
   var containers = Array.empty[ItemStack]
-
   var lightColor = 0xF23030
 
   private final val StoredEnergyTag = Settings.namespace + "storedEnergy"
@@ -61,33 +64,41 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
   private final val ContainersTag = Settings.namespace + "containers"
   private final val LightColorTag = Settings.namespace + "lightColor"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    name = ItemUtils.getDisplayName(nbt).getOrElse("")
-    if (Strings.isNullOrEmpty(name)) {
-      name = RobotData.randomName
+  override def loadData(holder: DataComponentHolder): Unit = {
+    name = holder.getComponent(DataComponents.CUSTOM_NAME) match {
+      case Some(value) => value
+      case None => Component.literal(RobotData.randomName)
     }
-    totalEnergy = nbt.getInt(StoredEnergyTag)
-    robotEnergy = nbt.getInt(RobotEnergyTag)
-    tier = nbt.getInt(TierTag)
-    components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get())
-    containers = nbt.getList(ContainersTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag].map(ItemStack.parse(provider, _).get())
-    if (nbt.contains(LightColorTag)) {
-      lightColor = nbt.getInt(LightColorTag)
+
+    for(RobotChargeInfo(total, stored) <- holder.getComponent(OCComponents.ROBOT_CHARGE)) {
+      totalEnergy = total
+      robotEnergy = stored
+    }
+
+    for(tier <- holder.getComponent(OCComponents.TIER)) {
+      this.tier = tier
+    }
+
+    for(items <- holder.getComponent(OCComponents.COMPONENTS)) {
+      components = items.toArray
+    }
+
+    for(items <- holder.getComponent(OCComponents.CONTAINERS)) {
+      containers = items.toArray
+    }
+
+    for(color <- holder.getComponent(OCComponents.LIGHT_COLOR)) {
+      lightColor = color.rgba
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    if (!Strings.isNullOrEmpty(name)) {
-      ItemUtils.setDisplayName(nbt, name)
-    }
-    nbt.putInt(StoredEnergyTag, totalEnergy)
-    nbt.putInt(RobotEnergyTag, robotEnergy)
-    nbt.putInt(TierTag, tier)
-    nbt.setNewTagList(ComponentsTag, components.toIterable)
-    nbt.setNewTagList(ContainersTag, containers.toIterable)
-    nbt.putInt(LightColorTag, lightColor)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(DataComponents.CUSTOM_NAME, name)
+    holder.setComponent(OCComponents.ROBOT_CHARGE, RobotChargeInfo(totalEnergy, robotEnergy))
+    holder.setComponent(OCComponents.TIER, tier.toByte)
+    holder.setComponent(OCComponents.COMPONENTS, components.toList)
+    holder.setComponent(OCComponents.CONTAINERS, containers.toList)
+    holder.setComponent(OCComponents.LIGHT_COLOR, new ColorRGBA(lightColor))
   }
 
   def copyItemStack(provider: HolderLookup.Provider) = {
@@ -95,14 +106,15 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     // Forget all node addresses and so on. This is used when 'picking' a
     // robot in creative mode.
     val newInfo = new RobotData(stack)
-    newInfo.components.foreach(cs => Option(api.Driver.driverFor(cs)) match {
-      case Some(driver) if driver == DriverScreen =>
-        val nbt = driver.dataTag(cs)
-        for (tagName <- nbt.getAllKeys.toArray) {
-          nbt.remove(tagName.asInstanceOf[String])
-        }
-      case _ =>
-    })
+    // FIXME probably
+    // newInfo.components.foreach(cs => Option(api.Driver.driverFor(cs)) match {
+    //   case Some(driver) if driver == DriverScreen =>
+    //     val nbt = driver.dataTag(cs)
+    //     for (tagName <- nbt.getAllKeys.toArray) {
+    //       nbt.remove(tagName.asInstanceOf[String])
+    //     }
+    //   case _ =>
+    // })
     // Don't show energy info (because it's unreliable) but fill up the
     // internal buffer. This is for creative use only, anyway.
     newInfo.totalEnergy = 0

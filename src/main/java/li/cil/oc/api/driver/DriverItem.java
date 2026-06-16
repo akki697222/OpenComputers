@@ -113,8 +113,13 @@ public interface DriverItem {
      * @param stack the item to get the child tag from.
      * @return the tag to use for saving and loading, or {@code null} to use
      * the default tag {@code oc:data}.
+     *
+     * @deprecated Use {@link li.cil.oc.api.Persistable} and/or Data Components directly.
      */
-    CompoundTag dataTag(ItemStack stack);
+    @Deprecated(since = "1.9; NeoForge 1.21.1+", forRemoval = true)
+    default CompoundTag dataTag(ItemStack stack) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Get the tag compound based on the item stack to use for persisting the
@@ -135,6 +140,11 @@ public interface DriverItem {
      *
      * @param stack the item to get the child tag from.
      * @param updater A function that will be run to modify tag data.
+     *
+     * @deprecated Use {@link li.cil.oc.api.Persistable} and/or Data Components directly.
      */
-    void updateDataTag(ItemStack stack, Consumer<CompoundTag> updater);
+    @Deprecated(since = "1.9; NeoForge 1.21.1+", forRemoval = true)
+    default void updateDataTag(ItemStack stack, Consumer<CompoundTag> updater) {
+        throw new UnsupportedOperationException();
+    }
 }

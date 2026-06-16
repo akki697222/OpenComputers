@@ -21,17 +21,8 @@ object Migrator {
     }
   }
 
-  private lazy val map = Map[DataComponentType[_], Migrator[_]](
-    OCComponents.LOOT_DISK.get -> LootDiskMigrator,
-    OCComponents.DISK_COLOR.get -> DiskColorMigrator,
-    OCComponents.EEPROM_CODE.get -> EEPROMCodeMigrator,
-    OCComponents.EEPROM_DATA.get -> EEPROMUserDataMigrator,
-    OCComponents.READONLY.get -> EEPROMReadonlyMigrator,
-    OCComponents.LABEL.get -> LabelMigrator
-  )
-
   def perform[T](ty: DataComponentType[T], nbt: CompoundTag, provider: HolderLookup.Provider): Option[T] = {
-    map.get(ty) match {
+    Migrators.map.get(ty) match {
       case Some(migrator) => migrator.fromNBT(nbt, provider) map(_.asInstanceOf[T])
       case None => None
     }

@@ -8,6 +8,7 @@ import li.cil.oc.client.audio.AudioSession
 import li.cil.oc.client.renderer.PetRenderer
 import li.cil.oc.common.blockentity._
 import li.cil.oc.common.blockentity.traits._
+import li.cil.oc.common.datacomponents.CompoundStorage
 import li.cil.oc.common.item.Tablet
 import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.{Loot, PacketType, component, menu, PacketHandler => CommonPacketHandler}
@@ -18,9 +19,10 @@ import li.cil.oc.util.{Audio, ClientAccessHelper}
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponentMap
 import net.minecraft.core.registries.Registries
 import net.minecraft.core.particles.ParticleOptions
-import net.minecraft.nbt.NbtIo
+import net.minecraft.nbt.{NbtIo, NbtOps}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.{SoundEvent, SoundSource}
 import net.minecraft.world.entity.player.Player
@@ -695,18 +697,10 @@ object PacketHandler extends CommonPacketHandler {
   def onTextBufferInit(p: PacketParser): Unit = {
     ComponentTracker.get(p.player.level, p.readUTF()) match {
       case Some(buffer: li.cil.oc.common.component.TextBuffer) =>
-        val nbt = p.readNBT()
-        if (nbt.contains("maxWidth")) {
-          val maxWidth = nbt.getInt("maxWidth")
-          val maxHeight = nbt.getInt("maxHeight")
-          buffer.setMaximumResolution(maxWidth, maxHeight)
-        }
-        buffer.data.loadData(nbt, p.player.level.registryAccess())
-        if (nbt.contains("viewportWidth")) {
-          val viewportWidth = nbt.getInt("viewportWidth")
-          val viewportHeight = nbt.getInt("viewportHeight")
-          buffer.setViewport(viewportWidth, viewportHeight)
-        }
+        val nbt = CompoundStorage.CODEC.parse(NbtOps.INSTANCE, p.readNBT()).getOrThrow()
+        buffer.setMaximumResolution(p.readInt(), p.readInt())
+        buffer.data.loadData(nbt)
+        buffer.setViewport(p.readInt(), p.readInt())
         buffer.proxy.setChanged()
         buffer.markInitialized()
       case _ => // Invalid packet.
@@ -813,9 +807,9 @@ object PacketHandler extends CommonPacketHandler {
   def onTextBufferRamInit(p: PacketParser, buffer: api.internal.TextBuffer): Unit = {
     val owner = p.readUTF()
     val id = p.readInt()
-    val nbt = p.readNBT()
+    val holder = new CompoundStorage(DataComponentMap.CODEC.parse(NbtOps.INSTANCE, p.readNBT()).getOrThrow())
 
-    component.ClientGpuTextBufferHandler.loadBuffer(buffer, owner, id, nbt, ClientAccessHelper.getClientRegistryAccess)
+    component.ClientGpuTextBufferHandler.loadBuffer(buffer, owner, id, holder)
   }
 
   def onTextBufferBitBlt(p: PacketParser, buffer: api.internal.TextBuffer): Unit = {

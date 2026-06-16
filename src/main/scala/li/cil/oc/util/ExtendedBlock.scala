@@ -1,7 +1,7 @@
 package li.cil.oc.util
 
 import net.minecraft.world.level.block.{Block, LiquidBlock}
-import net.minecraft.core.Direction
+import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.block.LiquidBlock
 import net.minecraft.world.level.block.state.BlockState

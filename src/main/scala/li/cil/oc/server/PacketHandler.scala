@@ -18,6 +18,7 @@ import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.common.item.traits.FileSystemLike
 import li.cil.oc.common.blockentity._
 import li.cil.oc.common.blockentity.traits.Computer
+import li.cil.oc.common.datacomponents.CompoundStorage
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.Util
@@ -27,7 +28,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.level.Level
 import net.minecraft.world.InteractionHand
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.{CompoundTag, NbtOps}
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries
 import net.neoforged.neoforge.server.ServerLifecycleHooks
@@ -373,13 +374,17 @@ object PacketHandler extends CommonPacketHandler {
               case screen: Screen if !screen.isOrigin => false
               case _ => true
             }) {
-              val nbt = new CompoundTag()
-              buffer.data.saveData(nbt, entity.level().registryAccess())
-              nbt.putInt("maxWidth", buffer.getMaximumWidth)
-              nbt.putInt("maxHeight", buffer.getMaximumHeight)
-              nbt.putInt("viewportWidth", buffer.getViewportWidth)
-              nbt.putInt("viewportHeight", buffer.getViewportHeight)
-              PacketSender.sendTextBufferInit(address, nbt, entity)
+              val nbt = new CompoundStorage()
+              buffer.data.saveData(nbt)
+              PacketSender.sendTextBufferInit(
+                address,
+                CompoundStorage.CODEC.encode(nbt, NbtOps.INSTANCE, new CompoundTag()).getOrThrow().asInstanceOf[CompoundTag],
+                buffer.getMaximumWidth,
+                buffer.getMaximumHeight,
+                buffer.getViewportWidth,
+                buffer.getViewportHeight,
+                entity
+              )
             }
           case _ => // Invalid packet.
         }

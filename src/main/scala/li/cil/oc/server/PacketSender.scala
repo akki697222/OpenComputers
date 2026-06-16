@@ -809,11 +809,16 @@ object PacketSender {
     }
   }
 
-  def sendTextBufferInit(address: String, value: CompoundTag, player: ServerPlayer): Unit = {
+  def sendTextBufferInit(address: String, value: CompoundTag, maxWidth: Int, maxHeight: Int, viewportWidth: Int, viewportHeight: Int, player: ServerPlayer): Unit = {
     val pb = new CompressedPacketBuilder(PacketType.TextBufferInit)
 
     pb.writeUTF(address)
     pb.writeNBT(value)
+
+    pb.writeInt(maxWidth)
+    pb.writeInt(maxHeight)
+    pb.writeInt(viewportWidth)
+    pb.writeInt(viewportHeight)
 
     pb.sendToPlayer(player)
   }

@@ -21,9 +21,11 @@ import li.cil.oc.api.util.Lifecycle
 import li.cil.oc.api.util.StateAware
 import li.cil.oc.api.util.StateAware.State
 import li.cil.oc.common.Tier
+import li.cil.oc.common.datacomponents.{OCComponents, TerminalReference}
 import li.cil.oc.common.item
 import li.cil.oc.util.ExtendedNBT._
-import net.minecraft.core.component.DataComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.{DataComponentHolder, DataComponents}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.StringTag
@@ -36,6 +38,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.nbt.Tag
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.component.CustomData
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environment with EnvironmentHost with Analyzable with RackMountable with Lifecycle with DeviceInfo {
   val node = api.Network.newNode(this, Visibility.None).create()
@@ -150,14 +153,17 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
     if (api.Items.get(heldItem) == api.Items.get(Constants.ItemName.Terminal)) {
       if (!getEnvironmentLevel.isClientSide) {
         val key = UUID.randomUUID().toString
-        keys -= heldItem.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe.getString(Settings.namespace + "key")
+        
+        for(component <- heldItem.getComponent(OCComponents.TERMINAL_REFERENCE)) {
+          keys -= component.key
+        }
+        
         val maxSize = Settings.get.terminalsPerServer
         while (keys.length >= maxSize) {
           keys.remove(0)
         }
         keys += key
-        heldItem.get(DataComponents.CUSTOM_DATA).getUnsafe.putString(Settings.namespace + "key", key)
-        heldItem.get(DataComponents.CUSTOM_DATA).getUnsafe.putString(Settings.namespace + "server", node.address)
+        heldItem.setComponent(OCComponents.TERMINAL_REFERENCE, TerminalReference(key, node.address))
         rack.markChanged(slot)
         player.getInventory.setChanged()
       }
@@ -173,21 +179,21 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
   private final val KeyboardTag = Settings.namespace + "keyboard"
   private final val KeysTag = Settings.namespace + "keys"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def loadData(holder: DataComponentHolder): Unit = {
     if (!rack.getEnvironmentLevel.isClientSide) {
-      node.loadData(nbt, provider)
+      node.loadData(holder)
     }
-    buffer.loadData(nbt.getCompound(BufferTag), provider)
-    keyboard.loadData(nbt.getCompound(KeyboardTag), provider)
+    buffer.loadData(holder)
+    keyboard.loadData(holder)
     keys.clear()
-    nbt.getList(KeysTag, Tag.TAG_STRING).foreach((tag: StringTag) => keys += tag.getAsString)
+    keys ++= holder.getOrDefault(OCComponents.KEYS, List.empty)
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    node.saveData(nbt, provider)
-    nbt.setNewCompoundTag(BufferTag, (nbt: CompoundTag) => buffer.saveData(nbt, provider))
-    nbt.setNewCompoundTag(KeyboardTag, (nbt: CompoundTag) => keyboard.saveData(nbt, provider))
-    nbt.setNewTagList(KeysTag, keys)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    node.saveData(holder)
+    buffer.saveData(holder)
+    keyboard.saveData(holder)
+    holder.set(OCComponents.KEYS, keys.toList)
   }
 
   // ----------------------------------------------------------------------- //

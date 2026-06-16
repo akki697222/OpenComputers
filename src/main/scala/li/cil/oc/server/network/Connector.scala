@@ -1,11 +1,14 @@
 package li.cil.oc.server.network
 
 import li.cil.oc.Settings
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.api.network
 import li.cil.oc.api.network.{Node => ImmutableNode}
-import li.cil.oc.common.item.data.NodeData
+import li.cil.oc.common.datacomponents.OCComponents
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 trait Connector extends network.Connector with Node {
   var localBufferSize = 0.0
@@ -120,13 +123,16 @@ trait Connector extends network.Connector with Node {
 
   // ----------------------------------------------------------------------- //
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    localBuffer = nbt.getDouble(NodeData.BufferTag)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+
+    for(buffer <- holder.getComponent(OCComponents.CHARGE)) {
+      localBuffer = buffer
+    }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    nbt.putDouble(NodeData.BufferTag, math.min(localBuffer, localBufferSize))
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    holder.setComponent(OCComponents.CHARGE, localBuffer)
   }
 }

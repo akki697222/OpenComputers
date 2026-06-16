@@ -1,34 +1,28 @@
 package li.cil.oc
 
-import java.nio.file.Paths
-import li.cil.oc.common.IMC
-import li.cil.oc.common.Proxy
+import li.cil.oc.common.{IMC, Proxy}
 import li.cil.oc.common.block.ChameliumBlock
-import li.cil.oc.common.capabilities.Capabilities
-import li.cil.oc.common.entity.EntityTypes
-import li.cil.oc.common.init.Blocks
-import li.cil.oc.common.init.Items
-import li.cil.oc.common.menu.MenuTypes
-import li.cil.oc.common.recipe.Recipes
 import li.cil.oc.common.blockentity.TileEntityTypes
 import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.common.entity.EntityTypes
+import li.cil.oc.common.init.{Blocks, Items}
+import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.common.recipe.Recipes
 import li.cil.oc.integration.Mods
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.ThreadPoolFactory
 import net.neoforged.api.distmarker.Dist
-import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.bus.api.{IEventBus, SubscribeEvent}
-import net.neoforged.neoforgespi.Environment
-import net.neoforged.fml.InterModComms
-import net.neoforged.fml.ModContainer
-import net.neoforged.fml.ModLoadingContext
+import net.neoforged.fml.{InterModComms, ModContainer}
+import net.neoforged.fml.common.Mod
 import net.neoforged.fml.event.lifecycle.{FMLCommonSetupEvent, InterModProcessEvent}
 import net.neoforged.fml.loading.FMLPaths
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforgespi.Environment
+import org.apache.logging.log4j.{LogManager, Logger}
 
+import java.nio.file.Paths
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.neoforged.fml.common.Mod
 
 object OpenComputers {
   final val ID = "opencomputers"

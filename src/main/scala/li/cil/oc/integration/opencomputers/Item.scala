@@ -28,10 +28,6 @@ trait Item extends DriverItem {
 
   override def tier(stack: ItemStack) = Tier.One
 
-  override def dataTag(stack: ItemStack): CompoundTag = Item.dataTag(stack)
-
-  override def updateDataTag(stack: ItemStack, updater: Consumer[CompoundTag]): Unit = Item.updateDataTag(stack, updater)
-
   protected def isOneOf(stack: ItemStack, items: api.detail.ItemInfo*): Boolean = items.filter(_ != null).contains(api.Items.get(stack))
 
   protected def isAdapter(host: Class[_ <: EnvironmentHost]): Boolean = classOf[internal.Adapter].isAssignableFrom(host)

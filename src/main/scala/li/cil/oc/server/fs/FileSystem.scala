@@ -7,17 +7,21 @@ import java.net.URL
 import java.util.UUID
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.api
 import li.cil.oc.api.fs.Label
 import li.cil.oc.api.network.EnvironmentHost
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.traits.FileSystemLike
 import li.cil.oc.server.component
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.storage.LevelResource
 import net.neoforged.fml.loading.FMLLoader
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 import scala.util.Try
@@ -147,11 +151,11 @@ object FileSystem extends api.detail.FileSystemAPI {
 
     private final val LabelTag = Settings.namespace + "fs.label"
 
-    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
+    override def loadData(holder: DataComponentHolder): Unit = {}
 
-    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-      if (label != null) {
-        nbt.putString(LabelTag, label)
+    override def saveData(holder: MutableDataComponentHolder): Unit = {
+      if(label != null) {
+        holder.setComponent(OCComponents.LABEL, label)
       }
     }
   }

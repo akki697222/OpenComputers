@@ -8,13 +8,16 @@ import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
 import li.cil.oc.api.machine.{Arguments, Callback, Context, LimitReachedException}
 import li.cil.oc.api.network._
-import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.{ExtendedUnicodeHelper, PackedColor}
 import net.minecraft.nbt.{CompoundTag, ListTag}
 import li.cil.oc.common.{Tier, component}
 import li.cil.oc.common.component.GpuTextBuffer
+import li.cil.oc.common.datacomponents.{CompoundStorage, GraphicsCardState, OCComponents}
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.util.matching.Regex
@@ -627,61 +630,33 @@ class GraphicsCard(val tier: Int) extends AbstractManagedEnvironment with Device
   private final val NBT_PAGE_DATA: String = "page_data"
   private val COMPOUND_ID = (new CompoundTag).getId
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-
-    if (nbt.contains(SCREEN_KEY)) {
-      nbt.getString(SCREEN_KEY) match {
-        case screen: String if !screen.isEmpty => screenAddress = Some(screen)
-        case _ => screenAddress = None
-      }
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+    for(GraphicsCardState(screen, bufferIndex) <- holder.getComponent(OCComponents.GRAPHICS_CARD)) {
+      screenAddress = screen
       screenInstance = None
-    }
 
-    if (nbt.contains(BUFFER_INDEX_KEY)) {
-      bufferIndex = nbt.getInt(BUFFER_INDEX_KEY)
+      this.bufferIndex = bufferIndex
     }
 
     removeAllBuffers() // JUST in case
-    if (nbt.contains(VIDEO_RAM_KEY)) {
-      val videoRamNbt = nbt.getCompound(VIDEO_RAM_KEY)
-      val nbtPages = videoRamNbt.getList(NBT_PAGES, COMPOUND_ID)
-      for (i <- 0 until nbtPages.size) {
-        val nbtPage = nbtPages.getCompound(i)
-        val idx: Int = nbtPage.getInt(NBT_PAGE_IDX)
-        val data = nbtPage.getCompound(NBT_PAGE_DATA)
-        loadBuffer(node.address, idx, data, provider)
+    for(vram <- holder.getComponent(OCComponents.VIDEO_RAM)) {
+      for(idx -> storage <- vram) {
+        loadBuffer(node.address, idx, storage)
       }
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
 
-    if (screenAddress.isDefined) {
-      nbt.putString(SCREEN_KEY, screenAddress.get)
-    }
-
-    nbt.putInt(BUFFER_INDEX_KEY, bufferIndex)
-
-    val videoRamNbt = new CompoundTag
-    val nbtPages = new ListTag
-
-    val indexes = bufferIndexes()
-    for (idx: Int <- indexes) {
-      getBuffer(idx) match {
-        case Some(page) => {
-          val nbtPage = new CompoundTag
-          nbtPage.putInt(NBT_PAGE_IDX, idx)
-          val data = new CompoundTag
-          page.data.saveData(data, provider)
-          nbtPage.put(NBT_PAGE_DATA, data)
-          nbtPages.add(nbtPage)
-        }
-        case _ => // ignore
-      }
-    }
-    videoRamNbt.put(NBT_PAGES, nbtPages)
-    nbt.put(VIDEO_RAM_KEY, videoRamNbt)
+    holder.setComponent(OCComponents.GRAPHICS_CARD, GraphicsCardState(screenAddress, bufferIndex))
+    holder.setComponent(OCComponents.VIDEO_RAM,
+      bufferIndexes().map(i => i -> getBuffer(i)).collect {
+        case i -> Some(page) =>
+          val storage = new CompoundStorage()
+          page.data.saveData(storage)
+          i -> storage
+      }.toList)
   }
 }

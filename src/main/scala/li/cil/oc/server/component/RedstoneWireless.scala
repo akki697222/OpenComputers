@@ -1,21 +1,18 @@
 package li.cil.oc.server.component
 
-import li.cil.oc.Constants
-import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
-import li.cil.oc.api.driver.DeviceInfo.DeviceClass
-import li.cil.oc.Settings
+import li.cil.oc.{Constants, Settings}
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.api.machine.Arguments
-import li.cil.oc.api.machine.Callback
-import li.cil.oc.api.machine.Context
+import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
+import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network._
 import li.cil.oc.common.EventHandler
-import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
-import li.cil.oc.integration.Mods
+import li.cil.oc.common.datacomponents.{OCComponents, WirelessRedstoneState}
 import li.cil.oc.integration.util
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToJava._
 
@@ -118,17 +115,22 @@ trait RedstoneWireless extends RedstoneSignaller with DeviceInfo {
   private final val WirelessInputTag = "wirelessInput"
   private final val WirelessOutputTag = "wirelessOutput"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
-    wirelessFrequency = nbt.getInt(WirelessFrequencyTag)
-    wirelessInput = nbt.getBoolean(WirelessInputTag)
-    wirelessOutput = nbt.getBoolean(WirelessOutputTag)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    super.loadData(holder)
+
+    for(WirelessRedstoneState(frequency, input, output) <- holder.getComponent(OCComponents.WIRELESS_REDSTONE_STATE)) {
+      wirelessFrequency = frequency
+      wirelessInput = input
+      wirelessOutput = output
+    }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
-    nbt.putInt(WirelessFrequencyTag, wirelessFrequency)
-    nbt.putBoolean(WirelessInputTag, wirelessInput)
-    nbt.putBoolean(WirelessOutputTag, wirelessOutput)
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    super.saveData(holder)
+    holder.setComponent(OCComponents.WIRELESS_REDSTONE_STATE, WirelessRedstoneState(
+      wirelessFrequency,
+      wirelessInput,
+      wirelessOutput
+    ))
   }
 }

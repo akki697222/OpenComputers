@@ -36,6 +36,7 @@ import net.neoforged.neoforge.registries.{DeferredRegister, NeoForgeRegistries, 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import li.cil.oc.util.ExtendedItemStack._
+import net.minecraft.network.chat.Component
 
 import java.nio.ByteBuffer
 
@@ -254,7 +255,7 @@ object Items extends ItemAPI {
   def createConfiguredRobot(): ItemStack = {
     val data = new RobotData()
 
-    data.name = "Creatix"
+    data.name = Component.literal("Creatix")
     data.tier = Tier.Five
     data.robotEnergy = Settings.get.bufferRobot.toInt
     data.totalEnergy = data.robotEnergy

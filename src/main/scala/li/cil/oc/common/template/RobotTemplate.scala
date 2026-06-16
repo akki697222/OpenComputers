@@ -8,6 +8,7 @@ import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
 import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.util.ItemUtils
+import net.minecraft.network.chat.Component
 import net.minecraft.world.Container
 import net.minecraft.world.item.ItemStack
 
@@ -31,7 +32,7 @@ object RobotTemplate extends Template {
     val items = (1 until inventory.getContainerSize).map(inventory.getItem)
     val data = new RobotData()
     data.tier = caseTier(inventory)
-    data.name = RobotData.randomName
+    data.name = Component.literal(RobotData.randomName)
     data.robotEnergy = Settings.get.bufferRobot.toInt
     data.totalEnergy = data.robotEnergy
     data.containers = items.take(3).filter(!_.isEmpty).toArray

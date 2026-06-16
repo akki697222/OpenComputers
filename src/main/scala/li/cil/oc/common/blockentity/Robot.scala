@@ -3,12 +3,11 @@ package li.cil.oc.common.blockentity
 import java.util.UUID
 import java.util.function.Consumer
 import li.cil.oc._
-import li.cil.oc.api.Driver
+import li.cil.oc.api.{Driver, Persistable, internal}
 import li.cil.oc.api.driver.item
 import li.cil.oc.api.driver.item.Container
 import li.cil.oc.api.event.RobotAnalyzeEvent
 import li.cil.oc.api.event.RobotMoveEvent
-import li.cil.oc.api.internal
 import li.cil.oc.api.network._
 import li.cil.oc.client.gui
 import li.cil.oc.common.EventHandler
@@ -23,7 +22,7 @@ import li.cil.oc.integration.opencomputers.DriverKeyboard
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.server.agent
-import li.cil.oc.server.component
+import li.cil.oc.server.component.{Robot => RobotComponent}
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.{BlockPosHelper, BlockPosition, InventoryUtils, StackOption}
 import li.cil.oc.util.ExtendedNBT._
@@ -31,6 +30,7 @@ import li.cil.oc.util.ExtendedLevel._
 import li.cil.oc.util.StackOption._
 import net.minecraft.client.Minecraft
 import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.{Component => TextComponent}
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
@@ -73,7 +73,7 @@ class Robot(pos: BlockPos, state: BlockState)
 
   val info = new RobotData()
 
-  val bot: component.Robot = if (isServer) new component.Robot(this) else null
+  val bot: RobotComponent = if (isServer) new RobotComponent(this) else null
 
   // NeoForge 1.21.1: FluidHandler capability is registered via RegisterCapabilitiesEvent.
   // Robot itself implements IFluidHandler, so the registration lambda returns `this`.
@@ -193,9 +193,9 @@ class Robot(pos: BlockPos, state: BlockState)
 
   // ----------------------------------------------------------------------- //
 
-  override def name: String = info.name
+  override def name: String = info.name.getString
 
-  override def setName(name: String): Unit = info.name = name
+  override def setName(name: String): Unit = info.name = TextComponent.literal(name)
 
   override def onAnalyze(player: entity.player.Player, side: Direction, hitX: Float, hitY: Float, hitZ: Float): Array[Node] = {
     player.sendSystemMessage(Localization.Analyzer.RobotOwner(ownerName))
@@ -457,6 +457,14 @@ class Robot(pos: BlockPos, state: BlockState)
     // robot's proxy instance.
     _isOutputEnabled = hasRedstoneCard
     if (isRunning) EventHandler.onRobotStart(this)
+  }
+
+  override def loadComponentsForServer(): Unit = {
+    updateInventorySize()
+    machine.onHostChanged()
+
+    val holder = Persistable.holder(this)
+    bot.loadData(holder)
   }
 
   // Side check for Waila (and other mods that may call this client side).

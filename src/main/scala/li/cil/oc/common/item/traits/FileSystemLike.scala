@@ -46,7 +46,7 @@ trait FileSystemLike extends SimpleItem {
         }
       }
 
-      val data = new DriveData(stack, context.level().registryAccess())
+      val data = new DriveData(stack)
       tooltip.add(Component.literal(Localization.Tooltip.DiskMode(data.isUnmanaged)).setStyle(Tooltip.DefaultStyle))
       tooltip.add(Component.literal(Localization.Tooltip.DiskLock(data.lockInfo)).setStyle(Tooltip.DefaultStyle))
     }

@@ -1,13 +1,12 @@
 package li.cil.oc.server.network
 
 import com.google.common.base.Strings
-import li.cil.oc.OpenComputers
-import li.cil.oc.api
-import li.cil.oc.api.network.Environment
-import li.cil.oc.api.network.Visibility
-import li.cil.oc.api.network.{Node => ImmutableNode}
-import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
+import li.cil.oc.{OpenComputers, api}
+import li.cil.oc.api.network.{Environment, Visibility, Node => ImmutableNode}
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -72,9 +71,8 @@ trait Node extends ImmutableNode {
 
   // ----------------------------------------------------------------------- //
 
-  def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    if (nbt.contains("address")) {
-      val newAddress = nbt.getString("address")
+  override def loadData(holder: DataComponentHolder): Unit = {
+    for(newAddress <- holder.getComponent(OCComponents.ADDRESS)) {
       if (!Strings.isNullOrEmpty(newAddress) && newAddress != address) network match {
         case wrapper: Network.Wrapper => wrapper.network.remap(this, newAddress)
         case _ => address = newAddress
@@ -82,9 +80,9 @@ trait Node extends ImmutableNode {
     }
   }
 
-  def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
     if (address != null) {
-      nbt.putString("address", address)
+      holder.setComponent(OCComponents.ADDRESS, address)
     }
   }
 

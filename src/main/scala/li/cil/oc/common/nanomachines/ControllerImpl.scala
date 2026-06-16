@@ -356,7 +356,7 @@ class ControllerImpl(val player: Player) extends Controller with WirelessEndpoin
     uuid = nbt.getString("uuid")
     responsePort = nbt.getInt("port")
     storedEnergy = nbt.getDouble("energy")
-    configuration.loadData(nbt.getCompound("configuration"), provider)
+    configuration.loadData(nbt.getCompound("configuration"))
     activeBehaviorsDirty = true
   }
 

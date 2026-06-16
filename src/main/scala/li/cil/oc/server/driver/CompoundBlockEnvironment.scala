@@ -5,9 +5,13 @@ import com.google.common.hash.Hashing
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
 import li.cil.oc.api.network._
+import li.cil.oc.common.datacomponents.{CompoundStorage, OCComponents}
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class CompoundBlockEnvironment(val name: String, val environments: (String, ManagedEnvironment)*) extends ManagedEnvironment {
   // Block drivers with visibility < network usually won't make much sense,
@@ -54,31 +58,30 @@ class CompoundBlockEnvironment(val name: String, val environments: (String, Mana
 
   private final val TypeHashTag = "typeHash"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    // Ignore existing data if the underlying type is different.
-    if (nbt.contains(TypeHashTag) && nbt.getLong(TypeHashTag) != typeHash) return
-    node.loadData(nbt, provider)
-    for ((driver, environment) <- environments) {
-      if (nbt.contains(driver)) {
-        try {
-          environment.loadData(nbt.getCompound(driver), provider)
-        } catch {
-          case e: Throwable => OpenComputers.log.warn(s"A block component of type '${environment.getClass.getName}' (provided by driver '$driver') threw an error while loading.", e)
+  override def loadData(holder: DataComponentHolder): Unit = {
+    for(saveTypeHash -> storage <- holder.getComponent(OCComponents.COMPOUND_DRIVER)) {
+      if(saveTypeHash != typeHash) return
+      node.loadData(holder)
+
+      for ((driver, environment) <- environments) {
+        if (storage.contains(driver)) {
+          try {
+            environment.loadData(storage(driver))
+          } catch {
+            case e: Throwable => OpenComputers.log.warn(s"A block component of type '${environment.getClass.getName}' (provided by driver '$driver') threw an error while loading.", e)
+          }
         }
       }
     }
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.putLong(TypeHashTag, typeHash)
-    node.saveData(nbt, provider)
-    for ((driver, environment) <- environments) {
-      try {
-        nbt.setNewCompoundTag(driver, (nbt: CompoundTag) => environment.saveData(nbt, provider))
-      } catch {
-        case e: Throwable => OpenComputers.log.warn(s"A block component of type '${environment.getClass.getName}' (provided by driver '$driver') threw an error while saving.", e)
-      }
-    }
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.COMPOUND_DRIVER, typeHash -> Map.from(environments.map {
+      case (driver, environment) =>
+        val storage = new CompoundStorage()
+        environment.saveData(storage)
+        driver -> storage
+    }))
   }
 
   private def typeHash = {

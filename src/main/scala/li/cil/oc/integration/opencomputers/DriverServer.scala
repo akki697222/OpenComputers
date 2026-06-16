@@ -31,8 +31,4 @@ object DriverServer extends Item with HostAware {
   }
 
   override def slot(stack: ItemStack): String = Slot.RackMountable
-
-  override def dataTag(stack: ItemStack): CompoundTag = ItemUtils.getOrCreateTag(stack)
-
-  override def updateDataTag(stack: ItemStack, updater: Consumer[CompoundTag]): Unit = CustomData.update(DataComponents.CUSTOM_DATA, stack, updater)
 }

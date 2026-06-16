@@ -1,25 +1,24 @@
 package li.cil.oc.integration.opencomputers
 
 import li.cil.oc
-import li.cil.oc.Constants
-import li.cil.oc.OpenComputers
-import li.cil.oc.Settings
-import li.cil.oc.api
+import li.cil.oc.{Constants, OpenComputers, Settings, api}
 import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.common.Loot
-import li.cil.oc.common.Slot
+import li.cil.oc.common.{Loot, Slot}
 import li.cil.oc.common.datacomponents.OCComponents
-import li.cil.oc.common.item.{FloppyDisk, HardDiskDrive, SolidStateDrive}
 import li.cil.oc.common.item.data.DriveData
+import li.cil.oc.common.item.{FloppyDisk, HardDiskDrive, SolidStateDrive}
 import li.cil.oc.server.component.Drive
 import li.cil.oc.server.fs.FileSystem.{ItemLabel, ReadOnlyLabel}
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ItemUtils
-import li.cil.oc.util.ExtendedItemStack._
 import net.minecraft.core.HolderLookup
-import net.minecraft.world.item.ItemStack
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.ItemStack
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.server.ServerLifecycleHooks
+
+import java.util.UUID
 
 object DriverFileSystem extends Item {
   val UUIDVerifier = """^([0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12})$""".r
@@ -68,10 +67,7 @@ object DriverFileSystem extends Item {
       // Loot disk, create file system using factory callback.
       Loot.factories.get(lootFactory) match {
         case Some(factory) =>
-          val label =
-            if (dataTag(stack).contains(Settings.namespace + "fs.label"))
-              dataTag(stack).getString(Settings.namespace + "fs.label")
-            else null
+          val label = stack.getComponent(OCComponents.LABEL).orNull
           api.FileSystem.asManagedEnvironment(factory.call(), label, host, Settings.resourceDomain + ":floppy_access")
         case _ => null // Invalid loot disk.
       }
@@ -80,13 +76,13 @@ object DriverFileSystem extends Item {
       // We have a bit of a chicken-egg problem here, because we want to use the
       // node's address as the folder name... so we generate the address here,
       // if necessary. No one will know, right? Right!?
-      val address = addressFromTag(dataTag(stack))
+      val address = getOrCreateAddress(stack)
       var label: api.fs.Label = new ReadWriteItemLabel(stack)
       val isFloppy = api.Items.get(stack) == api.Items.get(Constants.ItemName.Floppy)
       val isSSD = stack.getItem.isInstanceOf[SolidStateDrive]
       val sound = if (isSSD) None
       else Some(Settings.resourceDomain + ":" + (if (isFloppy) "floppy_access" else "hdd_access"))
-      val drive = new DriveData(stack, ServerLifecycleHooks.getCurrentServer.registryAccess())
+      val drive = new DriveData(stack)
       val environment = if (drive.isUnmanaged) {
         new Drive(capacity max 0, platterCount, label, Option(host), sound, speed, drive.isLocked)
       }
@@ -106,18 +102,30 @@ object DriverFileSystem extends Item {
   }
   else null
 
+  private def getOrCreateAddress(holder: MutableDataComponentHolder): String = {
+    holder.getComponent(OCComponents.ADDRESS) match {
+      case Some(UUIDVerifier(address)) => address
+      case _ =>
+        val newAddress = UUID.randomUUID().toString
+        holder.setComponent(OCComponents.ADDRESS, newAddress)
+        OpenComputers.log.warn(s"Generated new address for disk '${newAddress}'.")
+        newAddress
+    }
+  }
+
+  @deprecated
   private def addressFromTag(tag: CompoundTag) =
     if (tag.contains("node") && tag.getCompound("node").contains("address")) {
       tag.getCompound("node").getString("address") match {
         case UUIDVerifier(address) => address
         case _ => // Invalid disk address.
-          val newAddress = java.util.UUID.randomUUID().toString
+          val newAddress = UUID.randomUUID().toString
           tag.getCompound("node").putString("address", newAddress)
           OpenComputers.log.warn(s"Generated new address for disk '${newAddress}'.")
           newAddress
       }
     }
-    else java.util.UUID.randomUUID().toString
+    else UUID.randomUUID().toString
 
   private class ReadWriteItemLabel(stack: ItemStack) extends ItemLabel(stack) {
     var label: Option[String] = None
@@ -128,20 +136,16 @@ object DriverFileSystem extends Item {
       label = Option(value).map(_.take(16))
     }
 
-    private final val LabelTag = Settings.namespace + "fs.label"
-
-    override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-      if (nbt.contains(LabelTag)) {
-        label = Option(nbt.getString(LabelTag))
+    override def loadData(holder: DataComponentHolder): Unit = {
+      for(text <- holder.getComponent(OCComponents.LABEL)) {
+        label = Some(text)
       }
     }
 
-    override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-      label match {
-        case Some(value) => nbt.putString(LabelTag, value)
-        case _ =>
+    override def saveData(holder: MutableDataComponentHolder): Unit = {
+      for(label <- label) {
+        holder.setComponent(OCComponents.LABEL, label)
       }
     }
   }
-
 }

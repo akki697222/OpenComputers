@@ -5,7 +5,8 @@ import li.cil.oc.client.Sound
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.util.{BlockPosition, SideTracker}
 import net.minecraft.core.HolderLookup
-import net.minecraft.nbt.CompoundTag
+import net.minecraft.core.component.{DataComponentMap, DataComponentPatch, DataComponentType, PatchedDataComponentMap}
+import net.minecraft.nbt.{CompoundTag, NbtOps}
 import net.minecraft.network.Connection
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
@@ -63,20 +64,32 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   // ----------------------------------------------------------------------- //
 
+  @deprecatedOverriding("use loadComponentsForServer()", since = "NeoForge 1.21+")
   def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
+  @deprecatedOverriding("use saveComponentsForServer()", since = "NeoForge 1.21+")
   def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, true)
     super.saveAdditional(nbt, provider)
   }
 
   @OnlyIn(Dist.CLIENT)
+  @deprecatedOverriding("use loadComponentsForClient()", since = "NeoForge 1.21+")
   def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
   @OnlyIn(Dist.CLIENT)
+  @deprecatedOverriding("use saveComponentsForClient()", since = "NeoForge 1.21+")
   def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, false)
   }
+  
+  def loadComponentsForServer(): Unit = {}
+  def saveComponentsForServer(): Unit = {}
+
+  @OnlyIn(Dist.CLIENT)
+  def loadComponentsForClient(): Unit = {}
+  @OnlyIn(Dist.CLIENT)
+  def saveComponentsForClient(): Unit = {}
 
   // ----------------------------------------------------------------------- //
 
@@ -86,6 +99,17 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
       loadForServer(nbt, provider)
     } else {
       loadForClient(nbt, provider)
+    }
+  }
+
+  override def loadWithComponents(tag: CompoundTag, registries: HolderLookup.Provider): Unit = {
+    super.loadWithComponents(tag, registries)
+    // components are loaded here
+    
+    if(isServer) {
+      loadComponentsForServer()
+    } else {
+      loadComponentsForClient()
     }
   }
 
@@ -132,4 +156,13 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
   def getData[T](prop: ModelProperty[T]): T = null.asInstanceOf[T]
 
   def setData[T](prop: ModelProperty[T], value: T): T = null.asInstanceOf[T]
+
+  private def dataComponentMap: PatchedDataComponentMap = components() match {
+    case patched: PatchedDataComponentMap => patched
+    case notPatched => {
+      val patched = new PatchedDataComponentMap(notPatched)
+      setComponents(patched)
+      patched
+    }
+  }
 }

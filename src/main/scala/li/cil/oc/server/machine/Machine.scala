@@ -31,10 +31,13 @@ import li.cil.oc.common.EventHandler
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.common.Slot
 import li.cil.oc.common.blockentity
+import li.cil.oc.common.datacomponents.MachineData.{Signal => DataSignal}
+import li.cil.oc.common.datacomponents.{MachineData, OCComponents}
 import li.cil.oc.server.PacketSender
 import li.cil.oc.server.driver.Registry
 import li.cil.oc.server.fs.FileSystem
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ResultWrapper
 import li.cil.oc.util.ResultWrapper.result
 import li.cil.oc.util.ThreadPoolFactory
@@ -57,9 +60,14 @@ import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.client.server.IntegratedServer
-import net.minecraft.core.HolderLookup
+import net.minecraft.core.{BlockPos, HolderLookup}
+import net.minecraft.core.component.DataComponentHolder
+import net.minecraft.world.level.ChunkPos
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.loading.FMLEnvironment
+import net.neoforged.neoforge.common.MutableDataComponentHolder
+
+import java.nio.ByteBuffer
 
 class Machine(val host: MachineHost) extends AbstractManagedEnvironment with machine.Machine with Runnable with DeviceInfo {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Network).
@@ -747,166 +755,144 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
   // ----------------------------------------------------------------------- //
 
   private def tmpPath = node.address + "_tmp"
-  private final val StateTag = "state"
-  private final val UsersTag = "users"
-  private final val MessageTag = "message"
-  private final val ComponentsTag = "components"
-  private final val AddressTag = "address"
-  private final val NameTag = "name"
-  private final val TmpTag = "tmp"
-  private final val SignalsTag = "signals"
-  private final val ArgsTag = "args"
-  private final val LengthTag = "length"
-  private final val ArgPrefixTag = "arg"
-  private final val UptimeTag = "uptime"
-  private final val CPUTimeTag = "cpuTime"
-  private final val RemainingPauseTag = "remainingPause"
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = Machine.this.synchronized(state.synchronized {
+  override def loadData(holder: DataComponentHolder): Unit = {
     assert(state.top == Machine.State.Stopped || state.top == Machine.State.Paused)
     close()
     state.clear()
 
-    super.loadData(nbt, provider)
+    super.loadData(holder)
 
-    state.pushAll(nbt.getIntArray(StateTag).reverseMap(Machine.State(_)))
-    nbt.getList(UsersTag, Tag.TAG_STRING).foreach((tag: StringTag) => _users += tag.getAsString)
-    if (nbt.contains(MessageTag)) {
-      message = Some(nbt.getString(MessageTag))
-    }
+    for(data <- holder.getComponent(OCComponents.MACHINE)) {
+      state.pushAll(data.state)
+      _users ++= data.users
 
-    _components ++= nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).map((tag: CompoundTag) =>
-      tag.getString(AddressTag) -> tag.getString(NameTag))
+      for(msg <- data.message) {
+        message = Some(msg)
+      }
 
-    tmp.foreach(fs => {
-      if (nbt.contains(TmpTag)) fs.loadData(nbt.getCompound(TmpTag), provider)
-      else fs.loadData(SaveHandler.loadNBT(nbt, tmpPath), provider)
-    })
+      _components ++= data.components.map(c => c.address -> c.name)
 
-    if (state.nonEmpty && isRunning && init()) try {
-      architecture.loadData(nbt)
+      for (fs <- tmp) {
+        val lvl = host.getEnvironmentLevel
+        val cpos = new ChunkPos(new BlockPos(host.xPosition.toInt, host.yPosition.toInt, host.zPosition.toInt))
+        fs.loadData(SaveHandler.loadNBT(lvl.dimension.location, cpos, tmpPath), lvl.registryAccess())
+      }
 
-      signals ++= nbt.getList(SignalsTag, Tag.TAG_COMPOUND).map((signalNbt: CompoundTag) => {
-        val argsNbt = signalNbt.getCompound(ArgsTag)
-        val argsLength = argsNbt.getInt(LengthTag)
-        new Machine.Signal(signalNbt.getString(NameTag),
-          (0 until argsLength).map(ArgPrefixTag + _).map(argsNbt.get).map {
-            case tag: ByteTag if tag.getAsByte == -1 => null
-            case tag: ByteTag => Boolean.box(tag.getAsByte == 1)
-            case tag: LongTag => Long.box(tag.getAsLong)
-            case tag: DoubleTag => Double.box(tag.getAsDouble)
-            case tag: StringTag => tag.getAsString
-            case tag: ByteArrayTag => tag.getAsByteArray
-            case tag: ListTag =>
-              val data = mutable.Map.empty[String, String]
-              for (i <- 0 until tag.size by 2) {
-                data += tag.getString(i) -> tag.getString(i + 1)
-              }
-              data
-            case tag: CompoundTag => tag
-            case _ => null
-          }.toArray[AnyRef])
-      })
+      if (state.nonEmpty && isRunning && init()) {
+        try {
+          architecture.loadData(data.architectureData)
+        } catch {
+          case t: Throwable =>
+            OpenComputers.log.error(
+              s"""Unexpected error loading a state of computer at ${host.machinePosition()}. """ +
+                s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
+            close()
+        }
 
-      uptime = nbt.getLong(UptimeTag)
-      cpuTotal = nbt.getLong(CPUTimeTag)
-      remainingPause = nbt.getInt(RemainingPauseTag)
+        signals ++= data.signals.map(v => Machine.Signal(v.name, v.args.map {
+          case DataSignal.Null => null
+          case DataSignal.Boolean(v) => Boolean.box(v)
+          case DataSignal.Long(v) => Long.box(v)
+          case DataSignal.Double(v) => Double.box(v)
+          case DataSignal.StringValue(v) => v
+          case DataSignal.ByteArray(v) => if (v.hasArray) {
+            v.array
+          } else {
+            val array: Array[Byte] = Array.fill(v.remaining()) {
+              0
+            }
+            v.get(array)
+            array
+          }
+          case DataSignal.StringMap(v) => mutable.Map.from(v)
+          case DataSignal.Compound(v) => v
+        }.toArray))
 
-      // Delay execution for a second to allow the world around us to settle.
-      if (state.top != Machine.State.Restarting) {
-        pause(Settings.get.startupDelay)
+        uptime = data.uptime
+        cpuTotal = data.cpuTotal
+        remainingPause = data.remainingPause
+
+        // Delay execution for a second to allow the world around us to settle.
+        if (state.top != Machine.State.Restarting) {
+          pause(Settings.get.startupDelay)
+        }
+      } else {
+        // Clean up in case we got a weird state stack.
+        onHostChanged()
+        close()
       }
     }
-    catch {
-      case t: Throwable =>
-        OpenComputers.log.error(
-          s"""Unexpected error loading a state of computer at ${host.machinePosition()}. """ +
-            s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
-        close()
-    }
-    else {
-      // Clean up in case we got a weird state stack.
-      onHostChanged()
-      close()
-    }
-  })
+  }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = Machine.this.synchronized(state.synchronized {
+  override def saveData(holder: MutableDataComponentHolder): Unit = {
     // The lock on 'this' should guarantee that this never happens regularly.
     // If something other than regular saving tries to save while we are executing code,
     // e.g. SpongeForge saving during robot.move due to block changes being captured,
     // just don't save this at all. What could possibly go wrong?
     if(isExecuting) return
 
-    if (SaveHandler.savingForClients) {
+    if(SaveHandler.savingForClients) {
       return
     }
 
     // Make sure we don't continue running until everything has saved.
     pause(0.05)
 
-    super.saveData(nbt, provider)
+    super.saveData(holder)
 
     // Make sure the component list is up-to-date.
     processAddedComponents()
 
-    nbt.putIntArray(StateTag, state.map(_.id).toArray)
-    nbt.setNewTagList(UsersTag, _users)
-    message.foreach(nbt.putString(MessageTag, _))
-
-    val componentsNbt = new ListTag()
-    for ((address, name) <- _components) {
-      val componentNbt = new CompoundTag()
-      componentNbt.putString(AddressTag, address)
-      componentNbt.putString(NameTag, name)
-      componentsNbt.add(componentNbt)
+    for(fs <- tmp) {
+      val lvl = host.getEnvironmentLevel
+      val cpos = new ChunkPos(new BlockPos(host.xPosition.toInt, host.yPosition.toInt, host.zPosition.toInt))
+      SaveHandler.scheduleSave(lvl.dimension.location, cpos, tmpPath, (nbt: CompoundTag) => fs.saveData(nbt, lvl.registryAccess()))
     }
-    nbt.put(ComponentsTag, componentsNbt)
 
-    tmp.foreach(fs => SaveHandler.scheduleSave(host, nbt, tmpPath, (nbt: CompoundTag) => fs.saveData(nbt, provider)))
-
-    if (state.top != Machine.State.Stopped) try {
-      architecture.saveData(nbt)
-
-      val signalsNbt = new ListTag()
-      for (s <- signals.iterator) {
-        val signalNbt = new CompoundTag()
-        signalNbt.putString(NameTag, s.name)
-        signalNbt.setNewCompoundTag(ArgsTag, args => {
-          args.putInt(LengthTag, s.args.length)
-          s.args.zipWithIndex.foreach {
-            case (null, i) => args.putByte(ArgPrefixTag + i, -1)
-            case (arg: java.lang.Boolean, i) => args.putByte(ArgPrefixTag + i, if (arg) 1 else 0)
-            case (arg: java.lang.Long, i) => args.putLong(ArgPrefixTag + i, arg)
-            case (arg: java.lang.Double, i) => args.putDouble(ArgPrefixTag + i, arg)
-            case (arg: String, i) => args.putString(ArgPrefixTag + i, arg)
-            case (arg: Array[Byte], i) => args.putByteArray(ArgPrefixTag + i, arg)
-            case (arg: Map[_, _], i) =>
-              val list = new ListTag()
-              for ((key, value) <- arg) {
-                list.append(key.toString)
-                list.append(value.toString)
-              }
-              args.put(ArgPrefixTag + i, list)
-            case (arg: CompoundTag, i) => args.put(ArgPrefixTag + i, arg)
-            case (_, i) => args.putByte(ArgPrefixTag + i, -1)
-          }
-        })
-        signalsNbt.add(signalNbt)
-      }
-      nbt.put(SignalsTag, signalsNbt)
-
-      nbt.putLong(UptimeTag, uptime)
-      nbt.putLong(CPUTimeTag, cpuTotal)
-      nbt.putInt(RemainingPauseTag, remainingPause)
-    }
-    catch {
-      case t: Throwable =>
-        OpenComputers.log.error(
-          s"""Unexpected error saving a state of computer at ${host.machinePosition()}. """ +
-            s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
-    }
-  })
+    holder.setComponent(OCComponents.MACHINE, MachineData(
+      state = state.toArray,
+      users = _users.toSet,
+      message = message,
+      components = _components.map { case (k, v) => MachineData.Component(k, v) }.toList,
+      architectureData = {
+        val nbt = new CompoundTag()
+        
+        try {
+          architecture.saveData(nbt)
+        } catch {
+          case t: Throwable =>
+            OpenComputers.log.error(
+              s"""Unexpected error saving a state of computer at ${host.machinePosition()}. """ +
+                s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
+        }
+        
+        nbt
+      },
+      signals = if(state.top != Machine.State.Stopped) {
+        signals.map {
+          case Machine.Signal(name, args) =>
+            MachineData.Signal(
+              name,
+              args.map {
+                case null => DataSignal.Null
+                case arg: java.lang.Boolean => DataSignal.Boolean(arg)
+                case arg: java.lang.Long => DataSignal.Long(arg)
+                case arg: java.lang.Double => DataSignal.Double(arg)
+                case arg: String => DataSignal.StringValue(arg)
+                case arg: Array[Byte] => DataSignal.ByteArray(ByteBuffer.wrap(arg))
+                case arg: Map[_, _] => DataSignal.StringMap(Map.from(arg.iterator.map { case a -> b => a.toString -> b.toString }))
+                case arg: CompoundTag => DataSignal.Compound(arg)
+                case _ => DataSignal.Null
+              }.toList
+            )
+        }.toList
+      } else List.empty,
+      uptime = uptime,
+      cpuTotal = cpuTotal,
+      remainingPause = remainingPause
+    ))
+  }
 
   // ----------------------------------------------------------------------- //
 
@@ -1112,7 +1098,7 @@ object Machine extends MachineAPI {
   override def create(host: MachineHost) = new Machine(host)
 
   /** Possible states of the computer, and in particular its executor. */
-  private[machine] object State extends Enumeration {
+  object State extends Enumeration {
     /** The computer is not running right now and there is no Lua state. */
     val Stopped = Value("Stopped")
 
@@ -1145,7 +1131,7 @@ object Machine extends MachineAPI {
   }
 
   /** Signals are messages sent to the Lua state from Java asynchronously. */
-  private[machine] class Signal(val name: String, val args: Array[AnyRef]) extends machine.Signal {
+  private[machine] case class Signal(val name: String, val args: Array[AnyRef]) extends machine.Signal {
     def convert() = new Signal(name, Registry.convert(args))
   }
 

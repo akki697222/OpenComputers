@@ -39,7 +39,7 @@ class UpgradeBattery(props: Properties, val tier: Int) extends Item(props) with 
     }
     traits.Chargeable.applyCharge(amount, buffer, Settings.get.bufferCapacitorUpgrades(tier), used => if (!simulate) {
       data.buffer = Option(buffer + used)
-      CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => data.saveData(tag))
+      data.saveData(stack)
     })
   }
 
@@ -50,7 +50,7 @@ class UpgradeBattery(props: Properties, val tier: Int) extends Item(props) with 
   override def setCharge(stack: ItemStack, amount: Double): Unit = {
     val data = new NodeData(stack)
     data.buffer = Option((0.0 max amount) min maxCharge(stack))
-    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag => data.saveData(tag))
+    data.saveData(stack)
   }
 
   override def canExtract(stack: ItemStack): Boolean = true

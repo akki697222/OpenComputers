@@ -17,7 +17,7 @@ trait TankLevelControl extends TankAware with LevelAware with SideRestricted {
       case Some(stack) =>
         FluidUtils.fluidHandlerAt(position.offset(side), side.getOpposite) match {
           case Some(handler) => args.optTankProperties(handler, 1, null) match {
-            case properties: TankProperties => result(stack.isFluidEqual(properties.contents))
+            case properties: TankProperties => result(stack.is(properties.contents.getFluid))
             case _ => result((0 until handler.getTanks).map(handler.getFluidInTank).exists(stack.isFluidEqual))
           }
           case _ => result(false)

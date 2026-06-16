@@ -4,6 +4,7 @@ import java.lang
 import java.util
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.api.Persistable
 import li.cil.oc.api.machine.Machine
 import li.cil.oc.api.network.Node
 import li.cil.oc.client.Sound
@@ -155,6 +156,12 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
       case _ =>
     }
     machine.loadData(nbt.getCompound(ComputerTag), provider)
+  }
+
+  override def loadComponentsForServer(): Unit = {
+    super.loadComponentsForServer()
+    val holder = Persistable.holder(this)
+    machine.loadData(holder)
 
     // Kickstart initialization to avoid values getting overwritten by
     // loadForClient if that packet is handled after a manual

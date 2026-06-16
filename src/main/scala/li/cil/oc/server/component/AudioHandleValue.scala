@@ -3,7 +3,9 @@ package li.cil.oc.server.component
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.prefab.AbstractValue
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 final class AudioHandleValue extends AbstractValue {
   def this(owner: String, handle: Int) = {
@@ -29,14 +31,14 @@ final class AudioHandleValue extends AbstractValue {
     }
   }
 
-  override def loadData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadData(nbt, provider)
+  override def loadData(holder: DataComponentHolder, nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.loadData(holder, nbt, provider)
     owner = nbt.getString("owner")
     handle = nbt.getInt("handle")
   }
 
-  override def saveData(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveData(nbt, provider)
+  override def saveData(holder: MutableDataComponentHolder, nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+    super.saveData(holder, nbt, provider)
     nbt.putString("owner", owner)
     nbt.putInt("handle", handle)
   }
