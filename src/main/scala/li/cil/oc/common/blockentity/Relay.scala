@@ -8,6 +8,8 @@ import li.cil.oc.api.detail.ItemInfo
 import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network._
 import li.cil.oc.common._
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.integration.Mods
 import li.cil.oc.integration.opencomputers.DriverLinkedCard
 import li.cil.oc.server.PacketSender
@@ -239,9 +241,8 @@ class Relay(pos: BlockPos, state: BlockState)
         if (descriptor == WirelessNetworkCardTier1 || descriptor == WirelessNetworkCardTier2)
           wirelessTier = if (descriptor == WirelessNetworkCardTier1) Tier.One else Tier.Two
         if (descriptor == LinkedCard) {
-          val data = DriverLinkedCard.dataTag(stack)
-          if (data.contains(Settings.namespace + "tunnel")) {
-            tunnel = data.getString(Settings.namespace + "tunnel")
+          for(tunnelTag <- stack.getComponent(OCComponents.TUNNEL)) {
+            tunnel = tunnelTag
             isLinkedEnabled = true
             QuantumNetwork.add(this)
           }

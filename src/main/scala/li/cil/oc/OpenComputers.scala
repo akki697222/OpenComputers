@@ -55,6 +55,8 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
     cls.getConstructor(classOf[IEventBus]).newInstance(modBus).asInstanceOf[Proxy]
   }
 
+  Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
+  
   modBus.register(this)
   OCComponents.REGISTRAR.register(modBus)
   Items.init(modBus)
@@ -71,7 +73,6 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   OpenComputers.instance = Some(this)
   //NeoForge.EVENT_BUS.register(OpenComputers.proxy)
   modBus.register(OpenComputers.proxy)
-  Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
   OpenComputers.proxy.preInit()
   NeoForge.EVENT_BUS.register(ThreadPoolFactory)
 

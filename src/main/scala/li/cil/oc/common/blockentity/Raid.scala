@@ -118,11 +118,10 @@ class Raid(pos: BlockPos, state: BlockState)
     case (acc, hdd) if !hdd.isEmpty => acc + (Option(api.Driver.driverFor(hdd)) match {
       case Some(driver) => driver.createEnvironment(hdd, this) match {
         case fs: FileSystem =>
-          val nbt = driver.dataTag(hdd)
-          fs.loadData(nbt, this.getLevel.registryAccess())
+          fs.loadData(hdd)
           fs.fileSystem.close()
           fs.fileSystem.list("/").foreach(fs.fileSystem.delete)
-          fs.saveData(nbt, this.getLevel.registryAccess())
+          fs.saveData(hdd)
           fs.fileSystem.spaceTotal
         case _ => 0L // Ignore.
       }

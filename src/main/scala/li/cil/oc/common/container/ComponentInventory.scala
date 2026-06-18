@@ -194,9 +194,6 @@ trait ComponentInventory extends Inventory with network.Environment {
     }
   }
 
-  protected def dataTag(driver: ItemDriver, stack: ItemStack) =
-    Option(driver.dataTag(stack)).getOrElse(Item.dataTag(stack))
-
   protected def save(component: ManagedEnvironment, driver: ItemDriver, stack: ItemStack): Unit = {
     try {
       component.saveData(stack)

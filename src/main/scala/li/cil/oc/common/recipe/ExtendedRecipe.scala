@@ -14,6 +14,7 @@ import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.common.item.data.TabletData
 import li.cil.oc.server.machine.luac.LuaStateFactory
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ExtendedItemStack._
 import li.cil.oc.util.{ItemUtils, SideTracker}
 import net.minecraft.core.component.DataComponents
@@ -96,22 +97,17 @@ object ExtendedRecipe {
     val craftedItemName = api.Items.get(craftedStack)
 
     if (craftedItemName == navigationUpgrade) {
-      Option(api.Driver.driverFor(craftedStack)).foreach(driver =>
-        for (stack <- getItems(inventory)) {
-          if (stack.getItem == Items.FILLED_MAP) {
-            // Store information of the map used for crafting in the result.
-            val nbt = driver.dataTag(craftedStack)
-            nbt.put(Settings.namespace + "map", stack.save(provider))
-          }
-        })
+      for (stack <- getItems(inventory)) {
+        if (stack.getItem == Items.FILLED_MAP) {
+          // Store information of the map used for crafting in the result.
+          craftedStack.setComponent(OCComponents.SOURCE_MAP_ITEM, stack)
+        }
+      }
     }
 
     if (craftedItemName == linkedCard) {
       if (SideTracker.isServer) {
-        Option(api.Driver.driverFor(craftedStack)).foreach(driver => {
-          val nbt = driver.dataTag(craftedStack)
-          nbt.putString(Settings.namespace + "tunnel", UUID.randomUUID().toString)
-        })
+        craftedStack.setComponent(OCComponents.TUNNEL, UUID.randomUUID().toString)
       }
     }
 

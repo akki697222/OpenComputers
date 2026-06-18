@@ -59,6 +59,12 @@ neoForge {
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/data/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
 }
 
 sourceSets.main.scala { srcDir 'src/data/scala' }

@@ -31,7 +31,7 @@ object DriverTablet extends Item {
         case Some(environment) => environment.node match {
           case component: Component =>
             component.setVisibility(Visibility.Network)
-            environment.saveData(dataTag(stack), host.getEnvironmentLevel.registryAccess())
+            environment.saveData(stack)
             environment
           case _ => null
         }

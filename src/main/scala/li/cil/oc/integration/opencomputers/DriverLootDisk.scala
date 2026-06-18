@@ -7,8 +7,10 @@ import li.cil.oc.Settings
 import li.cil.oc.api
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.common.Slot
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ItemUtils
 import li.cil.oc.util.ExtendedItemStack._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.storage.LevelResource
@@ -37,11 +39,7 @@ object DriverLootDisk extends Item {
         else {
           api.FileSystem.fromResource(ResourceLocation.fromNamespaceAndPath(Settings.resourceDomain, lootPath))
         }
-      val label =
-        if (dataTag(stack).contains(Settings.namespace + "fs.label")) {
-          dataTag(stack).getString(Settings.namespace + "fs.label")
-        }
-        else null
+      val label = stack.getComponent(OCComponents.LABEL).orNull
       api.FileSystem.asManagedEnvironment(fs, label, host, Settings.resourceDomain + ":floppy_access")
     }
     else null
