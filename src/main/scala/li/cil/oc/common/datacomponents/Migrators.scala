@@ -2,6 +2,7 @@ package li.cil.oc.common.datacomponents
 
 import cats.NonEmptyTraverse.ops.toAllNonEmptyTraverseOps
 import li.cil.oc.Settings
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.datacomponents.MachineData.Signal
 import li.cil.oc.common.datacomponents.TextBufferContents.ShortArray
@@ -252,17 +253,17 @@ private object Migrators {
       case intArray: IntArrayTag => Some(intArray.getAsIntArray)
     }
 
-    def itemStack(name: Identifier) = value[ItemStack](name) {
-      case compoundTag: CompoundTag => ItemStack.parse(provider, compoundTag).toScala
+    def itemStack(name: Identifier) = value[ImmutableItemStack](name) {
+      case compoundTag: CompoundTag => ImmutableItemStack.parse(provider, compoundTag).toScala
     }
 
     def fluidStack(name: Identifier) = value[FluidStack](name) {
       case compoundTag: CompoundTag => FluidStack.parse(provider, compoundTag).toScala
     }
 
-    def itemStackList(name: Identifier) = value[List[ItemStack]](name) {
+    def itemStackList(name: Identifier) = value[List[ImmutableItemStack]](name) {
       case tag: ListTag if TagTypes.getType(tag.getElementType) == CompoundTag.TYPE =>
-        Some((0 until tag.size()).map(i => ItemStack.parse(provider, tag.get(i))).filter(_.isPresent).map(_.get).toList)
+        Some((0 until tag.size()).map(i => ImmutableItemStack.parse(provider, tag.get(i))).filter(_.isPresent).map(_.get).toList)
     }
 
     def uuid(name: Identifier) = value[UUID](name) {

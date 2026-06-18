@@ -1,26 +1,25 @@
 package li.cil.oc.common.datacomponents
 
 import com.mojang.serialization.Codec
-import io.netty.buffer.ByteBuf
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.item.data.PrintData
 import li.cil.oc.server.component.DebugCard.AccessContext
-import net.minecraft.core.{BlockPos, UUIDUtil}
 import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.registries.Registries
+import net.minecraft.core.{BlockPos, UUIDUtil}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.{Component, ComponentSerialization}
 import net.minecraft.network.codec.{ByteBufCodecs, StreamCodec}
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.ColorRGBA
-import net.minecraft.world.item.{DyeColor, ItemStack}
+import net.minecraft.world.item.DyeColor
 import net.neoforged.neoforge.fluids.FluidStack
 import net.neoforged.neoforge.registries.{DeferredHolder, DeferredRegister}
 
 import java.nio.ByteBuffer
 import java.util.UUID
-import java.util.function.Supplier
 
 object OCComponents {
   type Type[T] = DeferredHolder[DataComponentType[_], DataComponentType[T]]
@@ -44,10 +43,10 @@ object OCComponents {
   val EEPROM_CODE: Type[ByteBuffer] = persistent("eeprom_code", Codec.BYTE_BUFFER)
   val EEPROM_DATA: Type[ByteBuffer] = persistent("eeprom_data", Codec.BYTE_BUFFER)
   val MF_COORD: Type[MFCoords] = persistentShared("mf_coord", MFCoords.CODEC, MFCoords.STREAM_CODEC)
-  val COMPONENTS: Type[List[ItemStack]] = persistentShared("components", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val CONTENTS: Type[List[ItemStack]] = persistentShared("contents", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val CONTAINERS: Type[List[ItemStack]] = persistentShared("containers", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val ATTACHMENT: Type[ItemStack] = persistentShared("attachment", ItemStack.CODEC, ItemStack.STREAM_CODEC)
+  val COMPONENTS: Type[List[ImmutableItemStack]] = persistentShared("components", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val CONTENTS: Type[List[ImmutableItemStack]] = persistentShared("contents", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val CONTAINERS: Type[List[ImmutableItemStack]] = persistentShared("containers", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val ATTACHMENT: Type[ImmutableItemStack] = persistentShared("attachment", ImmutableItemStack.OPTIONAL_CODEC, ImmutableItemStack.OPTIONAL_STREAM_CODEC)
   val TIER: Type[Byte] = persistentShared("tier", ScalaCodec.BYTE, ScalaStreamCodec.BYTE)
   val STORED_ENERGY: Type[Int] = persistentShared("stored_energy", ScalaCodec.INT, ScalaStreamCodec.VAR_INT)
   val ADDRESS: Type[String] = persistentShared("address", Codec.STRING, ByteBufCodecs.STRING_UTF8)
@@ -58,7 +57,7 @@ object OCComponents {
   val MAX_CHARGE: Type[Double] = persistentShared("max_charge", ScalaCodec.DOUBLE, ScalaStreamCodec.DOUBLE)
   val ROBOT_CHARGE: Type[RobotChargeInfo] = persistentShared("robot_charge", RobotChargeInfo.CODEC, RobotChargeInfo.STREAM_CODEC)
   val NANOMACHINES_NETWORK_INFO: Type[CompoundTag] = persistent("nanomachines_network_info", CompoundTag.CODEC)
-  val SOURCE_MAP_ITEM: Type[ItemStack] = persistent("source_map_item", ItemStack.CODEC)
+  val SOURCE_MAP_ITEM: Type[ImmutableItemStack] = persistent("source_map_item", ImmutableItemStack.OPTIONAL_CODEC)
   val KEYS: Type[List[String]] = persistentShared("keys", ScalaCodec.list(Codec.STRING), ScalaStreamCodec.list(ByteBufCodecs.STRING_UTF8))
   val TERMINAL_REFERENCE: Type[TerminalReference] = persistent("terminal_reference", TerminalReference.CODEC)
   val TEXT_BUFFER: Type[TextBufferContents] = persistent("text_buffer", TextBufferContents.CODEC)
@@ -89,7 +88,7 @@ object OCComponents {
   val STRENGTH: Type[Double] = persistent("strength", ScalaCodec.DOUBLE)
   val HEAD_POS: Type[Int] = persistent("head_position", ScalaCodec.INT)
   val TANK: Type[FluidStack] = persistent("tank", FluidStack.CODEC)
-  val FUEL_INVENTORY: Type[ItemStack] = persistent("fuel_inventory", ItemStack.CODEC)
+  val FUEL_INVENTORY: Type[ImmutableItemStack] = persistent("fuel_inventory", ImmutableItemStack.OPTIONAL_CODEC)
   val FUEL_TICKS_REMAINING: Type[Int] = persistent("fuel_ticks_remaining", ScalaCodec.INT)
   val DEBUG_CARD_ACCESS_CONTEXT: Type[AccessContext] = persistent("debug_card/access_context", AccessContext.CODEC)
   val DEBUG_CARD_REMOTE_NODE_POSITION: Type[BlockPos] = persistent("debug_card/remote_node", BlockPos.CODEC)

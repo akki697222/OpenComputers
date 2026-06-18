@@ -268,7 +268,7 @@ object EventHandler {
     didRecraft = recraft(e, navigationUpgrade, stack => {
       // Restore the map currently used in the upgrade.
       stack.getComponent(OCComponents.SOURCE_MAP_ITEM) match {
-        case Some(map) => StackOption(map)
+        case Some(map) => StackOption(map.mutableCopy())
         case _ => EmptyStack
       }
     }) || didRecraft

@@ -5,6 +5,7 @@ import li.cil.oc.Constants
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.api.detail.ItemInfo
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.data.DroneData
@@ -100,7 +101,7 @@ object ExtendedRecipe {
       for (stack <- getItems(inventory)) {
         if (stack.getItem == Items.FILLED_MAP) {
           // Store information of the map used for crafting in the result.
-          craftedStack.setComponent(OCComponents.SOURCE_MAP_ITEM, stack)
+          craftedStack.setComponent(OCComponents.SOURCE_MAP_ITEM, ImmutableItemStack.copyOf(stack))
         }
       }
     }

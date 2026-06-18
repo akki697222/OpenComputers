@@ -1,5 +1,7 @@
 package li.cil.oc.common.blockentity.traits
 
+import li.cil.oc.api.Persistable
+
 import java.util.function.Consumer
 import li.cil.oc.common.container
 import li.cil.oc.util.BlockPosition
@@ -18,6 +20,16 @@ trait Inventory extends BaseBlockEntity with container.Inventory {
   // ----------------------------------------------------------------------- //
 
   override def getDisplayName: Component = super[Inventory].getDisplayName
+
+  override def loadComponentsForServer(): Unit = {
+    super.loadComponentsForServer()
+    loadData(Persistable.holder(this))
+  }
+
+  override def saveComponentsForServer(): Unit = {
+    super.saveComponentsForServer()
+    saveData(Persistable.holder(this))
+  }
 
   override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForServer(nbt, provider)

@@ -5,9 +5,8 @@ import li.cil.oc.Constants
 import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
 import li.cil.oc.api.driver.DeviceInfo.DeviceClass
 import li.cil.oc.Settings
-import li.cil.oc.api.Network
+import li.cil.oc.api.{ImmutableItemStack, Network, internal}
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.internal
 import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
@@ -215,14 +214,14 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
   override def loadData(holder: DataComponentHolder): Unit = {
     super.loadData(holder)
 
-    inventory = StackOption(holder.getComponent(OCComponents.FUEL_INVENTORY))
+    inventory = StackOption(holder.getComponent(OCComponents.FUEL_INVENTORY).map(_.mutableCopy()))
     remainingTicks = holder.getComponent(OCComponents.FUEL_TICKS_REMAINING) getOrElse 0
   }
 
   override def saveData(holder: MutableDataComponentHolder): Unit = {
     super.saveData(holder)
 
-    holder.setComponent(OCComponents.FUEL_INVENTORY, inventory.toOption)
+    holder.setComponent(OCComponents.FUEL_INVENTORY, inventory.toOption.map(ImmutableItemStack.copyOf))
     holder.setComponent(OCComponents.FUEL_TICKS_REMAINING, Option.when(remainingTicks > 0) { remainingTicks })
   }
 }
