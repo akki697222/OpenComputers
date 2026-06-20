@@ -17,6 +17,7 @@ import li.cil.oc.common.menu
 import li.cil.oc.common.container.InventoryProxy
 import li.cil.oc.common.container.InventorySelection
 import li.cil.oc.common.container.TankSelection
+import li.cil.oc.common.datacomponents.{OCComponents, Owner, RobotCurrentAnimation}
 import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.integration.opencomputers.DriverKeyboard
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
@@ -27,9 +28,10 @@ import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.{BlockPosHelper, BlockPosition, InventoryUtils, StackOption}
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.StackOption._
 import net.minecraft.client.Minecraft
-import net.minecraft.core.component.DataComponents
+import net.minecraft.core.component.{DataComponentHolder, DataComponents}
 import net.minecraft.network.chat.{Component => TextComponent}
 import net.minecraft.world.item.ItemStack
 import net.neoforged.api.distmarker.Dist
@@ -52,7 +54,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.network.chat
 import net.minecraft.world.item.component.ItemAttributeModifiers
-import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.common.{MutableDataComponentHolder, NeoForge}
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import net.neoforged.neoforge.fluids.{FluidStack, IFluidTank}
 import net.neoforged.neoforge.fluids.capability.IFluidHandler
@@ -65,7 +67,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 // class that was held by the old proxy to it and can then safely forget the
 // old proxy, which will be cleaned up by Minecraft like any other tile entity.
 class Robot(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state) with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock
+  extends BlockEntity(BlockEntityTypes.ROBOT.get(), pos, state) with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock
   with IFluidHandler with internal.Robot with InventorySelection with TankSelection with MenuProvider
     with IBlockEntityExtension {
 
@@ -425,118 +427,76 @@ class Robot(pos: BlockPos, state: BlockState)
   private final val SwingingToolTag = Settings.namespace + "swingingTool"
   private final val TurnAxisTag = Settings.namespace + "turnAxis"
 
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    updateInventorySize()
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
     machine.onHostChanged()
 
-    bot.loadData(nbt.getCompound(RobotTag), provider)
-    if (nbt.contains(OwnerTag)) {
-      ownerName = nbt.getString(OwnerTag)
+    bot.loadData(holder)
+    for(Owner(name, id) <- holder.getComponent(OCComponents.OWNER)) {
+      ownerName = name
+      ownerUUID = id
     }
-    if (nbt.contains(OwnerUUIDTag)) {
-      ownerUUID = UUID.fromString(nbt.getString(OwnerUUIDTag))
-    }
-    if (inventorySize > 0) {
-      selectedSlot = nbt.getInt(SelectedSlotTag) max 0 min mainInventory.getContainerSize - 1
-    }
-    selectedTank = nbt.getInt(SelectedTankTag)
-    animationTicksTotal = nbt.getInt(AnimationTicksTotalTag)
-    animationTicksLeft = nbt.getInt(AnimationTicksLeftTag)
-    if (animationTicksLeft > 0) {
-      if (nbt.contains(MoveFromXTag)) {
-        val moveFromX = nbt.getInt(MoveFromXTag)
-        val moveFromY = nbt.getInt(MoveFromYTag)
-        val moveFromZ = nbt.getInt(MoveFromZTag)
-        moveFrom = Some(new BlockPos(moveFromX, moveFromY, moveFromZ))
-      }
-      swingingTool = nbt.getBoolean(SwingingToolTag)
-      turnAxis = nbt.getByte(TurnAxisTag).toInt
-    }
+
+    selectedTank = holder.getComponent(OCComponents.SELECTED_TANK) getOrElse 0
 
     // Normally set in superclass, but that's not called directly, only in the
     // robot's proxy instance.
     _isOutputEnabled = hasRedstoneCard
-    if (isRunning) EventHandler.onRobotStart(this)
+    if(isRunning) EventHandler.onRobotStart(this)
   }
 
-  override def loadComponentsForServer(): Unit = {
-    updateInventorySize()
-    machine.onHostChanged()
-
-    val holder = Persistable.holder(this)
-    bot.loadData(holder)
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = this.synchronized {
+    bot.saveData(holder)
+    holder.setComponent(OCComponents.OWNER, Owner(ownerName, ownerUUID))
+    holder.setComponent(OCComponents.SELECTED_TANK, selectedTank)
   }
 
-  // Side check for Waila (and other mods that may call this client side).
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = if (isServer) this.synchronized {
-    info.saveData(nbt, provider)
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForClient(holder)
+    this.loadData(holder)
 
-    // Note: computer is saved when proxy is saved (in proxy's super save)
-    // which is a bit ugly, and may be refactored some day, but it works.
-    nbt.setNewCompoundTag(RobotTag, (nbt: CompoundTag) => bot.saveData(nbt, provider))
-    nbt.putString(OwnerTag, ownerName)
-    nbt.putString(OwnerUUIDTag, ownerUUID.toString)
-    nbt.putInt(SelectedSlotTag, selectedSlot)
-    nbt.putInt(SelectedTankTag, selectedTank)
-    if (isAnimatingMove || isAnimatingSwing || isAnimatingTurn) {
-      nbt.putInt(AnimationTicksTotalTag, animationTicksTotal)
-      nbt.putInt(AnimationTicksLeftTag, animationTicksLeft)
-      moveFrom match {
-        case Some(blockPos) =>
-          nbt.putInt(MoveFromXTag, blockPos.getX)
-          nbt.putInt(MoveFromYTag, blockPos.getY)
-          nbt.putInt(MoveFromZTag, blockPos.getZ)
-        case _ =>
-      }
-      nbt.putBoolean(SwingingToolTag, swingingTool)
-      nbt.putByte(TurnAxisTag, turnAxis.toByte)
-    }
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    loadData(nbt, provider)
-    info.loadData(nbt, provider)
-
-    updateInventorySize()
-
-    selectedSlot = nbt.getInt(SelectedSlotTag)
-    animationTicksTotal = nbt.getInt(AnimationTicksTotalTag)
-    animationTicksLeft = nbt.getInt(AnimationTicksLeftTag)
-    if (animationTicksLeft > 0) {
-      if (nbt.contains(MoveFromXTag)) {
-        val moveFromX = nbt.getInt(MoveFromXTag)
-        val moveFromY = nbt.getInt(MoveFromYTag)
-        val moveFromZ = nbt.getInt(MoveFromZTag)
-        moveFrom = Some(new BlockPos(moveFromX, moveFromY, moveFromZ))
-      }
-      swingingTool = nbt.getBoolean(SwingingToolTag)
-      turnAxis = nbt.getByte(TurnAxisTag).toInt
-    }
     connectComponents()
   }
 
-  @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = this.synchronized {
-    super.saveForClient(nbt, provider)
-    saveData(nbt, provider)
-    info.saveData(nbt, provider)
+  override def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForClient(holder)
+    this.saveData(holder)
+  }
 
-    nbt.putInt(SelectedSlotTag, selectedSlot)
-    if (isAnimatingMove || isAnimatingSwing || isAnimatingTurn) {
-      nbt.putInt(AnimationTicksTotalTag, animationTicksTotal)
-      nbt.putInt(AnimationTicksLeftTag, animationTicksLeft)
-      moveFrom match {
-        case Some(blockPos) =>
-          nbt.putInt(MoveFromXTag, blockPos.getX)
-          nbt.putInt(MoveFromYTag, blockPos.getY)
-          nbt.putInt(MoveFromZTag, blockPos.getZ)
-        case _ =>
-      }
-      nbt.putBoolean(SwingingToolTag, swingingTool)
-      nbt.putByte(TurnAxisTag, turnAxis.toByte)
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    updateInventorySize()
+    info.loadData(holder)
+
+    if(inventorySize > 0) {
+      selectedSlot = holder.getComponent(OCComponents.SELECTED_SLOT) getOrElse 0 max 0 min mainInventory.getContainerSize - 1
     }
+
+    for(ticks <- holder.getComponent(OCComponents.ROBOT_TOTAL_ANIMATION_TIME)) {
+      animationTicksTotal = ticks
+    }
+
+    for(ani <- holder.getComponent(OCComponents.ROBOT_CURRENT_ANIMATION) if ani.ticksLeft > 0) {
+      animationTicksLeft = ani.ticksLeft
+      moveFrom = ani.moveFrom
+      swingingTool = ani.swingShovel
+      turnAxis = ani.turnAxis.toInt
+    }
+  }
+
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = this.synchronized {
+    info.saveData(holder)
+
+    holder.setComponent(OCComponents.SELECTED_SLOT, selectedSlot)
+    val isAnimating = isAnimatingMove || isAnimatingSwing || isAnimatingTurn
+
+    holder.setComponent(OCComponents.ROBOT_TOTAL_ANIMATION_TIME, Option.when(isAnimating) { animationTicksTotal })
+    holder.setComponent(OCComponents.ROBOT_CURRENT_ANIMATION, Option.when(isAnimating) {
+      RobotCurrentAnimation(
+        animationTicksLeft,
+        moveFrom,
+        swingingTool,
+        turnAxis.toByte
+      )
+    })
   }
 
   // ----------------------------------------------------------------------- //
@@ -577,7 +537,7 @@ class Robot(pos: BlockPos, state: BlockState)
             attributeInstance.addTransientModifier(attributeModifier)
           }
         })
-        
+
         ServerPacketSender.sendRobotInventory(this, slot, stack)
       }
       if (isUpgradeSlot(slot)) {

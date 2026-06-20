@@ -2,13 +2,18 @@ package li.cil.oc.common.blockentity.traits
 
 import li.cil.oc.Settings
 import li.cil.oc.api.internal
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.server.PacketSender
 import li.cil.oc.util.Color
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.HolderLookup
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.item.DyeColor
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.util.ColorRGBA
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 trait Colored extends BaseBlockEntity with internal.Colored {
   private var _color = 0
@@ -32,35 +37,14 @@ trait Colored extends BaseBlockEntity with internal.Colored {
 
   // ----------------------------------------------------------------------- //
 
-  private final val RenderColorTag = Settings.namespace + "renderColorRGB"
-  private final val RenderColorTagCompat = Settings.namespace + "renderColor"
-
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-    if (nbt.contains(RenderColorTagCompat)) {
-      _color = Color.rgbValues(DyeColor.byId(nbt.getInt(RenderColorTagCompat)))
-    }
-    if (nbt.contains(RenderColorTag)) {
-      _color = nbt.getInt(RenderColorTag)
-    }
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    super.loadComponentsCommon(holder)
+    for(color <- holder.getComponent(OCComponents.RENDER_COLOR))
+      _color = color.rgba()
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    nbt.putInt(RenderColorTag, _color)
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    if (nbt.contains(RenderColorTag)) {
-      _color = nbt.getInt(RenderColorTag)
-    }
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    nbt.putInt(RenderColorTag, _color)
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsCommon(holder)
+    holder.setComponent(OCComponents.RENDER_COLOR, new ColorRGBA(_color))
   }
 }

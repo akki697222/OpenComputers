@@ -15,7 +15,7 @@ import net.neoforged.neoforge.common.MutableDataComponentHolder;
 public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
     public static final String NODE_TAG = "node";
 
-    // Should be initialized using setNode(api.Network.newNode()). See TileEntityEnvironment.
+    // Should be initialized using setNode(api.Network.newNode()). See BlockEntityEnvironment.
     private Node _node;
 
     @Override
@@ -50,7 +50,7 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
 
     @Override
     public void loadData(DataComponentHolder holder) throws UnrecoverablePersistanceException {
-        if (node() != null && holder.has(DataComponents.NODE)) {
+        if (node() != null && holder.has(DataComponents.ADDRESS)) {
             node().loadData(holder);
         }
     }

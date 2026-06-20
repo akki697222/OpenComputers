@@ -1,35 +1,35 @@
 package li.cil.oc.server
 
 import com.google.common.cache.{Cache, CacheBuilder}
-import li.cil.oc.{Settings, api}
+import io.netty.buffer.Unpooled
 import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
-import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.api.network.Node
+import li.cil.oc.api.network.{EnvironmentHost, Node}
 import li.cil.oc.common._
-import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.common.blockentity.traits._
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.PackedColor
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.core.BlockPos
-import net.neoforged.neoforge.common.NeoForge
-import net.minecraft.core.registries.BuiltInRegistries
-
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
-import scala.collection.mutable
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.entity.player.Player
+import li.cil.oc.common.datacomponents.CompoundStorage
+import li.cil.oc.common.nanomachines.ControllerImpl
+import li.cil.oc.util.{BlockPosition, PackedColor}
+import li.cil.oc.{Settings, api}
+import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.world.level.Level
+import net.minecraft.nbt.{CompoundTag, NbtIo}
+import net.minecraft.network.RegistryFriendlyByteBuf
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.network.connection.ConnectionType
+import net.neoforged.neoforge.server.ServerLifecycleHooks
+
+import java.util.concurrent.TimeUnit
+import scala.collection.mutable
 
 object PacketSender {
   def sendAudioStart(host: EnvironmentHost, sessionId: Int, channel: Int, sampleRate: Int, channels: Int, format: Int, loop: Boolean, pos: BlockPosition): Unit = {
@@ -230,7 +230,50 @@ object PacketSender {
         }
       }
     }
-}
+  }
+
+  def sendFileSystemActivity(node: Node, host: EnvironmentHost) = {
+    val diskActivityPacketDelay = Settings.get.diskActivitySoundDelay
+
+    if (diskActivityPacketDelay >= 0) {
+      val hostTimeouts = fileSystemAccessTimeouts.synchronized {
+        fileSystemAccessTimeouts.getOrElseUpdate(node, CacheBuilder.newBuilder().concurrencyLevel(Settings.get.threads).maximumSize(250).expireAfterWrite(diskActivityPacketDelay, TimeUnit.MILLISECONDS).build[String, java.lang.Long]())
+      }
+      val cacheKey = host match {
+        case t: BlockEntity => t.getBlockPos.toString
+        case _ => s"${host.xPosition},${host.yPosition},${host.zPosition}"
+      }
+      val lastHostTimeout = hostTimeouts.getIfPresent(cacheKey)
+      if (lastHostTimeout == null || lastHostTimeout <= System.currentTimeMillis()) {
+        val event = host match {
+          case t: BlockEntity => new FileSystemAccessEvent.Server(null, t, node)
+          case _ => new FileSystemAccessEvent.Server(null, host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
+        }
+        NeoForge.EVENT_BUS.post(event)
+        if (!event.isCanceled) {
+          hostTimeouts.put(cacheKey, System.currentTimeMillis() + diskActivityPacketDelay)
+
+          val pb = new SimplePacketBuilder(PacketType.FileSystemActivity)
+
+          pb.writeUTF(event.getSound)
+          NbtIo.write(event.getData, pb)
+          event.getBlockEntity match {
+            case t: BlockEntity =>
+              pb.writeBoolean(true)
+              pb.writeTileEntity(t)
+            case _ =>
+              pb.writeBoolean(false)
+              pb.writeUTF(event.getWorld.dimension.location.toString)
+              pb.writeDouble(event.getX)
+              pb.writeDouble(event.getY)
+              pb.writeDouble(event.getZ)
+          }
+
+          pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+        }
+      }
+    }
+  }
 
   def sendNetworkActivity(node: Node, host: EnvironmentHost): Unit = {
 
@@ -535,7 +578,10 @@ object PacketSender {
 
     pb.writeTileEntity(t)
     pb.writeInt(mountable)
-    pb.writeNBT(t.lastData(mountable))
+
+    val bytes = new RegistryFriendlyByteBuf(Unpooled.buffer(), ServerLifecycleHooks.getCurrentServer.registryAccess(), ConnectionType.NEOFORGE)
+    CompoundStorage.OPTION_STREAM_CODEC.encode(bytes, t.lastData(mountable))
+    pb.write(bytes.array())
 
     pb.sendToPlayersNearTileEntity(t)
   }

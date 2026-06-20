@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Geolyzer(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.GEOLYZER.get(), pos, state) with traits.Environment with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.GEOLYZER.get(), pos, state) with traits.Environment with IBlockEntityExtension {
   val geolyzer = new component.Geolyzer(this)
 
   def node = geolyzer.node

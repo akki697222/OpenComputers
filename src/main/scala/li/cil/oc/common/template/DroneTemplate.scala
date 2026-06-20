@@ -29,6 +29,8 @@ object DroneTemplate extends Template {
 
   def selectTier2(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.DroneCaseTier2)
 
+  def selectTier3(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.DroneCaseTier3)
+
   def selectTierCreative(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.DroneCaseCreative)
 
   def validate(inventory: Container): Array[AnyRef] = validateComputer(inventory)
@@ -98,6 +100,30 @@ object DroneTemplate extends Template {
         null,
         (Slot.CPU, Tier.One),
         (Slot.Memory, Tier.One),
+        (Slot.Memory, Tier.One),
+        (Slot.EEPROM, Tier.Any)
+      ).map(toPair)))
+
+    // Tier 2
+    api.IMC.registerAssemblerTemplate(
+      "Drone (Tier 3)",
+      "li.cil.oc.common.template.DroneTemplate.selectTier3",
+      "li.cil.oc.common.template.DroneTemplate.validate",
+      "li.cil.oc.common.template.DroneTemplate.assemble",
+      hostClass,
+      null,
+      Array(
+        Tier.Four,
+        Tier.Three,
+        Tier.Two,
+        Tier.One
+      ),
+      asJavaIterable(Iterable(
+        (Slot.Card, Tier.Three),
+        (Slot.Card, Tier.Two),
+        null,
+        (Slot.CPU, Tier.One),
+        (Slot.Memory, Tier.Two),
         (Slot.Memory, Tier.One),
         (Slot.EEPROM, Tier.Any)
       ).map(toPair)))

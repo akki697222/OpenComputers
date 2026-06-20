@@ -1,17 +1,20 @@
 package li.cil.oc.common.blockentity
 
-import li.cil.oc.{Settings, api}
+import li.cil.oc.{OpenComputers, Settings, api}
 import li.cil.oc.api.component.RackMountable
 import li.cil.oc.api.{Driver, internal}
 import li.cil.oc.api.network._
 import li.cil.oc.api.util.StateAware
 import li.cil.oc.client.renderer.block.ServerRackModel
 import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
+import li.cil.oc.common.datacomponents.{CompoundStorage, OCComponents}
 import li.cil.oc.common.{Slot, menu}
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedInventory._
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.{DataComponentHolder, DataComponentMap, DataComponentPatch}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, IntArrayTag, Tag}
 import net.minecraft.world.entity.player.{Inventory, Player}
@@ -21,18 +24,19 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.{Container, MenuProvider}
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import java.util
 import scala.collection.immutable.ArraySeq
 
 class Rack(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
+  extends BlockEntity(BlockEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
   with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider
     with IBlockEntityExtension {
 
   var isRelayEnabled = false
-  val lastData = new Array[CompoundTag](getContainerSize)
+  val lastData: Array[Option[CompoundStorage]] = Array.fill[Option[CompoundStorage]](getContainerSize) { None }
   val hasChanged: Array[Boolean] = Array.fill(getContainerSize)(true)
 
   @OnlyIn(Dist.CLIENT)
@@ -278,7 +282,7 @@ class Rack(pos: BlockPos, state: BlockState)
     case _ => null
   }
 
-  override def getMountableData(slot: Int): CompoundTag = lastData(slot)
+  override def getMountableData(slot: Int): DataComponentHolder = lastData(slot) getOrElse CompoundStorage.EMPTY
 
   override def markChanged(slot: Int): Unit = {
     hasChanged.synchronized(hasChanged(slot) = true)
@@ -388,7 +392,11 @@ class Rack(pos: BlockPos, state: BlockState)
         case (Some(mountable: RackMountable), slot) =>
           if (hasChanged(slot)) {
             hasChanged(slot) = false
-            lastData(slot) = mountable.getData
+
+            val data = lastData(slot) getOrElse new CompoundStorage()
+            mountable.describeForClient(data)
+            lastData(slot) = Some(data)
+
             ServerPacketSender.sendRackMountableData(this, slot)
             getLevel.updateNeighborsAt(getBlockPos, getBlockState.getBlock)
             // These are working state dependent, so recompute them.
@@ -415,51 +423,48 @@ class Rack(pos: BlockPos, state: BlockState)
 
   // ----------------------------------------------------------------------- //
 
-  private final val IsRelayEnabledTag = Settings.namespace + "isRelayEnabled"
-  private final val NodeMappingTag = Settings.namespace + "nodeMapping"
-  private final val LastDataTag = Settings.namespace + "lastData"
-  private final val RackDataTag = Settings.namespace + "rackData"
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForServer(holder)
+    isRelayEnabled = holder.has(OCComponents.RELAY_ENABLED)
 
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-
-    isRelayEnabled = nbt.getBoolean(IsRelayEnabledTag)
-    nbt.getList(NodeMappingTag, Tag.TAG_INT_ARRAY).map((buses: IntArrayTag) =>
-      buses.getAsIntArray.map(id => if (id < 0 || id == Direction.SOUTH.ordinal()) None else Option(Direction.from3DDataValue(id)))).
-      copyToArray(nodeMapping)
-
-    // Kickstart initialization.
-    _isOutputEnabled = hasRedstoneCard
+    for(nodeMap <- holder.getComponent(OCComponents.RACK_NODE_MAPPING)) {
+      nodeMap.map(_.map {
+        case Direction.SOUTH => None
+        case other => Some(other)
+      }) copyToArray nodeMapping
+    }
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-
-    nbt.putBoolean(IsRelayEnabledTag, isRelayEnabled)
-    nbt.setNewTagList(NodeMappingTag, nodeMapping.map(buses =>
-      toNbt(buses.map(side => side.fold(-1)(_.ordinal())))))
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+    holder.setComponent(OCComponents.RELAY_ENABLED, isRelayEnabled)
+    holder.setComponent(OCComponents.RACK_NODE_MAPPING, nodeMapping.map(_.map {
+      case None => Direction.SOUTH
+      case Some(Direction.SOUTH) =>
+        OpenComputers.log.warn(s"Weird direction value in rack at $pos! SOUTH should not be possible?")
+        Direction.SOUTH
+      case Some(other) => other
+    }))
   }
 
-  @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForClient(holder)
     requestModelDataUpdate()
 
-    val data = nbt.getList(LastDataTag, Tag.TAG_COMPOUND).
-      toTagArray[CompoundTag]
-    data.copyToArray(lastData)
-    loadData(nbt.getCompound(RackDataTag), provider)
+    for(data <- holder.getComponent(OCComponents.RACK_DATA)) {
+      data.copyToArray(lastData)
+    }
+
+    loadData(holder)
     connectComponents()
   }
 
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
+  override def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForClient(holder)
+    holder.setComponent(OCComponents.RACK_DATA, lastData)
 
-    val data = lastData.map(tag => if (tag == null) new CompoundTag() else tag)
-    nbt.setNewTagList(LastDataTag, data)
-    nbt.setNewCompoundTag(RackDataTag, tag => saveData(tag, provider))
+    saveData(holder)
   }
-
   // ----------------------------------------------------------------------- //
 
   def slotAt(side: Direction, hitX: Float, hitY: Float, hitZ: Float): Option[Int] = {

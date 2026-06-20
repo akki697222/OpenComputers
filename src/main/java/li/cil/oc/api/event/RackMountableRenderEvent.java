@@ -6,7 +6,7 @@ import li.cil.oc.api.component.RackMountable;
 import li.cil.oc.api.internal.Rack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponentHolder;
 import net.minecraft.core.Direction;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.ICancellableEvent;
@@ -33,11 +33,11 @@ public abstract class RackMountableRenderEvent extends Event {
     /**
      * Some additional data made available by the mountable. May be {@code null}.
      *
-     * @see RackMountable#getData()
+     * @see RackMountable#describeForClient
      */
-    public final CompoundTag data;
+    public final DataComponentHolder data;
 
-    public RackMountableRenderEvent(Rack rack, int mountable, CompoundTag data) {
+    public RackMountableRenderEvent(Rack rack, int mountable, DataComponentHolder data) {
         this.rack = rack;
         this.mountable = mountable;
         this.data = data;
@@ -63,7 +63,7 @@ public abstract class RackMountableRenderEvent extends Event {
          */
         private TextureAtlasSprite frontTextureOverride;
 
-        public Block(final Rack rack, final int mountable, final CompoundTag data, final Direction side) {
+        public Block(final Rack rack, final int mountable, final DataComponentHolder data, final Direction side) {
             super(rack, mountable, data);
             this.side = side;
         }
@@ -94,7 +94,7 @@ public abstract class RackMountableRenderEvent extends Event {
      * origin will fill the full front face of the rack (i.e. rotation and translation
      * have already been applied).
      */
-    public static class TileEntity extends RackMountableRenderEvent {
+    public static class BlockEntity extends RackMountableRenderEvent {
         /**
          * The transformation used by the rendering engine.
          */
@@ -117,7 +117,7 @@ public abstract class RackMountableRenderEvent extends Event {
          */
         public final float v0, v1;
 
-        public TileEntity(final Rack rack, final int mountable, final CompoundTag data, final PoseStack stack, final MultiBufferSource typeBuffer, final int light, final int overlay, final float v0, final float v1) {
+        public BlockEntity(final Rack rack, final int mountable, final DataComponentHolder data, final PoseStack stack, final MultiBufferSource typeBuffer, final int light, final int overlay, final float v0, final float v1) {
             super(rack, mountable, data);
             this.stack = stack;
             this.typeBuffer = typeBuffer;

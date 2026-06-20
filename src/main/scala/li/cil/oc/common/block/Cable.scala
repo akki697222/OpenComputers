@@ -1,14 +1,13 @@
 package li.cil.oc.common.block
 
 import com.mojang.serialization.MapCodec
+import li.cil.oc.common.block.Cable.CODEC
 import li.cil.oc.common.block.property.PropertyCableConnection
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.Capabilities
-import li.cil.oc.common.block.Cable.CODEC
+import li.cil.oc.common.capabilities.Capabilities
 import li.cil.oc.util.{Color, ItemColorizer}
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.item.{DyeColor, ItemStack}
 import net.minecraft.world.level.block.Block
@@ -17,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, simpleC
 import net.minecraft.world.level.block.state.{BlockState, StateDefinition => StateContainer}
 import net.minecraft.world.level.{LevelReader, BlockGetter => IBlockReader, Level => World, LevelAccessor => IWorld}
 import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelectionContext, Shapes => VoxelShapes}
-import net.minecraft.world.phys.{HitResult => RayTraceResult}
 
 class Cable(props: Properties) extends SimpleBlock(props) {
   override def codec(): MapCodec[Cable] = CODEC
@@ -140,8 +138,7 @@ object Cable {
     if (neighborTileEntity != null && neighborTileEntity.getLevel != null) {
       val neighborHasNode = hasNetworkNode(neighborTileEntity, fromSide.getOpposite)
       val canConnectColor = canConnectBasedOnColor(tileEntity, neighborTileEntity, defaultColor)
-      val canConnectIM = canConnectFromSideIM(tileEntity, fromSide) && canConnectFromSideIM(neighborTileEntity, fromSide.getOpposite)
-      if (neighborHasNode && canConnectColor && canConnectIM) {
+      if (neighborHasNode && canConnectColor) {
         if (fromState.is(state.getBlock)) {
           return CableHelper.helperSetCableShapeState(state, fromSide, PropertyCableConnection.Shape.CABLE)
         }
@@ -196,10 +193,4 @@ object Cable {
     val (c1, c2) = (if (te1 == null) c1Default else getConnectionColor(te1), getConnectionColor(te2))
     c1 == c2 || c1 == Color.rgbValues(DyeColor.LIGHT_GRAY) || c2 == Color.rgbValues(DyeColor.LIGHT_GRAY)
   }
-
-  private def canConnectFromSideIM(tileEntity: TileEntity, side: Direction) =
-    tileEntity match {
-      case im: blockentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
-      case _ => true
-    }
 }

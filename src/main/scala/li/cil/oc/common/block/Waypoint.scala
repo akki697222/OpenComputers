@@ -3,7 +3,7 @@ package li.cil.oc.common.block
 import li.cil.oc.client.gui
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -54,5 +54,5 @@ class Waypoint(props: Properties) extends RedstoneAware(props) with traits.Ticka
       case _ => super.getValidRotations(world, pos)
     }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.WAYPOINT.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.WAYPOINT.get()
 }

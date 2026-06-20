@@ -44,7 +44,6 @@ trait PowerInformation extends BaseBlockEntity {
   private final val GlobalBufferTag = Settings.namespace + "globalBuffer"
   private final val GlobalBufferSizeTag = Settings.namespace + "globalBufferSize"
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     globalBuffer = nbt.getDouble(GlobalBufferTag)

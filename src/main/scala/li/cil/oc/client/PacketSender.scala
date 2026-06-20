@@ -239,4 +239,13 @@ object PacketSender {
 
     pb.sendToServer()
   }
+
+  def sendHoloScreenResize(screen: HoloScreen, side: Direction): Unit = {
+    val pb = new SimplePacketBuilder(PacketType.HoloScreenResize)
+
+    pb.writeTileEntity(screen)
+    pb.writeDirection(Option(side))
+
+    pb.sendToServer()
+  }
 }

@@ -47,8 +47,7 @@ abstract class ComponentTracker {
     Option(components(level).getIfPresent(address))
   }
 
-  @SubscribeEvent
-  def onWorldUnload(e: LevelEvent.Unload): Unit = e.getLevel match {
+  def worldUnloaded(e: LevelEvent.Unload): Unit = e.getLevel match {
     case level: Level => clear(level)
     case _ =>
   }

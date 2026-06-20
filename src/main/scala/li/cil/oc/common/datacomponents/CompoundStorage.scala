@@ -12,6 +12,8 @@ import net.neoforged.neoforge.common.MutableDataComponentHolder
 class CompoundStorage(orig: DataComponentMap = DataComponentMap.EMPTY) extends MutableDataComponentHolder {
   private val components: PatchedDataComponentMap = new PatchedDataComponentMap(orig)
 
+  def isEmpty: Boolean = components.isEmpty
+
   def this(nbt: CompoundTag) = this(DataComponentMap.builder()
     .set(DataComponents.CUSTOM_DATA, CustomData.of(nbt))
     .build())
@@ -37,11 +39,19 @@ class CompoundStorage(orig: DataComponentMap = DataComponentMap.EMPTY) extends M
 }
 
 object CompoundStorage {
+  val EMPTY = new CompoundStorage()
+
   val CODEC: Codec[CompoundStorage] = DataComponentMap.CODEC.xmap(m => new CompoundStorage(m), c => c.getComponents)
+  val OPTION_CODEC: Codec[Option[CompoundStorage]] = CODEC.xmap(m => if(m.isEmpty) None else Some(m), m => m match {
+    case Some(value) => value
+    case None => CompoundStorage.EMPTY
+  })
   val STREAM_CODEC: StreamCodec[RegistryFriendlyByteBuf, CompoundStorage] = DataComponentPatch.STREAM_CODEC
     .map[CompoundStorage](patch => new CompoundStorage().andApply(patch), (c: CompoundStorage) => {
       val builder = DataComponentPatch.builder()
       c.components.forEach(i => builder.set(i))
       builder.build()
     })
+  val OPTION_STREAM_CODEC: StreamCodec[RegistryFriendlyByteBuf, Option[CompoundStorage]] =
+    STREAM_CODEC.map(i => Option.when(!i.isEmpty) { i }, _ getOrElse CompoundStorage.EMPTY)
 }

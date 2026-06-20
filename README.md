@@ -1,4 +1,4 @@
-![Welcome to OpenComputers](assets/misc/banner.png)
+![Welcome to OpenComputers](assets/misc/banner_new.png)
 
 > [!IMPORTANT]
 > This is a Community Edition and fork of OpenComputers. Not an official Project.

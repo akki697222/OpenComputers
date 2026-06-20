@@ -13,14 +13,15 @@ import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.driver.Registry
 import li.cil.oc.server.machine.ProgramLocations
 import li.cil.oc.util.ExtendedNBT._
+import net.minecraft.core.component.DataComponentPatch
+import net.minecraft.core.registries.{BuiltInRegistries, Registries}
 import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.nbt.StringTag
+import net.minecraft.nbt.{CompoundTag, NbtOps, StringTag, Tag}
 import net.minecraft.core.{BlockPos, HolderLookup}
 import net.neoforged.fml.InterModComms.IMCMessage
 
 import scala.collection.convert.ImplicitConversionsToScala._
-import net.minecraft.nbt.Tag
+import net.minecraft.resources.{ResourceKey, ResourceLocation}
 import net.minecraft.world.entity.player.Player
 import net.neoforged.neoforge.event.server.ServerLifecycleEvent
 import net.neoforged.neoforge.server.ServerLifecycleHooks
@@ -81,7 +82,12 @@ object IMC {
       }
       case compInfo: CompoundTag if message.method == api.IMC.BLACKLIST_HOST => {
         OpenComputers.log.debug(s"Blacklisting component '${compInfo.getString("name")}' for host '${compInfo.getString("host")}' as requested by mod ${message.senderModId()}.")
-        try Registry.blacklistHost(ItemStack.parseOptional(ServerLifecycleHooks.getCurrentServer.registryAccess(), compInfo.getCompound("item")), Class.forName(compInfo.getString("host"))) catch {
+        val item = compInfo.getCompound("item")
+        val id = ResourceKey.create(Registries.ITEM, ResourceLocation.parse(item.getString("id")))
+        val count = item.getByte("count")
+        val components = DataComponentPatch.CODEC.parse(NbtOps.INSTANCE, item.get("components")).getOrThrow()
+        val stack = new ItemStack(BuiltInRegistries.ITEM.getHolder(id).orElseThrow(), count, components)
+        try Registry.blacklistHost(stack, Class.forName(compInfo.getString("host"))) catch {
           case t: Throwable => OpenComputers.log.warn("Failed blacklisting component.", t)
         }
       }

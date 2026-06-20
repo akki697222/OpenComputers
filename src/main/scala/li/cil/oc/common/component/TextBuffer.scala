@@ -106,7 +106,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
     DeviceAttribute.Vendor -> Constants.DeviceInfo.DefaultVendor,
     DeviceAttribute.Product -> "Text Screen V0",
     DeviceAttribute.Capacity -> (maxResolution._1 * maxResolution._2).toString,
-    DeviceAttribute.Width -> Array("1", "4", "8").apply(maxDepth.ordinal())
+    DeviceAttribute.Width -> Array("1", "4", "8", "16").apply(maxDepth.ordinal())
   )
 
   override def getDeviceInfo: java.util.Map[String, String] = deviceInfo

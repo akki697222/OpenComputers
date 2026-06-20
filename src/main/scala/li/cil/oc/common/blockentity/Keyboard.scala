@@ -1,23 +1,18 @@
 package li.cil.oc.common.blockentity
 
-import li.cil.oc.Constants
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.network.Analyzable
-import li.cil.oc.api.network.SidedEnvironment
+import li.cil.oc.{Constants, Settings, api}
+import li.cil.oc.api.network.{Analyzable, SidedEnvironment}
 import li.cil.oc.util.ExtendedNBT._
-import net.minecraft.world.entity.player.{Player => PlayerEntity}
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.entity.player.{Player => PlayerEntity}
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Keyboard(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.KEYBOARD.get(), pos, state) with traits.Environment with traits.Rotatable with traits.ImmibisMicroblock with SidedEnvironment with Analyzable with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.KEYBOARD.get(), pos, state) with traits.Environment with traits.Rotatable with SidedEnvironment with Analyzable with IBlockEntityExtension {
   override def validFacings = Direction.values
 
   val keyboard = {

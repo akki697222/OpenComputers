@@ -858,13 +858,15 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
       architectureData = {
         val nbt = new CompoundTag()
         
-        try {
-          architecture.saveData(nbt)
-        } catch {
-          case t: Throwable =>
-            OpenComputers.log.error(
-              s"""Unexpected error saving a state of computer at ${host.machinePosition()}. """ +
-                s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
+        if(architecture != null) {
+          try {
+            architecture.saveData(nbt)
+          } catch {
+            case t: Throwable =>
+              OpenComputers.log.error(
+                s"""Unexpected error saving a state of computer at ${host.machinePosition()}. """ +
+                  s"""State: ${state.headOption.fold("no state")(_.toString)}. Unless you're upgrading/downgrading across a major version, please report this! Thank you.""", t)
+          }
         }
         
         nbt

@@ -9,9 +9,12 @@ import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.client.renderer.block.ScreenModel
 import li.cil.oc.common.Tier
+import li.cil.oc.common.datacomponents.OCComponents
 import net.minecraft.client.Minecraft
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
@@ -26,9 +29,10 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.projectile.Arrow
 import net.minecraft.world.entity.player.Player
 import net.neoforged.neoforge.client.model.data.ModelData
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
-class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntity(TileEntityTypes.SCREEN.get(), pos, state) 
+class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntity(BlockEntityTypes.SCREEN.get(), pos, state)
   with traits.TextBuffer with SidedEnvironment with traits.Rotatable with traits.RedstoneAware with traits.Colored with Analyzable with Ordered[Screen]
   with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = this(pos, state, 0)
@@ -312,38 +316,33 @@ class Screen(pos: BlockPos, state: BlockState, var tier: Int) extends BlockEntit
 
   // ----------------------------------------------------------------------- //
 
-  private final val TierTag = Settings.namespace + "tier"
-  private final val HadRedstoneInputTag = Settings.namespace + "hadRedstoneInput"
-  private final val InvertTouchModeTag = Settings.namespace + "invertTouchMode"
-
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min Tier.Four
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    for(t <- holder.getComponent(OCComponents.TIER)) tier = t
     setColor(Color.byTier(tier))
-    super.loadForServer(nbt, provider)
-    hadRedstoneInput = nbt.getBoolean(HadRedstoneInputTag)
-    invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
+    super.loadComponentsCommon(holder)
+
+    invertTouchMode = holder.has(OCComponents.INVERT_TOUCH)
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.putByte(TierTag, tier.toByte)
-    super.saveForServer(nbt, provider)
-    nbt.putBoolean(HadRedstoneInputTag, hadRedstoneInput)
-    nbt.putBoolean(InvertTouchModeTag, invertTouchMode)
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.TIER, tier.toByte)
+    super.saveComponentsCommon(holder)
+    holder.setComponent(OCComponents.INVERT_TOUCH, invertTouchMode)
   }
 
-  @OnlyIn(Dist.CLIENT) 
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min Tier.Four
-    super.loadForClient(nbt, provider)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForServer(holder)
+    hadRedstoneInput = holder.getComponent(OCComponents.HAS_REDSTONE_INPUT) getOrElse false
+  }
+
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+    holder.setComponent(OCComponents.HAS_REDSTONE_INPUT, hadRedstoneInput)
+  }
+
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForClient(holder)
     requestModelDataUpdate()
-    invertTouchMode = nbt.getBoolean(InvertTouchModeTag)
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    nbt.putByte(TierTag, tier.toByte)
-    super.saveForClient(nbt, provider)
-    nbt.putBoolean(InvertTouchModeTag, invertTouchMode)
   }
 
   // ----------------------------------------------------------------------- //

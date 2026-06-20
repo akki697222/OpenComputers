@@ -8,6 +8,7 @@ import net.minecraft.network.codec.{ByteBufCodecs, StreamCodec}
 import net.minecraft.util.{ColorRGBA, ExtraCodecs}
 import net.minecraft.world.phys.{AABB, Vec3}
 
+import java.nio.ByteBuffer
 import java.util.stream.IntStream
 import scala.collection.mutable
 import scala.jdk.CollectionConverters._
@@ -43,6 +44,7 @@ object ScalaStreamCodec {
   val INT: StreamCodec[ByteBuf, Int] = ByteBufCodecs.INT.map(b => b, b => b)
   val INT_ARRAY: StreamCodec[ByteBuf, Array[Int]] = list(INT).map(i => i.toArray, i => i.toList)
   val VAR_INT: StreamCodec[ByteBuf, Int] = ByteBufCodecs.VAR_INT.map(b => b, b => b)
+  val VAR_LONG: StreamCodec[ByteBuf, Long] = ByteBufCodecs.VAR_LONG.map(b => b, b => b)
   val BYTE: StreamCodec[ByteBuf, Byte] = ByteBufCodecs.BYTE.map(b => b, b => b)
   val FLOAT: StreamCodec[ByteBuf, Float] = ByteBufCodecs.FLOAT.map(b => b, b => b)
   val DOUBLE: StreamCodec[ByteBuf, Double] = ByteBufCodecs.DOUBLE.map(b => b, b => b)
@@ -63,8 +65,12 @@ object ScalaStreamCodec {
 
   def list[B <: ByteBuf, T](codec: StreamCodec[B, T]): StreamCodec[B, List[T]] =
     ByteBufCodecs.list().apply(codec).map(_.asScala.toList, _.asJava)
+  def array[B <: ByteBuf, T: ClassTag](codec: StreamCodec[B, T]): StreamCodec[B, Array[T]] =
+    ByteBufCodecs.list().apply(codec).map(l => l.asScala.toArray, _.toList.asJava)
   def mutableSet[B <: ByteBuf, T](codec: StreamCodec[B, T]): StreamCodec[B, mutable.Set[T]] =
     ByteBufCodecs.list().apply(codec).map(_.asScala.to(mutable.Set), _.toList.asJava)
+  def set[B <: ByteBuf, T](codec: StreamCodec[B, T]): StreamCodec[B, Set[T]] =
+    ByteBufCodecs.list().apply(codec).map(_.asScala.toSet, _.toList.asJava)
   def option[B <: ByteBuf, T](codec: StreamCodec[B, T]): StreamCodec[B, Option[T]] =
     ByteBufCodecs.optional(codec).map(_.toScala, _.toJava)
   def pair[B <: ByteBuf, K, V](pair: (StreamCodec[B, K], StreamCodec[B, V])): StreamCodec[B, (K, V)] =

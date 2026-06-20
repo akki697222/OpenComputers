@@ -6,6 +6,7 @@ import li.cil.oc.api
 import li.cil.oc.Constants
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.blockentity
+import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.util.PackedColor
 import li.cil.oc.util.Tooltip
@@ -14,6 +15,7 @@ import net.minecraft.network.chat.{Component => ITextComponent}
 import net.minecraft.world.{InteractionHand => Hand}
 import net.minecraft.world.entity.player.{Player => PlayerEntity}
 import net.minecraft.world.item.Item.TooltipContext
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.{ItemStack, TooltipFlag => ITooltipFlag}
 import net.minecraft.world.item.context.{BlockPlaceContext => BlockItemUseContext}
 import net.minecraft.world.level.{BlockGetter => IBlockReader, Level => World}
@@ -25,15 +27,31 @@ import net.minecraft.world.phys.shapes.{VoxelShape, CollisionContext => ISelecti
 import scala.collection.convert.ImplicitConversionsToScala._
 
 class HoloScreen(props: Properties, tier: Int) extends Screen(props, tier) {
-  private val Shape = VoxelShapes.box(0, 0, 0, 1, 0.5, 1)
+  private val FloorShape = VoxelShapes.box(0, 0, 0, 1, 0.5, 1)
+  private val CeilingShape = VoxelShapes.box(0, 0.5, 0, 1, 1, 1)
+
+  registerDefaultState(stateDefinition.any.
+    setValue(PropertyRotatable.Mount, Direction.UP).
+    setValue(PropertyRotatable.Facing, Direction.NORTH))
 
   override protected def createBlockStateDefinition(builder: StateContainer.Builder[Block, BlockState]) =
-    builder.add(PropertyRotatable.Facing)
+    builder.add(PropertyRotatable.Mount, PropertyRotatable.Facing)
 
-  override def getStateForPlacement(ctx: BlockItemUseContext): BlockState =
-    super.getStateForPlacement(ctx).setValue(PropertyRotatable.Facing, ctx.getHorizontalDirection.getOpposite)
+  override def getStateForPlacement(ctx: BlockItemUseContext): BlockState = {
+    val mount =
+      if (ctx.getClickedFace == Direction.DOWN) Direction.DOWN
+      else Direction.UP
 
-  override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = Shape
+    super.getStateForPlacement(ctx).
+      setValue(PropertyRotatable.Mount, mount).
+      setValue(PropertyRotatable.Facing, ctx.getHorizontalDirection.getOpposite)
+  }
+
+  override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape =
+    state.getValue(PropertyRotatable.Mount) match {
+      case Direction.DOWN => CeilingShape
+      case _ => FloorShape
+    }
 
   override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.HoloScreen(pos, state, tier)
 
@@ -44,10 +62,10 @@ class HoloScreen(props: Properties, tier: Int) extends Screen(props, tier) {
     if (Wrench.holdsApplicableWrench(player, pos) || api.Items.get(heldItem) == api.Items.get(Constants.ItemName.Analyzer)) {
       super.localOnBlockActivated(world, pos, player, hand, heldItem, side, hitX, hitY, hitZ)
     }
-    else if (player.isCrouching && heldItem.isEmpty) {
+    else if (isResizeModifierDown(player)) {
       world.getBlockEntity(pos) match {
         case screen: blockentity.HoloScreen =>
-          val changed = screen.resize(side, world.getBlockState(pos).getValue(PropertyRotatable.Facing))
+          val changed = screen.resize(screen.resizeOperationForWorldSide(side))
           if (changed) {
             world.sendBlockUpdated(pos, world.getBlockState(pos), world.getBlockState(pos), 3)
           }
@@ -55,7 +73,20 @@ class HoloScreen(props: Properties, tier: Int) extends Screen(props, tier) {
         case _ => false
       }
     }
-    else super.localOnBlockActivated(world, pos, player, hand, heldItem, side, hitX, hitY, hitZ)
+    else {
+      world.getBlockEntity(pos) match {
+        case screen: blockentity.HoloScreen =>
+          player match {
+            case serverPlayer: ServerPlayer if !world.isClientSide => MenuTypes.openHoloScreenGui(serverPlayer, screen)
+            case _ =>
+          }
+          true
+        case _ => false
+      }
+    }
+
+  private def isResizeModifierDown(player: PlayerEntity): Boolean =
+    player.isCrouching || player.isShiftKeyDown
 
   override protected def tooltipBody(stack: ItemStack, context: TooltipContext, tooltip: util.List[ITextComponent], advanced: ITooltipFlag): Unit = {
     val (w, h) = Settings.screenResolutionsByTier(tier)

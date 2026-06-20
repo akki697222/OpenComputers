@@ -2,9 +2,8 @@ package li.cil.oc.common.container
 
 import li.cil.oc.OpenComputers
 import li.cil.oc.api
-import li.cil.oc.api.Driver
+import li.cil.oc.api.{Driver, ImmutableItemStack, network}
 import li.cil.oc.api.driver.{DriverItem => ItemDriver}
-import li.cil.oc.api.network
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.network.Node
@@ -104,7 +103,7 @@ trait ComponentInventory extends Inventory with network.Environment {
 
   // ----------------------------------------------------------------------- //
 
-  override def component: DataComponentType[List[ItemStack]] =
+  override def component: DataComponentType[List[ImmutableItemStack]] =
     OCComponents.COMPONENTS.get()
 
   override def saveData(holder: MutableDataComponentHolder): Unit = {
@@ -193,9 +192,6 @@ trait ComponentInventory extends Inventory with network.Environment {
       this.node.connect(node)
     }
   }
-
-  protected def dataTag(driver: ItemDriver, stack: ItemStack) =
-    Option(driver.dataTag(stack)).getOrElse(Item.dataTag(stack))
 
   protected def save(component: ManagedEnvironment, driver: ItemDriver, stack: ItemStack): Unit = {
     try {

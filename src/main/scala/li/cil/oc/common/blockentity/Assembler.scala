@@ -34,7 +34,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Assembler(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.ASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
+  extends BlockEntity(BlockEntityTypes.ASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
   with traits.Inventory with SidedEnvironment with traits.StateAware with traits.Tickable with DeviceInfo with MenuProvider
     with IBlockEntityExtension {
 
@@ -176,7 +176,6 @@ class Assembler(pos: BlockPos, state: BlockState)
     nbt.putDouble(RemainingTag, requiredEnergy)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     requiredEnergy = nbt.getDouble(RemainingTag)

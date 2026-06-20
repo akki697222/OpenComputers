@@ -1,8 +1,14 @@
 package li.cil.oc.common
 
 import li.cil.oc._
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.common.init.Items
 import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
+import li.cil.oc.common.menu.MenuTypes
+import li.cil.oc.common.entity.EntityTypes
+import li.cil.oc.common.init.{Blocks, Items}
+import li.cil.oc.common.item.RedstoneCard
+import li.cil.oc.common.recipe.Recipes
 import li.cil.oc.integration.Mods
 import li.cil.oc.server._
 import li.cil.oc.server.machine.luac.{LuaStateFactory, NativeLua52Architecture, NativeLua53Architecture, NativeLua54Architecture}
@@ -69,17 +75,8 @@ class Proxy(val modBus: IEventBus) {
   def registerModel(instance: Item, id: String): Unit = {}
 
   def registerModel(instance: Block, id: String): Unit = {}
-}
 
-class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
-  @SubscribeEvent
-  def postInit(e: FMLLoadCompleteEvent): Unit = {
-    // Don't allow driver registration after this point, to avoid issues.
-    driver.Registry.locked = true
-  }
-
-  @SubscribeEvent
-  def onRegisterPayloads(event: RegisterPayloadHandlersEvent): Unit = {
+  def registerPacket(event: RegisterPayloadHandlersEvent): Unit = {
     val registrar: PayloadRegistrar = event.registrar(OpenComputers.ID).versioned("1")
 
     registrar.playBidirectional(
@@ -92,5 +89,18 @@ class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
         })
       }
     )
+  }
+}
+
+class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
+  @SubscribeEvent
+  def postInit(e: FMLLoadCompleteEvent): Unit = {
+    // Don't allow driver registration after this point, to avoid issues.
+    driver.Registry.locked = true
+  }
+
+  @SubscribeEvent
+  def onRegisterPayloads(event: RegisterPayloadHandlersEvent): Unit = {
+    registerPacket(event)
   }
 }

@@ -3,6 +3,7 @@ package li.cil.oc.common.item.data
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.common.Tier
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
@@ -27,13 +28,9 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
   var components: Array[ItemStack] = Array[ItemStack](ItemStack.EMPTY)
   var storedEnergy = 0
 
-  private final val TierTag = Settings.namespace + "tier"
-  private final val ComponentsTag = Settings.namespace + "components"
-  private final val StoredEnergyTag = Settings.namespace + "storedEnergy"
-
   override def loadData(holder: DataComponentHolder): Unit = {
-    tier = (holder.getComponent(OCComponents.TIER).getOrElse(default = 0)).asInstanceOf[Byte].toInt
-    components = holder.getComponent(OCComponents.COMPONENTS).getOrElse(List.empty).filter(!_.isEmpty).toArray
+    tier = holder.getComponent(OCComponents.TIER).getOrElse(default = 0.asInstanceOf[Byte]).toInt
+    components = holder.getComponent(OCComponents.COMPONENTS).getOrElse(List.empty).filter(!_.isEmpty).map(_.mutableCopy()).toArray
     storedEnergy = holder.getComponent(OCComponents.STORED_ENERGY) getOrElse 0
 
     // Reserve slot for EEPROM if necessary, avoids having to resize the
@@ -45,7 +42,7 @@ class MicrocontrollerData(itemName: String = Constants.BlockName.Microcontroller
 
   override def saveData(holder: MutableDataComponentHolder): Unit = {
     holder.setComponent(OCComponents.TIER, tier.toByte)
-    holder.setComponent(OCComponents.COMPONENTS, components.toList)
+    holder.setComponent(OCComponents.COMPONENTS, components.map(ImmutableItemStack.copyOf).toList)
     holder.setComponent(OCComponents.STORED_ENERGY, storedEnergy)
   }
 

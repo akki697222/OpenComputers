@@ -12,7 +12,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-public final class TileEntityTypes {
+public final class BlockEntityTypes {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
             DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, OpenComputers.ID());
 
@@ -159,7 +159,7 @@ public final class TileEntityTypes {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Screen>> SCREEN =
             BLOCK_ENTITY_TYPES.register("screen", () -> BlockEntityType.Builder
-                    .of(TileEntityTypes::createScreen,
+                    .of(BlockEntityTypes::createScreen,
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier2()).block(),
                             Items.get(Constants.BlockName$.MODULE$.ScreenTier3()).block(),
@@ -167,12 +167,15 @@ public final class TileEntityTypes {
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenBackTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenBackTier2()).block(),
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenBackTier3()).block(),
+                            Items.get(Constants.BlockName$.MODULE$.FlatScreenBackTier4()).block(),
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenFrontTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenFrontTier2()).block(),
                             Items.get(Constants.BlockName$.MODULE$.FlatScreenFrontTier3()).block(),
+                            Items.get(Constants.BlockName$.MODULE$.FlatScreenFrontTier4()).block(),
                             Items.get(Constants.BlockName$.MODULE$.HoloScreenTier1()).block(),
                             Items.get(Constants.BlockName$.MODULE$.HoloScreenTier2()).block(),
-                            Items.get(Constants.BlockName$.MODULE$.HoloScreenTier3()).block())
+                            Items.get(Constants.BlockName$.MODULE$.HoloScreenTier3()).block(),
+                            Items.get(Constants.BlockName$.MODULE$.HoloScreenTier4()).block())
                     .build(null));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<Transposer>> TRANSPOSER =
@@ -202,7 +205,7 @@ public final class TileEntityTypes {
         return new Screen(pos, state);
     }
 
-    private TileEntityTypes() {
+    private BlockEntityTypes() {
         throw new Error();
     }
 }

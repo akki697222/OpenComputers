@@ -6,6 +6,7 @@ import li.cil.oc.Constants
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import li.cil.oc.api
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.common.datacomponents.{OCComponents, RobotChargeInfo}
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.ExtendedNBT._
@@ -80,11 +81,11 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     }
 
     for(items <- holder.getComponent(OCComponents.COMPONENTS)) {
-      components = items.toArray
+      components = items.toArray.map(_.mutableCopy())
     }
 
     for(items <- holder.getComponent(OCComponents.CONTAINERS)) {
-      containers = items.toArray
+      containers = items.toArray.map(_.mutableCopy())
     }
 
     for(color <- holder.getComponent(OCComponents.LIGHT_COLOR)) {
@@ -96,8 +97,8 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     holder.setComponent(DataComponents.CUSTOM_NAME, name)
     holder.setComponent(OCComponents.ROBOT_CHARGE, RobotChargeInfo(totalEnergy, robotEnergy))
     holder.setComponent(OCComponents.TIER, tier.toByte)
-    holder.setComponent(OCComponents.COMPONENTS, components.toList)
-    holder.setComponent(OCComponents.CONTAINERS, containers.toList)
+    holder.setComponent(OCComponents.COMPONENTS, components.map(ImmutableItemStack.copyOf).toList)
+    holder.setComponent(OCComponents.CONTAINERS, containers.map(ImmutableItemStack.copyOf).toList)
     holder.setComponent(OCComponents.LIGHT_COLOR, new ColorRGBA(lightColor))
   }
 

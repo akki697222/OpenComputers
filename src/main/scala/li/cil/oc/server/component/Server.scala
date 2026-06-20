@@ -9,9 +9,11 @@ import li.cil.oc.api.internal.Rack
 import li.cil.oc.api.machine.MachineHost
 import li.cil.oc.api.network.{Analyzable, Environment, Message, Node}
 import li.cil.oc.common.container.{ComponentInventory, ServerInventory}
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.{InventorySlots, Slot, Tier, item}
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.server.network.Connector
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import net.minecraft.core.Direction
 import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
@@ -145,13 +147,11 @@ class Server(val rack: api.internal.Rack, val slot: Int) extends Environment wit
   // ----------------------------------------------------------------------- //
   // RackMountable
 
-  override def getData: CompoundTag = {
-    val nbt = new CompoundTag()
-    nbt.putBoolean("isRunning", wasRunning)
-    nbt.putBoolean("hasErrored", hadErrored)
-    nbt.putLong("lastFileSystemAccess", lastFileSystemAccess)
-    nbt.putLong("lastNetworkActivity", lastNetworkActivity)
-    nbt
+  override def describeForClient(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.IS_RUNNING, wasRunning)
+    holder.setComponent(OCComponents.IS_ERRORED, hadErrored)
+    holder.setComponent(OCComponents.Network.LAST_DISK_ACCESS, lastFileSystemAccess)
+    holder.setComponent(OCComponents.Network.LAST_NETWORK_ACCESS, lastNetworkActivity)
   }
 
   override def getConnectableCount: Int = componentSlots.count {

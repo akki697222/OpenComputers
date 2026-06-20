@@ -42,6 +42,22 @@ class ExtendedMutableDataComponentHolder(holder: MutableDataComponentHolder) ext
 
     result
   } else None
+
+  def setComponent(dataComponent: DataComponentType[Unit], value: Boolean): Unit = {
+    if(value) {
+      holder.set(() => dataComponent, ())
+    } else {
+      holder.remove(() => dataComponent)
+    }
+  }
+
+  def setComponent(dataComponent: Supplier[DataComponentType[Unit]], value: Boolean): Unit = {
+    if(value) {
+      holder.set(dataComponent, ())
+    } else {
+      holder.remove(dataComponent)
+    }
+  }
   
   def setComponent[T](dataComponent: DataComponentType[T], value: T): T = {
     holder.set(dataComponent, value)

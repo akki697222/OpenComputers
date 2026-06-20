@@ -28,7 +28,7 @@ import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 class Hologram(pos: BlockPos, state: BlockState, var tier: Int) 
-  extends BlockEntity(TileEntityTypes.HOLOGRAM.get(), pos, state) with traits.Environment with SidedEnvironment with Analyzable with traits.RotatableBaseBlock with traits.Tickable with DeviceInfo with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.HOLOGRAM.get(), pos, state) with traits.Environment with SidedEnvironment with Analyzable with traits.RotatableBaseBlock with traits.Tickable with DeviceInfo with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = this(pos, state, 0)
 
   val node = api.Network.newNode(this, Visibility.Network).
@@ -503,7 +503,6 @@ class Hologram(pos: BlockPos, state: BlockState, var tier: Int)
     nbt.putFloat(RotationSpeedZTag, rotationSpeedZ)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     nbt.getIntArray(VolumeTag).copyToArray(volume)

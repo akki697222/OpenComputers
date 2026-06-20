@@ -1,7 +1,7 @@
 package li.cil.oc.common.container
 
 import li.cil.oc.Settings
-import li.cil.oc.api.Persistable
+import li.cil.oc.api.{ImmutableItemStack, Persistable}
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ExtendedDataComponentHolder._
@@ -62,13 +62,13 @@ trait Inventory extends SimpleInventory with Persistable {
 
   // ----------------------------------------------------------------------- //
 
-  def loadFrom(value: Iterable[ItemStack]): Unit = {
+  def loadFrom(value: Iterable[ImmutableItemStack]): Unit = {
     for (item <- value; i <- 0 until (value.size max items.length)) {
-      items(i) = item
+      items(i) = item.mutableCopy()
     }
   }
 
-  def component: DataComponentType[List[ItemStack]] =
+  def component: DataComponentType[List[ImmutableItemStack]] =
     OCComponents.CONTENTS.get()
 
   override def loadData(holder: DataComponentHolder): Unit = {
@@ -78,7 +78,7 @@ trait Inventory extends SimpleInventory with Persistable {
   }
 
   override def saveData(holder: MutableDataComponentHolder): Unit = {
-    holder.setComponent(this.component, items.toList)
+    holder.setComponent(this.component, items.map(ImmutableItemStack.copyOf).toList)
   }
 
   // ----------------------------------------------------------------------- //

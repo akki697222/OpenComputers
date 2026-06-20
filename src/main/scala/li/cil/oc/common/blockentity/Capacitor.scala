@@ -20,7 +20,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Capacitor( pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.CAPACITOR.get(), pos, state) with traits.Environment with DeviceInfo with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.CAPACITOR.get(), pos, state) with traits.Environment with DeviceInfo with IBlockEntityExtension {
   // Start with maximum theoretical capacity, gets reduced after validation.
   // This is done so that we don't lose energy while loading.
   val node = api.Network.newNode(this, Visibility.Network).

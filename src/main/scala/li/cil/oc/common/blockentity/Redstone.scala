@@ -1,23 +1,19 @@
 package li.cil.oc.common.blockentity
 
-import li.cil.oc.Settings
-import li.cil.oc.api
-import li.cil.oc.api.network.Component
-import li.cil.oc.api.network.Node
-import li.cil.oc.api.network.Visibility
+import li.cil.oc.{Settings, api}
+import li.cil.oc.api.network.{Component, Node, Visibility}
 import li.cil.oc.common.blockentity.traits.RedstoneChangedEventArgs
 import li.cil.oc.integration.util.BundledRedstone
 import li.cil.oc.server.component
 import li.cil.oc.server.component.RedstoneVanilla
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.core.{BlockPos, HolderLookup}
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.entity.BlockEntityType
-import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
-class Redstone(pos: BlockPos, state: BlockState) extends BlockEntity(TileEntityTypes.REDSTONE_IO.get(), pos, state) 
+class Redstone(pos: BlockPos, state: BlockState) extends BlockEntity(BlockEntityTypes.REDSTONE_IO.get(), pos, state)
   with traits.Environment with traits.BundledRedstoneAware with traits.Tickable with IBlockEntityExtension {
   val instance: RedstoneVanilla =
     if (BundledRedstone.isAvailable)

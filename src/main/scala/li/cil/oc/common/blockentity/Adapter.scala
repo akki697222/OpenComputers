@@ -36,7 +36,7 @@ import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 class Adapter(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.ADAPTER.get(), pos, state) with traits.Environment with traits.ComponentInventory
+  extends BlockEntity(BlockEntityTypes.ADAPTER.get(), pos, state) with traits.Environment with traits.ComponentInventory
   with traits.Tickable with traits.OpenSides with Analyzable with internal.Adapter with DeviceInfo with MenuProvider
   with IBlockEntityExtension {
 

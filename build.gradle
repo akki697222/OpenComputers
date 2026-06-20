@@ -65,6 +65,12 @@ neoForge {
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/data/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
         }
     }
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
 }
 
 sourceSets.main.scala { srcDir 'src/data/scala' }
@@ -143,6 +149,13 @@ repositories {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        url = "https://maven.createmod.net"
+    }
+    maven {
+        url = "https://maven.ithundxr.dev/mirror"
+    }
+    maven { url = "https://maven.ithundxr.dev/snapshots" } // Registrate
     flatDir { dirs 'libs' }
 }
 
@@ -159,25 +172,51 @@ dependencies {
 
     def jeiSlug = "jei-${minecraft_version}"
 
+    // Jade
     compileOnly("curse.maven:jade-324717:${jade_version}")
+
+    // CC: Tweaked
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-common-api:${cct_version}")
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-core-api:${cct_version}")
     compileOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge-api:${cct_version}")
     runtimeOnly("cc.tweaked:cc-tweaked-${minecraft_version}-forge:${cct_version}")
+
+    // Modern Fix
     runtimeOnly("maven.modrinth:modernfix:${modernfix_version}")
 
-    // CoFH Core & Thermal
+    // CoFH & Thermal
     // not currently available for 1.21+
 //    compileOnly("curse.maven:cofh-core-69162:4801048")
 //    compileOnly("curse.maven:thermal-foundation-222880:4788649")
 
+    // Create
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    implementation("net.createmod.ponder:ponder-neoforge:${ponder_version}+mc${minecraft_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
+    runtimeOnly("com.tterrag.registrate:Registrate:${registrate_version}")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
+
+    // AE2
     compileOnly("org.appliedenergistics:appliedenergistics2:${ae2_version}:api")
+
+    // Mekanism
     compileOnly("mekanism:Mekanism:${mekanism_version}:api")
+    runtimeOnly("mekanism:Mekanism:${mekanism_version}")
+    runtimeOnly("mekanism:Mekanism:${mekanism_version}:generators")
+
+    // JEI
     runtimeOnly("mezz.jei:${jeiSlug}-neoforge:${jei_version}")
     compileOnly("mezz.jei:${jeiSlug}-neoforge-api:${jei_version}")
+
+    // CodeChicken
     compileOnly("curse.maven:cb-multipart-258426:5292585")
     compileOnly("curse.maven:codechicken-lib-1-8-242818:5753868")
+
+    // EnderStorage
     compileOnly("curse.maven:ender-storage-1-8-245174:5292573")
+
+    // Project: Red
     compileOnly("mrtjp:ProjectRed:${projred_version}:core")
     compileOnly("mrtjp:ProjectRed:${projred_version}:api")
 

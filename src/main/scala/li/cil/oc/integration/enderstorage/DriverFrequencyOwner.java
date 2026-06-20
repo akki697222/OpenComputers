@@ -9,15 +9,15 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.api.prefab.DriverSidedTileEntity;
+import li.cil.oc.api.prefab.DriverSidedBlockEntity;
 import li.cil.oc.integration.ManagedBlockEntityEnvironment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 
-public final class DriverFrequencyOwner extends DriverSidedTileEntity {
+public final class DriverFrequencyOwner extends DriverSidedBlockEntity {
     @Override
-    public Class<?> getTileEntityClass() {
+    public Class<?> getBlockEntityClass() {
         return TileFrequencyOwner.class;
     }
 

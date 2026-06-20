@@ -1,5 +1,6 @@
 local args = {...}
 
+local fs = require("filesystem")
 local component = require("component")
 
 local function makeDecompressor()
@@ -81,14 +82,14 @@ end
 
 print("Reading file: " .. args[1])
 
-local file, err = io.open(args[1], "rb")
+local file, err = fs.open(args[1], "rb")
 if not file then
     io.stderr:write("Failed to open file: " .. tostring(err) .. "\n")
     return
 end
 
 local audio  = component.audio
-local handle = audio.open(0, tonumber(args[3]) or 12000, "mono8")
+local handle = audio.open(0, tonumber(args[3]) or 12000, "stereo16")
 audio.setLoop(handle, args[2] and true or false)
 
 local decompress = makeDecompressor()

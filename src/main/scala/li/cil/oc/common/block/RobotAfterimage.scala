@@ -1,7 +1,7 @@
 package li.cil.oc.common.block
 
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.util.BlockPosHelper
 import li.cil.oc.{Constants, Settings, api}
 import net.minecraft.core.{BlockPos, Direction}
@@ -99,5 +99,5 @@ class RobotAfterimage(props: Properties) extends SimpleBlock(props) with traits.
     None
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.ROBOT.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.ROBOT.get()
 }

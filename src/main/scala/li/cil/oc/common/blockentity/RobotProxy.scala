@@ -32,7 +32,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
-  extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state)
+  extends BlockEntity(BlockEntityTypes.ROBOT.get(), pos, state)
   with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock with WorldlyContainer with IFluidHandler with internal.Robot
     with IBlockEntityExtension{
 
@@ -171,26 +171,25 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
     }
   }
 
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    robot.info.loadData(nbt, provider)
-    super.loadForServer(nbt, provider)
-    robot.loadForServer(nbt, provider)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    robot.info.loadData(holder)
+    super.loadComponentsForServer(holder)
+    robot.loadComponentsForServer(holder)
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    robot.saveForServer(nbt, provider)
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+    robot.saveComponentsForServer(holder)
   }
 
   override def saveData(holder: MutableDataComponentHolder): Unit = robot.saveData(holder)
 
   override def loadData(holder: DataComponentHolder): Unit = robot.loadData(holder)
 
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.loadForClient(nbt, provider)
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = robot.loadComponentsForClient(holder)
 
   @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = robot.saveForClient(nbt, provider)
+  override def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = robot.saveComponentsForClient(holder)
 
   override def setChanged(): Unit = robot.setChanged()
 

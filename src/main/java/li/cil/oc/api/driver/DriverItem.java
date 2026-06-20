@@ -93,58 +93,10 @@ public interface DriverItem {
      */
     int tier(ItemStack stack);
 
-    /**
-     * Get the tag compound based on the item stack to use for persisting the
-     * environment associated with the specified item stack.
-     * <br>
-     * This is only used if the item has an environment. This must always be a
-     * child tag of the item stack's own tag compound, it will not be saved
-     * otherwise. Use this in the unlikely case that the default name collides
-     * with something. The built-in components use a child tag-compound with
-     * the name {@code oc:data}, which will also be used if this returns
-     * {@code null}.
-     * <br>
-     * This tag will be passed to the environment's
-     * {@link li.cil.oc.api.Persistable#saveData saveData} and
-     * {@link li.cil.oc.api.Persistable#loadData loadData} methods when
-     * appropriate (world save / load and when removed from their hosting
-     * inventory).
+    /*
+     * Looking for dataTag()?
      *
-     * @param stack the item to get the child tag from.
-     * @return the tag to use for saving and loading, or {@code null} to use
-     * the default tag {@code oc:data}.
-     *
-     * @deprecated Use {@link li.cil.oc.api.Persistable} and/or Data Components directly.
+     * Since Minecraft 1.21.1, this mod uses Data Components instead, so you
+     * no longer need to provide a dedicated tag to store OC's stuff.
      */
-    @Deprecated(since = "1.9; NeoForge 1.21.1+", forRemoval = true)
-    default CompoundTag dataTag(ItemStack stack) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get the tag compound based on the item stack to use for persisting the
-     * environment associated with the specified item stack.
-     * <br>
-     * This is only used if the item has an environment. This must always be a
-     * child tag of the item stack's own tag compound, it will not be saved
-     * otherwise. Use this in the unlikely case that the default name collides
-     * with something. The built-in components use a child tag-compound with
-     * the name {@code oc:data}, which will also be used if this returns
-     * {@code null}.
-     * <br>
-     * This tag will be passed to the environment's
-     * {@link li.cil.oc.api.Persistable#saveData saveData} and
-     * {@link li.cil.oc.api.Persistable#loadData loadData} methods when
-     * appropriate (world save / load and when removed from their hosting
-     * inventory).
-     *
-     * @param stack the item to get the child tag from.
-     * @param updater A function that will be run to modify tag data.
-     *
-     * @deprecated Use {@link li.cil.oc.api.Persistable} and/or Data Components directly.
-     */
-    @Deprecated(since = "1.9; NeoForge 1.21.1+", forRemoval = true)
-    default void updateDataTag(ItemStack stack, Consumer<CompoundTag> updater) {
-        throw new UnsupportedOperationException();
-    }
 }

@@ -1,20 +1,18 @@
 package li.cil.oc.common.event
 
 import com.mojang.math.Axis
-import li.cil.oc.Constants
-import li.cil.oc.api
+import li.cil.oc.{Constants, api}
 import li.cil.oc.api.event.RackMountableRenderEvent
 import li.cil.oc.client.Textures
 import li.cil.oc.client.renderer.RenderTypes
 import li.cil.oc.client.renderer.tileentity.RenderUtil
+import li.cil.oc.common.datacomponents.OCComponents
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.RenderState
 import net.minecraft.client.Minecraft
-import net.neoforged.bus.api.SubscribeEvent
-import net.minecraft.client.renderer.block.model.ItemTransforms
-import net.minecraft.world.item.{ItemDisplayContext, ItemStack}
-import net.minecraft.nbt.Tag
 import net.minecraft.resources.ResourceLocation
-import org.joml.Vector3f
+import net.minecraft.world.item.ItemDisplayContext
+import net.neoforged.bus.api.SubscribeEvent
 
 object RackMountableRenderHandler {
   lazy val DiskDriveMountable = api.Items.get(Constants.ItemName.DiskDriveMountable)
@@ -28,14 +26,14 @@ object RackMountableRenderHandler {
   )
 
   lazy val TerminalServer = api.Items.get(Constants.ItemName.TerminalServer)
+  lazy val CapacitorMountable = api.Items.get(Constants.ItemName.CapacitorMountable)
 
   @SubscribeEvent
-  def onRackMountableRendering(e: RackMountableRenderEvent.TileEntity): Unit = {
+  def onRackMountableRendering(e: RackMountableRenderEvent.BlockEntity): Unit = {
     if (e.data != null && DiskDriveMountable == api.Items.get(e.rack.getItem(e.mountable))) {
       // Disk drive.
 
-      if (e.data.contains("disk")) {
-        val stack = ItemStack.parseOptional(e.rack.getEnvironmentLevel.registryAccess(), e.data.getCompound("disk"))
+      for (stack <- e.data.getComponent(OCComponents.Network.DISK_ITEM)) {
         if (!stack.isEmpty) {
           val matrix = e.stack
           matrix.pushPose()
@@ -45,7 +43,7 @@ object RackMountableRenderHandler {
           matrix.scale(0.5f, 0.5f, 0.5f)
 
           Minecraft.getInstance.getItemRenderer.renderStatic(
-            stack,                              
+            stack.mutableCopy(),
             ItemDisplayContext.FIXED,
             e.light,                            
             e.overlay,                          
@@ -58,29 +56,36 @@ object RackMountableRenderHandler {
         }
       }
 
-      if (System.currentTimeMillis() - e.data.getLong("lastAccess") < 400 && e.rack.getEnvironmentLevel.random.nextDouble() > 0.1) {
-        renderOverlayFromAtlas(e, Textures.Block.RackDiskDriveActivity)
+      for(lastAccess <- e.data.getComponent(OCComponents.Network.LAST_ACCESS)) {
+        if (System.currentTimeMillis() - lastAccess < 400 && e.rack.getEnvironmentLevel.random.nextDouble() > 0.1) {
+          renderOverlayFromAtlas(e, Textures.Block.RackDiskDriveActivity)
+        }
       }
     }
     else if (e.data != null && Servers.contains(api.Items.get(e.rack.getItem(e.mountable)))) {
+      val isRunning = e.data.getComponent(OCComponents.IS_RUNNING) getOrElse false
+      val hasErrored = e.data.has(OCComponents.IS_ERRORED)
+      val lastFileSystemAccess = e.data.getComponent(OCComponents.Network.LAST_DISK_ACCESS) getOrElse 0L
+      val lastNetworkAccess = e.data.getComponent(OCComponents.Network.LAST_NETWORK_ACCESS) getOrElse 0L
+
       // Server.
-      if (e.data.getBoolean("isRunning")) {
+      if (isRunning) {
         renderOverlayFromAtlas(e, Textures.Block.RackServerOn)
       }
-      if (e.data.getBoolean("hasErrored") && RenderUtil.shouldShowErrorLight(e.rack.hashCode * (e.mountable + 1))) {
+      if (hasErrored && RenderUtil.shouldShowErrorLight(e.rack.hashCode * (e.mountable + 1))) {
         renderOverlayFromAtlas(e, Textures.Block.RackServerError)
       }
-      if (System.currentTimeMillis() - e.data.getLong("lastFileSystemAccess") < 400 && e.rack.getEnvironmentLevel.random.nextDouble() > 0.1) {
+      if (System.currentTimeMillis() - lastFileSystemAccess < 400 && e.rack.getEnvironmentLevel.random.nextDouble() > 0.1) {
         renderOverlayFromAtlas(e, Textures.Block.RackServerActivity)
       }
-      if ((System.currentTimeMillis() - e.data.getLong("lastNetworkActivity") < 300 && System.currentTimeMillis() % 200 > 100) && e.data.getBoolean("isRunning")) {
+      if ((System.currentTimeMillis() - lastNetworkAccess < 300 && System.currentTimeMillis() % 200 > 100) && isRunning) {
         renderOverlayFromAtlas(e, Textures.Block.RackServerNetworkActivity)
       }
     }
     else if (e.data != null && TerminalServer == api.Items.get(e.rack.getItem(e.mountable))) {
       // Terminal server.
       renderOverlayFromAtlas(e, Textures.Block.RackTerminalServerOn)
-      val countConnected = e.data.getList("keys", Tag.TAG_STRING).size()
+      val countConnected = e.data.getComponent(OCComponents.KEYS).map(_.size) getOrElse 0
 
       if (countConnected > 0) {
         val u0 = 7 / 16f
@@ -88,9 +93,15 @@ object RackMountableRenderHandler {
         renderOverlayFromAtlas(e, Textures.Block.RackTerminalServerPresence, u0, u1)
       }
     }
+    else if (e.data != null && CapacitorMountable == api.Items.get(e.rack.getItem(e.mountable))) {
+      // Render overlay if active (it has power)
+      if (e.data.getComponent(OCComponents.IS_POWERED) getOrElse false) {
+        renderOverlayFromAtlas(e, Textures.Block.RackCapacitorOn)
+      }
+    }
   }
 
-  private def renderOverlayFromAtlas(e: RackMountableRenderEvent.TileEntity, texture: ResourceLocation, u0: Float = 0, u1: Float = 1): Unit = {
+  private def renderOverlayFromAtlas(e: RackMountableRenderEvent.BlockEntity, texture: ResourceLocation, u0: Float = 0, u1: Float = 1): Unit = {
     val matrix = e.stack.last.pose
     val r = e.typeBuffer.getBuffer(RenderTypes.BLOCK_OVERLAY)
     val icon = Textures.getSprite(texture)
@@ -105,14 +116,14 @@ object RackMountableRenderHandler {
     if (DiskDriveMountable == api.Items.get(e.rack.getItem(e.mountable))) {
       // Disk drive.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackDiskDrive))
-    }
-    else if (Servers.contains(api.Items.get(e.rack.getItem(e.mountable)))) {
+    } else if (Servers.contains(api.Items.get(e.rack.getItem(e.mountable)))) {
       // Server.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackServer))
-    }
-    else if (TerminalServer == api.Items.get(e.rack.getItem(e.mountable))) {
+    } else if (TerminalServer == api.Items.get(e.rack.getItem(e.mountable))) {
       // Terminal server.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackTerminalServer))
+    } else if (CapacitorMountable == api.Items.get(e.rack.getItem(e.mountable))) {
+      e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackCapacitor))
     }
   }
 }

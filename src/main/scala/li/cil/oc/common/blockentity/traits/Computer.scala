@@ -9,10 +9,13 @@ import li.cil.oc.api.machine.Machine
 import li.cil.oc.api.network.Node
 import li.cil.oc.client.Sound
 import li.cil.oc.common.blockentity.RobotProxy
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.integration.opencomputers.DriverRedstoneCard
 import li.cil.oc.server.agent
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedNBT._
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.StringTag
@@ -24,6 +27,7 @@ import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 import net.minecraft.nbt.Tag
 import net.minecraft.world.entity.player.Player
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import scala.jdk.CollectionConverters._
 
@@ -102,8 +106,8 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
 
   override def updateEntity(): Unit = {
     // If we're not yet in a network we might have just been loaded from disk,
-    // meaning there may be other tile entities that also have not re-joined
-    // the network. We skip the update this round to allow other tile entities
+    // meaning there may be other block entities that also have not re-joined
+    // the network. We skip the update this round to allow other block entities
     // to join the network, too, avoiding issues of missing nodes (e.g. in the
     // GPU which would otherwise loose track of its screen).
     if (isServer && isConnected) {
@@ -146,8 +150,8 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
   private final val IsRunningTag = Settings.namespace + "isRunning"
   private final val UsersTag = Settings.namespace + "users"
 
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForServer(holder)
     // God, this is so ugly... will need to rework the robot architecture.
     // This is required for loading auxiliary data (kernel state), because the
     // coordinates in the actual robot won't be set properly, otherwise.
@@ -155,12 +159,7 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
       case proxy: RobotProxy => proxy.robot.setLevel(getLevel)
       case _ =>
     }
-    machine.loadData(nbt.getCompound(ComputerTag), provider)
-  }
 
-  override def loadComponentsForServer(): Unit = {
-    super.loadComponentsForServer()
-    val holder = Persistable.holder(this)
     machine.loadData(holder)
 
     // Kickstart initialization to avoid values getting overwritten by
@@ -170,29 +169,30 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     _isOutputEnabled = hasRedstoneCard
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    if (machine != null) {
-      nbt.setNewCompoundTag(ComputerTag, (nbt: CompoundTag) => machine.saveData(nbt, provider))
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+    if(machine != null) {
+      machine.saveData(holder)
     }
   }
 
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    hasErrored = nbt.getBoolean(HasErroredTag)
-    setRunning(nbt.getBoolean(IsRunningTag))
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForClient(holder)
+    hasErrored = holder.has(OCComponents.IS_ERRORED)
+    setRunning(holder.getComponent(OCComponents.IS_RUNNING) getOrElse false)
     _users.clear()
-    _users ++= nbt.getList(UsersTag, Tag.TAG_STRING).map((tag: StringTag) => tag.getAsString)
-    if (_isRunning) runSound.foreach(sound => Sound.startLoop(this, sound, 0.5f, (1000 + getLevel.random.nextInt(2000)).toLong))
+    for(users <- holder.getComponent(OCComponents.USERS))
+      _users ++= users
+    for(sound <- runSound if _isRunning)
+      Sound.startLoop(this, sound, 0.5f, (1000 + getLevel.random.nextInt(2000)).toLong)
   }
 
   @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    nbt.putBoolean(HasErroredTag, machine != null && machine.lastError != null)
-    nbt.putBoolean(IsRunningTag, isRunning)
-    nbt.setNewTagList(UsersTag, machine.users.map(user => StringTag.valueOf(user)))
+  override def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForClient(holder)
+    holder.setComponent(OCComponents.IS_ERRORED, machine != null && machine.lastError != null)
+    holder.setComponent(OCComponents.IS_RUNNING, isRunning)
+    if(machine != null) holder.setComponent(OCComponents.USERS, machine.users.toSet)
   }
 
   // ----------------------------------------------------------------------- //

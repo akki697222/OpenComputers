@@ -2,6 +2,7 @@ package li.cil.oc.common.item.data
 
 import li.cil.oc.Constants
 import li.cil.oc.Settings
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ExtendedItemStack._
@@ -39,16 +40,13 @@ class NavigationUpgradeData extends ItemData(Constants.ItemName.NavigationUpgrad
     128 * (1 << info.scale)
   }
 
-  private final val DataTag = Settings.namespace + "data"
-  private final val MapTag = Settings.namespace + "map"
-
   override def loadData(holder: DataComponentHolder): Unit = {
-    map = holder.getComponent(OCComponents.SOURCE_MAP_ITEM).orNull
+    map = holder.getComponent(OCComponents.SOURCE_MAP_ITEM).map(_.mutableCopy()).orNull
   }
 
   override def saveData(holder: MutableDataComponentHolder): Unit = {
     if(map != null) {
-      holder.setComponent(OCComponents.SOURCE_MAP_ITEM, map)
+      holder.setComponent(OCComponents.SOURCE_MAP_ITEM, ImmutableItemStack.copyOf(map))
     }
   }
 }

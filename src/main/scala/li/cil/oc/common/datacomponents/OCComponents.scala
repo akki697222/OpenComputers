@@ -1,13 +1,13 @@
 package li.cil.oc.common.datacomponents
 
 import com.mojang.serialization.Codec
-import io.netty.buffer.ByteBuf
+import li.cil.oc.api.ImmutableItemStack
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.item.data.PrintData
 import li.cil.oc.server.component.DebugCard.AccessContext
-import net.minecraft.core.{BlockPos, UUIDUtil}
 import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.registries.Registries
+import net.minecraft.core.{BlockPos, Direction, UUIDUtil}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.{Component, ComponentSerialization}
@@ -20,20 +20,36 @@ import net.neoforged.neoforge.registries.{DeferredHolder, DeferredRegister}
 
 import java.nio.ByteBuffer
 import java.util.UUID
-import java.util.function.Supplier
+import scala.language.implicitConversions
 
 object OCComponents {
+//  private[oc] implicit def convert[T](holder: DeferredHolder[DataComponentType[_], DataComponentType[T]]): DataComponentType[T] =
+//    holder.get()
+
+  private[oc] implicit def convert(itemStack: ItemStack): ImmutableItemStack =
+    ImmutableItemStack.copyOf(itemStack)
+
+  private[oc] implicit def convert(itemStack: ImmutableItemStack): ItemStack =
+    itemStack.mutableCopy()
+
   type Type[T] = DeferredHolder[DataComponentType[_], DataComponentType[T]]
 
   val REGISTRAR: DeferredRegister.DataComponents = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, "opencomputers")
 
-  private def persistent[T](name: String, codec: Codec[T]): Type[T] = {
+  private def persistent[T](name: String, codec: Codec[T]): Type[T] =
     REGISTRAR.registerComponentType(name, _.persistent(codec))
-  }
 
-  private def persistentShared[T](name: String, codec: Codec[T], streamCodec: StreamCodec[_ >: RegistryFriendlyByteBuf, T]): Type[T] = {
+  private def sharedOnly[T](name: String, streamCodec: StreamCodec[_ >: RegistryFriendlyByteBuf, T]): Type[T] =
+    REGISTRAR.registerComponentType(name, _.networkSynchronized(streamCodec))
+
+  private def persistentShared[T](name: String, codec: Codec[T], streamCodec: StreamCodec[_ >: RegistryFriendlyByteBuf, T]): Type[T] =
     REGISTRAR.registerComponentType(name, _.persistent(codec).networkSynchronized(streamCodec))
-  }
+
+  private def persistentUnit(name: String): Type[Unit] =
+    persistent(name, Codec.unit(()))
+
+  private def persistentSharedUnit(name: String): Type[Unit] =
+    persistentShared(name, Codec.unit(()), StreamCodec.unit(()))
 
   val ID: Type[UUID] = persistentShared("id", UUIDUtil.CODEC, UUIDUtil.STREAM_CODEC)
   val OWNER: Type[Owner] = persistentShared("owner", Owner.CODEC, Owner.STREAM_CODEC)
@@ -44,10 +60,10 @@ object OCComponents {
   val EEPROM_CODE: Type[ByteBuffer] = persistent("eeprom_code", Codec.BYTE_BUFFER)
   val EEPROM_DATA: Type[ByteBuffer] = persistent("eeprom_data", Codec.BYTE_BUFFER)
   val MF_COORD: Type[MFCoords] = persistentShared("mf_coord", MFCoords.CODEC, MFCoords.STREAM_CODEC)
-  val COMPONENTS: Type[List[ItemStack]] = persistentShared("components", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val CONTENTS: Type[List[ItemStack]] = persistentShared("contents", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val CONTAINERS: Type[List[ItemStack]] = persistentShared("containers", ScalaCodec.list(ItemStack.CODEC), ScalaStreamCodec.list(ItemStack.STREAM_CODEC))
-  val ATTACHMENT: Type[ItemStack] = persistentShared("attachment", ItemStack.CODEC, ItemStack.STREAM_CODEC)
+  val COMPONENTS: Type[List[ImmutableItemStack]] = persistentShared("components", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val CONTENTS: Type[List[ImmutableItemStack]] = persistentShared("contents", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val CONTAINERS: Type[List[ImmutableItemStack]] = persistentShared("containers", ScalaCodec.list(ImmutableItemStack.OPTIONAL_CODEC), ScalaStreamCodec.list(ImmutableItemStack.OPTIONAL_STREAM_CODEC))
+  val ATTACHMENT: Type[ImmutableItemStack] = persistentShared("attachment", ImmutableItemStack.OPTIONAL_CODEC, ImmutableItemStack.OPTIONAL_STREAM_CODEC)
   val TIER: Type[Byte] = persistentShared("tier", ScalaCodec.BYTE, ScalaStreamCodec.BYTE)
   val STORED_ENERGY: Type[Int] = persistentShared("stored_energy", ScalaCodec.INT, ScalaStreamCodec.VAR_INT)
   val ADDRESS: Type[String] = persistentShared("address", Codec.STRING, ByteBufCodecs.STRING_UTF8)
@@ -58,13 +74,15 @@ object OCComponents {
   val MAX_CHARGE: Type[Double] = persistentShared("max_charge", ScalaCodec.DOUBLE, ScalaStreamCodec.DOUBLE)
   val ROBOT_CHARGE: Type[RobotChargeInfo] = persistentShared("robot_charge", RobotChargeInfo.CODEC, RobotChargeInfo.STREAM_CODEC)
   val NANOMACHINES_NETWORK_INFO: Type[CompoundTag] = persistent("nanomachines_network_info", CompoundTag.CODEC)
-  val SOURCE_MAP_ITEM: Type[ItemStack] = persistent("source_map_item", ItemStack.CODEC)
+  val SOURCE_MAP_ITEM: Type[ImmutableItemStack] = persistent("source_map_item", ImmutableItemStack.OPTIONAL_CODEC)
   val KEYS: Type[List[String]] = persistentShared("keys", ScalaCodec.list(Codec.STRING), ScalaStreamCodec.list(ByteBufCodecs.STRING_UTF8))
   val TERMINAL_REFERENCE: Type[TerminalReference] = persistent("terminal_reference", TerminalReference.CODEC)
   val TEXT_BUFFER: Type[TextBufferContents] = persistent("text_buffer", TextBufferContents.CODEC)
   val IS_ON: Type[Boolean] = persistentShared("is_on", ScalaCodec.BOOL, ScalaStreamCodec.BOOL)
   val IS_RUNNING: Type[Boolean] = persistentShared("is_running", ScalaCodec.BOOL, ScalaStreamCodec.BOOL)
   val IS_POWERED: Type[Boolean] = persistentShared("is_powered", ScalaCodec.BOOL, ScalaStreamCodec.BOOL)
+  val IS_ERRORED: Type[Unit] = persistentSharedUnit("is_errored")
+  val USERS: Type[Set[String]] = persistentShared("users", ScalaCodec.set(Codec.STRING), ScalaStreamCodec.set(ByteBufCodecs.STRING_UTF8))
   val MAX_VIDEO_MODE: Type[MaximumVideoMode] = persistentShared("max_video_mode", MaximumVideoMode.CODEC, MaximumVideoMode.STREAM_CODEC)
   val VIDEO_MODE: Type[VideoMode] = persistentShared("video_mode", VideoMode.CODEC, VideoMode.STREAM_CODEC)
   val IS_PRECISE: Type[Boolean] = persistentShared("is_precise", ScalaCodec.BOOL, ScalaStreamCodec.BOOL)
@@ -81,6 +99,8 @@ object OCComponents {
   val GRAPHICS_CARD: Type[GraphicsCardState] = persistent("graphics_card", GraphicsCardState.CODEC)
   val VIDEO_RAM: Type[List[(Int, CompoundStorage)]] = persistent("video_ram", ScalaCodec.list(ScalaCodec.pair(ScalaCodec.INT -> CompoundStorage.CODEC)))
   val WAKE_THRESHOLD: Type[Int] = persistent("wake_threshold", ScalaCodec.INT)
+  val HAS_REDSTONE_INPUT: Type[Boolean] = persistent("has_redstone_input", ScalaCodec.BOOL)
+  val INVERT_TOUCH: Type[Unit] = persistentSharedUnit("invert_touch")
   val WIRELESS_REDSTONE_STATE: Type[WirelessRedstoneState] = persistent("wireless_redstone_state", WirelessRedstoneState.CODEC)
   val LEASHED_ENTITIES: Type[List[UUID]] = persistent("leashed_entities", ScalaCodec.list(UUIDUtil.CODEC))
   val OPEN_PORTS: Type[Array[Int]] = persistent("open_ports", ScalaCodec.INT_ARRAY)
@@ -89,8 +109,27 @@ object OCComponents {
   val STRENGTH: Type[Double] = persistent("strength", ScalaCodec.DOUBLE)
   val HEAD_POS: Type[Int] = persistent("head_position", ScalaCodec.INT)
   val TANK: Type[FluidStack] = persistent("tank", FluidStack.CODEC)
-  val FUEL_INVENTORY: Type[ItemStack] = persistent("fuel_inventory", ItemStack.CODEC)
+  val FUEL_INVENTORY: Type[ImmutableItemStack] = persistent("fuel_inventory", ImmutableItemStack.OPTIONAL_CODEC)
   val FUEL_TICKS_REMAINING: Type[Int] = persistent("fuel_ticks_remaining", ScalaCodec.INT)
+  val RENDER_COLOR: Type[ColorRGBA] = persistentShared("render_color", ColorRGBA.CODEC, ScalaStreamCodec.COLOR_RGBA)
+  val CHARGE_SPEED: Type[Double] = persistentShared("charge_speed", ScalaCodec.DOUBLE, ScalaStreamCodec.DOUBLE)
+  val INVERT_SIGNAL: Type[Unit] = persistentUnit("invert_signal")
+  val PRESENCE: Type[ByteBuffer] = persistent("presence", Codec.BYTE_BUFFER)
+  val COMPONENT_NODES: Type[Array[Option[CompoundStorage]]] = persistent("component_nodes", ScalaCodec.array(CompoundStorage.OPTION_CODEC))
+  val SELECTED_SLOT: Type[Int] = persistentShared("selected_slot", ScalaCodec.INT, ScalaStreamCodec.INT)
+  val SELECTED_TANK: Type[Int] = persistent("selected_tank", ScalaCodec.INT)
+  val ROBOT_TOTAL_ANIMATION_TIME: Type[Int] = persistentShared("robot/total_animation_time", ScalaCodec.INT, ScalaStreamCodec.INT)
+  val ROBOT_CURRENT_ANIMATION: Type[RobotCurrentAnimation] = persistentShared("robot/current_animation", RobotCurrentAnimation.CODEC, RobotCurrentAnimation.STREAM_CODEC)
+  val RACK_DATA: Type[Array[Option[CompoundStorage]]] = persistentShared("rack_data", ScalaCodec.array(CompoundStorage.OPTION_CODEC), ScalaStreamCodec.array(CompoundStorage.OPTION_STREAM_CODEC))
+  val RELAY_ENABLED: Type[Unit] = persistentUnit("relay_enabled")
+  val RACK_NODE_MAPPING: Type[Array[Array[Direction]]] = persistent("rack_node_mapping", ScalaCodec.array(ScalaCodec.array(Direction.CODEC)))
   val DEBUG_CARD_ACCESS_CONTEXT: Type[AccessContext] = persistent("debug_card/access_context", AccessContext.CODEC)
   val DEBUG_CARD_REMOTE_NODE_POSITION: Type[BlockPos] = persistent("debug_card/remote_node", BlockPos.CODEC)
+
+  object Network {
+    val LAST_ACCESS: Type[Long] = sharedOnly("network/last_access_timestamp", ScalaStreamCodec.VAR_LONG)
+    val LAST_DISK_ACCESS: Type[Long] = sharedOnly("network/last_disk_access", ScalaStreamCodec.VAR_LONG)
+    val LAST_NETWORK_ACCESS: Type[Long] = sharedOnly("network/last_network_access", ScalaStreamCodec.VAR_LONG)
+    val DISK_ITEM: Type[ImmutableItemStack] = sharedOnly("network/disk_item", ImmutableItemStack.OPTIONAL_STREAM_CODEC)
+  }
 }

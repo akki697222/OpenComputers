@@ -1,6 +1,6 @@
 package li.cil.oc.common
 
-import net.minecraft.core.registries.BuiltInRegistries
+import li.cil.oc.common.datacomponents.OCComponents
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.chunk.LevelChunk
@@ -11,7 +11,7 @@ import net.neoforged.neoforge.client.event.{ClientPlayerNetworkEvent, ClientTick
 import net.neoforged.neoforge.common.util.FakePlayer
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent
-import net.neoforged.neoforge.event.entity.player.PlayerEvent.{ItemCraftedEvent, PlayerChangedDimensionEvent, PlayerLoggedInEvent, PlayerLoggedOutEvent, PlayerRespawnEvent}
+import net.neoforged.neoforge.event.entity.player.PlayerEvent._
 import net.neoforged.neoforge.event.level.{BlockEvent, ChunkEvent, LevelEvent}
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 import net.neoforged.neoforge.server.ServerLifecycleHooks
@@ -23,21 +23,19 @@ import java.util.Calendar
 import li.cil.oc._
 import li.cil.oc.api.Network
 import li.cil.oc.api.detail.ItemInfo
-import li.cil.oc.api.internal.{Colored, Rack, Server}
+import li.cil.oc.api.internal.{Rack, Server}
 import li.cil.oc.api.machine.MachineHost
-import li.cil.oc.api.network.{Environment, SidedComponent, SidedEnvironment}
 import li.cil.oc.client.renderer.PetRenderer
-import li.cil.oc.common.blockentity.{Robot, TileEntityTypes}
-import li.cil.oc.common.capabilities.CapabilitySidedComponent
+import li.cil.oc.common.blockentity.Robot
 import li.cil.oc.common.component.TerminalServer
 import li.cil.oc.common.item.data.{MicrocontrollerData, RobotData, TabletData}
-import li.cil.oc.common.item.traits
 import li.cil.oc.integration.util
 import li.cil.oc.server.component.Keyboard
-import li.cil.oc.server.machine.{Callbacks, Machine}
 import li.cil.oc.server.machine.luac.LuaStateFactory
+import li.cil.oc.server.machine.{Callbacks, Machine}
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.ExtendedLevel._
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.StackOption._
 import li.cil.oc.util._
 import net.minecraft.server.level.{ChunkHolder, ServerLevel, ServerPlayer}
@@ -269,11 +267,8 @@ object EventHandler {
 
     didRecraft = recraft(e, navigationUpgrade, stack => {
       // Restore the map currently used in the upgrade.
-      Option(api.Driver.driverFor(e.getCrafting)) match {
-        case Some(driver) => StackOption(ItemStack.parseOptional(
-          e.getEntity.level.registryAccess(),
-          driver.dataTag(stack).getCompound(Settings.namespace + "map"))
-        )
+      stack.getComponent(OCComponents.SOURCE_MAP_ITEM) match {
+        case Some(map) => StackOption(map.mutableCopy())
         case _ => EmptyStack
       }
     }) || didRecraft

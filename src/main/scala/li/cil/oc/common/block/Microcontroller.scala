@@ -9,7 +9,7 @@ import li.cil.oc.common.Tier
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.item.data.MicrocontrollerData
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.InventoryUtils
@@ -138,5 +138,5 @@ class Microcontroller(props: Properties)
     super.playerWillDestroy(world, pos, state, player)
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.MICROCONTROLLER.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.MICROCONTROLLER.get()
 }

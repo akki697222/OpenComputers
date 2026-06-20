@@ -15,7 +15,6 @@ import net.minecraft.core.Direction;
 
 import javax.annotation.Nonnull;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +29,8 @@ import org.slf4j.LoggerFactory;
  * network as an index structure to find other nodes connected to them.
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class TileEntitySidedEnvironment extends BlockEntity implements SidedEnvironment {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TileEntitySidedEnvironment.class);
-
+public abstract class BlockEntitySidedEnvironment extends BlockEntity implements SidedEnvironment {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockEntitySidedEnvironment.class);
     // See constructor.
     protected Node[] nodes = new Node[6];
 
@@ -73,7 +71,7 @@ public abstract class TileEntitySidedEnvironment extends BlockEntity implements 
      *       .create(), ...);
      * </pre>
      */
-    protected TileEntitySidedEnvironment(BlockEntityType<?> type, BlockPos pos, BlockState state, final Node... nodes) {
+    protected BlockEntitySidedEnvironment(BlockEntityType<?> type, BlockPos pos, BlockState state, final Node... nodes) {
         super(type, pos, state);
         System.arraycopy(nodes, 0, this.nodes, 0, Math.min(nodes.length, this.nodes.length));
     }
@@ -92,7 +90,7 @@ public abstract class TileEntitySidedEnvironment extends BlockEntity implements 
 
     // ----------------------------------------------------------------------- //
 
-    public static void tick(Level level, BlockPos pos, BlockState state, TileEntitySidedEnvironment be) {
+    public static void tick(Level level, BlockPos pos, BlockState state, BlockEntitySidedEnvironment be) {
         if (!be.addedToNetwork) {
             be.addedToNetwork = true;
             // Note that joinOrCreateNetwork will try to connect each of our

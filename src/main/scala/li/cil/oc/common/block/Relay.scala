@@ -3,7 +3,7 @@ package li.cil.oc.common.block
 import li.cil.oc.Settings
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
 import net.minecraft.core.BlockPos
@@ -22,5 +22,5 @@ class Relay(props: Properties) extends SimpleBlock(props) with traits.GUI with t
 
   override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Relay(pos, state)
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.RELAY.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.RELAY.get()
 }

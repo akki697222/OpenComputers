@@ -2,7 +2,7 @@ package li.cil.oc.common.block
 
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -35,5 +35,5 @@ class Printer(props: Properties) extends SimpleBlock(props) with traits.StateAwa
 
   override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Printer(pos, state)
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.PRINTER.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.PRINTER.get()
 }

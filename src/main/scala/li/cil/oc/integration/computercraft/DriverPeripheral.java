@@ -75,18 +75,17 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
     private static final BlockCapability<IPeripheral, Direction> PERIPHERAL_CAP = getPeripheralCapability();
 
     private IPeripheral findPeripheral(final Level world, final BlockPos pos, final Direction side) {
-        try {
-            if (PERIPHERAL_CAP == null) return null;
+        if (PERIPHERAL_CAP == null) return null;
 
-            // NeoForge 1.21.1: query capability from the level directly
-            final IPeripheral p = world.getCapability(PERIPHERAL_CAP, pos, side);
+        // NeoForge 1.21.1: query capability from the level directly
+        final IPeripheral p = world.getCapability(PERIPHERAL_CAP, pos, side);
 
-            if (p != null && !isBlacklisted(p)) {
-                return p;
-            }
-        } catch (Exception e) {
-            OpenComputers.log().warn("Error accessing ComputerCraft peripheral @ ({}, {}, {}).", pos.getX(), pos.getY(), pos.getZ(), e);
+        if (p != null && !isBlacklisted(p)) {
+            return p;
         }
+
+        final IPeripheral p2 = world.getCapability(PeripheralProvider.CAPABILITY_PERIPHERAL(), pos, side);
+        if (p != null && !isBlacklisted(p2)) return p2;
 
         return null;
     }

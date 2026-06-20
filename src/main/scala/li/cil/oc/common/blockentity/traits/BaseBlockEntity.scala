@@ -1,16 +1,18 @@
 package li.cil.oc.common.blockentity.traits
 
+import li.cil.oc.api.Persistable
 import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.client.Sound
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.util.{BlockPosition, SideTracker}
 import net.minecraft.core.HolderLookup
-import net.minecraft.core.component.{DataComponentMap, DataComponentPatch, DataComponentType, PatchedDataComponentMap}
+import net.minecraft.core.component.{DataComponentHolder, DataComponentMap, DataComponentPatch, DataComponentType, PatchedDataComponentMap}
 import net.minecraft.nbt.{CompoundTag, NbtOps}
 import net.minecraft.network.Connection
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelProperty
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {
   private final val IsServerDataTag = Settings.namespace + "isServerData"
@@ -48,7 +50,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
   override def onChunkUnloaded(): Unit = {
     super.onChunkUnloaded()
     try dispose() catch {
-      case t: Throwable => OpenComputers.log.error("Failed properly disposing a tile entity, things may leak and or break.", t)
+      case t: Throwable => OpenComputers.log.error("Failed properly disposing a block entity, things may leak and or break.", t)
     }
   }
 
@@ -73,23 +75,23 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     super.saveAdditional(nbt, provider)
   }
 
-  @OnlyIn(Dist.CLIENT)
   @deprecatedOverriding("use loadComponentsForClient()", since = "NeoForge 1.21+")
   def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
-  @OnlyIn(Dist.CLIENT)
   @deprecatedOverriding("use saveComponentsForClient()", since = "NeoForge 1.21+")
   def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, false)
   }
-  
-  def loadComponentsForServer(): Unit = {}
-  def saveComponentsForServer(): Unit = {}
+
+  def loadComponentsCommon(holder: DataComponentHolder): Unit = {}
+  def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {}
+  def loadComponentsForServer(holder: DataComponentHolder): Unit = {}
+  def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {}
 
   @OnlyIn(Dist.CLIENT)
-  def loadComponentsForClient(): Unit = {}
+  def loadComponentsForClient(holder: DataComponentHolder): Unit = {}
   @OnlyIn(Dist.CLIENT)
-  def saveComponentsForClient(): Unit = {}
+  def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {}
 
   // ----------------------------------------------------------------------- //
 
@@ -105,17 +107,28 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
   override def loadWithComponents(tag: CompoundTag, registries: HolderLookup.Provider): Unit = {
     super.loadWithComponents(tag, registries)
     // components are loaded here
-    
+    val holder = Persistable.holder(this)
+    loadComponentsCommon(holder)
+
     if(isServer) {
-      loadComponentsForServer()
+      loadComponentsForServer(holder)
     } else {
-      loadComponentsForClient()
+      loadComponentsForClient(holder)
     }
   }
 
   override def saveAdditional(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveAdditional(nbt, provider)
     save(nbt, provider)
+
+    val holder = Persistable.holder(this)
+    saveComponentsCommon(holder)
+
+    if(isServer) {
+      saveComponentsForServer(holder)
+    } else {
+      saveComponentsForClient(holder)
+    }
   }
 
   def save(nbt: CompoundTag, provider: HolderLookup.Provider): CompoundTag = {
@@ -136,7 +149,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     SaveHandler.savingForClients = true
     try {
       try saveForClient(nbt, provider) catch {
-        case e: Throwable => OpenComputers.log.warn("There was a problem writing a TileEntity description packet. Please report this if you see it!", e)
+        case e: Throwable => OpenComputers.log.warn("There was a problem writing a BlockEntity description packet. Please report this if you see it!", e)
       }
     } finally {
       SaveHandler.savingForClients = false
@@ -147,7 +160,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   override def onDataPacket(manager: Connection, packet: ClientboundBlockEntityDataPacket, provider: HolderLookup.Provider): Unit = {
     try loadForClient(packet.getTag, provider) catch {
-      case e: Throwable => OpenComputers.log.warn("There was a problem reading a TileEntity description packet. Please report this if you see it!", e)
+      case e: Throwable => OpenComputers.log.warn("There was a problem reading a BlockEntity description packet. Please report this if you see it!", e)
     }
   }
   

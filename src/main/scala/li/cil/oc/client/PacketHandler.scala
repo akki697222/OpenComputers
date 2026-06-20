@@ -2,13 +2,14 @@ package li.cil.oc.client
 
 import com.mojang.blaze3d.pipeline.RenderCall
 import com.mojang.blaze3d.systems.RenderSystem
+import io.netty.buffer.{ByteBuf, Unpooled}
 import li.cil.oc.{Localization, OpenComputers, Settings, api}
 import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
 import li.cil.oc.client.audio.AudioSession
 import li.cil.oc.client.renderer.PetRenderer
 import li.cil.oc.common.blockentity._
 import li.cil.oc.common.blockentity.traits._
-import li.cil.oc.common.datacomponents.CompoundStorage
+import li.cil.oc.common.datacomponents.{CompoundStorage, ScalaStreamCodec}
 import li.cil.oc.common.item.Tablet
 import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.{Loot, PacketType, component, menu, PacketHandler => CommonPacketHandler}
@@ -23,12 +24,14 @@ import net.minecraft.core.component.DataComponentMap
 import net.minecraft.core.registries.Registries
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.nbt.{NbtIo, NbtOps}
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.sounds.{SoundEvent, SoundSource}
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.network.connection.ConnectionType
 import net.neoforged.neoforge.registries.NeoForgeRegistries
 
 object PacketHandler extends CommonPacketHandler {
@@ -575,7 +578,7 @@ object PacketHandler extends CommonPacketHandler {
     p.readBlockEntity[Rack]() match {
       case Some(t) =>
         val mountableIndex = p.readInt()
-        t.lastData(mountableIndex) = p.readNBT()
+        t.lastData(mountableIndex) = CompoundStorage.OPTION_STREAM_CODEC.decode(new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(p.readAllBytes()), ClientAccessHelper.getClientRegistryAccess, ConnectionType.NEOFORGE))
         t.getLevel.notifyBlockUpdate(t.getBlockPos)
       case _ => // Invalid packet.
     }

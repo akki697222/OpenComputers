@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -51,6 +52,10 @@ public final class MenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<DiskDrive>> DISK_DRIVE =
             MENU.register("disk_drive", () -> IMenuTypeExtension.create(
                     (id, plr, buff) -> new DiskDrive(id, plr, new SimpleContainer(1))));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<HoloScreen>> HOLO_SCREEN =
+            MENU.register("holo_screen", () -> IMenuTypeExtension.create(
+                    (id, plr, buff) -> new HoloScreen(id, plr, new SimpleContainer(1))));
 
     public static final DeferredHolder<MenuType<?>, MenuType<Drone>> DRONE =
             MENU.register("drone", () -> IMenuTypeExtension.create((id, plr, buff) -> {
@@ -139,6 +144,10 @@ public final class MenuTypes {
 
     public static void openDiskDriveGui(ServerPlayer player, li.cil.oc.common.container.DiskDriveMountableInventory diskDrive) {
         player.openMenu(diskDrive);
+    }
+
+    public static void openHoloScreenGui(ServerPlayer player, li.cil.oc.common.blockentity.HoloScreen screen) {
+        player.openMenu(screen);
     }
 
     public static void openDroneGui(ServerPlayer player, li.cil.oc.common.entity.Drone drone) {
