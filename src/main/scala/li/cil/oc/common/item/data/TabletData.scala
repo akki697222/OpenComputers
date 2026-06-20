@@ -3,7 +3,6 @@ package li.cil.oc.common.item.data
 import li.cil.oc.Constants
 import li.cil.oc.Settings
 import li.cil.oc.common.Tier
-import li.cil.oc.common.TierMigration
 import li.cil.oc.util.ExtendedNBT._
 import net.minecraft.world.item.ItemStack
 import net.minecraft.nbt.CompoundTag
@@ -41,7 +40,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     isRunning = nbt.getBoolean(IsRunningTag)
     energy = nbt.getDouble(EnergyTag)
     maxEnergy = nbt.getDouble(MaxEnergyTag)
-    tier = TierMigration.loadStoredTier(nbt, TierTag)
+    tier = nbt.getInt(TierTag)
     if (nbt.contains(ContainerTag)) {
       container = ItemStack.of(nbt.getCompound(ContainerTag))
     }
@@ -60,7 +59,7 @@ class TabletData extends ItemData(Constants.ItemName.Tablet) {
     nbt.putBoolean(IsRunningTag, isRunning)
     nbt.putDouble(EnergyTag, energy)
     nbt.putDouble(MaxEnergyTag, maxEnergy)
-    TierMigration.saveStoredTier(nbt, TierTag, tier, asByte = false)
+    nbt.putInt(TierTag, tier)
     if (!container.isEmpty) nbt.setNewCompoundTag(ContainerTag, container.save)
   }
 }

@@ -7,6 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.junit.JUnitRunner
 
+import java.lang.Boolean.{FALSE => JFalse, TRUE => JTrue}
 import java.nio.file.Files
 
 @RunWith(classOf[JUnitRunner])
@@ -38,8 +39,8 @@ class NetworkPacketNbtTest extends AnyFunSpec with Matchers with BeforeAndAfterA
       nbt.putByte("data1", 0.toByte)
 
       val packet = Network.newPacket(nbt)
-      packet.data(0) shouldBe java.lang.Boolean.TRUE
-      packet.data(1) shouldBe java.lang.Boolean.FALSE
+      packet.data(0) shouldBe JTrue
+      packet.data(1) shouldBe JFalse
     }
   }
 }

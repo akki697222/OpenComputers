@@ -10,7 +10,11 @@ import li.cil.oc.util.ResultWrapper.result
 import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
+import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.{BlockHitResult, Vec3}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.entity.item.ItemTossEvent
 import net.minecraftforge.eventbus.api.Event.Result
@@ -38,11 +42,11 @@ trait ContainerLevelControl extends ContainerAware with LevelAware with SideRest
     result(false)
   }
 
-  private def blockStateMatchesStack(item: BlockItem, stack: ItemStack, state: net.minecraft.world.level.block.state.BlockState, blockPos: net.minecraft.core.BlockPos, side: Direction): Boolean = {
+  private def blockStateMatchesStack(item: BlockItem, stack: ItemStack, state: BlockState, blockPos: BlockPos, side: Direction): Boolean = {
     if (item.getBlock.getStateDefinition.getProperties.isEmpty) return true
-    val context = new net.minecraft.world.item.context.BlockPlaceContext(
-      world, fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, stack,
-      new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(blockPos), side.getOpposite, blockPos, false))
+    val context = new BlockPlaceContext(
+      world, fakePlayer, InteractionHand.MAIN_HAND, stack,
+      new BlockHitResult(Vec3.atCenterOf(blockPos), side.getOpposite, blockPos, false))
     Option(item.getBlock.getStateForPlacement(context)).forall(_ == state)
   }
 
