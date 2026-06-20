@@ -19,7 +19,7 @@ import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.item.ItemEntity
 
 trait ContainerLevelControl extends ContainerAware with LevelAware with SideRestricted {
-  @Callback(doc = "function(side:number):boolean -- Compare the block on the specified side with the one in the selected slot. Returns true if equal.")
+  @Callback(doc = "function(side:number[, fuzzy:boolean=false]):boolean -- Compare the block on the specified side with the one in the selected slot. Returns true if equal.")
   def compare(context: Context, args: Arguments): Array[AnyRef] = {
     val side = checkSideForAction(args, 0)
     stackInSlot(selectedSlot) match {
@@ -28,13 +28,22 @@ trait ContainerLevelControl extends ContainerAware with LevelAware with SideRest
           val blockPos = position.offset(side).toBlockPos
           val state = world.getBlockState(blockPos)
           val idMatches = item.getBlock == state.getBlock
-          args.optBoolean(1, false) // TODO
-          return result(idMatches)
+          val fuzzy = args.optBoolean(1, false)
+          val subTypeMatches = fuzzy || blockStateMatchesStack(item, stack, state, blockPos, side)
+          return result(idMatches && subTypeMatches)
         case _ =>
       }
       case _ =>
     }
     result(false)
+  }
+
+  private def blockStateMatchesStack(item: BlockItem, stack: ItemStack, state: net.minecraft.world.level.block.state.BlockState, blockPos: net.minecraft.core.BlockPos, side: Direction): Boolean = {
+    if (item.getBlock.getStateDefinition.getProperties.isEmpty) return true
+    val context = new net.minecraft.world.item.context.BlockPlaceContext(
+      world, fakePlayer, net.minecraft.world.InteractionHand.MAIN_HAND, stack,
+      new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(blockPos), side.getOpposite, blockPos, false))
+    Option(item.getBlock.getStateForPlacement(context)).forall(_ == state)
   }
 
   @Callback(doc = "function(side:number[, count:number=64]):boolean -- Drops items from the selected slot towards the specified side.")
