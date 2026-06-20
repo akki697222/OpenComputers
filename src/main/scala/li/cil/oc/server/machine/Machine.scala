@@ -381,11 +381,6 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
   })
 
   override def invoke(address: String, method: String, args: Array[AnyRef]): Array[AnyRef] = {
-    if (method == "setForeground" || method == "setBackground") {
-      if (args.nonEmpty && args(0).isInstanceOf[Array[Byte]]) {
-        OpenComputers.log.warn(s"[Debug] Bad argument passed to $method! Array[Byte] detected.")
-      }
-    }
     if (node != null && node.network != null) {
       Option(node.network.node(address)) match {
         case Some(component: li.cil.oc.server.network.Component) if component.canBeSeenFrom(node) || component == node =>

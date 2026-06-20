@@ -19,7 +19,6 @@ class NetSplitter(props: Properties) extends RedstoneAware(props) {
 
   // ----------------------------------------------------------------------- //
 
-  // NOTE: must not be final for immibis microblocks to work.
   override def use(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, trace: BlockRayTraceResult): ActionResultType = {
     if (Wrench.holdsApplicableWrench(player, pos)) {
       val side = trace.getDirection
