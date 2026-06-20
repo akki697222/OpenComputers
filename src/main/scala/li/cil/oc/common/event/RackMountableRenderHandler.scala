@@ -95,7 +95,7 @@ object RackMountableRenderHandler {
     }
     else if (e.data != null && CapacitorMountable == api.Items.get(e.rack.getItem(e.mountable))) {
       // Render overlay if active (it has power)
-      if (e.data.getBoolean("hasEnergy")) {
+      if (e.data.getComponent(OCComponents.IS_POWERED) getOrElse false) {
         renderOverlayFromAtlas(e, Textures.Block.RackCapacitorOn)
       }
     }

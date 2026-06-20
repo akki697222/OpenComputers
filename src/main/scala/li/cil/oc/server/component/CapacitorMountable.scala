@@ -6,10 +6,13 @@ import li.cil.oc.api.internal.Rack
 import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network.{Analyzable, Component, ComponentConnector, Node, Visibility}
 import li.cil.oc.api.prefab.{AbstractManagedEnvironment, ComponentConnectableRackMountableEnvironment}
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.util.ExtendedNBT.toNbt
 import net.minecraft.core.Direction
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.player.Player
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 import java.util
 import scala.jdk.CollectionConverters._
@@ -44,17 +47,7 @@ class CapacitorMountable(val rack: Rack) extends ComponentConnectableRackMountab
   
   protected def maxCapacity: Double = Settings.get.bufferCapacitor + Settings.get.bufferCapacitorAdjacencyBonus * 9
 
-  override def loadData(nbt: CompoundTag): Unit = {
-    super[ComponentConnectableRackMountableEnvironment].loadData(nbt)
-  }
-
-  override def saveData(nbt: CompoundTag): Unit = {
-    super[ComponentConnectableRackMountableEnvironment].saveData(nbt)
-  }
-
-  override def getData: CompoundTag = {
-    val nbt = new CompoundTag()
-    nbt.putBoolean("hasEnergy", node.localBuffer() > 0)
-    nbt
+  override def describeForClient(holder: MutableDataComponentHolder): Unit = {
+    holder.set(OCComponents.IS_POWERED, node.localBuffer() > 0)
   }
 }

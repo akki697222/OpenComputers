@@ -1,12 +1,12 @@
 package li.cil.oc.integration.neoforge
 
-import li.cil.oc.common.blockentity.traits.{BaseBlockEntity, PowerAcceptor}
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
+import li.cil.oc.common.blockentity.traits.PowerAcceptor
 import li.cil.oc.integration.util.Power
 import net.minecraft.core.Direction
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
-import net.neoforged.neoforge.capabilities.{Capabilities, ICapabilityProvider, RegisterCapabilitiesEvent}
+import net.neoforged.neoforge.capabilities.{Capabilities, RegisterCapabilitiesEvent}
 import net.neoforged.neoforge.energy.IEnergyStorage
 
 object EventHandlerNeoForge {
@@ -15,15 +15,15 @@ object EventHandlerNeoForge {
   def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
     // Register IEnergyStorage (EnergyStorage.BLOCK) for all PowerAcceptor block entities
     Seq(
-      TileEntityTypes.ADAPTER, TileEntityTypes.ASSEMBLER, TileEntityTypes.CABLE,
-      TileEntityTypes.CAPACITOR, TileEntityTypes.CARPETED_CAPACITOR, TileEntityTypes.CASE,
-      TileEntityTypes.CHARGER, TileEntityTypes.DISASSEMBLER, TileEntityTypes.DISK_DRIVE,
-      TileEntityTypes.GEOLYZER, TileEntityTypes.HOLOGRAM, TileEntityTypes.KEYBOARD,
-      TileEntityTypes.MICROCONTROLLER, TileEntityTypes.MOTION_SENSOR, TileEntityTypes.NET_SPLITTER,
-      TileEntityTypes.POWER_CONVERTER, TileEntityTypes.POWER_DISTRIBUTOR, TileEntityTypes.PRINT,
-      TileEntityTypes.PRINTER, TileEntityTypes.RACK, TileEntityTypes.RAID,
-      TileEntityTypes.REDSTONE_IO, TileEntityTypes.RELAY, TileEntityTypes.ROBOT,
-      TileEntityTypes.SCREEN, TileEntityTypes.TRANSPOSER, TileEntityTypes.WAYPOINT
+      BlockEntityTypes.ADAPTER, BlockEntityTypes.ASSEMBLER, BlockEntityTypes.CABLE,
+      BlockEntityTypes.CAPACITOR, BlockEntityTypes.CARPETED_CAPACITOR, BlockEntityTypes.CASE,
+      BlockEntityTypes.CHARGER, BlockEntityTypes.DISASSEMBLER, BlockEntityTypes.DISK_DRIVE,
+      BlockEntityTypes.GEOLYZER, BlockEntityTypes.HOLOGRAM, BlockEntityTypes.KEYBOARD,
+      BlockEntityTypes.MICROCONTROLLER, BlockEntityTypes.MOTION_SENSOR, BlockEntityTypes.NET_SPLITTER,
+      BlockEntityTypes.POWER_CONVERTER, BlockEntityTypes.POWER_DISTRIBUTOR, BlockEntityTypes.PRINT,
+      BlockEntityTypes.PRINTER, BlockEntityTypes.RACK, BlockEntityTypes.RAID,
+      BlockEntityTypes.REDSTONE_IO, BlockEntityTypes.RELAY, BlockEntityTypes.ROBOT,
+      BlockEntityTypes.SCREEN, BlockEntityTypes.TRANSPOSER, BlockEntityTypes.WAYPOINT
     ).foreach { beType =>
       event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, beType.get().asInstanceOf[BlockEntityType[_]], (be: BlockEntity, side: Direction) => {
         be match {

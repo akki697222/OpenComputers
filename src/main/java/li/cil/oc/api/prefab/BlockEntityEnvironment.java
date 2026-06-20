@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("UnusedDeclaration")
 public abstract class BlockEntityEnvironment extends BlockEntity implements Environment {
     private static final String TAG_NODE = "oc:node";
-    private static final Logger LOGGER = LoggerFactory.getLogger(TileEntityEnvironment.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockEntityEnvironment.class);
 
     /**
      * This must be set in subclasses to the node that is used to represent

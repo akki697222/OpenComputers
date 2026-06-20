@@ -22,6 +22,7 @@ import com.mojang.math.Axis
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.renderer.blockentity.{BlockEntityRenderer => TileEntityRenderer}
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.minecraft.world.phys.Vec3
 import net.neoforged.bus.api.SubscribeEvent
@@ -95,9 +96,9 @@ object ScreenRenderer extends BlockEntityRendererProvider[Screen] {
     val player = mc.player
     if (mc.level == null || player == null || mc.screen != null || mc.gameMode == null) return
 
-    val partialTicks = mc.getFrameTime
+    val partialTicks = mc.getTimer.getGameTimeDeltaTicks
     val start = player.getEyePosition(partialTicks)
-    val reach = mc.gameMode.getPickRange.toDouble
+    val reach = player.getAttribute(Attributes.BLOCK_INTERACTION_RANGE).getValue
     val end = start.add(player.getViewVector(partialTicks).scale(reach))
 
     val hit = renderedHoloScreens.values.

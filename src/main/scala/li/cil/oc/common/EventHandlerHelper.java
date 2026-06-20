@@ -1,11 +1,10 @@
 package li.cil.oc.common;
 
-import li.cil.oc.common.blockentity.TileEntityTypes;
+import li.cil.oc.common.blockentity.BlockEntityTypes;
 import li.cil.oc.common.item.traits.Chargeable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public final class EventHandlerHelper {
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -18,7 +17,7 @@ public final class EventHandlerHelper {
          */
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
-                TileEntityTypes.ROBOT.get(),
+                BlockEntityTypes.ROBOT.get(),
                 (be, ignored) -> be
         );
         BuiltInRegistries.ITEM.forEach(item -> {

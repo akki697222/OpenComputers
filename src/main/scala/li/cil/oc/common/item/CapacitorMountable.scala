@@ -2,6 +2,6 @@ package li.cil.oc.common.item
 
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
-import net.minecraftforge.common.extensions.IForgeItem
+import net.neoforged.neoforge.common.extensions.IItemExtension
 
-class CapacitorMountable(props: Properties) extends Item(props) with IForgeItem with traits.SimpleItem
+class CapacitorMountable(props: Properties) extends Item(props) with IItemExtension with traits.SimpleItem

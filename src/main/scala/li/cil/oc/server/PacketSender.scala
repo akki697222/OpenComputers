@@ -2,39 +2,34 @@ package li.cil.oc.server
 
 import com.google.common.cache.{Cache, CacheBuilder}
 import io.netty.buffer.Unpooled
-import li.cil.oc.{Settings, api}
 import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
-import li.cil.oc.api.network.EnvironmentHost
-import li.cil.oc.api.network.Node
+import li.cil.oc.api.network.{EnvironmentHost, Node}
 import li.cil.oc.common._
-import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.common.blockentity.traits._
 import li.cil.oc.common.datacomponents.CompoundStorage
-import li.cil.oc.util.BlockPosition
-import li.cil.oc.util.PackedColor
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.Direction
-import net.minecraft.resources.ResourceLocation
-import net.minecraft.core.BlockPos
-import net.neoforged.neoforge.common.NeoForge
-import net.minecraft.core.registries.BuiltInRegistries
-
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
-import scala.collection.mutable
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.entity.player.Player
+import li.cil.oc.common.nanomachines.ControllerImpl
+import li.cil.oc.util.{BlockPosition, PackedColor}
+import li.cil.oc.{Settings, api}
+import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.{CompoundTag, NbtIo}
 import net.minecraft.network.RegistryFriendlyByteBuf
-import net.minecraft.world.level.Level
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.network.connection.ConnectionType
 import net.neoforged.neoforge.server.ServerLifecycleHooks
+
+import java.util.concurrent.TimeUnit
+import scala.collection.mutable
 
 object PacketSender {
   def sendAudioStart(host: EnvironmentHost, sessionId: Int, channel: Int, sampleRate: Int, channels: Int, format: Int, loop: Boolean, pos: BlockPosition): Unit = {
@@ -254,7 +249,7 @@ object PacketSender {
           case t: BlockEntity => new FileSystemAccessEvent.Server(null, t, node)
           case _ => new FileSystemAccessEvent.Server(null, host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
         }
-        MinecraftForge.EVENT_BUS.post(event)
+        NeoForge.EVENT_BUS.post(event)
         if (!event.isCanceled) {
           hostTimeouts.put(cacheKey, System.currentTimeMillis() + diskActivityPacketDelay)
 

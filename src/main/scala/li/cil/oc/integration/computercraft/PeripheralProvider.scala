@@ -2,7 +2,7 @@ package li.cil.oc.integration.computercraft
 
 import dan200.computercraft.api.peripheral.IPeripheral
 import li.cil.oc.OpenComputers
-import li.cil.oc.common.blockentity.{Relay, TileEntityTypes}
+import li.cil.oc.common.blockentity.{Relay, BlockEntityTypes}
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.neoforged.bus.api.SubscribeEvent
@@ -41,7 +41,7 @@ object PeripheralProvider {
   def onRegisterCapabilities(event: RegisterCapabilitiesEvent): Unit = {
     event.registerBlockEntity(
       CAPABILITY_PERIPHERAL,
-      TileEntityTypes.RELAY.get(),
+      BlockEntityTypes.RELAY.get(),
       (relay: Relay, _: Direction) => new RelayPeripheral(relay): IPeripheral
     )
   }

@@ -84,9 +84,8 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
             return p;
         }
 
-        final IPeripheral p2 = world.getCapability(
-                PeripheralProvider.CAPABILITY_PERIPHERAL(), pos, side).orElse(null);
-        if (!isBlacklisted(p2)) return p2;
+        final IPeripheral p2 = world.getCapability(PeripheralProvider.CAPABILITY_PERIPHERAL(), pos, side);
+        if (p != null && !isBlacklisted(p2)) return p2;
 
         return null;
     }
