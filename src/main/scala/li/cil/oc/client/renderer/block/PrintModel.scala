@@ -26,6 +26,7 @@ import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.util.RandomSource
 import net.minecraft.client.renderer.RenderType
+import net.minecraftforge.client.ChunkRenderTypeSet
 import net.minecraftforge.client.model.data.{ModelData, ModelProperty}
 
 import scala.collection.JavaConverters.bufferAsJavaList
@@ -72,6 +73,9 @@ object PrintModel extends SmartBlockModelBase {
   }
 
   override def getOverrides: ItemOverrides = ItemOverride
+
+  override def getRenderTypes(state: BlockState, rand: RandomSource, data: ModelData): ChunkRenderTypeSet =
+    ChunkRenderTypeSet.of(RenderType.cutout())
 
   override def getQuads(state: BlockState, side: Direction, rand: RandomSource, data: ModelData, renderType: RenderType): util.List[BakedQuad] =
     Option(data.get(PRINT_PROPERTY)) match {
