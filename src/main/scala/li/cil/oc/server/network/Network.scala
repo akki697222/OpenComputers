@@ -460,10 +460,7 @@ object Network extends api.detail.NetworkAPI {
             case Some(node: MutableNode) =>
               neighborNode match {
                 case Some(neighbor: MutableNode) if neighbor != node && neighbor.network != null =>
-                  val canConnectColor = canConnectBasedOnColor(tileEntity, neighborTileEntity)
-                  val canConnectIM = MicroblockConnectivity.canConnectFromSide(tileEntity, side) &&
-                    MicroblockConnectivity.canConnectFromSide(neighborTileEntity, side.getOpposite)
-                  if (canConnectColor && canConnectIM) neighbor.connect(node)
+                  if (canConnectBasedOnColor(tileEntity, neighborTileEntity)) neighbor.connect(node)
                   else node.disconnect(neighbor)
                 case _ =>
               }
