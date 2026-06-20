@@ -565,14 +565,14 @@ object Network extends api.detail.NetworkAPI {
   override def newPacket(nbt: CompoundTag) = {
     val source = nbt.getString("source")
     val destination =
-      if (nbt.contains("dest")) nbt.getString("dest")
-      else null
+      if (nbt.contains("dest")) null
+      else nbt.getString("dest")
     val port = nbt.getInt("port")
     val ttl = nbt.getInt("ttl")
     val data = (for (i <- 0 until nbt.getInt("dataLength")) yield {
       if (nbt.contains("data" + i)) {
         nbt.get("data" + i) match {
-          case tag: ByteTag      => Boolean.box(tag.getAsByte == 1)
+          case tag: ByteTag      => Boolean.box(tag.getAsByte != 0)
           case tag: ShortTag     => Short.box(tag.getAsShort)
           case tag: IntTag       => Int.box(tag.getAsInt)
           case tag: LongTag      => Long.box(tag.getAsLong)
@@ -706,7 +706,7 @@ object Network extends api.detail.NetworkAPI {
       }
       values.length * 2 + values.foldLeft(0)((acc, arg) => {
         acc + (arg match {
-          case null | ResultWrapper.unit | None => 1
+          case null | ResultWrapper.unit | None => 4
           case _: java.lang.Boolean => 1
           case _: java.lang.Byte => 2 /* FIXME: Bytes are currently sent as shorts */
           case _: java.lang.Short => 2

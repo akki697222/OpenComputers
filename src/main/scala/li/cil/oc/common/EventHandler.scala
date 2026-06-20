@@ -49,6 +49,8 @@ import net.minecraft.Util
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent
+import net.minecraftforge.client.event.ScreenEvent
+import net.minecraft.client.Minecraft
 import net.minecraftforge.common.util.FakePlayer
 import net.minecraftforge.event.AttachCapabilitiesEvent
 import net.minecraftforge.event.TickEvent
@@ -221,8 +223,33 @@ object EventHandler {
   }
 
   @SubscribeEvent
+  @OnlyIn(Dist.CLIENT)
+  def onScreenOpening(e: ScreenEvent.Opening): Unit = syncSinglePlayerPause("Opening")
+
+  @SubscribeEvent
+  @OnlyIn(Dist.CLIENT)
+  def onScreenClosing(e: ScreenEvent.Closing): Unit = syncSinglePlayerPause("Closing")
+
+  private def syncSinglePlayerPause(eventName: String): Unit = {
+    val paused = Minecraft.getInstance.isPaused
+    if (paused != SinglePlayerPause.isPaused) {
+      // #region agent log
+      try {
+        val logPath = java.nio.file.Paths.get(System.getProperty("user.dir")).resolve("../..").resolve("debug-2d9163.log").normalize()
+        val logLine = s"""{"sessionId":"2d9163","location":"EventHandler.scala:syncSinglePlayerPause","message":"SinglePlayerPause synced","data":{"paused":$paused,"event":"$eventName"},"timestamp":${System.currentTimeMillis()},"hypothesisId":"pause-sync"}""" + "\n"
+        java.nio.file.Files.write(
+          logPath,
+          logLine.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+          java.nio.file.StandardOpenOption.CREATE,
+          java.nio.file.StandardOpenOption.APPEND)
+      } catch { case _: Throwable => }
+      // #endregion
+      SinglePlayerPause.isPaused = paused
+    }
+  }
+
+  @SubscribeEvent
   def onClientTick(e: ClientTickEvent): Unit = if (e.phase == TickEvent.Phase.START) {
-    SinglePlayerPause.isPaused = net.minecraft.client.Minecraft.getInstance.isPaused
     pendingClient.synchronized {
       val adds = pendingClient.toArray
       pendingClient.clear()
