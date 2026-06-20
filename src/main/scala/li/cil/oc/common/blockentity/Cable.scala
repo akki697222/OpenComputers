@@ -18,7 +18,7 @@ import net.minecraftforge.api.distmarker.{Dist, OnlyIn}
 import net.minecraftforge.client.model.data.ModelData
 
 class Cable(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(BlockEntityTypes.CABLE.get(), pos, state) with traits.Environment with traits.NotAnalyzable with traits.Colored {
+  extends BlockEntity(BlockEntityTypes.CABLE.get(), pos, state) with traits.Environment with traits.NotAnalyzable with traits.ImmibisMicroblock with traits.Colored {
   val node = api.Network.newNode(this, Visibility.None).create()
 
   setColor(Color.rgbValues(DyeColor.LIGHT_GRAY))

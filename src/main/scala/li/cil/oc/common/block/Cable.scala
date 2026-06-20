@@ -3,6 +3,7 @@ package li.cil.oc.common.block
 import li.cil.oc.common.block.property.PropertyCableConnection
 import li.cil.oc.common.blockentity
 import li.cil.oc.common.capabilities.Capabilities
+import li.cil.oc.server.network.MicroblockConnectivity
 import li.cil.oc.util.{Color, ItemColorizer}
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.world.entity.LivingEntity
@@ -148,7 +149,9 @@ object Cable {
     if (neighborTileEntity != null && neighborTileEntity.getLevel != null) {
       val neighborHasNode = hasNetworkNode(neighborTileEntity, fromSide.getOpposite)
       val canConnectColor = canConnectBasedOnColor(tileEntity, neighborTileEntity, defaultColor)
-      if (neighborHasNode && canConnectColor) {
+      val canConnectIM = MicroblockConnectivity.canConnectFromSide(tileEntity, fromSide) &&
+        MicroblockConnectivity.canConnectFromSide(neighborTileEntity, fromSide.getOpposite)
+      if (neighborHasNode && canConnectColor && canConnectIM) {
         if (fromState.is(state.getBlock)) {
           return CableHelper.helperSetCableShapeState(state, fromSide, PropertyCableConnection.Shape.CABLE)
         }
