@@ -13,6 +13,7 @@ import li.cil.oc.common
 import li.cil.oc.common.InventorySlots
 import li.cil.oc.common.Slot
 import li.cil.oc.common.Tier
+import li.cil.oc.common.TierMigration
 import li.cil.oc.common.block.property.PropertyRunning
 import li.cil.oc.common.menu
 import li.cil.oc.common.menu.MenuTypes
@@ -102,14 +103,14 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
   private final val TierTag = Settings.namespace + "tier"
 
   override def loadForServer(nbt: CompoundTag): Unit = {
-    tier = nbt.getByte(TierTag) max 0 min Tier.Five
+    tier = TierMigration.loadStoredTier(nbt, TierTag)
     setColor(Color.byTier(tier))
     super.loadForServer(nbt)
     isSizeInventoryReady = true
   }
 
   override def saveForServer(nbt: CompoundTag): Unit = {
-    nbt.putByte(TierTag, tier.toByte)
+    TierMigration.saveStoredTier(nbt, TierTag, tier, asByte = true)
     super.saveForServer(nbt)
   }
 

@@ -9,6 +9,7 @@ import li.cil.oc.api
 import li.cil.oc.integration.opencomputers.DriverScreen
 import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.ItemUtils
+import li.cil.oc.common.TierMigration
 import net.minecraft.world.item.ItemStack
 
 import scala.io.Source
@@ -66,7 +67,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     }
     totalEnergy = nbt.getInt(StoredEnergyTag)
     robotEnergy = nbt.getInt(RobotEnergyTag)
-    tier = nbt.getInt(TierTag)
+    tier = TierMigration.loadStoredTier(nbt, TierTag)
     components = nbt.getList(ComponentsTag, Tag.TAG_COMPOUND).
       toTagArray[CompoundTag].map(ItemStack.of(_))
     containers = nbt.getList(ContainersTag, Tag.TAG_COMPOUND).
@@ -82,7 +83,7 @@ class RobotData extends ItemData(Constants.BlockName.Robot) {
     }
     nbt.putInt(StoredEnergyTag, totalEnergy)
     nbt.putInt(RobotEnergyTag, robotEnergy)
-    nbt.putInt(TierTag, tier)
+    TierMigration.saveStoredTier(nbt, TierTag, tier, asByte = false)
     nbt.setNewTagList(ComponentsTag, components.toIterable)
     nbt.setNewTagList(ContainersTag, containers.toIterable)
     nbt.putInt(LightColorTag, lightColor)
