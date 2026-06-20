@@ -706,7 +706,7 @@ object Network extends api.detail.NetworkAPI {
       }
       values.length * 2 + values.foldLeft(0)((acc, arg) => {
         acc + (arg match {
-          case null | ResultWrapper.unit | None => 4
+          case null | ResultWrapper.unit | None => 1
           case _: java.lang.Boolean => 1
           case _: java.lang.Byte => 2 /* FIXME: Bytes are currently sent as shorts */
           case _: java.lang.Short => 2
