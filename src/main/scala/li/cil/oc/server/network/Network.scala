@@ -460,9 +460,7 @@ object Network extends api.detail.NetworkAPI {
             case Some(node: MutableNode) =>
               neighborNode match {
                 case Some(neighbor: MutableNode) if neighbor != node && neighbor.network != null =>
-                  val canConnectColor = canConnectBasedOnColor(tileEntity, neighborTileEntity)
-                  val canConnectIM = canConnectFromSideIM(tileEntity, side) && canConnectFromSideIM(neighborTileEntity, side.getOpposite)
-                  if (canConnectColor && canConnectIM) neighbor.connect(node)
+                  if (canConnectBasedOnColor(tileEntity, neighborTileEntity)) neighbor.connect(node)
                   else node.disconnect(neighbor)
                 case _ =>
               }
@@ -531,12 +529,6 @@ object Network extends api.detail.NetworkAPI {
     val (c1, c2) = (getConnectionColor(te1), getConnectionColor(te2))
     c1 == c2 || c1 == Color.rgbValues(DyeColor.LIGHT_GRAY) || c2 == Color.rgbValues(DyeColor.LIGHT_GRAY)
   }
-
-  private def canConnectFromSideIM(tileEntity: BlockEntity, side: Direction) =
-    tileEntity match {
-      case im: blockentity.traits.ImmibisMicroblock => im.ImmibisMicroblocks_isSideOpen(side.ordinal)
-      case _ => true
-    }
 
   // ----------------------------------------------------------------------- //
 

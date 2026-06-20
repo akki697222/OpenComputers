@@ -106,8 +106,8 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
 
   override def updateEntity(): Unit = {
     // If we're not yet in a network we might have just been loaded from disk,
-    // meaning there may be other tile entities that also have not re-joined
-    // the network. We skip the update this round to allow other tile entities
+    // meaning there may be other block entities that also have not re-joined
+    // the network. We skip the update this round to allow other block entities
     // to join the network, too, avoiding issues of missing nodes (e.g. in the
     // GPU which would otherwise loose track of its screen).
     if (isServer && isConnected) {
@@ -176,7 +176,6 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     }
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
     super.loadComponentsForClient(holder)
     hasErrored = holder.has(OCComponents.IS_ERRORED)

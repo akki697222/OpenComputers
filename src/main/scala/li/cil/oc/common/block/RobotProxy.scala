@@ -5,7 +5,7 @@ import li.cil.oc.client.KeyBindings
 import li.cil.oc.common.item.data.RobotData
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.server.{PacketSender, agent}
 import li.cil.oc.server.loot.LootFunctions
 import li.cil.oc.util.{BlockPosition, InventoryUtils, Tooltip}
@@ -239,5 +239,5 @@ class RobotProxy(props: Properties) extends RedstoneAware(props) with traits.Sta
     super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid)
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.ROBOT.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.ROBOT.get()
 }

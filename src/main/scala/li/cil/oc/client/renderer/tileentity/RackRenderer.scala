@@ -54,7 +54,7 @@ class RackRenderer extends TileEntityRenderer[Rack] {
       if (!rack.getItem(i).isEmpty) {
         val v0    = vOffset + i * vSize
         val v1    = vOffset + (i + 1) * vSize
-        val event = new RackMountableRenderEvent.TileEntity(rack, i, rack.lastData(i) getOrElse CompoundStorage.EMPTY, stack, buffer, rackLight, overlay, v0, v1)
+        val event = new RackMountableRenderEvent.BlockEntity(rack, i, rack.lastData(i) getOrElse CompoundStorage.EMPTY, stack, buffer, rackLight, overlay, v0, v1)
         NeoForge.EVENT_BUS.post(event)
       }
     }

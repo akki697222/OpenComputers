@@ -6,7 +6,7 @@ import li.cil.oc.api.machine.Arguments
 import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.ManagedEnvironment
-import li.cil.oc.api.prefab.DriverSidedTileEntity
+import li.cil.oc.api.prefab.DriverSidedBlockEntity
 import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.world.level.block.Block
@@ -18,8 +18,8 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.CommandBlockEntity
 import net.neoforged.neoforge.server.ServerLifecycleHooks
 
-object DriverCommandBlock extends DriverSidedTileEntity {
-  override def getTileEntityClass: Class[_] = classOf[CommandBlockEntity]
+object DriverCommandBlock extends DriverSidedBlockEntity {
+  override def getBlockEntityClass: Class[_] = classOf[CommandBlockEntity]
 
   override def createEnvironment(world: Level, pos: BlockPos, side: Direction): ManagedEnvironment =
     new Environment(world.getBlockEntity(pos).asInstanceOf[CommandBlockEntity])

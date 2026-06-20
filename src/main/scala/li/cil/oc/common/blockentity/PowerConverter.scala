@@ -19,7 +19,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class PowerConverter(pos: BlockPos, state: BlockState)
-  extends TileEntity(TileEntityTypes.POWER_CONVERTER.get(), pos, state) with traits.PowerAcceptor with traits.Environment with traits.NotAnalyzable with DeviceInfo with IBlockEntityExtension {
+  extends TileEntity(BlockEntityTypes.POWER_CONVERTER.get(), pos, state) with traits.PowerAcceptor with traits.Environment with traits.NotAnalyzable with DeviceInfo with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.None).
     withConnector(Settings.get.bufferConverter).
     create()

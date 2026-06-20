@@ -25,7 +25,7 @@ import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 
 class NetSplitter(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.NET_SPLITTER.get(), pos, state) 
+  extends BlockEntity(BlockEntityTypes.NET_SPLITTER.get(), pos, state)
     with traits.Environment with traits.OpenSides with traits.RedstoneAware with api.network.SidedEnvironment with DeviceInfo with IBlockEntityExtension {
   private lazy val deviceInfo: util.Map[String, String] = Map(
     DeviceAttribute.Class -> DeviceClass.Network,
@@ -121,7 +121,6 @@ class NetSplitter(pos: BlockPos, state: BlockState)
     nbt.putBoolean(IsInvertedTag, isInverted)
   }
 
-  @OnlyIn(Dist.CLIENT) 
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     isInverted = nbt.getBoolean(IsInvertedTag)

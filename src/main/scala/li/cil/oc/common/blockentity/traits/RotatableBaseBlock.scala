@@ -1,11 +1,9 @@
 package li.cil.oc.common.blockentity.traits
 
 import li.cil.oc.Settings
-import li.cil.oc.util.RotationHelper
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.core.{Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 
 /**
  * Like Rotatable, but stores the rotation information in the TE's NBT instead
@@ -52,7 +50,6 @@ trait RotatableBaseBlock extends Rotatable {
     nbt.putInt(YawTag, yaw.ordinal)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     pitch = Direction.from3DDataValue(nbt.getInt(PitchTag))

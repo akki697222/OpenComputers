@@ -36,7 +36,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class DiskDrive(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.DISK_DRIVE.get(), pos, state) with traits.Environment
+  extends BlockEntity(BlockEntityTypes.DISK_DRIVE.get(), pos, state) with traits.Environment
   with traits.ComponentInventory with traits.Rotatable with Analyzable with DeviceInfo with MenuProvider
     with IBlockEntityExtension{
 
@@ -145,7 +145,6 @@ class DiskDrive(pos: BlockPos, state: BlockState)
 
   private final val DiskTag = Settings.namespace + "disk"
 
-  @OnlyIn(Dist.CLIENT) 
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     if (nbt.contains(DiskTag)) {

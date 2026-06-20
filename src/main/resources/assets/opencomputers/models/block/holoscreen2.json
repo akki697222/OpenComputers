@@ -107,7 +107,7 @@
   "textures": {
     "0": "opencomputers:block/openscreens/holo_side2",
     "1": "opencomputers:block/openscreens/holo_bottom2",
-    "2": "opencomputers:block/openscreens/holo_top1",
+    "2": "opencomputers:block/openscreens/holo_top2",
     "particle": "opencomputers:block/openscreens/holo_side2"
   },
   "elements": [

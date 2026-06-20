@@ -4,7 +4,7 @@ import li.cil.oc.Settings
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.server.PacketSender
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
@@ -65,5 +65,5 @@ class Charger(props: Properties) extends RedstoneAware(props) with traits.PowerA
     super.neighborChanged(state, world, pos, block, fromPos, b)
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.CHARGER.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.CHARGER.get()
 }

@@ -235,7 +235,50 @@ object PacketSender {
         }
       }
     }
-}
+  }
+
+  def sendFileSystemActivity(node: Node, host: EnvironmentHost) = {
+    val diskActivityPacketDelay = Settings.get.diskActivitySoundDelay
+
+    if (diskActivityPacketDelay >= 0) {
+      val hostTimeouts = fileSystemAccessTimeouts.synchronized {
+        fileSystemAccessTimeouts.getOrElseUpdate(node, CacheBuilder.newBuilder().concurrencyLevel(Settings.get.threads).maximumSize(250).expireAfterWrite(diskActivityPacketDelay, TimeUnit.MILLISECONDS).build[String, java.lang.Long]())
+      }
+      val cacheKey = host match {
+        case t: BlockEntity => t.getBlockPos.toString
+        case _ => s"${host.xPosition},${host.yPosition},${host.zPosition}"
+      }
+      val lastHostTimeout = hostTimeouts.getIfPresent(cacheKey)
+      if (lastHostTimeout == null || lastHostTimeout <= System.currentTimeMillis()) {
+        val event = host match {
+          case t: BlockEntity => new FileSystemAccessEvent.Server(null, t, node)
+          case _ => new FileSystemAccessEvent.Server(null, host.getEnvironmentLevel, host.xPosition, host.yPosition, host.zPosition, node)
+        }
+        MinecraftForge.EVENT_BUS.post(event)
+        if (!event.isCanceled) {
+          hostTimeouts.put(cacheKey, System.currentTimeMillis() + diskActivityPacketDelay)
+
+          val pb = new SimplePacketBuilder(PacketType.FileSystemActivity)
+
+          pb.writeUTF(event.getSound)
+          NbtIo.write(event.getData, pb)
+          event.getBlockEntity match {
+            case t: BlockEntity =>
+              pb.writeBoolean(true)
+              pb.writeTileEntity(t)
+            case _ =>
+              pb.writeBoolean(false)
+              pb.writeUTF(event.getWorld.dimension.location.toString)
+              pb.writeDouble(event.getX)
+              pb.writeDouble(event.getY)
+              pb.writeDouble(event.getZ)
+          }
+
+          pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+        }
+      }
+    }
+  }
 
   def sendNetworkActivity(node: Node, host: EnvironmentHost): Unit = {
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * network as an index structure to find other nodes connected to them.
  */
 @SuppressWarnings("UnusedDeclaration")
-public abstract class TileEntityEnvironment extends BlockEntity implements Environment {
+public abstract class BlockEntityEnvironment extends BlockEntity implements Environment {
     private static final String TAG_NODE = "oc:node";
     private static final Logger LOGGER = LoggerFactory.getLogger(TileEntityEnvironment.class);
 
@@ -72,7 +72,7 @@ public abstract class TileEntityEnvironment extends BlockEntity implements Envir
 
     // ----------------------------------------------------------------------- //
     
-    public TileEntityEnvironment(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public BlockEntityEnvironment(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 

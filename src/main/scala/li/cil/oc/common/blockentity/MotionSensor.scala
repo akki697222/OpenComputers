@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class MotionSensor(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.MOTION_SENSOR.get(), pos, state) with traits.Environment with traits.Tickable with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.MOTION_SENSOR.get(), pos, state) with traits.Environment with traits.Tickable with IBlockEntityExtension {
   val motionSensor = new component.MotionSensor(this)
 
   def node: Node = motionSensor.node

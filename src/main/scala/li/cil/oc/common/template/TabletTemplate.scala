@@ -37,6 +37,8 @@ object TabletTemplate extends Template {
 
   def selectTier2(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.TabletCaseTier2)
 
+  def selectTier3(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.TabletCaseTier3)
+
   def selectCreative(stack: ItemStack) = api.Items.get(stack) == api.Items.get(Constants.ItemName.TabletCaseCreative)
 
   def validate(inventory: Container): Array[AnyRef] = validateComputer(inventory)
@@ -113,6 +115,32 @@ object TabletTemplate extends Template {
         (Slot.Memory, Tier.Two),
         (Slot.EEPROM, Tier.Any),
         (Slot.HDD, Tier.Two)
+      ).map(toPair)))
+
+    // Tier 3
+    api.IMC.registerAssemblerTemplate(
+      "Tablet (Tier 3)",
+      "li.cil.oc.common.template.TabletTemplate.selectTier3",
+      "li.cil.oc.common.template.TabletTemplate.validate",
+      "li.cil.oc.common.template.TabletTemplate.assemble",
+      hostClass,
+      Array(
+        Tier.Three
+      ),
+      Array(
+        Tier.Four,
+        Tier.Three,
+        Tier.Three
+      ),
+      asJavaIterable(Iterable(
+        (Slot.Card, Tier.Four),
+        (Slot.Card, Tier.Three),
+        null,
+        (Slot.CPU, Tier.Four),
+        (Slot.Memory, Tier.Three),
+        (Slot.Memory, Tier.Three),
+        (Slot.EEPROM, Tier.Any),
+        (Slot.HDD, Tier.Three)
       ).map(toPair)))
 
     // Creative

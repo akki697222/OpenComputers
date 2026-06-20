@@ -67,7 +67,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 // class that was held by the old proxy to it and can then safely forget the
 // old proxy, which will be cleaned up by Minecraft like any other tile entity.
 class Robot(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state) with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock
+  extends BlockEntity(BlockEntityTypes.ROBOT.get(), pos, state) with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock
   with IFluidHandler with internal.Robot with InventorySelection with TankSelection with MenuProvider
     with IBlockEntityExtension {
 
@@ -537,7 +537,7 @@ class Robot(pos: BlockPos, state: BlockState)
             attributeInstance.addTransientModifier(attributeModifier)
           }
         })
-        
+
         ServerPacketSender.sendRobotInventory(this, slot, stack)
       }
       if (isUpgradeSlot(slot)) {

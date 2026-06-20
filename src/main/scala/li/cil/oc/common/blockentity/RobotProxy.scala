@@ -32,7 +32,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction
 
 class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
-  extends BlockEntity(TileEntityTypes.ROBOT.get(), pos, state)
+  extends BlockEntity(BlockEntityTypes.ROBOT.get(), pos, state)
   with traits.Computer with traits.PowerInformation with traits.RotatableBaseBlock with WorldlyContainer with IFluidHandler with internal.Robot
     with IBlockEntityExtension{
 
@@ -186,7 +186,6 @@ class RobotProxy(pos: BlockPos, state: BlockState, val robot: Robot)
 
   override def loadData(holder: DataComponentHolder): Unit = robot.loadData(holder)
 
-  @OnlyIn(Dist.CLIENT)
   override def loadComponentsForClient(holder: DataComponentHolder): Unit = robot.loadComponentsForClient(holder)
 
   @OnlyIn(Dist.CLIENT)

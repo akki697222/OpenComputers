@@ -31,7 +31,7 @@ import java.util
 import scala.collection.immutable.ArraySeq
 
 class Rack(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
+  extends BlockEntity(BlockEntityTypes.RACK.get(), pos, state) with traits.PowerAcceptor with traits.Hub with traits.PowerBalancer
   with traits.ComponentInventory with traits.Rotatable with traits.BundledRedstoneAware with Analyzable with internal.Rack with traits.StateAware with MenuProvider
     with IBlockEntityExtension {
 

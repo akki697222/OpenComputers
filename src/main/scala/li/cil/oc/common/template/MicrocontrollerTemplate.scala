@@ -24,6 +24,8 @@ object MicrocontrollerTemplate extends Template {
   def selectTier1(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier1)
 
   def selectTier2(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier2)
+  
+  def selectTier3(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.MicrocontrollerCaseTier3)
 
   def selectTierCreative(stack: ItemStack): Boolean = api.Items.get(stack) == api.Items.get(Constants.ItemName.MicrocontrollerCaseCreative)
 
@@ -93,6 +95,27 @@ object MicrocontrollerTemplate extends Template {
         (Slot.EEPROM, Tier.Any)
       ).map(toPair)))
 
+    // Tier 3
+    api.IMC.registerAssemblerTemplate(
+      "Microcontroller (Tier 3)",
+      "li.cil.oc.common.template.MicrocontrollerTemplate.selectTier3",
+      "li.cil.oc.common.template.MicrocontrollerTemplate.validate",
+      "li.cil.oc.common.template.MicrocontrollerTemplate.assemble",
+      hostClass,
+      null,
+      Array(
+        Tier.Four
+      ),
+      asJavaIterable(Iterable(
+        (Slot.Card, Tier.Two),
+        (Slot.Card, Tier.Two),
+        null,
+        (Slot.CPU, Tier.One),
+        (Slot.Memory, Tier.Two),
+        (Slot.Memory, Tier.One),
+        (Slot.EEPROM, Tier.Any)
+      ).map(toPair)))
+    
     // Creative
     api.IMC.registerAssemblerTemplate(
       "Microcontroller (Creative)",

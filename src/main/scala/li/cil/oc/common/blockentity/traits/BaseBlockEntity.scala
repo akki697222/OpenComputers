@@ -50,7 +50,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
   override def onChunkUnloaded(): Unit = {
     super.onChunkUnloaded()
     try dispose() catch {
-      case t: Throwable => OpenComputers.log.error("Failed properly disposing a tile entity, things may leak and or break.", t)
+      case t: Throwable => OpenComputers.log.error("Failed properly disposing a block entity, things may leak and or break.", t)
     }
   }
 
@@ -75,16 +75,14 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     super.saveAdditional(nbt, provider)
   }
 
-  @OnlyIn(Dist.CLIENT)
   @deprecatedOverriding("use loadComponentsForClient()", since = "NeoForge 1.21+")
   def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {}
 
-  @OnlyIn(Dist.CLIENT)
   @deprecatedOverriding("use saveComponentsForClient()", since = "NeoForge 1.21+")
   def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     nbt.putBoolean(IsServerDataTag, false)
   }
-  
+
   def loadComponentsCommon(holder: DataComponentHolder): Unit = {}
   def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {}
   def loadComponentsForServer(holder: DataComponentHolder): Unit = {}
@@ -151,7 +149,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     SaveHandler.savingForClients = true
     try {
       try saveForClient(nbt, provider) catch {
-        case e: Throwable => OpenComputers.log.warn("There was a problem writing a TileEntity description packet. Please report this if you see it!", e)
+        case e: Throwable => OpenComputers.log.warn("There was a problem writing a BlockEntity description packet. Please report this if you see it!", e)
       }
     } finally {
       SaveHandler.savingForClients = false
@@ -162,7 +160,7 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
 
   override def onDataPacket(manager: Connection, packet: ClientboundBlockEntityDataPacket, provider: HolderLookup.Provider): Unit = {
     try loadForClient(packet.getTag, provider) catch {
-      case e: Throwable => OpenComputers.log.warn("There was a problem reading a TileEntity description packet. Please report this if you see it!", e)
+      case e: Throwable => OpenComputers.log.warn("There was a problem reading a BlockEntity description packet. Please report this if you see it!", e)
     }
   }
   

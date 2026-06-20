@@ -52,6 +52,10 @@ public final class MenuTypes {
             MENU.register("disk_drive", () -> IMenuTypeExtension.create(
                     (id, plr, buff) -> new DiskDrive(id, plr, new SimpleContainer(1))));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<HoloScreen>> HOLO_SCREEN =
+            MENU.register("holo_screen", () -> IMenuTypeExtension.create(
+                    (id, plr, buff) -> new HoloScreen(id, plr, new SimpleContainer(1))));
+
     public static final DeferredHolder<MenuType<?>, MenuType<Drone>> DRONE =
             MENU.register("drone", () -> IMenuTypeExtension.create((id, plr, buff) -> {
                 int invSize = buff.readVarInt();
@@ -139,6 +143,10 @@ public final class MenuTypes {
 
     public static void openDiskDriveGui(ServerPlayer player, li.cil.oc.common.container.DiskDriveMountableInventory diskDrive) {
         player.openMenu(diskDrive);
+    }
+
+    public static void openHoloScreenGui(ServerPlayer player, li.cil.oc.common.blockentity.HoloScreen screen) {
+        NetworkHooks.openScreen(player, screen);
     }
 
     public static void openDroneGui(ServerPlayer player, li.cil.oc.common.entity.Drone drone) {

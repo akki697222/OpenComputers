@@ -2,18 +2,17 @@ package li.cil.oc.common.blockentity
 
 import com.google.common.base.Charsets
 import dan200.computercraft.api.peripheral.IComputerAccess
-import li.cil.oc.{Constants, Localization, Settings, api}
 import li.cil.oc.api.Driver
 import li.cil.oc.api.detail.ItemInfo
 import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network._
 import li.cil.oc.common._
 import li.cil.oc.common.datacomponents.OCComponents
-import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.integration.Mods
-import li.cil.oc.integration.opencomputers.DriverLinkedCard
 import li.cil.oc.server.PacketSender
 import li.cil.oc.server.network.QuantumNetwork
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import li.cil.oc.{Constants, Localization, Settings, api}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.{CompoundTag, ListTag, Tag}
 import net.minecraft.world.MenuProvider
@@ -28,7 +27,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.mutable
 
 class Relay(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.RELAY.get(), pos, state) with traits.Hub with traits.ComponentInventory
+  extends BlockEntity(BlockEntityTypes.RELAY.get(), pos, state) with traits.Hub with traits.ComponentInventory
   with traits.PowerAcceptor with Analyzable with WirelessEndpoint with QuantumNetwork.QuantumNode with MenuProvider
     with IBlockEntityExtension {
 

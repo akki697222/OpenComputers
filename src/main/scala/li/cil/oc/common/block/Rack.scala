@@ -5,7 +5,7 @@ import li.cil.oc.api.component.RackMountable
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -75,5 +75,5 @@ class Rack(props: Properties) extends RedstoneAware(props) with traits.PowerAcce
     new Vector3d(v.x * cos - v.z * sin, v.y, v.x * sin + v.z * cos)
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.RACK.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.RACK.get()
 }

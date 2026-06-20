@@ -3,7 +3,7 @@ package li.cil.oc.common.block
 import com.mojang.serialization.MapCodec
 import li.cil.oc.common.block.CarpetedCapacitor.CODEC
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.level.block.state.BlockState
@@ -14,7 +14,7 @@ class CarpetedCapacitor(props: Properties) extends Capacitor(props) with traits.
   
   override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.CarpetedCapacitor(pos, state)
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.CARPETED_CAPACITOR.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.CARPETED_CAPACITOR.get()
 }
 
 object CarpetedCapacitor {

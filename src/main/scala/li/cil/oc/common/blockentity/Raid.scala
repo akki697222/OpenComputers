@@ -1,8 +1,8 @@
 package li.cil.oc.common.blockentity
 
+import li.cil.oc.api.Driver
 import li.cil.oc.api.fs.Label
 import li.cil.oc.api.network.{Analyzable, Visibility}
-import li.cil.oc.api.{Driver, Persistable}
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.item.data.DriveData
 import li.cil.oc.common.{Slot, menu}
@@ -12,13 +12,12 @@ import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.{Settings, api}
 import net.minecraft.core.component.{DataComponentHolder, DataComponentMap}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
-import net.minecraft.nbt.{ByteArrayTag, CompoundTag}
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.player.{Inventory, Player}
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
-import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
@@ -27,7 +26,7 @@ import java.util.UUID
 import java.util.function.Consumer
 
 class Raid(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.RAID.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable with Analyzable with MenuProvider
+  extends BlockEntity(BlockEntityTypes.RAID.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable with Analyzable with MenuProvider
     with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.None).create()
 
@@ -141,18 +140,18 @@ class Raid(pos: BlockPos, state: BlockState)
   private final val FileSystemTag = Settings.namespace + "fs"
   private final val PresenceTag = Settings.namespace + "presence"
   private final val LabelTag = Settings.namespace + "label"
-  
+
   override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
     super.loadComponentsForServer(holder)
-    
+
     for(address <- holder.getComponent(OCComponents.ADDRESS)) {
       tryCreateRaid(address)
-      
+
       for(fs <- filesystem) {
         fs.loadData(holder)
       }
     }
-    
+
     label.loadData(holder)
   }
 

@@ -65,7 +65,21 @@ object PacketHandler extends CommonPacketHandler {
       case PacketType.ServerPower => onServerPower(p)
       case PacketType.TextBufferInit => onTextBufferInit(p)
       case PacketType.WaypointLabel => onWaypointLabel(p)
+      case PacketType.HoloScreenResize => onHoloScreenResize(p)
       case _ => // Invalid packet.
+    }
+  }
+
+  def onHoloScreenResize(p: PacketParser): Unit = {
+    val screen = p.readBlockEntity[HoloScreen]()
+    val side = p.readDirection()
+    (screen, side, p.player) match {
+      case (Some(holo), Some(resizeSide), player: ServerPlayer)
+        if player.distanceToSqr(holo.x + 0.5, holo.y + 0.5, holo.z + 0.5) <= 64 =>
+        if (holo.resize(resizeSide)) {
+          holo.getLevel.sendBlockUpdated(holo.getBlockPos, holo.getBlockState, holo.getBlockState, 3)
+        }
+      case _ =>
     }
   }
 

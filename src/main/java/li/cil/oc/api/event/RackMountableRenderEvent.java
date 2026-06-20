@@ -94,7 +94,7 @@ public abstract class RackMountableRenderEvent extends Event {
      * origin will fill the full front face of the rack (i.e. rotation and translation
      * have already been applied).
      */
-    public static class TileEntity extends RackMountableRenderEvent {
+    public static class BlockEntity extends RackMountableRenderEvent {
         /**
          * The transformation used by the rendering engine.
          */
@@ -117,7 +117,7 @@ public abstract class RackMountableRenderEvent extends Event {
          */
         public final float v0, v1;
 
-        public TileEntity(final Rack rack, final int mountable, final DataComponentHolder data, final PoseStack stack, final MultiBufferSource typeBuffer, final int light, final int overlay, final float v0, final float v1) {
+        public BlockEntity(final Rack rack, final int mountable, final DataComponentHolder data, final PoseStack stack, final MultiBufferSource typeBuffer, final int light, final int overlay, final float v0, final float v1) {
             super(rack, mountable, data);
             this.stack = stack;
             this.typeBuffer = typeBuffer;

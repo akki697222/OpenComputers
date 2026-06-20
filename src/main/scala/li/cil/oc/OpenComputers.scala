@@ -2,7 +2,7 @@ package li.cil.oc
 
 import li.cil.oc.common.{IMC, Proxy}
 import li.cil.oc.common.block.ChameliumBlock
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.entity.EntityTypes
 import li.cil.oc.common.init.{Blocks, Items}
@@ -56,13 +56,13 @@ class OpenComputers(modBus: IEventBus, modContainer: ModContainer) {
   }
 
   Settings.load(FMLPaths.CONFIGDIR.get().resolve(Paths.get("opencomputers", "settings.conf")).toFile())
-  
+
   modBus.register(this)
   OCComponents.REGISTRAR.register(modBus)
   Items.init(modBus)
   Blocks.init(modBus)
   CreativeTab.CREATIVE_TABS.register(modBus)
-  TileEntityTypes.init(modBus)
+  BlockEntityTypes.init(modBus)
   Recipes.init(modBus)
   LootFunctions.init(modBus)
   EntityTypes.ENTITY_TYPES.register(modBus)

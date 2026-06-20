@@ -23,7 +23,7 @@ import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Waypoint(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.WAYPOINT.get(), pos, state) with traits.Environment with traits.Rotatable with traits.RedstoneAware with traits.Tickable with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.WAYPOINT.get(), pos, state) with traits.Environment with traits.Rotatable with traits.RedstoneAware with traits.Tickable with IBlockEntityExtension {
   val node = api.Network.newNode(this, Visibility.Network).
     withComponent("waypoint").
     create()

@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec
 import li.cil.oc.common.block.Adapter.CODEC
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.integration.util.Wrench
 import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, simpleCodec}
 import net.minecraft.world.level.block.Block
@@ -71,7 +71,7 @@ class Adapter(props: Properties) extends SimpleBlock(props) with traits.GUI with
     else super.localOnBlockActivated(world, pos, player, hand, heldItem, side, hitX, hitY, hitZ)
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.ADAPTER.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.ADAPTER.get()
 }
 
 object Adapter {

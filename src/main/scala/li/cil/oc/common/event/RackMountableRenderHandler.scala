@@ -26,9 +26,10 @@ object RackMountableRenderHandler {
   )
 
   lazy val TerminalServer = api.Items.get(Constants.ItemName.TerminalServer)
+  lazy val CapacitorMountable = api.Items.get(Constants.ItemName.CapacitorMountable)
 
   @SubscribeEvent
-  def onRackMountableRendering(e: RackMountableRenderEvent.TileEntity): Unit = {
+  def onRackMountableRendering(e: RackMountableRenderEvent.BlockEntity): Unit = {
     if (e.data != null && DiskDriveMountable == api.Items.get(e.rack.getItem(e.mountable))) {
       // Disk drive.
 
@@ -92,9 +93,15 @@ object RackMountableRenderHandler {
         renderOverlayFromAtlas(e, Textures.Block.RackTerminalServerPresence, u0, u1)
       }
     }
+    else if (e.data != null && CapacitorMountable == api.Items.get(e.rack.getItem(e.mountable))) {
+      // Render overlay if active (it has power)
+      if (e.data.getBoolean("hasEnergy")) {
+        renderOverlayFromAtlas(e, Textures.Block.RackCapacitorOn)
+      }
+    }
   }
 
-  private def renderOverlayFromAtlas(e: RackMountableRenderEvent.TileEntity, texture: ResourceLocation, u0: Float = 0, u1: Float = 1): Unit = {
+  private def renderOverlayFromAtlas(e: RackMountableRenderEvent.BlockEntity, texture: ResourceLocation, u0: Float = 0, u1: Float = 1): Unit = {
     val matrix = e.stack.last.pose
     val r = e.typeBuffer.getBuffer(RenderTypes.BLOCK_OVERLAY)
     val icon = Textures.getSprite(texture)
@@ -109,14 +116,14 @@ object RackMountableRenderHandler {
     if (DiskDriveMountable == api.Items.get(e.rack.getItem(e.mountable))) {
       // Disk drive.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackDiskDrive))
-    }
-    else if (Servers.contains(api.Items.get(e.rack.getItem(e.mountable)))) {
+    } else if (Servers.contains(api.Items.get(e.rack.getItem(e.mountable)))) {
       // Server.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackServer))
-    }
-    else if (TerminalServer == api.Items.get(e.rack.getItem(e.mountable))) {
+    } else if (TerminalServer == api.Items.get(e.rack.getItem(e.mountable))) {
       // Terminal server.
       e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackTerminalServer))
+    } else if (CapacitorMountable == api.Items.get(e.rack.getItem(e.mountable))) {
+      e.setFrontTextureOverride(Textures.getSprite(Textures.Block.RackCapacitor))
     }
   }
 }

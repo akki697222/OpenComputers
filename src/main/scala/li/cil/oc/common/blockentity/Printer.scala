@@ -27,7 +27,7 @@ import java.util
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Printer(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.PRINTER.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable
+  extends BlockEntity(BlockEntityTypes.PRINTER.get(), pos, state) with traits.Environment with traits.Inventory with traits.Rotatable
   with SidedEnvironment with traits.StateAware with traits.Tickable with WorldlyContainer with DeviceInfo with MenuProvider
     with IBlockEntityExtension {
 
@@ -344,8 +344,7 @@ class Printer(pos: BlockPos, state: BlockState)
     nbt.putDouble(RemainingTag, requiredEnergy)
   }
 
-  @OnlyIn(Dist.CLIENT) override
-  def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
+  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     data.loadData(nbt.getCompound(DataTag), provider)
     requiredEnergy = nbt.getDouble(RemainingTag)

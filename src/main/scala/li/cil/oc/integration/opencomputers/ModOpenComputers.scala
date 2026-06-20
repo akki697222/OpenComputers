@@ -148,6 +148,7 @@ object ModOpenComputers extends ModProxy {
     api.Driver.add(DriverScreen)
     api.Driver.add(DriverTransposer)
 
+    api.Driver.add(DriverCapacitorMountable)
     api.Driver.add(DriverDiskDriveMountable)
     api.Driver.add(DriverServer)
     api.Driver.add(DriverTerminalServer)

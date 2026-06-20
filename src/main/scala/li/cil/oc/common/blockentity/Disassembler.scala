@@ -1,44 +1,33 @@
 package li.cil.oc.common.blockentity
 
-import java.util
-import li.cil.oc.Constants
-import li.cil.oc.api.driver.DeviceInfo.DeviceAttribute
-import li.cil.oc.api.driver.DeviceInfo.DeviceClass
-import li.cil.oc.Settings
-import li.cil.oc.api
+import li.cil.oc.{Constants, Settings, api}
 import li.cil.oc.api.driver.DeviceInfo
-import li.cil.oc.api.network.Connector
-import li.cil.oc.api.network.Visibility
+import li.cil.oc.api.driver.DeviceInfo.{DeviceAttribute, DeviceClass}
+import li.cil.oc.api.network.{Connector, Visibility}
 import li.cil.oc.api.util.StateAware
 import li.cil.oc.common.menu
-import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.template.DisassemblerTemplates
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
-import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.ExtendedNBT._
-import li.cil.oc.util.InventoryUtils
-import li.cil.oc.util.ItemUtils
+import li.cil.oc.util.{BlockPosition, InventoryUtils, ItemUtils}
 import net.minecraft.core.component.DataComponents
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.entity.player.Inventory
-import net.minecraft.world.MenuProvider
-import net.minecraft.world.item.ItemStack
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
-import net.minecraft.nbt.Tag
+import net.minecraft.nbt.{CompoundTag, Tag}
+import net.minecraft.world.MenuProvider
+import net.minecraft.world.entity.player.{Inventory, Player}
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
+import java.util
 import scala.collection.convert.ImplicitConversionsToJava._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class Disassembler(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.DISASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
+  extends BlockEntity(BlockEntityTypes.DISASSEMBLER.get(), pos, state) with traits.Environment with traits.PowerAcceptor
   with traits.Inventory with traits.StateAware with traits.PlayerInputAware with traits.Tickable with DeviceInfo with MenuProvider
     with IBlockEntityExtension {
 
@@ -177,7 +166,6 @@ class Disassembler(pos: BlockPos, state: BlockState)
     nbt.putDouble(TotalTag, totalRequiredEnergy)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     isActive = nbt.getBoolean(IsActiveTag)

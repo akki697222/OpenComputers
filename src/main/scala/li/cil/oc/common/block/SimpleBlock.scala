@@ -38,15 +38,15 @@ abstract class SimpleBlock(props: Properties) extends ContainerBlock(props) {
   override protected def codec(): com.mojang.serialization.MapCodec[_ <: SimpleBlock] = com.mojang.serialization.MapCodec.unit(this)
 
   @Deprecated
-  private var unlocalizedName = super.getDescriptionId()
+  private var unlocalizedName = super.getDescriptionId
 
   @Deprecated
-  private[oc] def setUnlocalizedName(name: String): Unit = unlocalizedName = "tile." + name
+  private[oc] def setUnlocalizedName(name: String): Unit = unlocalizedName = "blockentity." + name
 
   @Deprecated
-  override def getDescriptionId = unlocalizedName
+  override def getDescriptionId: String = unlocalizedName
 
-  protected val validRotations_ = Array(Direction.UP, Direction.DOWN)
+  protected val validRotations_ : Array[Direction] = Array(Direction.UP, Direction.DOWN)
 
   def createItemStack(amount: Int = 1) = new ItemStack(this, amount)
 

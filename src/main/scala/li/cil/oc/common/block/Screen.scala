@@ -8,7 +8,7 @@ import li.cil.oc.api
 import li.cil.oc.client.gui
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.integration.util.Wrench
 import li.cil.oc.util.PackedColor
 import li.cil.oc.util.RotationHelper
@@ -137,5 +137,5 @@ class Screen(props: Properties, val tier: Int) extends RedstoneAware(props) with
       case _ => super.getValidRotations(world, pos)
     }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.SCREEN.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.SCREEN.get()
 }

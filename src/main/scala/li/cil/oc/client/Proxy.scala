@@ -1,32 +1,22 @@
 package li.cil.oc.client
 
 import com.mojang.blaze3d.systems.RenderSystem
-import li.cil.oc.api
-import li.cil.oc.client
+import li.cil.oc.{api, client}
 import li.cil.oc.client.gui.GuiTypes
-import li.cil.oc.client.renderer.HighlightRenderer
-import li.cil.oc.client.renderer.MFUTargetRenderer
-import li.cil.oc.client.renderer.PetRenderer
-import li.cil.oc.client.renderer.TextBufferRenderCache
-import li.cil.oc.client.renderer.WirelessNetworkDebugRenderer
-import li.cil.oc.client.renderer.block.ModelInitialization
-import li.cil.oc.client.renderer.block.NetSplitterModel
+import li.cil.oc.client.renderer._
+import li.cil.oc.client.renderer.block.{ModelInitialization, NetSplitterModel}
 import li.cil.oc.client.renderer.entity.{DroneRenderer, ModelQuadcopter}
 import li.cil.oc.client.renderer.tileentity._
-import li.cil.oc.common.{PacketHandler => CommonPacketHandler}
-import li.cil.oc.common.{Proxy => CommonProxy}
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.common.component.TextBuffer
 import li.cil.oc.common.entity.EntityTypes
-import li.cil.oc.common.event.NanomachinesHandler
-import li.cil.oc.common.event.RackMountableRenderHandler
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.event.{NanomachinesHandler, RackMountableRenderHandler}
+import li.cil.oc.common.{PacketHandler => CommonPacketHandler, Proxy => CommonProxy}
 import li.cil.oc.util.Audio
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
-import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.Block
 import net.neoforged.bus.api.{IEventBus, SubscribeEvent}
-import net.neoforged.fml.ModLoadingContext
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
 import net.neoforged.neoforge.common.NeoForge
@@ -65,6 +55,7 @@ private[oc] class Proxy(modBus: IEventBus) extends CommonProxy(modBus) {
       NeoForge.EVENT_BUS.register(WirelessNetworkDebugRenderer)
       NeoForge.EVENT_BUS.register(Audio)
       NeoForge.EVENT_BUS.register(HologramRenderer)
+      NeoForge.EVENT_BUS.register(ScreenRenderer)
     }): Runnable)
 
     RenderSystem.recordRenderCall(() => NeoForge.EVENT_BUS.register(TextBufferRenderCache))
@@ -86,24 +77,24 @@ private[oc] class Proxy(modBus: IEventBus) extends CommonProxy(modBus) {
   def onRegisterRenderers(e: EntityRenderersEvent.RegisterRenderers): Unit = {
     e.registerEntityRenderer(EntityTypes.DRONE.get(), ctx => new DroneRenderer(ctx))
 
-    BlockEntityRenderers.register(TileEntityTypes.ADAPTER.get(), AdapterRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.ASSEMBLER.get(), AssemblerRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.CASE.get(), CaseRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.CHARGER.get(), ChargerRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.DISASSEMBLER.get(), DisassemblerRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.DISK_DRIVE.get(), DiskDriveRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.GEOLYZER.get(), GeolyzerRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.HOLOGRAM.get(), HologramRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.MICROCONTROLLER.get(), ctx => new MicrocontrollerRenderer(ctx))
-    BlockEntityRenderers.register(TileEntityTypes.NET_SPLITTER.get(), ctx => new NetSplitterRenderer(ctx))
-    BlockEntityRenderers.register(TileEntityTypes.POWER_DISTRIBUTOR.get(), PowerDistributorRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.PRINTER.get(), PrinterRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.RAID.get(), RaidRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.RACK.get(), RackRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.RELAY.get(), RelayRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.ROBOT.get(), RobotRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.SCREEN.get(), ScreenRenderer)
-    BlockEntityRenderers.register(TileEntityTypes.TRANSPOSER.get(), TransposerRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.ADAPTER.get(), AdapterRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.ASSEMBLER.get(), AssemblerRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.CASE.get(), CaseRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.CHARGER.get(), ChargerRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.DISASSEMBLER.get(), DisassemblerRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.DISK_DRIVE.get(), DiskDriveRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.GEOLYZER.get(), GeolyzerRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.HOLOGRAM.get(), HologramRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.MICROCONTROLLER.get(), ctx => new MicrocontrollerRenderer(ctx))
+    BlockEntityRenderers.register(BlockEntityTypes.NET_SPLITTER.get(), ctx => new NetSplitterRenderer(ctx))
+    BlockEntityRenderers.register(BlockEntityTypes.POWER_DISTRIBUTOR.get(), PowerDistributorRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.PRINTER.get(), PrinterRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.RAID.get(), RaidRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.RACK.get(), RackRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.RELAY.get(), RelayRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.ROBOT.get(), RobotRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.SCREEN.get(), ScreenRenderer)
+    BlockEntityRenderers.register(BlockEntityTypes.TRANSPOSER.get(), TransposerRenderer)
   }
 
   @SubscribeEvent

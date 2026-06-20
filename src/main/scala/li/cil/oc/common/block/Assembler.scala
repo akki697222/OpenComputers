@@ -5,7 +5,7 @@ import li.cil.oc.Settings
 import li.cil.oc.common.block.Assembler.CODEC
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import net.minecraft.world.level.block.state.BlockBehaviour.{Properties, simpleCodec}
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -37,9 +37,9 @@ class Assembler(props: Properties) extends SimpleBlock(props) with traits.PowerA
     case _ =>
   }
 
-  override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.Assembler(pos, state)
+  override def newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = new blockentity.Assembler(pos, state)
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.ASSEMBLER.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.ASSEMBLER.get()
 }
 
 object Assembler {

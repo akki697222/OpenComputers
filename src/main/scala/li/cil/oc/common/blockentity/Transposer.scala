@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Transposer(pos: BlockPos, state: BlockState) 
-  extends BlockEntity(TileEntityTypes.TRANSPOSER.get(), pos, state) with traits.Environment with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.TRANSPOSER.get(), pos, state) with traits.Environment with IBlockEntityExtension {
   val transposer = new component.Transposer.Block(this)
 
   def node = transposer.node

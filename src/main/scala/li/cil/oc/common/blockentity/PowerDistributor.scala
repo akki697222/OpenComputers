@@ -14,7 +14,7 @@ import net.neoforged.api.distmarker.OnlyIn
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class PowerDistributor(pos: BlockPos, state: BlockState)
-  extends BlockEntity(TileEntityTypes.POWER_DISTRIBUTOR.get(), pos, state) with traits.Environment with traits.PowerBalancer with traits.NotAnalyzable with IBlockEntityExtension {
+  extends BlockEntity(BlockEntityTypes.POWER_DISTRIBUTOR.get(), pos, state) with traits.Environment with traits.PowerBalancer with traits.NotAnalyzable with IBlockEntityExtension {
   val node = null
 
   private val nodes = Array.fill(6)(api.Network.newNode(this, Visibility.None).

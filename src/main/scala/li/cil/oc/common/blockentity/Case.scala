@@ -36,7 +36,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import scala.collection.convert.ImplicitConversionsToJava._
 
 class Case(pos: BlockPos, state: BlockState, var tier: Int)
-  extends BlockEntity(TileEntityTypes.CASE.get(), pos, state) with traits.PowerAcceptor with traits.Computer
+  extends BlockEntity(BlockEntityTypes.CASE.get(), pos, state) with traits.PowerAcceptor with traits.Computer
     with traits.Colored with internal.Case with DeviceInfo with MenuProvider with IBlockEntityExtension {
   def this(pos: BlockPos, state: BlockState) = {
     this(pos, state, 0)

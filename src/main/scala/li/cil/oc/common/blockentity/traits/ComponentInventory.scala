@@ -1,18 +1,14 @@
 package li.cil.oc.common.blockentity.traits
 
 import li.cil.oc.api.driver.DriverItem
-import li.cil.oc.api.network.ManagedEnvironment
-import li.cil.oc.api.network.Node
-import li.cil.oc.common.EventHandler
-import li.cil.oc.common.container
+import li.cil.oc.api.network.{ManagedEnvironment, Node}
+import li.cil.oc.common.{EventHandler, container}
 import li.cil.oc.util.ExtendedInventory._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
-import net.minecraft.world.item.ItemStack
+import net.minecraft.core.HolderLookup
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.core.{Direction, HolderLookup}
-import net.neoforged.api.distmarker.Dist
-import net.neoforged.api.distmarker.OnlyIn
+import net.minecraft.world.item.ItemStack
 
 import scala.collection.mutable
 
@@ -157,7 +153,6 @@ trait ComponentInventory extends Environment with Inventory with container.Compo
     saveData(nbt, provider)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     loadData(nbt, provider)

@@ -39,14 +39,15 @@ public class RenderTypes extends RenderType {
             // 48*48*48 voxels * 6 faces * 4 verts * ~8 bytes = ~25 MB worst case; 1<<22 is a safe upper bound.
             1 << 22,
             false,
-            false,
+            true,
             RenderType.CompositeState.builder()
                     .setShaderState(POSITION_COLOR_SHADER)
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setDepthTestState(LEQUAL_DEPTH_TEST)
                     .setCullState(NO_CULL)
+                    .setOutputState(TRANSLUCENT_TARGET)
                     .setWriteMaskState(COLOR_WRITE)
-                    .createCompositeState(false));
+                    .createCompositeState(true));
 
 
     private static RenderType createUpgrade(String name, ResourceLocation texture) {

@@ -22,7 +22,7 @@ import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 import java.util
 
 class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => Boolean], val scheduleUpdate: Option[Int => Unit], val onStateChange: Option[() => Unit])
-  extends BlockEntity(TileEntityTypes.PRINT.get(), pos, blockState) with traits.BaseBlockEntity with traits.RedstoneAware with traits.RotatableBaseBlock
+  extends BlockEntity(BlockEntityTypes.PRINT.get(), pos, blockState) with traits.BaseBlockEntity with traits.RedstoneAware with traits.RotatableBaseBlock
     with IBlockEntityExtension {
 
   def this(pos: BlockPos, blockState: BlockState) = this(pos, blockState, None, None, None)
@@ -136,7 +136,6 @@ class Print(pos: BlockPos, blockState: BlockState, val canToggle: Option[() => B
     nbt.putBoolean(StateTag, state)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     data.loadData(nbt.getCompound(DataTag), provider)

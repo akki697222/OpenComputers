@@ -7,7 +7,7 @@ import li.cil.oc.common.block.Case.CODEC
 import li.cil.oc.common.block.property.PropertyRotatable
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.blockentity
-import li.cil.oc.common.blockentity.TileEntityTypes
+import li.cil.oc.common.blockentity.BlockEntityTypes
 import li.cil.oc.util.Tooltip
 import net.minecraft.core.{BlockPos, Direction}
 import net.minecraft.network.chat.{Component => ITextComponent}
@@ -92,7 +92,7 @@ class Case(props: Properties, val tier: Int) extends RedstoneAware(props) with t
     }
   }
 
-  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = TileEntityTypes.CASE.get()
+  override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.CASE.get()
 }
 
 object Case {

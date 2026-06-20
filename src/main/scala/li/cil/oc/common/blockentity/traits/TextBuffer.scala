@@ -57,7 +57,6 @@ trait TextBuffer extends Environment with Tickable {
     buffer.saveData(nbt, provider)
   }
 
-  @OnlyIn(Dist.CLIENT)
   override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.loadForClient(nbt, provider)
     reapplyTierToBuffer()

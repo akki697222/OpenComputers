@@ -102,6 +102,7 @@ object PacketType extends Enumeration {
   RobotAssemblerStart,
   RobotStateRequest,
   ServerPower,
+  HoloScreenResize,
 
   EndOfList = Value
 }
