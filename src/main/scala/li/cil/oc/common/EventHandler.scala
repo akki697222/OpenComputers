@@ -222,6 +222,7 @@ object EventHandler {
 
   @SubscribeEvent
   def onClientTick(e: ClientTickEvent): Unit = if (e.phase == TickEvent.Phase.START) {
+    SinglePlayerPause.isPaused = net.minecraft.client.Minecraft.getInstance.isPaused
     pendingClient.synchronized {
       val adds = pendingClient.toArray
       pendingClient.clear()
