@@ -7,7 +7,10 @@ import li.cil.oc.api.machine.Callback
 import li.cil.oc.api.machine.Context
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.common.EventHandler
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.server.network.Waypoints
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.entity.BlockEntityType
@@ -16,6 +19,7 @@ import net.neoforged.api.distmarker.OnlyIn
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 class Waypoint(pos: BlockPos, state: BlockState)
@@ -68,27 +72,14 @@ class Waypoint(pos: BlockPos, state: BlockState)
 
   // ----------------------------------------------------------------------- //
 
-  private final val LabelTag = Settings.namespace + "label"
-
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-    label = nbt.getString(LabelTag)
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    super.loadComponentsCommon(holder)
+    for(label <- holder.getComponent(OCComponents.LABEL))
+      this.label = label
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    nbt.putString(LabelTag, label)
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    label = nbt.getString(LabelTag)
-  }
-
-  @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    nbt.putString(LabelTag, label)
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsCommon(holder)
+    holder.setComponent(OCComponents.LABEL, label)
   }
 }

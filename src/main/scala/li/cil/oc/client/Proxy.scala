@@ -30,6 +30,7 @@ import net.neoforged.fml.ModLoadingContext
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.neoforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
 import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
 
 private[oc] class Proxy(modBus: IEventBus) extends CommonProxy(modBus) {
   modBus.register(this)
@@ -103,6 +104,11 @@ private[oc] class Proxy(modBus: IEventBus) extends CommonProxy(modBus) {
     BlockEntityRenderers.register(TileEntityTypes.ROBOT.get(), RobotRenderer)
     BlockEntityRenderers.register(TileEntityTypes.SCREEN.get(), ScreenRenderer)
     BlockEntityRenderers.register(TileEntityTypes.TRANSPOSER.get(), TransposerRenderer)
+  }
+
+  @SubscribeEvent
+  def onRegisterPayloads(event: RegisterPayloadHandlersEvent): Unit = {
+    registerPacket(event)
   }
 
   override def registerModel(instance: Item, id: String): Unit = ModelInitialization.registerModel(instance, id)

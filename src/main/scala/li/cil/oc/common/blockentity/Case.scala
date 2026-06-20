@@ -18,6 +18,7 @@ import li.cil.oc.common.menu
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.util.Color
 import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.MenuProvider
@@ -29,6 +30,7 @@ import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.world.level.block.state.BlockState
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.collection.convert.ImplicitConversionsToJava._
@@ -104,18 +106,17 @@ class Case(pos: BlockPos, state: BlockState, var tier: Int)
 
   private final val TierTag = Settings.namespace + "tier"
 
-  override def loadComponentsForServer(): Unit = {
-    val holder = Persistable.holder(this)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
     for(t <- holder.getComponent(OCComponents.TIER)) {
       tier = t
     }
-    super.loadComponentsForServer()
+    super.loadComponentsForServer(holder)
     isSizeInventoryReady = true
   }
 
-  override def saveComponentsForServer(): Unit = {
-    Persistable.holder(this).setComponent(OCComponents.TIER, tier.toByte)
-    super.saveComponentsForServer()
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    holder.setComponent(OCComponents.TIER, tier.toByte)
+    super.saveComponentsForServer(holder)
   }
 
   // ----------------------------------------------------------------------- //

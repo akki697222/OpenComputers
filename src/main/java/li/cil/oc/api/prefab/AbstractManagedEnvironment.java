@@ -50,7 +50,7 @@ public abstract class AbstractManagedEnvironment implements ManagedEnvironment {
 
     @Override
     public void loadData(DataComponentHolder holder) throws UnrecoverablePersistanceException {
-        if (node() != null && holder.has(DataComponents.NODE)) {
+        if (node() != null && holder.has(DataComponents.ADDRESS)) {
             node().loadData(holder);
         }
     }

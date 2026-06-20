@@ -1,6 +1,7 @@
 package li.cil.oc.server
 
 import com.google.common.cache.{Cache, CacheBuilder}
+import io.netty.buffer.Unpooled
 import li.cil.oc.{Settings, api}
 import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
 import li.cil.oc.api.network.EnvironmentHost
@@ -9,6 +10,7 @@ import li.cil.oc.common._
 import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.common.blockentity.traits._
+import li.cil.oc.common.datacomponents.CompoundStorage
 import li.cil.oc.util.BlockPosition
 import li.cil.oc.util.PackedColor
 import net.minecraft.world.item.ItemStack
@@ -28,8 +30,11 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.world.level.Level
 import net.minecraft.sounds.SoundSource
+import net.neoforged.neoforge.network.connection.ConnectionType
+import net.neoforged.neoforge.server.ServerLifecycleHooks
 
 object PacketSender {
   def sendAudioStart(host: EnvironmentHost, sessionId: Int, channel: Int, sampleRate: Int, channels: Int, format: Int, loop: Boolean, pos: BlockPosition): Unit = {
@@ -535,7 +540,10 @@ object PacketSender {
 
     pb.writeTileEntity(t)
     pb.writeInt(mountable)
-    pb.writeNBT(t.lastData(mountable))
+
+    val bytes = new RegistryFriendlyByteBuf(Unpooled.buffer(), ServerLifecycleHooks.getCurrentServer.registryAccess(), ConnectionType.NEOFORGE)
+    CompoundStorage.OPTION_STREAM_CODEC.encode(bytes, t.lastData(mountable))
+    pb.write(bytes.array())
 
     pb.sendToPlayersNearTileEntity(t)
   }

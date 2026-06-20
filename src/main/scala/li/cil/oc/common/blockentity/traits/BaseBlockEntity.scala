@@ -1,16 +1,18 @@
 package li.cil.oc.common.blockentity.traits
 
+import li.cil.oc.api.Persistable
 import li.cil.oc.{OpenComputers, Settings}
 import li.cil.oc.client.Sound
 import li.cil.oc.common.SaveHandler
 import li.cil.oc.util.{BlockPosition, SideTracker}
 import net.minecraft.core.HolderLookup
-import net.minecraft.core.component.{DataComponentMap, DataComponentPatch, DataComponentType, PatchedDataComponentMap}
+import net.minecraft.core.component.{DataComponentHolder, DataComponentMap, DataComponentPatch, DataComponentType, PatchedDataComponentMap}
 import net.minecraft.nbt.{CompoundTag, NbtOps}
 import net.minecraft.network.Connection
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket
 import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.client.model.data.ModelProperty
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity {
   private final val IsServerDataTag = Settings.namespace + "isServerData"
@@ -83,13 +85,15 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
     nbt.putBoolean(IsServerDataTag, false)
   }
   
-  def loadComponentsForServer(): Unit = {}
-  def saveComponentsForServer(): Unit = {}
+  def loadComponentsCommon(holder: DataComponentHolder): Unit = {}
+  def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {}
+  def loadComponentsForServer(holder: DataComponentHolder): Unit = {}
+  def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {}
 
   @OnlyIn(Dist.CLIENT)
-  def loadComponentsForClient(): Unit = {}
+  def loadComponentsForClient(holder: DataComponentHolder): Unit = {}
   @OnlyIn(Dist.CLIENT)
-  def saveComponentsForClient(): Unit = {}
+  def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {}
 
   // ----------------------------------------------------------------------- //
 
@@ -105,17 +109,28 @@ trait BaseBlockEntity extends net.minecraft.world.level.block.entity.BlockEntity
   override def loadWithComponents(tag: CompoundTag, registries: HolderLookup.Provider): Unit = {
     super.loadWithComponents(tag, registries)
     // components are loaded here
-    
+    val holder = Persistable.holder(this)
+    loadComponentsCommon(holder)
+
     if(isServer) {
-      loadComponentsForServer()
+      loadComponentsForServer(holder)
     } else {
-      loadComponentsForClient()
+      loadComponentsForClient(holder)
     }
   }
 
   override def saveAdditional(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
     super.saveAdditional(nbt, provider)
     save(nbt, provider)
+
+    val holder = Persistable.holder(this)
+    saveComponentsCommon(holder)
+
+    if(isServer) {
+      saveComponentsForServer(holder)
+    } else {
+      saveComponentsForClient(holder)
+    }
   }
 
   def save(nbt: CompoundTag, provider: HolderLookup.Provider): CompoundTag = {

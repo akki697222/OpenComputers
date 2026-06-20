@@ -25,6 +25,7 @@ import li.cil.oc.common.event._
 import li.cil.oc.common.item.Analyzer
 import li.cil.oc.common.item.RedstoneCard
 import li.cil.oc.common.item.Tablet
+import li.cil.oc.common.item.data.ItemData
 import li.cil.oc.common.nanomachines.provider.DisintegrationProvider
 import li.cil.oc.common.nanomachines.provider.HungryProvider
 import li.cil.oc.common.nanomachines.provider.MagnetProvider
@@ -381,7 +382,7 @@ object ModOpenComputers extends ModProxy {
 
   private def blacklistHost(host: Class[_], itemNames: String*): Unit = {
     for (itemName <- itemNames) try {
-      api.IMC.blacklistHost(itemName, host, api.Items.get(itemName).createItemStack(1), ServerLifecycleHooks.getCurrentServer.registryAccess())
+      api.IMC.blacklistHost(itemName, host, api.Items.get(itemName).createItemStack(1))
     } catch {
       case t: Throwable => OpenComputers.log.warn(s"Error blacklisting '$itemName' for '${host.getSimpleName}.", t)
     }

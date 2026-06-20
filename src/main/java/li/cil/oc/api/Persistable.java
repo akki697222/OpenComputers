@@ -95,7 +95,7 @@ public interface Persistable {
     @ApiStatus.NonExtendable
     @ApiStatus.Obsolete(since = "OpenComputers 1.9, NeoForge 1.21.1+")
     default void loadData(CompoundTag tag, HolderLookup.Provider provider) throws UnrecoverablePersistanceException {
-        loadData(new NbtComponentHolder(tag, provider));
+        loadData(new NbtComponentHolder(tag));
     }
 
     /**
@@ -204,9 +204,9 @@ class NbtComponentHolder implements DataComponentHolder {
         tag = null;
     }
 
-    public NbtComponentHolder(@NonNull CompoundTag tag, HolderLookup.Provider provider) {
+    public NbtComponentHolder(@NonNull CompoundTag tag) {
         this.tag = tag;
-        components.applyPatch(DataComponentPatch.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow());
+        components.set(CUSTOM_DATA, CustomData.of(tag));
     }
 
     @Override
@@ -233,7 +233,7 @@ class MutableNbtComponentHolder extends NbtComponentHolder implements MutableDat
     }
 
     public MutableNbtComponentHolder(CompoundTag tag, HolderLookup.Provider provider) {
-        super(tag, provider);
+        super(tag);
     }
 
     @Override

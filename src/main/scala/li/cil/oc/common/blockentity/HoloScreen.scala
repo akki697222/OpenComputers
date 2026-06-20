@@ -1,9 +1,13 @@
 package li.cil.oc.common.blockentity
 
 import li.cil.oc.Settings
+import li.cil.oc.common.datacomponents.{OCComponents, VideoMode}
+import li.cil.oc.util.ExtendedDataComponentHolder._
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.level.block.state.BlockState
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 
 class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos, state, tier) {
   private final val ConfigWidthTag = Settings.namespace + "configWidth"
@@ -48,35 +52,18 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     else false
   }
 
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-    loadSize(nbt)
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    super.loadComponentsCommon(holder)
+    for(VideoMode(w, h) <- holder.getComponent(OCComponents.VIDEO_MODE)) {
+      width = w max 1 min Settings.get.maxScreenWidth
+      height = h max 1 min Settings.get.maxScreenHeight
+      checkMultiBlock()
+    }
   }
 
-  override def saveForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    saveSize(nbt)
-  }
-
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    loadSize(nbt)
-  }
-
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    saveSize(nbt)
-  }
-
-  private def loadSize(nbt: CompoundTag): Unit = {
-    width = (if (nbt.contains(ConfigWidthTag)) nbt.getInt(ConfigWidthTag) else 1) max 1 min Settings.get.maxScreenWidth
-    height = (if (nbt.contains(ConfigHeightTag)) nbt.getInt(ConfigHeightTag) else 1) max 1 min Settings.get.maxScreenHeight
-    checkMultiBlock()
-  }
-
-  private def saveSize(nbt: CompoundTag): Unit = {
-    nbt.putInt(ConfigWidthTag, width)
-    nbt.putInt(ConfigHeightTag, height)
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsCommon(holder)
+    holder.setComponent(OCComponents.VIDEO_MODE, VideoMode(width, height))
   }
 
   private def clockwise(facing: Direction): Direction = facing match {

@@ -55,13 +55,12 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
   lazy val keyboard = {
     val keyboardItem = api.Items.get(Constants.BlockName.Keyboard).createItemStack(1)
     val keyboard = api.Driver.driverFor(keyboardItem, getClass).createEnvironment(keyboardItem, this).asInstanceOf[api.internal.Keyboard]
-    keyboard.setUsableOverride(new UsabilityChecker {
-      override def isUsableByPlayer(keyboard: api.internal.Keyboard, player: Player) = {
-        val stack = player.getItemInHand(InteractionHand.MAIN_HAND)
-        stack.getItem match {
-          case t: item.Terminal if stack.has(DataComponents.CUSTOM_DATA) => sidedKeys.contains(stack.get(DataComponents.CUSTOM_DATA).getUnsafe.getString(Settings.namespace + "key"))
-          case _ => false
-        }
+    keyboard.setUsableOverride((keyboard: api.internal.Keyboard, player: Player) => {
+      val stack = player.getItemInHand(InteractionHand.MAIN_HAND)
+      stack.getItem match {
+        case t: item.Terminal if stack.has(OCComponents.TERMINAL_REFERENCE) =>
+          sidedKeys.contains(stack.getComponent(OCComponents.TERMINAL_REFERENCE).get.key)
+        case _ => false
       }
     })
     keyboard
@@ -74,17 +73,17 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
     if (rack != null) {
       val data = rack.getMountableData(slot)
       if (data != null) {
-        return data.contains("terminalAddress")
+        return data.has(OCComponents.ADDRESS)
       }
     }
     false
   }
 
-  def address: String = rack.getMountableData(slot).getString("terminalAddress")
+  def address: String = rack.getMountableData(slot).getComponent(OCComponents.ADDRESS).get
 
   def sidedKeys = {
     if (!rack.getEnvironmentLevel.isClientSide) keys
-    else rack.getMountableData(slot).getList("keys", Tag.TAG_STRING).map((tag: StringTag) => tag.getAsString)
+    else rack.getMountableData(slot).getComponent(OCComponents.KEYS) getOrElse List.empty
   }
 
   // ----------------------------------------------------------------------- //
@@ -136,13 +135,11 @@ class TerminalServer(val rack: api.internal.Rack, val slot: Int) extends Environ
   // ----------------------------------------------------------------------- //
   // RackMountable
 
-  override def getData: CompoundTag = {
+  override def describeForClient(holder: MutableDataComponentHolder): Unit = {
     if (node.address == null) api.Network.joinNewNetwork(node)
 
-    val nbt = new CompoundTag()
-    nbt.setNewTagList("keys", keys)
-    nbt.putString("terminalAddress", node.address)
-    nbt
+    holder.setComponent(OCComponents.KEYS, keys.toList)
+    holder.setComponent(OCComponents.ADDRESS, node.address)
   }
 
   override def getConnectableCount: Int = 0

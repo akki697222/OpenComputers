@@ -10,7 +10,7 @@ import li.cil.oc.common.item.data.PrintData
 import li.cil.oc.server.component.DebugCard.AccessContext
 import li.cil.oc.server.machine.Machine
 import li.cil.oc.util.ExtendedNBT._
-import li.cil.oc.util.{ItemUtils, NbtDataStream}
+import li.cil.oc.util.{Color, ItemUtils, NbtDataStream}
 import net.minecraft.core.component.{DataComponentType, DataComponents}
 import net.minecraft.core.{BlockPos, Direction, HolderLookup, UUIDUtil}
 import net.minecraft.nbt.{ByteArrayTag, ByteTag, CompoundTag, DoubleTag, FloatTag, IntArrayTag, IntTag, ListTag, LongTag, NbtOps, StringTag, TagTypes, Tag => NbtTag}
@@ -55,14 +55,25 @@ private object Migrators {
   }
 
   object SimpleValue {
-    def empty[T]: SimpleValue[T] = new SimpleValue[T] {
+    def empty[T]: SimpleValue[T] with Composable[T] = new SimpleValue[T] with Composable[T] {
       override val value: Option[T] = None
       override def andRemove: Option[T] = None
+      override def unwrap: Iterable[SimpleValue[_]] = Iterable.empty
     }
+
   }
 
   trait Composable[T] extends SimpleValue[T] {
     def unwrap: Iterable[SimpleValue[_]]
+
+    override def optional: Composable[Option[T]] = {
+      val orig = this
+      new Composable[Option[T]] {
+        override val value: Option[Option[T]] = Some(orig.value)
+        override def andRemove: Option[Option[T]] = Some(orig.andRemove)
+        override def unwrap: Iterable[SimpleValue[_]] = orig.unwrap
+      }
+    }
   }
 
   trait Value[T] extends SimpleValue[T] with Composable[T] {
@@ -127,7 +138,7 @@ private object Migrators {
     }
   }
 
-  def compose[U](fn: CompositionContext[U] => U): SimpleValue[U] = {
+  def compose[U](fn: CompositionContext[U] => U): Composable[U] = {
     try {
       val ctx = new CompositionContext[U](new mutable.ListBuffer())
       val value = fn(ctx)
@@ -163,8 +174,10 @@ private object Migrators {
     }
   }
 
-  class Composed[U](orig: Array[Composable[_]], fn: () => Option[U]) extends SimpleValue[U] {
+  class Composed[U](orig: Array[Composable[_]], fn: () => Option[U]) extends SimpleValue[U] with Composable[U] {
     override lazy val value: Option[U] = fn()
+
+    override def unwrap: Iterable[SimpleValue[_]] = orig
 
     override def andRemove: Option[U] = {
       for(value <- orig.flatMap(v => v.unwrap)) {
@@ -275,6 +288,10 @@ private object Migrators {
         Some((0 until list.size).flatMap(i => fn(new Deserializer[U](list.getCompound(i), provider))).toList)
     }
 
+    def array[U: ClassTag](name: Identifier)(fn: Deserializer[U] => Option[U]) = value[Array[U]](name) {
+      case list: ListTag if TagTypes.getType(list.getElementType) == CompoundTag.TYPE =>
+        Some((0 until list.size).flatMap(i => fn(new Deserializer[U](list.getCompound(i), provider))).toArray)
+    }
   }
 
   def register[T](component: Supplier[DataComponentType[T]])(fn: Deserializer[T] => Option[T]): Unit = {
@@ -429,7 +446,12 @@ private object Migrators {
     }
   }
   register(OCComponents.IS_ON) { _.boolean(oc -> "isOn").andRemove }
-  register(OCComponents.IS_POWERED) { _.boolean(oc -> "hasPower").andRemove }
+  register(OCComponents.IS_POWERED) { de =>
+    first(
+      () => de.boolean(oc -> "hasPower").andRemove,
+      () => de.boolean("hasPower").andRemove
+    )
+  }
   register(OCComponents.IS_PRECISE) { _.boolean(oc -> "precise").andRemove }
 
   register(OCComponents.MAX_VIDEO_MODE) { de =>
@@ -442,11 +464,18 @@ private object Migrators {
   }
 
   register(OCComponents.VIDEO_MODE) { de =>
-    composeAndRemove[VideoMode] { by =>
-      val width = by(de.int(oc -> "viewportWidth"))
-      val height = by(de.int(oc -> "viewportHeight"))
-      VideoMode(width, height)
-    }
+    first(
+      () => composeAndRemove[VideoMode] { by =>
+        val width = by(de.int(oc -> "viewportWidth"))
+        val height = by(de.int(oc -> "viewportHeight"))
+        VideoMode(width, height)
+      },
+      () => composeAndRemove[VideoMode] { by =>
+        val width = by(de.int(oc -> "configWidth"))
+        val height = by(de.int(oc -> "configHeight"))
+        VideoMode(width, height)
+      }
+    )
   }
 
   // terminal
@@ -459,6 +488,11 @@ private object Migrators {
       TerminalReference(key, server)
     }
   }
+
+  // computers
+  register(OCComponents.IS_RUNNING) { _.boolean(oc -> "isRunning").andRemove }
+  register(OCComponents.IS_ERRORED) { _.boolean(oc -> "hasErrored").map(b => Option.when(b) { () }).andRemove }
+  register(OCComponents.USERS) { _.stringList(oc -> "users").andRemove.map(_.toSet) }
 
   // the complicated one
   register(OCComponents.MACHINE) { de =>
@@ -625,6 +659,26 @@ private object Migrators {
     de.itemStackList(oc -> "containers").andRemove
   }
 
+  register(OCComponents.SELECTED_SLOT) { _.int(oc -> "selectedSlot").andRemove }
+  register(OCComponents.SELECTED_TANK) { _.int(oc -> "selectedTank").andRemove }
+
+  register(OCComponents.ROBOT_TOTAL_ANIMATION_TIME) { _.int(oc -> "animationTicksTotal").andRemove }
+  register(OCComponents.ROBOT_CURRENT_ANIMATION) { de =>
+    composeAndRemove[RobotCurrentAnimation] { by =>
+      val animationTicksLeft = by(de.int(oc -> "animationTicksLeft"))
+      val moveFrom = by(compose[BlockPos] { by =>
+        val moveFromX = by(de.int(oc -> "moveFromX"))
+        val moveFromY = by(de.int(oc -> "moveFromY"))
+        val moveFromZ = by(de.int(oc -> "moveFromZ"))
+        new BlockPos(moveFromX, moveFromY, moveFromZ)
+      }.optional)
+      val swingShovel = by(de.boolean(oc -> "swingingTool"))
+      val turnAxis = by(de.byte(oc -> "turnAxis"))
+
+      RobotCurrentAnimation(animationTicksLeft, moveFrom, swingShovel, turnAxis)
+    }
+  }
+
   // compound block thing
   register(OCComponents.COMPOUND_DRIVER) { de =>
     composeAndRemove[(Long, Map[String, CompoundStorage])] { by =>
@@ -637,7 +691,13 @@ private object Migrators {
 
   // tablet
   register(OCComponents.ATTACHMENT) { _.itemStack(oc -> "container").andRemove }
-  register(OCComponents.IS_RUNNING) { _.boolean(oc -> "isRunning").andRemove }
+
+  // microcontroller
+  register(OCComponents.COMPONENT_NODES) {
+    _.array[Option[CompoundStorage]](oc -> "componentNodes") { de =>
+      Some(Option.when(!de.tag.isEmpty) { new CompoundStorage(de.tag) })
+    }.andRemove
+  }
 
   // file systems
   register(OCComponents.FILESYSTEM_DATA) { de =>
@@ -649,7 +709,12 @@ private object Migrators {
     )
   }
 
-  register(OCComponents.ROBOT_ROM_FILESYSTEM_DATA) { _.compoundTag("romRobot").andRemove }
+  register(OCComponents.ROBOT_ROM_FILESYSTEM_DATA) { de =>
+    first(
+      () => de.compoundTag("romRobot").andRemove,
+      () => de.compound[CompoundTag](oc -> "robot") { de => de.compoundTag("romRobot").andRemove }
+    )
+  }
 
   register(OCComponents.HANDLES) { de =>
     def decomposeOwners(de: Deserializer[(String, Set[Int])]): Option[(String, Set[Int])] = {
@@ -670,6 +735,52 @@ private object Migrators {
 
   // COLORS!!!
   register(OCComponents.PALETTE) { _.intArray("palette").andRemove }
+  register(OCComponents.RENDER_COLOR) { de =>
+    first(
+      () => de.int(oc -> "renderColorRGB").map(i => Some(new ColorRGBA(i))).andRemove,
+      () => de.int(oc -> "renderColor").map(i => Some(new ColorRGBA(Color.rgbValues(DyeColor.byId(i))))).andRemove
+    )
+  }
+
+  // screen
+  register(OCComponents.HAS_REDSTONE_INPUT) { _.boolean(oc -> "hadRedstoneInput").andRemove }
+  register(OCComponents.INVERT_TOUCH) { de =>
+    first(
+      () => de.boolean(oc -> "invertTouchMode").andRemove,
+    ).flatMap(b => Option.when(b) { () })
+  }
+
+  // charger
+  register(OCComponents.CHARGE_SPEED) { de =>
+    first(
+      () => de.double(oc -> "chargeSpeed").andRemove,
+      () => de.double("chargeSpeed").andRemove
+    )
+  }
+
+  register(OCComponents.INVERT_SIGNAL) { de =>
+    first(
+      () => de.boolean(oc -> "invertSignal").andRemove,
+      () => de.boolean("invertSignal").andRemove,
+    ).flatMap(b => Option.when(b) { () })
+  }
+
+  // raid
+  register(OCComponents.PRESENCE) { _.byteBuffer(oc -> "presence").andRemove }
+
+  // racks
+  register(OCComponents.RACK_DATA) { de =>
+    de.array[Option[CompoundStorage]](oc -> "lastData") { de =>
+      Some(Option.when(!de.tag.isEmpty) { new CompoundStorage(de.tag) })
+    }.andRemove
+  }
+
+  register(OCComponents.RACK_NODE_MAPPING) { de =>
+    de.value(oc -> "nodeMapping") {
+      case tag: ListTag if TagTypes.getType(tag.getElementType) == IntArrayTag.TYPE =>
+        Some(tag.map { (i: IntArrayTag) => i.getAsIntArray.map(Direction.from3DDataValue) }.toArray)
+    }.andRemove
+  }
 
   // graphics card
   register(OCComponents.GRAPHICS_CARD) { de =>

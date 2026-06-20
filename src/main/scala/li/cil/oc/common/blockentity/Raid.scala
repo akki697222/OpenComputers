@@ -22,6 +22,7 @@ import net.neoforged.api.distmarker.{Dist, OnlyIn}
 import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
+import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.function.Consumer
 
@@ -140,21 +141,9 @@ class Raid(pos: BlockPos, state: BlockState)
   private final val FileSystemTag = Settings.namespace + "fs"
   private final val PresenceTag = Settings.namespace + "presence"
   private final val LabelTag = Settings.namespace + "label"
-
-  override def loadForServer(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-    if (nbt.contains(FileSystemTag)) {
-      val tag = nbt.getCompound(FileSystemTag)
-      tryCreateRaid(tag.getCompound(Settings.namespace + "node").getString(Settings.namespace + "address"))
-      filesystem.foreach(fs => fs.loadData(tag, provider))
-    }
-    label.loadData(nbt, provider)
-  }
   
-  override def loadComponentsForServer(): Unit = {
-    super.loadComponentsForServer()
-    
-    val holder = Persistable.holder(this)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForServer(holder)
     
     for(address <- holder.getComponent(OCComponents.ADDRESS)) {
       tryCreateRaid(address)
@@ -167,34 +156,27 @@ class Raid(pos: BlockPos, state: BlockState)
     label.loadData(holder)
   }
 
-  override def saveComponentsForServer(): Unit = {
-    super.saveComponentsForServer()
-    
-    val holder = Persistable.holder(this)
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+
     for(fs <- filesystem) fs.saveData(holder)
     label.saveData(holder)
   }
 
-  @OnlyIn(Dist.CLIENT) 
-  override def loadForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    nbt.getByteArray(PresenceTag).
-      map(_ != 0).
-      copyToArray(presence)
-    label.setLabel(nbt.getString(LabelTag))
+  override def loadComponentsForClient(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForClient(holder)
+    for(p <- holder.getComponent(OCComponents.PRESENCE)) {
+      val bytes: Array[Byte] = Array.fill(presence.length)(0)
+      p.get(bytes)
+      bytes.map(_ != 0).copyToArray(presence)
+    }
+    this.label.loadData(holder)
   }
 
-  @OnlyIn(Dist.CLIENT)
-  override def saveForClient(nbt: CompoundTag, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    val presenceArray = Array.tabulate[Byte](items.length) { i =>
-      if (items(i).isEmpty) 0.toByte else 1.toByte
-    }
-    nbt.put(PresenceTag, new ByteArrayTag(presenceArray))
-
-    if (label.getLabel(provider) != null) {
-      nbt.putString(LabelTag, label.getLabel(provider))
-    }
+  override def saveComponentsForClient(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForClient(holder)
+    holder.setComponent(OCComponents.PRESENCE, ByteBuffer.wrap(items.map(s => if(s.isEmpty) 0.toByte else 1.toByte)))
+    label.saveData(holder)
   }
 
   // ----------------------------------------------------------------------- //

@@ -13,12 +13,14 @@ import li.cil.oc.api.nanomachines.Controller
 import li.cil.oc.api.network._
 import li.cil.oc.api.util.StateAware
 import li.cil.oc.common.Slot
+import li.cil.oc.common.datacomponents.OCComponents
 import li.cil.oc.common.menu
 import li.cil.oc.common.menu.MenuTypes
 import li.cil.oc.common.entity.Drone
 import li.cil.oc.integration.util.ItemCharge
 import li.cil.oc.server.{PacketSender => ServerPacketSender}
 import li.cil.oc.util.BlockPosition
+import li.cil.oc.util.ExtendedDataComponentHolder._
 import li.cil.oc.util.ExtendedLevel._
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.entity.player.Inventory
@@ -30,10 +32,12 @@ import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.core.{BlockPos, Direction, HolderLookup}
 import net.minecraft.Util
+import net.minecraft.core.component.DataComponentHolder
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.Vec3
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.api.distmarker.OnlyIn
+import net.neoforged.neoforge.common.MutableDataComponentHolder
 import net.neoforged.neoforge.common.extensions.IBlockEntityExtension
 
 import scala.jdk.CollectionConverters._
@@ -173,47 +177,26 @@ class Charger(pos: BlockPos, state: BlockState)
 
   // ----------------------------------------------------------------------- //
 
-  private final val ChargeSpeedTag = Settings.namespace + "chargeSpeed"
-  private final val ChargeSpeedTagCompat = "chargeSpeed"
-  private final val HasPowerTag = Settings.namespace + "hasPower"
-  private final val HasPowerTagCompat = "hasPower"
-  private final val InvertSignalTag = Settings.namespace + "invertSignal"
-  private final val InvertSignalTagCompat = "invertSignal"
-
-  override def loadForServer(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
-    super.loadForServer(nbt, provider)
-    if (nbt.contains(ChargeSpeedTagCompat))
-      chargeSpeed = nbt.getDouble(ChargeSpeedTagCompat) max 0 min 1
-    else
-      chargeSpeed = nbt.getDouble(ChargeSpeedTag) max 0 min 1
-    if (nbt.contains(HasPowerTagCompat))
-      hasPower = nbt.getBoolean(HasPowerTagCompat)
-    else
-      hasPower = nbt.getBoolean(HasPowerTag)
-    if (nbt.contains(InvertSignalTagCompat))
-      invertSignal = nbt.getBoolean(InvertSignalTagCompat)
-    else
-      invertSignal = nbt.getBoolean(InvertSignalTag)
+  override def loadComponentsCommon(holder: DataComponentHolder): Unit = {
+    super.loadComponentsCommon(holder)
+    chargeSpeed = holder.getComponent(OCComponents.CHARGE_SPEED) getOrElse 0.0 max 0.0 min 1.0
+    hasPower = holder.getComponent(OCComponents.IS_POWERED) getOrElse false
   }
 
-  override def saveForServer(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
-    super.saveForServer(nbt, provider)
-    nbt.putDouble(ChargeSpeedTag, chargeSpeed)
-    nbt.putBoolean(HasPowerTag, hasPower)
-    nbt.putBoolean(InvertSignalTag, invertSignal)
+  override def saveComponentsCommon(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsCommon(holder)
+    holder.setComponent(OCComponents.CHARGE_SPEED, chargeSpeed)
+    holder.setComponent(OCComponents.IS_POWERED, hasPower)
   }
 
-  @OnlyIn(Dist.CLIENT)
-  override def loadForClient(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
-    super.loadForClient(nbt, provider)
-    chargeSpeed = nbt.getDouble(ChargeSpeedTag)
-    hasPower = nbt.getBoolean(HasPowerTag)
+  override def loadComponentsForServer(holder: DataComponentHolder): Unit = {
+    super.loadComponentsForServer(holder)
+    invertSignal = holder.has(OCComponents.INVERT_SIGNAL)
   }
 
-  override def saveForClient(nbt: CompoundNBT, provider: HolderLookup.Provider): Unit = {
-    super.saveForClient(nbt, provider)
-    nbt.putDouble(ChargeSpeedTag, chargeSpeed)
-    nbt.putBoolean(HasPowerTag, hasPower)
+  override def saveComponentsForServer(holder: MutableDataComponentHolder): Unit = {
+    super.saveComponentsForServer(holder)
+    holder.setComponent(OCComponents.INVERT_SIGNAL, invertSignal)
   }
 
   // ----------------------------------------------------------------------- //

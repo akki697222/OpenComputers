@@ -1,13 +1,17 @@
 package li.cil.oc.api;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.InterModComms;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 /**
  * This is a pure utility class to more comfortably register things that can
@@ -368,12 +372,14 @@ public final class IMC {
      * @param host  the class of the host to blacklist the component for.
      * @param stack the item stack representing the blacklisted component.
      */
-    public static void blacklistHost(final String name, final Class<?> host, final ItemStack stack, final @NotNull HolderLookup.Provider provider) {
+    public static void blacklistHost(final String name, final Class<?> host, final ItemStack stack) {
         final CompoundTag nbt = new CompoundTag();
         nbt.putString("name", name);
         nbt.putString("host", host.getName());
         final CompoundTag stackNbt = new CompoundTag();
-        stack.save(provider, stackNbt);
+        stackNbt.putString("id", Objects.requireNonNull(stack.getItemHolder().getKey()).location().toString());
+        stackNbt.putByte("count", (byte) stack.getCount());
+        stackNbt.put("components", DataComponentPatch.CODEC.encode(stack.getComponentsPatch(), NbtOps.INSTANCE, new CompoundTag()).getOrThrow());
         nbt.put("item", stackNbt);
         InterModComms.sendTo(MOD_ID, BLACKLIST_HOST, () -> nbt);
     }

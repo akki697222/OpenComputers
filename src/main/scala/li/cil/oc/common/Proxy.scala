@@ -69,17 +69,8 @@ class Proxy(val modBus: IEventBus) {
   def registerModel(instance: Item, id: String): Unit = {}
 
   def registerModel(instance: Block, id: String): Unit = {}
-}
 
-class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
-  @SubscribeEvent
-  def postInit(e: FMLLoadCompleteEvent): Unit = {
-    // Don't allow driver registration after this point, to avoid issues.
-    driver.Registry.locked = true
-  }
-
-  @SubscribeEvent
-  def onRegisterPayloads(event: RegisterPayloadHandlersEvent): Unit = {
+  def registerPacket(event: RegisterPayloadHandlersEvent): Unit = {
     val registrar: PayloadRegistrar = event.registrar(OpenComputers.ID).versioned("1")
 
     registrar.playBidirectional(
@@ -92,5 +83,18 @@ class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
         })
       }
     )
+  }
+}
+
+class ServerProxy(modBus: IEventBus) extends Proxy(modBus) {
+  @SubscribeEvent
+  def postInit(e: FMLLoadCompleteEvent): Unit = {
+    // Don't allow driver registration after this point, to avoid issues.
+    driver.Registry.locked = true
+  }
+
+  @SubscribeEvent
+  def onRegisterPayloads(event: RegisterPayloadHandlersEvent): Unit = {
+    registerPacket(event)
   }
 }

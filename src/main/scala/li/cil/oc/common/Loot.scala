@@ -68,18 +68,12 @@ object Loot {
     else None
 
   def registerLootDisk(name: String, loc: ResourceLocation, color: DyeColor, factory: Callable[FileSystem], doRecipeCycling: Boolean): ItemStack = {
-    OpenComputers.log.debug(s"Registering loot disk '$name' from mod ${loc.getNamespace}.")
-
-    val data = new CompoundTag()
-    data.putString(Settings.namespace + "fs.label", name)
-
     val stack = Items.get(Constants.ItemName.Floppy).createItemStack(1)
-    CustomData.update(DataComponents.CUSTOM_DATA, stack, nbt => {
-      nbt.put(Settings.namespace + "data", data)
-    })
-
+    stack.set(OCComponents.LABEL, name)
     stack.set(OCComponents.LOOT_DISK, loc)
     stack.set(OCComponents.DISK_COLOR, color)
+
+    OpenComputers.log.debug(s"Registering loot disk '$name' from mod ${loc.getNamespace}: $stack")
 
     Loot.factories += loc -> factory
 
