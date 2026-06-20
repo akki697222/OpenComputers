@@ -991,6 +991,13 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
       }
       // See if the game appears to be paused, in which case we also pause.
       if (isGamePaused) {
+        // #region agent log
+        try {
+          val logPath = java.nio.file.Paths.get(System.getProperty("user.dir")).resolve("../..").resolve("debug-2d9163.log").normalize()
+          val logLine = s"""{"sessionId":"2d9163","location":"Machine.scala:run","message":"game pause blocked run","data":{"stateTop":"${state.top}"},"timestamp":${System.currentTimeMillis()},"hypothesisId":"pause-stuck"}""" + "\n"
+          java.nio.file.Files.write(logPath, logLine.getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND)
+        } catch { case _: Throwable => }
+        // #endregion
         state.push(Machine.State.Paused)
         return
       }

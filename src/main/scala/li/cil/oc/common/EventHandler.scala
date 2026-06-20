@@ -224,19 +224,33 @@ object EventHandler {
 
   @SubscribeEvent
   @OnlyIn(Dist.CLIENT)
-  def onScreenOpening(e: ScreenEvent.Opening): Unit = syncSinglePlayerPause("Opening")
+  def onScreenOpening(e: ScreenEvent.Opening): Unit = {
+    if (e.getScreen.isPauseScreen) {
+      setSinglePlayerPause(true, "PauseScreenOpening")
+    }
+  }
 
   @SubscribeEvent
   @OnlyIn(Dist.CLIENT)
-  def onScreenClosing(e: ScreenEvent.Closing): Unit = syncSinglePlayerPause("Closing")
+  def onScreenClosing(e: ScreenEvent.Closing): Unit = {
+    if (e.getScreen.isPauseScreen) {
+      setSinglePlayerPause(false, "PauseScreenClosing")
+      pendingClient.synchronized {
+        pendingClient += { () =>
+          if (!Minecraft.getInstance.isPaused) {
+            setSinglePlayerPause(false, "PauseScreenClosingDeferred")
+          }
+        }
+      }
+    }
+  }
 
-  private def syncSinglePlayerPause(eventName: String): Unit = {
-    val paused = Minecraft.getInstance.isPaused
+  private def setSinglePlayerPause(paused: Boolean, eventName: String): Unit = {
     if (paused != SinglePlayerPause.isPaused) {
       // #region agent log
       try {
         val logPath = java.nio.file.Paths.get(System.getProperty("user.dir")).resolve("../..").resolve("debug-2d9163.log").normalize()
-        val logLine = s"""{"sessionId":"2d9163","location":"EventHandler.scala:syncSinglePlayerPause","message":"SinglePlayerPause synced","data":{"paused":$paused,"event":"$eventName"},"timestamp":${System.currentTimeMillis()},"hypothesisId":"pause-sync"}""" + "\n"
+        val logLine = s"""{"sessionId":"2d9163","location":"EventHandler.scala:setSinglePlayerPause","message":"SinglePlayerPause updated","data":{"paused":$paused,"event":"$eventName","mcPaused":${Minecraft.getInstance.isPaused}},"timestamp":${System.currentTimeMillis()},"hypothesisId":"pause-sync"}""" + "\n"
         java.nio.file.Files.write(
           logPath,
           logLine.getBytes(java.nio.charset.StandardCharsets.UTF_8),
