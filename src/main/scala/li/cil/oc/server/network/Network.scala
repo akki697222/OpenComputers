@@ -568,14 +568,14 @@ object Network extends api.detail.NetworkAPI {
   override def newPacket(nbt: CompoundTag) = {
     val source = nbt.getString("source")
     val destination =
-      if (nbt.contains("dest")) null
-      else nbt.getString("dest")
+      if (nbt.contains("dest")) nbt.getString("dest")
+      else null
     val port = nbt.getInt("port")
     val ttl = nbt.getInt("ttl")
     val data = (for (i <- 0 until nbt.getInt("dataLength")) yield {
       if (nbt.contains("data" + i)) {
         nbt.get("data" + i) match {
-          case tag: ByteTag      => Boolean.box(tag.getAsByte != 0)
+          case tag: ByteTag      => Boolean.box(tag.getAsByte == 1)
           case tag: ShortTag     => Short.box(tag.getAsShort)
           case tag: IntTag       => Int.box(tag.getAsInt)
           case tag: LongTag      => Long.box(tag.getAsLong)

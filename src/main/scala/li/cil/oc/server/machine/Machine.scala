@@ -199,7 +199,6 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
 
   override def canInteract(player: String): Boolean = !Settings.get.canComputersBeOwned ||
     _users.synchronized(_users.isEmpty || _users.contains(player)) ||
-    ServerLifecycleHooks.getCurrentServer == null ||
     ServerLifecycleHooks.getCurrentServer.isSingleplayer || {
     val config = ServerLifecycleHooks.getCurrentServer.getPlayerList
     val entity = config.getPlayerByName(player)
