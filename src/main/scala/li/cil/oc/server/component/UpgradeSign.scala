@@ -66,7 +66,12 @@ abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
           return result((), "not allowed")
         }
 
-        lines.map(line => Component.literal(line)).copyToArray(getAllMessages(sign).toArray)
+        var frontText = sign.getFrontText
+        for (i <- lines.indices) {
+          frontText = frontText.setMessage(i, Component.literal(lines(i)))
+        }
+        sign.setText(frontText, true)
+        sign.setChanged()
         host.getEnvironmentLevel.notifyBlockUpdate(sign.getBlockPos)
 
         MinecraftForge.EVENT_BUS.post(new SignChangeEvent.Post(sign, lines))
