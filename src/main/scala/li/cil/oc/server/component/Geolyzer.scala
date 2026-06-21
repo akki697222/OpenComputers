@@ -82,7 +82,7 @@ class Geolyzer(val host: EnvironmentHost) extends AbstractManagedEnvironment wit
 
   private def canSeeSky: Boolean = {
     val blockPos = position.offset(Direction.UP)
-    host.getEnvironmentLevel.dimension != Level.NETHER && host.getEnvironmentLevel.canSeeSkyFromBelowWater(blockPos.toBlockPos)
+    host.getEnvironmentLevel.dimension != Level.NETHER && host.getEnvironmentLevel.canSeeSky(blockPos.toBlockPos)
   }
 
   @Callback(doc = """function():boolean -- Returns whether there is a clear line of sight to the sky directly above.""")
