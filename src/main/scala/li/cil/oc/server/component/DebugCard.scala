@@ -158,7 +158,8 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
         case 1 => server.getLevel(Level.END)
         case _ => null
       }
-      result(new DebugCard.WorldValue(world))
+      if (world == null) result(null, "unknown dimension")
+      else result(new DebugCard.WorldValue(world))
     }
     else result(new DebugCard.WorldValue(host.getEnvironmentLevel))
   }
@@ -201,7 +202,7 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
       case 0 => server.overworld
       case -1 => server.getLevel(Level.NETHER)
       case 1 => server.getLevel(Level.END)
-      case _ => null
+      case _ => return result(null, "unknown dimension")
     } else host.getEnvironmentLevel
 
     val position: BlockPosition = new BlockPosition(x, y, z, Option(world))
@@ -656,15 +657,19 @@ object DebugCard {
     override def loadData(nbt: CompoundTag): Unit = {
       super.loadData(nbt)
       ctx = AccessContext.loadData(nbt)
-      dimension = ResourceLocation.tryParse(nbt.getString(DimensionTag))
-      val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
-      scoreboard = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey).getScoreboard
+      val parsedDim = ResourceLocation.tryParse(nbt.getString(DimensionTag))
+      if (parsedDim != null) {
+        dimension = parsedDim
+        val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
+        val level = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
+        if (level != null) scoreboard = level.getScoreboard
+      }
     }
 
     override def saveData(nbt: CompoundTag): Unit = {
       super.saveData(nbt)
       ctx.foreach(_.saveData(nbt))
-      nbt.putString(DimensionTag, dimension.toString)
+      if (dimension != null) nbt.putString(DimensionTag, dimension.toString)
     }
   }
 
@@ -822,7 +827,7 @@ object DebugCard {
       checkAccess()
       val blockPos = new BlockPos(args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))
       world.getBlockEntity(blockPos) match {
-        case tileEntity: BlockEntity => result(toNbt(nbt => tileEntity.saveWithFullMetadata()).toTypedMap)
+        case tileEntity: BlockEntity => result(tileEntity.saveWithFullMetadata().toTypedMap)
         case _ => null
       }
     }
@@ -840,7 +845,7 @@ object DebugCard {
               tileEntity.setChanged()
               world.notifyBlockUpdate(blockPos)
               result(true)
-            case nbt => result((), s"nbt tag COMPOUND expected, got 'nbt.getType.getName'")
+            case nbt => result((), s"nbt tag COMPOUND expected, got '${nbt.getType.getName}'")
           }
         case _ => result((), "no tile entity")
       }
@@ -976,9 +981,12 @@ object DebugCard {
     override def loadData(nbt: CompoundTag): Unit = {
       super.loadData(nbt)
       ctx = AccessContext.loadData(nbt)
-      val dimension = ResourceLocation.tryParse(nbt.getString(DimensionTag))
-      val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
-      world = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
+      val dimensionLoc = ResourceLocation.tryParse(nbt.getString(DimensionTag))
+      if (dimensionLoc != null) {
+        val dimKey = ResourceKey.create(Registries.DIMENSION, dimensionLoc)
+        val level = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
+        if (level != null) world = level
+      }
     }
 
     override def saveData(nbt: CompoundTag): Unit = {
