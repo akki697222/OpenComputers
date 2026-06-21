@@ -119,12 +119,11 @@ class Relay(pos: BlockPos, state: BlockState)
         val computer: IComputerAccess = c.asInstanceOf[IComputerAccess]
         val address = s"cc${computer.getID}_${computer.getAttachmentName}"
         if (source != address && Option(destination).forall(_ == address) && openPorts(computer).contains(port)) {
-          val header = Seq(computer.getAttachmentName, Int.box(port), Int.box(answerPort))
           val payload = args.map {
             case x: Array[Byte] => new String(x, Charsets.UTF_8)
             case x => x
           }
-          computer.queueEvent("modem_message", Array((header :+ (if (payload.length > 1) payload else payload(0))): _*): _*)
+          computer.queueEvent("modem_message", Array(Seq(computer.getAttachmentName, Int.box(port), Int.box(answerPort)) ++ payload: _*))
         }
       }
     }
