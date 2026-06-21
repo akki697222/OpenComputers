@@ -887,7 +887,7 @@ object DebugCard {
       checkAccess()
       val (xMin, yMin, zMin) = (args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))
       val (xMax, yMax, zMax) = (args.checkInteger(3), args.checkInteger(4), args.checkInteger(5))
-      val block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(args.checkString(3)))
+      val block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(args.checkString(6)))
       val metadata = args.checkInteger(7)
       for (x <- math.min(xMin, xMax) to math.max(xMin, xMax)) {
         for (y <- math.min(yMin, yMax) to math.max(yMin, yMax)) {
