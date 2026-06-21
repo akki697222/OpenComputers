@@ -195,12 +195,15 @@ class TradeInfo(var host: Option[EnvironmentHost], var merchant: WeakReference[M
     nbt.putInt(MerchantID, merchantID)
   }
 
-  private def loadEntity(nbt: CompoundTag, uuid: UUID): Option[Entity] = {
-    val dimension = ResourceLocation.tryParse(nbt.getString(DimensionIDTag))
-    val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
-    val world = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
+  private def resolveLevel(nbt: CompoundTag): Option[net.minecraft.server.level.ServerLevel] = {
+    val dimLoc = ResourceLocation.tryParse(nbt.getString(DimensionIDTag))
+    if (dimLoc == null) return None
+    val dimKey = ResourceKey.create(Registries.DIMENSION, dimLoc)
+    Option(ServerLifecycleHooks.getCurrentServer.getLevel(dimKey))
+  }
 
-    Option(world.getEntity(uuid))
+  private def loadEntity(nbt: CompoundTag, uuid: UUID): Option[Entity] = {
+    resolveLevel(nbt).flatMap(world => Option(world.getEntity(uuid)))
   }
 
   private def loadHostEntity(nbt: CompoundTag): Option[EnvironmentHost] = {
@@ -211,18 +214,15 @@ class TradeInfo(var host: Option[EnvironmentHost], var merchant: WeakReference[M
   }
 
   private def loadHostTileEntity(nbt: CompoundTag): Option[EnvironmentHost] = {
-    val dimension = ResourceLocation.tryParse(nbt.getString(DimensionIDTag))
-    val dimKey = ResourceKey.create(Registries.DIMENSION, dimension)
-    val world = ServerLifecycleHooks.getCurrentServer.getLevel(dimKey)
-
-    val x = nbt.getInt(HostXTag)
-    val y = nbt.getInt(HostYTag)
-    val z = nbt.getInt(HostZTag)
-
-    world.getBlockEntity(new BlockPos(x, y, z)) match {
-      case robotProxy: li.cil.oc.common.blockentity.RobotProxy => Option(robotProxy.robot)
-      case agent: li.cil.oc.api.internal.Agent => Option(agent)
-      case null => None
+    resolveLevel(nbt) match {
+      case None => None
+      case Some(world) =>
+        val pos = new BlockPos(nbt.getInt(HostXTag), nbt.getInt(HostYTag), nbt.getInt(HostZTag))
+        world.getBlockEntity(pos) match {
+          case robotProxy: li.cil.oc.common.blockentity.RobotProxy => Option(robotProxy.robot)
+          case agent: li.cil.oc.api.internal.Agent => Option(agent)
+          case _ => None
+        }
     }
   }
 }
