@@ -18,8 +18,6 @@ import net.minecraft.world.item.crafting.CraftingRecipe
 import net.minecraft.world.item.crafting.Recipe
 import net.minecraft.world.item.crafting.RecipeType
 import net.minecraft.world.item.crafting.Ingredient
-import net.minecraft.world.item.crafting.ShapedRecipe
-import net.minecraft.world.item.crafting.ShapelessRecipe
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.tags.BlockTags
@@ -111,7 +109,7 @@ object ItemUtils {
   def getIngredients(manager: RecipeManager, stack: ItemStack): Array[ItemStack] = try {
     def getFilteredInputs(inputs: Iterable[ItemStack], outputSize: Int) = (inputs.filter(input =>
       !input.isEmpty &&
-        input.getCount / outputSize > 0 &&
+        input.getCount > 0 &&
         // Strip out buckets, because those are returned when crafting, and
         // we have no way of returning the fluid only (and I can't be arsed
         // to make it output fluids into fluiducts or such, sorry).
@@ -125,21 +123,22 @@ object ItemUtils {
       case _ => false
     }
 
-    val (ingredients, count) = manager.getAllRecipesFor[CraftingContainer, CraftingRecipe](RecipeType.CRAFTING).
-      filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack)).collect {
-      case recipe: ShapedRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
-      case recipe: ShapelessRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
+    val matching = manager.getAllRecipesFor[CraftingContainer, CraftingRecipe](RecipeType.CRAFTING).
+      filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack))
+
+    val (ingredients, count) = matching.collect {
+      case recipe: CraftingRecipe =>
+        val outputSize = getOutputSize(recipe)
+        val (inputs, _) = getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), outputSize)
+        (inputs, outputSize)
     }.collectFirst {
-      case (inputs, outputSize) if !inputs.exists(isInputBlacklisted) => (inputs, outputSize)
+      case (inputs, outputSize) if inputs.nonEmpty && !inputs.exists(isInputBlacklisted) &&
+        !inputs.exists(input => ItemStack.isSameItem(input, stack)) => (inputs, outputSize)
     } match {
       case Some((inputs, outputSize)) => (inputs, outputSize)
       case _ => return Array.empty
     }
 
-    // Avoid positive feedback loops.
-    if (ingredients.exists(ingredient => ItemStack.isSameItem(ingredient, stack))) {
-      return Array.empty[ItemStack]
-    }
     // Merge equal items for size division by output size.
     val merged = mutable.ArrayBuffer.empty[ItemStack]
     for (ingredient <- ingredients) {
@@ -148,7 +147,10 @@ object ItemUtils {
         case _ => merged += ingredient.copy()
       }
     }
-    merged.foreach(s => s.setCount(s.getCount / count))
+    merged.foreach { s =>
+      val divided = s.getCount / count
+      s.setCount(if (divided > 0) divided else 1)
+    }
     // Split items up again to 'disassemble them individually'.
     val distinct = mutable.ArrayBuffer.empty[ItemStack]
     for (ingredient <- merged) {
