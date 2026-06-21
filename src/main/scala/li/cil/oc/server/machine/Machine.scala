@@ -26,9 +26,9 @@ import li.cil.oc.api.network.Node
 import li.cil.oc.api.network.Visibility
 import li.cil.oc.api.prefab
 import li.cil.oc.api.prefab.AbstractManagedEnvironment
-import li.cil.oc.client.ClientUtil
 import li.cil.oc.common.EventHandler
 import li.cil.oc.common.SaveHandler
+import li.cil.oc.common.SinglePlayerPause
 import li.cil.oc.common.Slot
 import li.cil.oc.common.blockentity
 import li.cil.oc.server.PacketSender
@@ -56,9 +56,6 @@ import net.minecraft.nbt.LongTag
 import net.minecraft.nbt.DoubleTag
 import net.minecraft.nbt.ByteArrayTag
 import net.minecraft.nbt.ListTag
-import net.minecraft.client.server.IntegratedServer
-import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.fml.DistExecutor
 
 class Machine(val host: MachineHost) extends AbstractManagedEnvironment with machine.Machine with Runnable with DeviceInfo {
   override val node: ComponentConnector = Network.newNode(this, Visibility.Network).
@@ -202,7 +199,6 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
 
   override def canInteract(player: String): Boolean = !Settings.get.canComputersBeOwned ||
     _users.synchronized(_users.isEmpty || _users.contains(player)) ||
-    ServerLifecycleHooks.getCurrentServer == null ||
     ServerLifecycleHooks.getCurrentServer.isSingleplayer || {
     val config = ServerLifecycleHooks.getCurrentServer.getPlayerList
     val entity = config.getPlayerByName(player)
@@ -385,11 +381,6 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
   })
 
   override def invoke(address: String, method: String, args: Array[AnyRef]): Array[AnyRef] = {
-    if (method == "setForeground" || method == "setBackground") {
-      if (args.nonEmpty && args(0).isInstanceOf[Array[Byte]]) {
-        OpenComputers.log.warn(s"[Debug] Bad argument passed to $method! Array[Byte] detected.")
-      }
-    }
     if (node != null && node.network != null) {
       Option(node.network.node(address)) match {
         case Some(component: li.cil.oc.server.network.Component) if component.canBeSeenFrom(node) || component == node =>
@@ -988,13 +979,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
 
   private def isGamePaused: Boolean = {
     val server = ServerLifecycleHooks.getCurrentServer
-
-    server != null &&
-      !server.isDedicatedServer &&
-      DistExecutor.unsafeCallWhenOn(
-        Dist.CLIENT,
-        () => () => ClientUtil.isPaused
-      )
+    server != null && !server.isDedicatedServer && SinglePlayerPause.isPaused
   }
 
   // This is a really high level lock that we only use for saving and loading.

@@ -2,16 +2,14 @@ package li.cil.oc.integration.create
 
 import com.simibubi.create.content.kinetics.motor.CreativeMotorBlockEntity
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollValueBehaviour
-import li.cil.oc.api.driver.{EnvironmentProvider, NamedBlock}
+import li.cil.oc.api.driver.NamedBlock
 import li.cil.oc.api.machine.{Arguments, Callback, Context}
 import li.cil.oc.api.network.ManagedEnvironment
 import li.cil.oc.api.prefab.DriverSidedBlockEntity
 import li.cil.oc.integration.ManagedBlockEntityEnvironment
 import li.cil.oc.util.ResultWrapper.result
 import net.minecraft.core.{BlockPos, Direction}
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.{Block, Blocks}
 
 object DriverCreativeMotor extends DriverSidedBlockEntity {
   override def getBlockEntityClass: Class[_] = classOf[CreativeMotorBlockEntity]
@@ -35,14 +33,6 @@ object DriverCreativeMotor extends DriverSidedBlockEntity {
     @Callback(doc = "function():number -- Gets the current RPM of the creative motor.")
     def getGeneratedSpeed(context: Context, args: Arguments): Array[AnyRef] = {
       result(generatedSpeed.getValue.asInstanceOf[Float])
-    }
-  }
-
-  object Provider extends EnvironmentProvider {
-    override def getEnvironment(stack: ItemStack): Class[_] = {
-      if (!stack.isEmpty && Block.byItem(stack.getItem) == Blocks.FURNACE)
-        classOf[Environment]
-      else null
     }
   }
 }

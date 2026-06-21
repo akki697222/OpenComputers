@@ -10,7 +10,11 @@ import li.cil.oc.util.ResultWrapper.result
 import li.cil.oc.util.StackOption._
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.ItemStack
-import net.minecraft.core.Direction
+import net.minecraft.core.{BlockPos, Direction}
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.{BlockHitResult, Vec3}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.entity.item.ItemTossEvent
 import net.minecraftforge.eventbus.api.Event.Result
@@ -19,7 +23,7 @@ import scala.collection.convert.ImplicitConversionsToScala._
 import net.minecraft.world.entity.item.ItemEntity
 
 trait ContainerLevelControl extends ContainerAware with LevelAware with SideRestricted {
-  @Callback(doc = "function(side:number):boolean -- Compare the block on the specified side with the one in the selected slot. Returns true if equal.")
+  @Callback(doc = "function(side:number[, fuzzy:boolean=false]):boolean -- Compare the block on the specified side with the one in the selected slot. Returns true if equal.")
   def compare(context: Context, args: Arguments): Array[AnyRef] = {
     val side = checkSideForAction(args, 0)
     stackInSlot(selectedSlot) match {
@@ -28,13 +32,22 @@ trait ContainerLevelControl extends ContainerAware with LevelAware with SideRest
           val blockPos = position.offset(side).toBlockPos
           val state = world.getBlockState(blockPos)
           val idMatches = item.getBlock == state.getBlock
-          args.optBoolean(1, false) // TODO
-          return result(idMatches)
+          val fuzzy = args.optBoolean(1, false)
+          val subTypeMatches = fuzzy || blockStateMatchesStack(item, stack, state, blockPos, side)
+          return result(idMatches && subTypeMatches)
         case _ =>
       }
       case _ =>
     }
     result(false)
+  }
+
+  private def blockStateMatchesStack(item: BlockItem, stack: ItemStack, state: BlockState, blockPos: BlockPos, side: Direction): Boolean = {
+    if (item.getBlock.getStateDefinition.getProperties.isEmpty) return true
+    val context = new BlockPlaceContext(
+      world, fakePlayer, InteractionHand.MAIN_HAND, stack,
+      new BlockHitResult(Vec3.atCenterOf(blockPos), side.getOpposite, blockPos, false))
+    Option(item.getBlock.getStateForPlacement(context)).forall(_ == state)
   }
 
   @Callback(doc = "function(side:number[, count:number=64]):boolean -- Drops items from the selected slot towards the specified side.")

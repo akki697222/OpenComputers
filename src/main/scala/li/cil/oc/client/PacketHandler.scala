@@ -500,10 +500,9 @@ object PacketHandler extends CommonPacketHandler {
         val velocity = p.readDouble()
         val direction = p.readDirection()
         val particleType = p.readRegistryEntry(ForgeRegistries.PARTICLE_TYPES)
+        val count = p.readUnsignedByte() / (1 << Minecraft.getInstance.options.particles.get.getId)
         particleType match {
           case particle: ParticleOptions =>
-            val count = p.readUnsignedByte() / (1 << Minecraft.getInstance.options.particles.get.getId)
-
             for (i <- 0 until count) {
               def rv(f: Direction => Int) = direction match {
                 case Some(d) => world.random.nextFloat - 0.5 + f(d) * 0.5
@@ -526,6 +525,7 @@ object PacketHandler extends CommonPacketHandler {
               }
             }
           case _ =>
+            OpenComputers.log.warn(s"Ignoring particle effect with unsupported type: $particleType")
         }
       case _ => // Invalid packet.
     }

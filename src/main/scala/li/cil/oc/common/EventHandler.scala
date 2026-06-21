@@ -49,6 +49,8 @@ import net.minecraft.Util
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent
+import net.minecraftforge.client.event.ScreenEvent
+import net.minecraft.client.Minecraft
 import net.minecraftforge.common.util.FakePlayer
 import net.minecraftforge.event.AttachCapabilitiesEvent
 import net.minecraftforge.event.TickEvent
@@ -218,6 +220,35 @@ object EventHandler {
       }
     })
     machines --= closed
+  }
+
+  @SubscribeEvent
+  @OnlyIn(Dist.CLIENT)
+  def onScreenOpening(e: ScreenEvent.Opening): Unit = {
+    if (e.getScreen.isPauseScreen) {
+      setSinglePlayerPause(true)
+    }
+  }
+
+  @SubscribeEvent
+  @OnlyIn(Dist.CLIENT)
+  def onScreenClosing(e: ScreenEvent.Closing): Unit = {
+    if (e.getScreen.isPauseScreen) {
+      setSinglePlayerPause(false)
+      pendingClient.synchronized {
+        pendingClient += { () =>
+          if (!Minecraft.getInstance.isPaused) {
+            setSinglePlayerPause(false)
+          }
+        }
+      }
+    }
+  }
+
+  private def setSinglePlayerPause(paused: Boolean): Unit = {
+    if (paused != SinglePlayerPause.isPaused) {
+      SinglePlayerPause.isPaused = paused
+    }
   }
 
   @SubscribeEvent

@@ -71,7 +71,7 @@ object FileSystem extends api.detail.FileSystemAPI {
       ZipFileInputStreamFileSystem.fromFile(file, innerPath.substring(1))
     }
     else {
-      new io.File(file, innerPath) match {
+      new io.File(file, innerPath.substring(1)) match {
         case fsp if fsp.exists() && fsp.isDirectory =>
           new ReadOnlyFileSystem(fsp)
         case _ => null
