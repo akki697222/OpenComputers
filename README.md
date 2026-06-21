@@ -2,6 +2,7 @@
 
 > [!IMPORTANT]
 > This is a Community Edition and fork of OpenComputers. Not an official Project.
+> 
 > This project uses AI in part. If you do not agree with the use of AI, please close this page immediately and return to your own world.
 
 Thanks to the original author Sangar, Vexatos, payonel, magik6k, Lord Joda, and all GitHub contributors.
