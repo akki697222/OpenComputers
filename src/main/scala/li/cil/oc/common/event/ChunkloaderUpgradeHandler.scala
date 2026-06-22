@@ -31,8 +31,6 @@ object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
 
   override def validateTickets(world: ServerLevel, helper: TicketHelper): Unit = {
     for ((owner, ticketsPair) <- helper.getEntityTickets) {
-      // This ensures that malformed tickets are also cleared on world save.
-      restoredTickets += owner -> null
       // Chunkloaders use only ticking tickets.
       val tickets = ticketsPair.getSecond
       if (tickets.size == 9) {
@@ -73,7 +71,7 @@ object ChunkloaderUpgradeHandler extends LoadingValidationCallback {
       // so if the save is because the game is being quit the tickets aren't
       // actually being cleared. This will *usually* not be a problem, but it
       // has room for improvement.
-      for ((owner, pos) <- restoredTickets) {
+      for ((owner, pos) <- restoredTickets if pos != null) {
         try {
           OpenComputers.log.warn(s"A chunk loader ticket has been orphaned! Address: ${owner}, position: (${pos.x}, ${pos.z}). Removing...")
           releaseTicket(level, owner.toString, pos)

@@ -44,8 +44,11 @@ object FileSystemAccessHandler {
     val volume = Settings.get.soundVolume
     val soundName = e.getSound
     if (soundName != null && soundName.nonEmpty) {
-      val sound = SoundEvent.createVariableRangeEvent(ResourceLocation.tryParse(soundName))
-      e.getWorld.playLocalSound(e.getX, e.getY, e.getZ, sound, SoundSource.BLOCKS, volume, 1, false)
+      val location = ResourceLocation.tryParse(soundName)
+      if (location != null) {
+        val sound = SoundEvent.createVariableRangeEvent(location)
+        e.getWorld.playLocalSound(e.getX, e.getY, e.getZ, sound, SoundSource.BLOCKS, volume, 1, false)
+      }
     }
     e.getBlockEntity match {
       case t: DiskDrive => t.lastAccess = System.currentTimeMillis()
