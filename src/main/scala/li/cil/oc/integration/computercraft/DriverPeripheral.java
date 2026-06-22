@@ -176,14 +176,14 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
                 throw new NoSuchMethodException();
             }
 
-            final Object[] invokeArgs = buildInvokeArguments(method, argArray);
+            final Object[] invokeArgs = buildInvokeArguments(method, argArray, access);
 
             final Object result = method.invoke(peripheral, invokeArgs);
 
             return wrapResult(result);
         }
 
-        private Object[] buildInvokeArguments(final Method method, final Object[] args) {
+        private Object[] buildInvokeArguments(final Method method, final Object[] args, final IComputerAccess access) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
             final Object[] invokeArgs = new Object[parameterTypes.length];
 
@@ -193,7 +193,7 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
                 final Class<?> type = parameterTypes[i];
 
                 if (type == IComputerAccess.class) {
-                    invokeArgs[i] = null;
+                    invokeArgs[i] = access;
                 } else if (type == ILuaContext.class) {
                     invokeArgs[i] = UnsupportedLuaContext.instance();
                 } else if (type == ObjectArguments.class) {
@@ -468,7 +468,7 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
 
             @Override
             public long issueMainThreadTask(@NotNull LuaTask luaTask) throws LuaException {
-                return 0;
+                throw new LuaException("issueMainThreadTask is not supported when calling CC peripherals from OC");
             }
         }
     }
