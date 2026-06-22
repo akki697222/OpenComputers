@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.server.level.{ServerPlayer => ServerPlayerEntity}
 import net.minecraft.core.BlockPos
-import net.minecraft.core.Direction
 import net.minecraft.world.level.block.entity.{BlockEntity, BlockEntityType}
 import net.minecraft.world.phys.shapes.{CollisionContext => ISelectionContext}
 import net.minecraft.world.phys.shapes.VoxelShape
@@ -28,9 +27,6 @@ class Assembler(props: Properties) extends SimpleBlock(props) with traits.PowerA
   }
 
   override def getShape(state: BlockState, world: IBlockReader, pos: BlockPos, ctx: ISelectionContext): VoxelShape = blockShape
-
-  override def isFaceSturdy(state: BlockState, level: IBlockReader, pos: BlockPos, face: Direction): Boolean =
-    face == Direction.DOWN || face == Direction.UP
 
   override def openGui(player: ServerPlayerEntity, world: World, pos: BlockPos): Unit = world.getBlockEntity(pos) match {
     case te: blockentity.Assembler => MenuTypes.openAssemblerGui(player, te)

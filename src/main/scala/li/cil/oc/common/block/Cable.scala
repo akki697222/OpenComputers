@@ -39,8 +39,6 @@ class Cable(props: Properties) extends SimpleBlock(props) with IForgeBlock {
   
   registerDefaultState(CableHelper.helperRegisterDefaultState(this.stateDefinition))
 
-  override def isFaceSturdy(state: BlockState, level: IBlockReader, pos: BlockPos, face: Direction): Boolean = false
-
   override def getStateForPlacement(ctx: BlockItemUseContext): BlockState = {
     val color = Cable.getConnectionColor(ctx.getItemInHand)
     val fromPos = new BlockPos.MutableBlockPos()
