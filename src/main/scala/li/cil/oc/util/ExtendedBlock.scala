@@ -18,7 +18,10 @@ object ExtendedBlock {
     def isAir(position: BlockPosition) = position.world.get.isEmptyBlock(position.toBlockPos)
     
     @Deprecated
-    def isReplaceable(position: BlockPosition) = block.defaultBlockState.is(BlockTags.REPLACEABLE)
+    def isReplaceable(position: BlockPosition) = {
+      val level = position.world.get
+      level.getBlockState(position.toBlockPos).canBeReplaced()
+    }
 
     @Deprecated
     def getBlockHardness(position: BlockPosition) = position.world.get.getBlockState(position.toBlockPos).getDestroySpeed(position.world.get, position.toBlockPos)

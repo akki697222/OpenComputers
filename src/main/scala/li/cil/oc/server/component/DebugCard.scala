@@ -208,7 +208,7 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
     val fakePlayer = FakePlayerFactory.get(world.asInstanceOf[ServerLevel], Settings.get.fakePlayerProfile)
     fakePlayer.setPos(position.x + 0.5, position.y + 0.5, position.z + 0.5)
 
-    val candidates = world.getEntitiesOfClass(classOf[Entity], position.bounds, null)
+    val candidates = world.getEntitiesOfClass(classOf[Entity], position.bounds, _ => true)
     (if (!candidates.isEmpty) Some(candidates.minBy(fakePlayer.distanceToSqr(_))) else None) match {
       case Some(living: LivingEntity) => result(true, "EntityLiving", living)
       case Some(minecart: Minecart) => result(true, "EntityMinecart", minecart)
@@ -218,12 +218,12 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
         if (state.isAir()) {
           result(false, "air", block)
         }
-        else if (block.isInstanceOf[LiquidBlock] || block.isInstanceOf[IFluidBlock]) {
+        else if (!state.getFluidState.isEmpty) {
           val event = new BlockEvent.BreakEvent(world, position.toBlockPos, state, fakePlayer)
           MinecraftForge.EVENT_BUS.post(event)
           result(event.isCanceled, "liquid", block)
         }
-        else if (block.isReplaceable(position)) {
+        else if (state.canBeReplaced()) {
           val event = new BlockEvent.BreakEvent(world, position.toBlockPos, state, fakePlayer)
           MinecraftForge.EVENT_BUS.post(event)
           result(event.isCanceled, "replaceable", block)
@@ -857,7 +857,7 @@ object DebugCard {
     @Callback(doc = """function(x:number, y:number, z:number):number -- Get the light value (emission) of the block at the specified coordinates.""")
     def getLightValue(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
-      result(world.getLightEmission(new BlockPos(args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))))
+      result(world.getMaxLocalRawBrightness(new BlockPos(args.checkInteger(0), args.checkInteger(1), args.checkInteger(2))))
     }
 
     @Callback(doc = """function(x:number, y:number, z:number):number -- Get whether the block at the specified coordinates is directly under the sky.""")

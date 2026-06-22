@@ -81,6 +81,9 @@ trait LevelInventoryAnalytics extends LevelAware with SideRestricted with Networ
   }
   else result((), "not enabled in config")
 
+  @Callback(doc = """function(side:number, slot:number):table -- Alias of getItem for 1.12 API compatibility.""")
+  def getStackInSlot(context: Context, args: Arguments): Array[AnyRef] = getItem(context, args)
+
   @Callback(doc = """function(side:number):userdata -- Get a description of all stacks in the inventory on the specified side of the device.""")
   def getAllStacks(context: Context, args: Arguments): Array[AnyRef] = if (Settings.get.allowItemStackInspection) {
     val facing = checkSideForAction(args, 0)
