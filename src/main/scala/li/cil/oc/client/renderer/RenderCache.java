@@ -74,15 +74,24 @@ public class RenderCache implements MultiBufferSource {
     private RenderType activeType;
     private BufferBuilder activeBuilder;
 
+    private boolean compiled = false;
+
     public RenderCache() {}
 
     public boolean isEmpty() { return cached.isEmpty() && activeBuilder == null; }
+
+    public boolean isCompiled() { return compiled; }
 
     public void clear() {
         cached.forEach(DrawEntry::close);
         cached.clear();
         activeType = null;
         activeBuilder = null;
+        compiled = false;
+    }
+
+    public void close() {
+        clear();
     }
 
     private void flush() {
@@ -108,6 +117,7 @@ public class RenderCache implements MultiBufferSource {
 
     public void finish() {
         flush();
+        compiled = true;
     }
 
     public void render(PoseStack poseStack) {
@@ -126,10 +136,13 @@ public class RenderCache implements MultiBufferSource {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        RenderSystem.depthMask(false);
 
         for (DrawEntry entry : cached) {
             entry.render(modelView, projection);
         }
+
+        RenderSystem.depthMask(true);
 
         VertexBuffer.unbind();
         RenderSystem.setInverseViewRotationMatrix(oldInverseRotation);

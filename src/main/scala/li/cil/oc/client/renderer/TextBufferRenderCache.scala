@@ -1,7 +1,7 @@
 package li.cil.oc.client.renderer
 
 import java.util.concurrent.TimeUnit
-import com.google.common.cache.CacheBuilder
+import com.google.common.cache.{CacheBuilder, RemovalNotification}
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.{DefaultVertexFormat, PoseStack, Tesselator, VertexFormat}
 import li.cil.oc.{OpenComputers, Settings}
@@ -18,6 +18,9 @@ object TextBufferRenderCache {
 
   private val cache = com.google.common.cache.CacheBuilder.newBuilder().
     expireAfterAccess(2, TimeUnit.SECONDS).
+    removalListener((notification: RemovalNotification[TextBufferRenderData, RenderCache]) => {
+      Option(notification.getValue).foreach(_.close())
+    }).
     build[TextBufferRenderData, RenderCache]()
 
   // ----------------------------------------------------------------------- //
@@ -28,7 +31,7 @@ object TextBufferRenderCache {
     RenderState.checkError(getClass.getName + ".render: entering")
 
     val cached = cache.get(buffer, () => new RenderCache)
-    if (buffer.dirty || cached.isEmpty) {
+    if (buffer.dirty || !cached.isCompiled) {
       for (line <- buffer.data.buffer) {
         renderer.generateChars(line)
       }
