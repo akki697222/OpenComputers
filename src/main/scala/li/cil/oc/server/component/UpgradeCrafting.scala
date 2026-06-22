@@ -64,7 +64,7 @@ class UpgradeCrafting(val host: EnvironmentHost with internal.Robot) extends Abs
 
           val craftResult = new ResultContainer
           val craftingSlot = new ResultSlot(player, CraftingContainer, craftResult, 0, 0, 0)
-          val craftedResult = craft.get.assemble(this, null)
+          val craftedResult = craft.get.assemble(this, host.getEnvironmentLevel.registryAccess())
           craftResult.setItem(0, craftedResult)
           if (!craftingSlot.hasItem)
             return false
