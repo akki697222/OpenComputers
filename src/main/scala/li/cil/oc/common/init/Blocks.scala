@@ -25,7 +25,7 @@ object Blocks {
 
     BLOCKS.register(Constants.BlockName.Adapter,           () => Items.registerBlock(new Adapter(defaultProps), Constants.BlockName.Adapter, defaultItemProps))
     BLOCKS.register(Constants.BlockName.Assembler,         () => Items.registerBlock(new Assembler(defaultProps), Constants.BlockName.Assembler, defaultItemProps))
-    BLOCKS.register(Constants.BlockName.Cable,             () => Items.registerBlock(new Cable(defaultProps), Constants.BlockName.Cable, defaultItemProps))
+    BLOCKS.register(Constants.BlockName.Cable,             () => Items.registerBlock(new Cable(defaultProps.noOcclusion()), Constants.BlockName.Cable, defaultItemProps))
     BLOCKS.register(Constants.BlockName.Capacitor,         () => Items.registerBlock(new Capacitor(defaultProps), Constants.BlockName.Capacitor, defaultItemProps))
     BLOCKS.register(Constants.BlockName.CaseTier1,         () => Items.registerBlock(new Case(defaultProps, Tier.One), Constants.BlockName.CaseTier1, defaultItemProps))
     BLOCKS.register(Constants.BlockName.CaseTier2,         () => Items.registerBlock(new Case(defaultProps, Tier.Two), Constants.BlockName.CaseTier2, defaultItemProps.rarity(Rarity.UNCOMMON)))

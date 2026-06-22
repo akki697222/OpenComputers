@@ -17,6 +17,8 @@ import net.minecraft.world.level.{Level => World}
 class NetSplitter(props: Properties) extends RedstoneAware(props) {
   override def newBlockEntity(pos: BlockPos, state: BlockState) = new blockentity.NetSplitter(pos, state)
 
+  override def isFaceSturdy(state: BlockState, level: IBlockReader, pos: BlockPos, face: Direction): Boolean = false
+
   // ----------------------------------------------------------------------- //
 
   // NOTE: must not be final for immibis microblocks to work.

@@ -75,5 +75,8 @@ class Rack(props: Properties) extends RedstoneAware(props) with traits.PowerAcce
     new Vector3d(v.x * cos - v.z * sin, v.y, v.x * sin + v.z * cos)
   }
 
+  override def isFaceSturdy(state: BlockState, level: IBlockReader, pos: BlockPos, face: Direction): Boolean =
+    toLocal(level, pos, face) != Direction.SOUTH
+
   override def getBlockEntityType: BlockEntityType[_ <: BlockEntity] = BlockEntityTypes.RACK.get()
 }

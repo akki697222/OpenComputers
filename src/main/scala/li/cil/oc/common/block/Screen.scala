@@ -126,6 +126,9 @@ class Screen(props: Properties, val tier: Int) extends RedstoneAware(props) with
 
   // ----------------------------------------------------------------------- //
 
+  override def isFaceSturdy(state: BlockState, level: IBlockReader, pos: BlockPos, face: Direction): Boolean =
+    toLocal(level, pos, face) != Direction.SOUTH
+
   override def getValidRotations(world: World, pos: BlockPos) =
     world.getBlockEntity(pos) match {
       case screen: blockentity.Screen =>
