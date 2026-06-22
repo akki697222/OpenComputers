@@ -208,7 +208,7 @@ class DebugCard(host: EnvironmentHost) extends AbstractManagedEnvironment with D
     val fakePlayer = FakePlayerFactory.get(world.asInstanceOf[ServerLevel], Settings.get.fakePlayerProfile)
     fakePlayer.setPos(position.x + 0.5, position.y + 0.5, position.z + 0.5)
 
-    val candidates = world.getEntitiesOfClass(classOf[Entity], position.bounds, _ => true)
+    val candidates = world.getEntitiesOfClass(classOf[Entity], position.bounds, (_: Entity) => true)
     (if (!candidates.isEmpty) Some(candidates.minBy(fakePlayer.distanceToSqr(_))) else None) match {
       case Some(living: LivingEntity) => result(true, "EntityLiving", living)
       case Some(minecart: Minecart) => result(true, "EntityMinecart", minecart)
