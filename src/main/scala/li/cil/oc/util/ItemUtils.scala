@@ -57,8 +57,7 @@ object ItemUtils {
   }
 
   def getHarvestTool(state: BlockState): String = {
-    val block = state.getBlock
-    val forgeTool = block.getHarvestTool(state)
+    val forgeTool = state.getHarvestTool
     if (forgeTool != null && forgeTool.nonEmpty) forgeTool
     else if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) "pickaxe"
     else if (state.is(BlockTags.MINEABLE_WITH_AXE)) "axe"
