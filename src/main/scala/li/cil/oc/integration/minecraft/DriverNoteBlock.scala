@@ -61,7 +61,7 @@ object DriverNoteBlock extends DriverBlock {
         }
       }
       val canTrigger = world.isEmptyBlock(pos.above)
-      if (canTrigger) world.blockEvent(pos, Blocks.NOTE_BLOCK, 0, 0)
+      world.blockEvent(pos, Blocks.NOTE_BLOCK, 0, 0)
       result(canTrigger)
     }
 

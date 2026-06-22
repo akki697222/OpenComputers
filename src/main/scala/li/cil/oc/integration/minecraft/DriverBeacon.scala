@@ -46,8 +46,8 @@ object DriverBeacon extends DriverSidedBlockEntity {
     }
 
     private def getEffectName(effect: MobEffect): String = {
-      val name = ForgeRegistries.MOB_EFFECTS.getKey(effect).toString
-      if (effect != null) name else null
+      if (effect == null) null
+      else Option(ForgeRegistries.MOB_EFFECTS.getKey(effect)).map(_.toString).orNull
     }
   }
 
