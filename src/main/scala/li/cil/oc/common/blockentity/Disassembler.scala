@@ -121,7 +121,7 @@ class Disassembler(pos: BlockPos, state: BlockState)
   def disassemble(stack: ItemStack, instant: Boolean = false): Unit = {
     // Validate the item, never trust Minecraft / other Mods on anything!
     if (canPlaceItem(0, stack)) {
-      val ingredients = ItemUtils.getIngredients(getLevel.getRecipeManager, stack)
+      val ingredients = ItemUtils.getIngredients(getLevel.getRecipeManager, stack, getLevel.registryAccess())
       DisassemblerTemplates.select(stack) match {
         case Some(template) =>
           val (stacks, drops) = template.disassemble(stack, ingredients)
@@ -190,7 +190,7 @@ class Disassembler(pos: BlockPos, state: BlockState)
 
   override def canPlaceItem(i: Int, stack: ItemStack): Boolean =
     allowDisassembling(stack) &&
-      (((Settings.get.disassembleAllTheThings || api.Items.get(stack) != null) && ItemUtils.getIngredients(getLevel.getRecipeManager, stack).nonEmpty) ||
+      (((Settings.get.disassembleAllTheThings || api.Items.get(stack) != null) && ItemUtils.getIngredients(getLevel.getRecipeManager, stack, getLevel.registryAccess()).nonEmpty) ||
         DisassemblerTemplates.select(stack).isDefined)
 
   private def allowDisassembling(stack: ItemStack) = !stack.isEmpty && (!stack.hasTag || !stack.getTag.getBoolean(Settings.namespace + "undisassemblable"))

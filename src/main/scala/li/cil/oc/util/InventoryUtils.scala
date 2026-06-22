@@ -38,7 +38,7 @@ object InventoryUtils {
   def haveSameItemType(stackA: ItemStack, stackB: ItemStack, checkNBT: Boolean = false): Boolean =
     !stackA.isEmpty && !stackB.isEmpty &&
       stackA.getItem == stackB.getItem &&
-      (stackA.getDamageValue == stackB.getDamageValue) &&
+      (!stackA.isDamageableItem || stackA.getDamageValue == stackB.getDamageValue) &&
       (!checkNBT || ItemStack.isSameItemSameTags(stackA, stackB))
 
   /**

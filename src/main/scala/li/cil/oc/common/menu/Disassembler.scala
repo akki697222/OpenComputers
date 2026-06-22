@@ -25,7 +25,7 @@ class Disassembler(id: Int, playerInventory: Inventory, val disassembler: Contai
       if (!container.canPlaceItem(getSlotIndex, stack)) return false
       allowDisassembling(stack) &&
         (((Settings.get.disassembleAllTheThings || api.Items.get(stack) != null) &&
-            ItemUtils.getIngredients(playerInventory.player.level.getRecipeManager, stack).nonEmpty) ||
+            ItemUtils.getIngredients(playerInventory.player.level.getRecipeManager, stack, playerInventory.player.level.registryAccess()).nonEmpty) ||
           DisassemblerTemplates.select(stack).isDefined)
     }
   })

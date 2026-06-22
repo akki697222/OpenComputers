@@ -22,6 +22,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe
 import net.minecraft.world.item.crafting.ShapelessRecipe
 import net.minecraft.nbt.NbtIo
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.core.{BlockPos, RegistryAccess}
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.inventory.CraftingContainer
 import net.minecraft.world.level.block.state.BlockState
@@ -48,14 +49,18 @@ object ItemUtils {
   }
 
   def getHarvestLevel(state: BlockState): Int = {
-    if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) 3
+    if (state.getDestroySpeed(null, BlockPos.ZERO) < 0) -1
+    else if (state.is(BlockTags.NEEDS_DIAMOND_TOOL)) 3
     else if (state.is(BlockTags.NEEDS_IRON_TOOL)) 2
     else if (state.is(BlockTags.NEEDS_STONE_TOOL)) 1
     else 0
   }
 
   def getHarvestTool(state: BlockState): String = {
-    if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) "pickaxe"
+    val block = state.getBlock
+    val forgeTool = block.getHarvestTool(state)
+    if (forgeTool != null && forgeTool.nonEmpty) forgeTool
+    else if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) "pickaxe"
     else if (state.is(BlockTags.MINEABLE_WITH_AXE)) "axe"
     else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) "shovel"
     else if (state.is(BlockTags.MINEABLE_WITH_HOE)) "hoe"
@@ -108,7 +113,7 @@ object ItemUtils {
     baos.toByteArray
   }
 
-  def getIngredients(manager: RecipeManager, stack: ItemStack): Array[ItemStack] = try {
+  def getIngredients(manager: RecipeManager, stack: ItemStack, registryAccess: RegistryAccess): Array[ItemStack] = try {
     def getFilteredInputs(inputs: Iterable[ItemStack], outputSize: Int) = (inputs.filter(input =>
       !input.isEmpty &&
         input.getCount / outputSize > 0 &&
@@ -117,7 +122,7 @@ object ItemUtils {
         // to make it output fluids into fluiducts or such, sorry).
         !input.getItem.isInstanceOf[BucketItem]).toArray, outputSize)
 
-    def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(null).getCount
+    def getOutputSize(recipe: Recipe[_]) = recipe.getResultItem(registryAccess).getCount
 
     def isInputBlacklisted(stack: ItemStack) = stack.getItem match {
       case item: BlockItem => Settings.get.disassemblerInputBlacklist.contains(ForgeRegistries.BLOCKS.getKey(item.getBlock))
@@ -126,7 +131,7 @@ object ItemUtils {
     }
 
     val (ingredients, count) = manager.getAllRecipesFor[CraftingContainer, CraftingRecipe](RecipeType.CRAFTING).
-      filter(recipe => !recipe.getResultItem(null).isEmpty && ItemStack.isSameItem(recipe.getResultItem(null), stack)).collect {
+      filter(recipe => !recipe.getResultItem(registryAccess).isEmpty && ItemStack.isSameItem(recipe.getResultItem(registryAccess), stack)).collect {
       case recipe: ShapedRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
       case recipe: ShapelessRecipe => getFilteredInputs(resolveOreDictEntries(recipe.getIngredients), getOutputSize(recipe))
     }.collectFirst {

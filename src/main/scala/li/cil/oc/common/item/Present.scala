@@ -10,6 +10,7 @@ import li.cil.oc.util.ItemUtils
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.Item.Properties
 import net.minecraft.world.item.ItemStack
+import net.minecraft.core.RegistryAccess
 import net.minecraft.world.item.crafting.RecipeManager
 import net.minecraftforge.common.extensions.IForgeItem
 
@@ -31,6 +32,7 @@ class Present(props: Properties) extends Item(props) with IForgeItem with traits
       if (!level.isClientSide) {
         level.playSound(player, player.getX, player.getY, player.getZ, SoundEvents.PLAYER_LEVELUP, SoundSource.MASTER, 0.2f, 1f)
         Present.recipeManager = level.getRecipeManager
+        Present.registryAccess = level.registryAccess()
         val present = Present.nextPresent()
         InventoryUtils.addToPlayerInventory(present, player)
       }
@@ -41,6 +43,7 @@ class Present(props: Properties) extends Item(props) with IForgeItem with traits
 
 object Present {
   private var recipeManager: RecipeManager = null
+  private var registryAccess: RegistryAccess = null
 
   private lazy val Presents = {
     val result = mutable.ArrayBuffer.empty[ItemStack]
@@ -50,7 +53,7 @@ object Present {
       if (item != null) {
         val stack = item.createItemStack(1)
         // Only if it can be crafted (wasn't disabled in the config).
-        if (ItemUtils.getIngredients(recipeManager, stack).nonEmpty) {
+        if (ItemUtils.getIngredients(recipeManager, stack, registryAccess).nonEmpty) {
           for (i <- 0 until weight) result += stack
         }
       }
