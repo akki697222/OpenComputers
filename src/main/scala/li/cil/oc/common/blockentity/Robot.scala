@@ -46,6 +46,7 @@ import net.minecraftforge.api.distmarker.OnlyIn
 import scala.collection.mutable
 import net.minecraft.world.MenuProvider
 import net.minecraft.core.BlockPos
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.Direction
@@ -379,6 +380,16 @@ class Robot(pos: BlockPos, state: BlockState)
     }
   }
 
+  // ----------------------------------------------------------------------- //
+
+  override def getRenderBoundingBox: AABB =
+    if (level != null && blockState != null) {
+      val shape = blockState.getCollisionShape(level, worldPosition)
+      shape.bounds().inflate(0.5).move(worldPosition)
+    } else {
+      new AABB(worldPosition)
+    }
+
   // The robot's machine is updated in a tick handler, to avoid delayed tile
   // entity creation when moving, which would screw over all the things...
   override protected def updateComputer(): Unit = {}
@@ -401,7 +412,7 @@ class Robot(pos: BlockPos, state: BlockState)
     super.dispose()
     if (isClient) {
       Minecraft.getInstance.screen match {
-        case robotGui: gui.Robot if robotGui.inventoryContainer.otherInventory == this =>
+        case robotGui: gui.Robot if robotGui.robot == this =>
           robotGui.onClose()
         case _ =>
       }
@@ -607,7 +618,7 @@ class Robot(pos: BlockPos, state: BlockState)
     }
     else if (isClient) {
       Minecraft.getInstance.screen match {
-        case robotGui: gui.Robot if robotGui.inventoryContainer.otherInventory == this =>
+        case robotGui: gui.Robot if robotGui.robot == this =>
           robotGui.onClose()
         case _ =>
       }
