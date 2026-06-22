@@ -26,7 +26,6 @@ import net.minecraft.core.{BlockPos, RegistryAccess}
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.inventory.CraftingContainer
 import net.minecraft.world.level.block.state.BlockState
-import net.minecraftforge.common.extensions.IForgeBlock
 import net.minecraftforge.registries.ForgeRegistries
 
 import scala.collection.convert.ImplicitConversionsToScala._
@@ -58,12 +57,7 @@ object ItemUtils {
   }
 
   def getHarvestTool(state: BlockState): String = {
-    val forgeTool = state.getBlock match {
-      case block: IForgeBlock => block.getHarvestTool(state, null, null)
-      case _ => null
-    }
-    if (forgeTool != null && forgeTool.nonEmpty) forgeTool
-    else if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) "pickaxe"
+    if (state.is(BlockTags.MINEABLE_WITH_PICKAXE)) "pickaxe"
     else if (state.is(BlockTags.MINEABLE_WITH_AXE)) "axe"
     else if (state.is(BlockTags.MINEABLE_WITH_SHOVEL)) "shovel"
     else if (state.is(BlockTags.MINEABLE_WITH_HOE)) "hoe"
