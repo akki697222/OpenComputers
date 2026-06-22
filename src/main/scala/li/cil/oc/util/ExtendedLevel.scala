@@ -44,7 +44,7 @@ object ExtendedLevel {
 
     def destroyBlockInWorldPartially(entityId: Int, position: BlockPosition, progress: Int) = level.destroyBlockProgress(entityId, position.toBlockPos, progress)
 
-    def extinguishFire(player: Player, position: BlockPosition, side: Direction) =
+    def extinguishFire(player: Player, position: BlockPosition, side: Direction): Boolean =
       level.extinguishFire(player, position.toBlockPos, side)
 
     def getBlockHardness(position: BlockPosition) = level.getBlockState(position.toBlockPos).getDestroySpeed(level, position.toBlockPos)

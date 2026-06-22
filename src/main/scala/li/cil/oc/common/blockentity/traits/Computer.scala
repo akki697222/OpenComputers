@@ -153,7 +153,7 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     this match {
       case proxy: RobotProxy =>
         proxy.robot.setLevel(getLevel)
-        proxy.robot.setWorldPosition(getBlockPos)
+        proxy.robot.worldPosition = getBlockPos
       case _ =>
     }
     machine.loadData(nbt.getCompound(ComputerTag))
