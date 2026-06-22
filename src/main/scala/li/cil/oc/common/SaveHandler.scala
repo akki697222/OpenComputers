@@ -160,7 +160,12 @@ object SaveHandler {
     })
     saving.remove(name)
 
-    load(ResourceLocation.tryParse(dimension), chunk, name)
+    val dimLoc = ResourceLocation.tryParse(dimension)
+    if (dimLoc == null) {
+      OpenComputers.log.warn(s"SaveHandler.load: invalid or missing dimension '$dimension' for '$name', skipping")
+      return Array.empty[Byte]
+    }
+    load(dimLoc, chunk, name)
   }
 
   def scheduleSave(dimension: ResourceLocation, chunk: ChunkPos, name: String, data: Array[Byte]): Unit = {
