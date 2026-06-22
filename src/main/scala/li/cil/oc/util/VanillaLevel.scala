@@ -8,7 +8,7 @@ import net.minecraft.world.level.Level
 /** Vanilla fire extinguishing without Level.extinguishFire (removed in 1.20). */
 object VanillaLevel {
   def extinguishFire(level: Level, player: Player, pos: BlockPos, side: Direction): Boolean = {
-    val firePos = pos.relative(side)
+    val firePos = pos.offset(side.getStepX, side.getStepY, side.getStepZ)
     val state = level.getBlockState(firePos)
     if (state.is(BlockTags.FIRE)) {
       level.removeBlock(firePos, false)
