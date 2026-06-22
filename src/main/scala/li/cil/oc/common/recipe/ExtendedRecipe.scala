@@ -39,52 +39,55 @@ object ExtendedRecipe {
   private lazy val hdds = Array(
     api.Items.get(Constants.ItemName.HDDTier1),
     api.Items.get(Constants.ItemName.HDDTier2),
-    api.Items.get(Constants.ItemName.HDDTier3)
+    api.Items.get(Constants.ItemName.HDDTier3),
+    api.Items.get(Constants.ItemName.HDDTier4)
   )
   private lazy val cpus = Array(
     api.Items.get(Constants.ItemName.CPUTier1),
     api.Items.get(Constants.ItemName.CPUTier2),
     api.Items.get(Constants.ItemName.CPUTier3),
+    api.Items.get(Constants.ItemName.CPUTier4),
     api.Items.get(Constants.ItemName.APUTier1),
-    api.Items.get(Constants.ItemName.APUTier2)
+    api.Items.get(Constants.ItemName.APUTier2),
+    api.Items.get(Constants.ItemName.APUTier3)
   )
   private lazy val robot = api.Items.get(Constants.BlockName.Robot)
   private lazy val tablet = api.Items.get(Constants.ItemName.Tablet)
   private lazy val print = api.Items.get(Constants.BlockName.Print)
   private val beaconBlocks = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "beacon_base_blocks"))
   
-  def patchRecipe[R <: Recipe[_]](recipe: R): R = {
-    val resultStack = recipe.getResultItem(null)
-    val resultItemName = api.Items.get(resultStack)
+  def patchRecipe[R <: Recipe[_]](recipe: R): R = recipe
 
-    // EEPROM initialization.
-    if (resultItemName == eeprom &&
-      resultStack.getCount == 1 && resultStack.hasTag &&
-      recipe.getIngredients.size == 2) {
-      val nbt = resultStack.getTag.getCompound(Settings.namespace + "data")
-      // Load EEPROM code (if it's a string)
-      val codeNbt = nbt.get(Settings.namespace + "eeprom")
-      if (codeNbt != null && codeNbt.getType == StringTag.TYPE) {
-        val codePath = codeNbt.asInstanceOf[StringTag].getAsString
-        val code = new Array[Byte](Settings.get.eepromSize)
-        val count = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + codePath).read(code)
-        nbt.putByteArray(Settings.namespace + "eeprom", code.take(count))
-      }
-      // Load EEPROM data (if it's a string)
-      val dataNbt = nbt.get(Settings.namespace + "userdata")
-      if (dataNbt != null && dataNbt.getType == StringTag.TYPE) {
-        val dataPath = dataNbt.asInstanceOf[StringTag].getAsString
-        val data = new Array[Byte](Settings.get.eepromDataSize)
-        val count = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + dataPath).read(data)
-        nbt.putByteArray(Settings.namespace + "userdata", data.take(count))
+  private def resolveEepromScriptPaths(stack: ItemStack): Unit = {
+    if (!stack.hasTag) return
+    val data = stack.getTag.getCompound(Settings.namespace + "data")
+
+    def loadScript(pathNbt: net.minecraft.nbt.Tag, size: Int, key: String): Unit = {
+      if (pathNbt != null && pathNbt.getType == StringTag.TYPE) {
+        val path = pathNbt.asInstanceOf[StringTag].getAsString
+        val stream = OpenComputers.getClass.getResourceAsStream(Settings.scriptPath + path)
+        if (stream != null) {
+          try {
+            val code = new Array[Byte](size)
+            val count = stream.read(code)
+            data.putByteArray(key, code.take(count))
+          } finally {
+            stream.close()
+          }
+        }
       }
     }
 
-    recipe
+    loadScript(data.get(Settings.namespace + "eeprom"), Settings.get.eepromSize, Settings.namespace + "eeprom")
+    loadScript(data.get(Settings.namespace + "userdata"), Settings.get.eepromDataSize, Settings.namespace + "userdata")
   }
 
   def addNBTToResult(recipe: Recipe[_], craftedStack: ItemStack, inventory: CraftingContainer): ItemStack = {
     val craftedItemName = api.Items.get(craftedStack)
+
+    if (craftedItemName == eeprom) {
+      resolveEepromScriptPaths(craftedStack)
+    }
 
     if (craftedItemName == navigationUpgrade) {
       Option(api.Driver.driverFor(craftedStack)).foreach(driver =>
