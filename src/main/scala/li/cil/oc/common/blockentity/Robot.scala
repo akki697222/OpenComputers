@@ -383,8 +383,9 @@ class Robot(pos: BlockPos, state: BlockState)
   // ----------------------------------------------------------------------- //
 
   override def getRenderBoundingBox: AABB =
-    if (level != null && blockState != null) {
-      val shape = blockState.getCollisionShape(level, worldPosition)
+    if (level != null) {
+      val state = getBlockState
+      val shape = state.getCollisionShape(level, worldPosition)
       shape.bounds().inflate(0.5).move(worldPosition)
     } else {
       new AABB(worldPosition)
