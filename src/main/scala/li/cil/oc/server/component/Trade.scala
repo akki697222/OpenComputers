@@ -22,6 +22,7 @@ import net.minecraft.world.Container
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.Registries
+import net.minecraft.server.level.ServerLevel
 
 class Trade(val info: TradeInfo) extends AbstractValue {
   def this() = this(new TradeInfo())
@@ -195,7 +196,7 @@ class TradeInfo(var host: Option[EnvironmentHost], var merchant: WeakReference[M
     nbt.putInt(MerchantID, merchantID)
   }
 
-  private def resolveLevel(nbt: CompoundTag): Option[net.minecraft.server.level.ServerLevel] = {
+  private def resolveLevel(nbt: CompoundTag): Option[ServerLevel] = {
     val dimLoc = ResourceLocation.tryParse(nbt.getString(DimensionIDTag))
     if (dimLoc == null) return None
     val dimKey = ResourceKey.create(Registries.DIMENSION, dimLoc)
