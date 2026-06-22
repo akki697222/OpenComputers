@@ -17,9 +17,6 @@ import net.minecraftforge.common.Tags
 
 object ExtendedLevel {
 
-  private def vanillaExtinguishFire(level: Level, player: Player, pos: BlockPos, side: Direction): Boolean =
-    level.extinguishFire(player, pos, side)
-
   implicit def extendedBlockAccess(getter: BlockGetter): ExtendedBlockAccess = new ExtendedBlockAccess(getter)
 
   implicit def extendedLevel(level: Level): ExtendedLevel = new ExtendedLevel(level)
@@ -48,7 +45,7 @@ object ExtendedLevel {
     def destroyBlockInWorldPartially(entityId: Int, position: BlockPosition, progress: Int) = level.destroyBlockProgress(entityId, position.toBlockPos, progress)
 
     def extinguishFire(player: Player, position: BlockPosition, side: Direction): Boolean =
-      ExtendedLevel.vanillaExtinguishFire(level, player, position.toBlockPos, side)
+      VanillaLevel.extinguishFire(level, player, position.toBlockPos, side)
 
     def getBlockHardness(position: BlockPosition) = level.getBlockState(position.toBlockPos).getDestroySpeed(level, position.toBlockPos)
 
