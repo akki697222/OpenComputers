@@ -128,7 +128,7 @@ class UpgradeChunkloader(val host: EnvironmentHost) extends AbstractManagedEnvir
       case Level.OVERWORLD => 0
       case Level.NETHER => -1
       case Level.END => 1
-      case _ => throw new Error("deprecated")
+      case dim => dim.location().hashCode()
     }
     val whitelist = Settings.get.chunkloadDimensionWhitelist
     val blacklist = Settings.get.chunkloadDimensionBlacklist

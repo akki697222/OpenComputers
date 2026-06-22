@@ -680,14 +680,14 @@ object DebugCard {
     // ----------------------------------------------------------------------- //
 
     @Deprecated
-    @Callback(doc = """function():number -- Gets the numeric id of the current dimension.""")
+    @Callback(doc = """function():number -- Gets the numeric id of the current dimension. Returns 0/−1/1 for vanilla dimensions; for modded dimensions returns a hash of the resource location. Use getDimension() for a stable string identifier.""")
     def getDimensionId(context: Context, args: Arguments): Array[AnyRef] = {
       checkAccess()
       world.dimension match {
         case Level.OVERWORLD => result(Int.box(0))
         case Level.NETHER => result(Int.box(-1))
         case Level.END => result(Int.box(1))
-        case _ => throw new Error("deprecated")
+        case dim => result(Int.box(dim.location().hashCode()))
       }
     }
 
