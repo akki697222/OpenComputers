@@ -126,6 +126,7 @@ class Trade(val info: TradeInfo) extends AbstractValue {
 
         // Tell the merchant we used the recipe, so MC can disable it and/or enable more recipes.
         merchant.notifyTrade(recipe)
+        merchant.setTradingPlayer(null)
         true
       }
       case _ => false

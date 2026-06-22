@@ -626,10 +626,6 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
 
   override def sendMerchantOffers(containerId: Int, offers: MerchantOffers, villagerLevel: Int, villagerXP: Int, showProgress: Boolean, canRestock: Boolean): Unit = {}
 
-  override def openMerchantMenu(merchant: Merchant, title: Component, level: Int): Unit = {
-    merchant.setTradingPlayer(null)
-  }
-
   override def openMenu(guiOwner: MenuProvider) = util.OptionalInt.empty
 
   override def openMinecartCommandBlock(thing: BaseCommandBlock): Unit = {}
