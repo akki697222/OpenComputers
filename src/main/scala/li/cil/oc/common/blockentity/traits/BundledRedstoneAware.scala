@@ -92,7 +92,7 @@ trait BundledRedstoneAware extends RedstoneAware {
     }
   }
 
-  def getBundledOutput: Array[Array[Int]] = _bundledInput
+  def getBundledOutput: Array[Array[Int]] = _bundledOutput
 
   def getBundledOutput(side: Direction): Array[Int] = _bundledOutput(checkSide(toLocal(side)))
 
