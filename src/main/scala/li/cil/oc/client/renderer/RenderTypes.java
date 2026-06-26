@@ -29,7 +29,21 @@ public class RenderTypes extends RenderType {
                     .setTransparencyState(LIGHTNING_TRANSPARENCY)
                     .createCompositeState(true));
 
-    public static final RenderType HOLOGRAM = create(OpenComputers.ID() + ":hologram",
+    public static final RenderType HOLOGRAM_OCCLUDER = create(OpenComputers.ID() + ":hologram_occluder",
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS,
+            1 << 22,
+            false,
+            false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(POSITION_COLOR_SHADER)
+                    .setTransparencyState(NO_TRANSPARENCY)
+                    .setDepthTestState(LEQUAL_DEPTH_TEST)
+                    .setCullState(NO_CULL)
+                    .setWriteMaskState(DEPTH_WRITE)
+                    .createCompositeState(false));
+
+    public static final RenderType HOLOGRAM_WORLD = create(OpenComputers.ID() + ":hologram",
             DefaultVertexFormat.POSITION_COLOR,
             VertexFormat.Mode.QUADS,
             // 48*48*48 voxels * 6 faces * 4 verts * ~8 bytes = ~25 MB worst case; 1<<22 is a safe upper bound.
@@ -44,6 +58,8 @@ public class RenderTypes extends RenderType {
                     .setOutputState(TRANSLUCENT_TARGET)
                     .setWriteMaskState(COLOR_WRITE)
                     .createCompositeState(true));
+
+    public static final RenderType HOLOGRAM = HOLOGRAM_WORLD;
 
 
     private static RenderType createUpgrade(String name, ResourceLocation texture) {

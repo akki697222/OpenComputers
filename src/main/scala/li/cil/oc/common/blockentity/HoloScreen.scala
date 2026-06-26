@@ -114,20 +114,37 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     if (shouldHaveKeyboard && internalKeyboard.isEmpty && isServer) {
       val keyboardItem = api.Items.get(Constants.BlockName.Keyboard).createItemStack(1)
       internalKeyboard = Option(api.Driver.driverFor(keyboardItem, getClass).createEnvironment(keyboardItem, this).asInstanceOf[api.internal.Keyboard])
-      connectInternalKeyboard()
     }
     else if (!shouldHaveKeyboard && internalKeyboard.nonEmpty) {
       internalKeyboard.foreach(_.node.remove())
       internalKeyboard = None
     }
+    connectInternalKeyboard()
   }
 
   private def connectInternalKeyboard(): Unit =
-    if (isServer && isConnected) internalKeyboard.foreach(keyboard => buffer.node.connect(keyboard.node))
+    if (isServer && isConnected) internalKeyboard.foreach { keyboard =>
+      if (!isInternalKeyboardConnected(keyboard)) {
+        buffer.node.connect(keyboard.node)
+      }
+    }
+
+  private def isInternalKeyboardConnected(keyboard: api.internal.Keyboard): Boolean = {
+    val neighbors = buffer.node.neighbors.iterator()
+    while (neighbors.hasNext) {
+      if (neighbors.next() == keyboard.node) return true
+    }
+    false
+  }
 
   override def onConnect(node: Node): Unit = {
     super.onConnect(node)
     if (node == this.node) connectInternalKeyboard()
+  }
+
+  override def updateEntity(): Unit = {
+    super.updateEntity()
+    connectInternalKeyboard()
   }
 
   override protected def onItemAdded(slot: Int, stack: ItemStack): Unit = {
@@ -149,6 +166,7 @@ class HoloScreen(pos: BlockPos, state: BlockState, tier: Int) extends Screen(pos
     loadSize(nbt)
     updateInternalKeyboard()
     internalKeyboard.foreach(_.loadData(nbt.getCompound(KeyboardTag)))
+    connectInternalKeyboard()
   }
 
   override def saveForServer(nbt: CompoundTag): Unit = {
