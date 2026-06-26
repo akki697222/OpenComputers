@@ -383,8 +383,10 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
 
     val layout = createHologramLayout(screen.width, screen.height)
     val color = hologramColor
-    val quad = buffer.getBuffer(RenderTypes.HOLOGRAM)
+    val occluder = buffer.getBuffer(RenderTypes.HOLOGRAM_OCCLUDER)
+    renderHologramOccluder(stack, occluder, color, layout)
 
+    val quad = buffer.getBuffer(RenderTypes.HOLOGRAM_WORLD)
     renderProjectionBeam(stack, quad, color, layout.beam)
     renderHologramSurface(stack, quad, color, layout.surface, layout.content, buffer)
 
@@ -428,6 +430,21 @@ class ScreenRenderer extends TileEntityRenderer[Screen] {
       drawProjectionQuad(stack, quad, color, alpha = 64, layout)
       stack.popPose()
     }
+
+  private def renderHologramOccluder(stack: PoseStack, quad: VertexConsumer, color: HologramColor, layout: HologramLayout): Unit = {
+    layout.beam.foreach { beam =>
+      stack.pushPose()
+      stack.translate(0, beam.anchor, beam.depth)
+      drawProjectionQuad(stack, quad, color, alpha = 255, beam)
+      stack.popPose()
+    }
+
+    val surface = layout.surface
+    stack.pushPose()
+    stack.translate(surface.left, surface.top, surface.depth)
+    drawColoredQuad(stack, quad, color, 255, 0, 0, surface.width.toFloat, surface.height.toFloat)
+    stack.popPose()
+  }
 
   private def renderHologramSurface(stack: PoseStack, quad: VertexConsumer, color: HologramColor, surface: HologramSurfaceLayout, content: MonitorContentLayout, buffer: MultiBufferSource): Unit = {
     stack.pushPose()
