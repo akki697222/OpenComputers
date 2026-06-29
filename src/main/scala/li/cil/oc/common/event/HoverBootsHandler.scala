@@ -31,7 +31,7 @@ object HoverBootsHandler {
       })
       if (hasHoverBoots != hadHoverBoots) {
         nbt.putBoolean(Settings.namespace + "hasHoverBoots", hasHoverBoots)
-        player.setMaxUpStep(if (hasHoverBoots) 1f else 0.5f)
+        player.setMaxUpStep(if (hasHoverBoots) 1f else 0.6f)
       }
       if (hasHoverBoots && !player.onGround && player.fallDistance < 5 && player.getDeltaMovement.y < 0) {
         player.setDeltaMovement(player.getDeltaMovement.multiply(1, 0.9, 1))

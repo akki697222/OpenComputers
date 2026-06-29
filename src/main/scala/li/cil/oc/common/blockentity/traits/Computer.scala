@@ -151,7 +151,9 @@ trait Computer extends Environment with ComponentInventory with Rotatable with B
     // This is required for loading auxiliary data (kernel state), because the
     // coordinates in the actual robot won't be set properly, otherwise.
     this match {
-      case proxy: RobotProxy => proxy.robot.setLevel(getLevel)
+      case proxy: RobotProxy =>
+        proxy.robot.setLevel(getLevel)
+        proxy.robot.worldPosition = getBlockPos
       case _ =>
     }
     machine.loadData(nbt.getCompound(ComputerTag))
