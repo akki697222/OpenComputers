@@ -270,12 +270,13 @@ trait Agent extends traits.LevelControl with traits.ContainerControl with traits
     for (side <- sides) {
       val player = rotatedPlayer(facing, side)
       player.setPose(if (sneaky) Pose.CROUCHING else Pose.STANDING)
-      val success = Option(pick(player, Settings.get.useAndPlaceRange)) match {
-        case Some(hit) if hit.getType == HitResult.Type.BLOCK =>
+      val hit = pick(player, Settings.get.useAndPlaceRange)
+      val success = hit.getType match {
+        case HitResult.Type.BLOCK =>
           val blockHit = hit.asInstanceOf[BlockHitResult]
           val (blockPos, hx, hy, hz) = clickParamsFromHit(blockHit)
           player.placeBlock(agent.selectedSlot, blockPos, blockHit.getDirection, hx, hy, hz)
-        case None if canPlaceInAir && player.closestEntity(classOf[Entity]).isEmpty =>
+        case HitResult.Type.MISS if canPlaceInAir && player.closestEntity(classOf[Entity]).isEmpty =>
           val (blockPos, hx, hy, hz) = clickParamsForPlace(facing)
           // blockPos here is the position of the agent
           // When a robot uses angel placement, the BlockItem code offsets the pos to Direction
