@@ -1,9 +1,12 @@
 ![Welcome to OpenComputers](assets/misc/banner_new.png)
 
+> [!NOTE]
+> My GitHub account is currently suspended, so I use codeburg to temporarily host this repository.
+
 > [!IMPORTANT]
 > This is a Community Edition and fork of OpenComputers. Not an official Project.
 > 
-> This project uses AI in part. If you do not agree with the use of AI, please close this page immediately and return to your own world.
+> This project uses AI in part.
 
 Thanks to the original author Sangar, Vexatos, payonel, magik6k, Lord Joda, and all GitHub contributors.
 

@@ -281,7 +281,7 @@ object EventHandler {
         })
         // Do update check in local games and for OPs.
         val server = ServerLifecycleHooks.getCurrentServer
-        if (!server.isDedicatedServer || server.getPlayerList.canSendCommands(player.getGameProfile)) {
+        if (!server.isDedicatedServer || server.getPlayerList.isOp(player.getGameProfile)) {
           Future {
             UpdateCheck.info foreach {
               case Some(release) => player.sendSystemMessage(Localization.Chat.InfoNewVersion(release.tag_name))
@@ -468,9 +468,7 @@ object EventHandler {
 
       val chunkMap = serverLevel.getChunkSource.chunkMap
       chunkMap.getChunks.asScala.foreach { holder =>
-        // Use getChunk() to include non-ticking chunks — original OC iterated
-        // loadedTileEntityList which covered all loaded TEs regardless of tick state.
-        val chunk = holder.getChunkIfPresent(holder.pos)
+        val chunk = holder.getTickingChunk
         if (chunk != null) {
           chunk.getBlockEntities.values().asScala.foreach {
             case te: blockentity.traits.BaseBlockEntity => te.dispose()
