@@ -301,7 +301,7 @@ object EventHandler {
     Loot.disksForClient.clear()
     Loot.disksForCyclingClient.clear()
 
-    client.Sound.startLoop(null, "computer_running", 0f, 0)
+    client.Sound.startLoop(null, "computer_running", 0f)
     scheduleServer(() => client.Sound.stopLoop(null))
   }
 
