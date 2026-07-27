@@ -20,7 +20,7 @@ object DriverCreativeMotor extends DriverSidedBlockEntity {
   private final class Environment(be: CreativeMotorBlockEntity) extends ManagedBlockEntityEnvironment[CreativeMotorBlockEntity](be, "creative_motor") with NamedBlock {
     override def preferredName = "creative_motor"
 
-    override def priority = 1
+    override def priority = 1 // required for overwrite CC:T peripheral
 
     private val generatedSpeed: ScrollValueBehaviour = be.generatedSpeed
 

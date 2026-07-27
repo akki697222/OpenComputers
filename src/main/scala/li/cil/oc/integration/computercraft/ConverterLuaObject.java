@@ -21,7 +21,7 @@ public final class ConverterLuaObject implements Converter {
     public static final class LuaObjectValue extends AbstractValue implements ManagedPeripheral {
         private final IDynamicLuaObject value;
 
-        protected final CallableHelper helper;
+        private final CallableHelper helper;
 
         // For loading when values were saved in a computer state.
         public LuaObjectValue() {
@@ -46,9 +46,9 @@ public final class ConverterLuaObject implements Converter {
             if (value != null) {
                 final int index = helper.methodIndex(method);
                 final Object[] argArray = CallableHelper.convertArguments(args);
-                return value.callMethod(DriverPeripheral.Environment.UnsupportedLuaContext.instance(), index, new ObjectArguments(argArray)).getResult();
+                return value.callMethod(new DriverPeripheral.Environment.OCLuaContext(), index, new ObjectArguments(argArray)).getResult();
             }
-            return new Object[]{null, "ComputerCraft userdata cannot be persisted"};
+            return new Object[]{null, "CC:T userdata cannot be persisted"};
         }
     }
 }

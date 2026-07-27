@@ -11,27 +11,30 @@ import li.cil.oc.OpenComputers;
 import li.cil.oc.Settings;
 import li.cil.oc.api.FileSystem;
 import li.cil.oc.api.Network;
+import li.cil.oc.api.driver.DriverBlock;
 import li.cil.oc.api.driver.NamedBlock;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.BlacklistedPeripheral;
-import li.cil.oc.api.network.ManagedEnvironment;
-import li.cil.oc.api.network.Node;
-import li.cil.oc.api.network.Visibility;
+import li.cil.oc.api.network.*;
+import li.cil.oc.api.prefab.AbstractManagedEnvironment;
 import li.cil.oc.util.Reflection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock {
+public final class DriverPeripheral implements DriverBlock {
     private static Set<Class<?>> blacklist;
 
     private boolean isBlacklisted(final Object o) {
@@ -102,7 +105,7 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
         return new Environment(findPeripheral(world, pos, side));
     }
 
-    public static class Environment extends li.cil.oc.api.prefab.AbstractManagedEnvironment implements li.cil.oc.api.network.ManagedPeripheral, NamedBlock {
+    public static class Environment extends AbstractManagedEnvironment implements ManagedPeripheral, NamedBlock {
         protected final IPeripheral peripheral;
         protected final String[] methodNames;
         protected final Map<String, FakeComputerAccess> accesses = new HashMap<>();
@@ -162,12 +165,12 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
                     throw new NoSuchMethodException();
                 }
 
-                return dynamic.callMethod(
+                return resolveMethodResult(dynamic.callMethod(
                         access,
-                        UnsupportedLuaContext.instance(),
+                        new OCLuaContext(),
                         index,
                         new ObjectArguments(argArray)
-                ).getResult();
+                ));
             }
 
             final Method method = reflectedMethods.get(name);
@@ -179,6 +182,10 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
             final Object[] invokeArgs = buildInvokeArguments(method, argArray, access);
 
             final Object result = method.invoke(peripheral, invokeArgs);
+
+            if (result instanceof MethodResult mr) {
+                return resolveMethodResult(mr);
+            }
 
             return wrapResult(result);
         }
@@ -195,7 +202,7 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
                 if (type == IComputerAccess.class) {
                     invokeArgs[i] = access;
                 } else if (type == ILuaContext.class) {
-                    invokeArgs[i] = UnsupportedLuaContext.instance();
+                    invokeArgs[i] = new OCLuaContext();
                 } else if (type == ObjectArguments.class) {
                     invokeArgs[i] = new ObjectArguments(args);
                 } else {
@@ -294,6 +301,22 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
             }
 
             return new Object[]{result};
+        }
+
+        private Object[] resolveMethodResult(MethodResult mr) throws LuaException {
+            while (mr.getCallback() != null) {
+                final Object[] fakeEvent = new Object[]{"task_complete", 1L, true};
+
+                try {
+                    mr = mr.getCallback().resume(fakeEvent);
+                } catch (LuaException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new LuaException(String.valueOf(e.getMessage()));
+                }
+            }
+
+            return mr.getResult() != null ? mr.getResult() : new Object[0];
         }
 
         @Override
@@ -456,19 +479,33 @@ public final class DriverPeripheral implements li.cil.oc.api.driver.DriverBlock 
             }
         }
 
-        public static final class UnsupportedLuaContext implements ILuaContext {
-            private static final UnsupportedLuaContext Instance = new UnsupportedLuaContext();
-
-            private UnsupportedLuaContext() {
-            }
-
-            public static UnsupportedLuaContext instance() {
-                return Instance;
-            }
-
+        public static final class OCLuaContext implements ILuaContext {
             @Override
             public long issueMainThreadTask(@NotNull LuaTask luaTask) throws LuaException {
-                throw new LuaException("issueMainThreadTask is not supported when calling CC peripherals from OC");
+                final MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+
+                if (server == null) {
+                    throw new LuaException("Server is not available");
+                }
+
+                try {
+                    server.submit(() -> {
+                        try {
+                            return luaTask.execute();
+                        } catch (LuaException e) {
+                            throw new java.util.concurrent.CompletionException(e);
+                        }
+                    }).get();
+                } catch (java.util.concurrent.CompletionException e) {
+                    if (e.getCause() instanceof LuaException le) {
+                        throw le;
+                    }
+                    throw new LuaException(String.valueOf(e.getMessage()));
+                } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
+                    throw new LuaException("Main thread task failed: " + e.getMessage());
+                }
+
+                return 1L;
             }
         }
     }

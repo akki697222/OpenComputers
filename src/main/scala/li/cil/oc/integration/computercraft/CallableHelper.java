@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import li.cil.oc.api.machine.Arguments;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,11 +23,11 @@ public final class CallableHelper {
         return index;
     }
 
-    public static Object[] convertArguments(final Arguments args) throws UnsupportedEncodingException {
+    public static Object[] convertArguments(final Arguments args) {
         final Object[] argArray = Iterables.toArray(args, Object.class);
         for (int i = 0; i < argArray.length; ++i) {
             if (argArray[i] instanceof byte[]) {
-                argArray[i] = new String((byte[]) argArray[i], "UTF-8");
+                argArray[i] = new String((byte[]) argArray[i], StandardCharsets.UTF_8);
             }
         }
         return argArray;
