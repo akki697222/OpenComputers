@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
@@ -192,6 +194,7 @@ public final class DriverPeripheral implements DriverBlock {
 
         private Object[] buildInvokeArguments(final Method method, final Object[] args, final IComputerAccess access) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
+            final Type[] genericParameterTypes = method.getGenericParameterTypes();
             final Object[] invokeArgs = new Object[parameterTypes.length];
 
             int argIndex = 0;
@@ -205,6 +208,14 @@ public final class DriverPeripheral implements DriverBlock {
                     invokeArgs[i] = new OCLuaContext();
                 } else if (type == ObjectArguments.class) {
                     invokeArgs[i] = new ObjectArguments(args);
+                } else if (type == Optional.class) {
+                    final Class<?> innerType = resolveOptionalType(genericParameterTypes[i]);
+                    if (argIndex < args.length && args[argIndex] != null) {
+                        invokeArgs[i] = Optional.ofNullable(coerce(args[argIndex], innerType));
+                    } else {
+                        invokeArgs[i] = Optional.empty();
+                    }
+                    argIndex++;
                 } else {
                     invokeArgs[i] = argIndex < args.length ? coerce(args[argIndex], type) : defaultValue(type);
                     argIndex++;
@@ -212,6 +223,16 @@ public final class DriverPeripheral implements DriverBlock {
             }
 
             return invokeArgs;
+        }
+
+        private Class<?> resolveOptionalType(Type genericType) {
+            if (genericType instanceof ParameterizedType parameterized) {
+                final Type actual = parameterized.getActualTypeArguments()[0];
+                if (actual instanceof Class<?> clazz) {
+                    return clazz;
+                }
+            }
+            return Object.class;
         }
 
         private Object coerce(final Object value, final Class<?> type) {
