@@ -29,6 +29,8 @@
 
 # VSCode
 /.vscode
+
+# Other
 /saves
 /logs
 /config
@@ -39,4 +41,4 @@
 /.scalafmt.conf
 /font
 /src/data/resources/.cache
-.mimocode/
+/.travis.yml

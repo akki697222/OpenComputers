@@ -330,7 +330,7 @@ class Machine(val host: MachineHost) extends AbstractManagedEnvironment with mac
       case arg: java.lang.String => arg
       case arg: Array[Byte] => arg
       case arg: CompoundTag => arg
-      case arg: java.util.HashMap[AnyRef, AnyRef] => arg.asScala
+      //case arg: java.util.HashMap[AnyRef, AnyRef] => arg.asScala
       case arg =>
         OpenComputers.log.warn("Trying to push signal with an unsupported argument of type " + arg.getClass.getName)
         null

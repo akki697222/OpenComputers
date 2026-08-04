@@ -37,7 +37,7 @@ object ExtendedLuaState {
           case null => null
           case primitive => primitive.asInstanceOf[AnyRef]
         }) match {
-          case null | _: BoxedUnit => lua.pushNil()
+          case null | () | _: BoxedUnit => lua.pushNil()
           case value: java.lang.Boolean => lua.pushBoolean(value.booleanValue)
           case value: java.lang.Byte => lua.pushInteger(value.byteValue)
           case value: java.lang.Character => lua.pushString(String.valueOf(value))
@@ -86,8 +86,8 @@ object ExtendedLuaState {
     def pushTable(obj: Any, map: Map[_, _], memo: util.IdentityHashMap[Any, Int]): Unit = {
       lua.newTable(0, map.size)
       val tableIndex = lua.getTop
-      memo.put(obj, tableIndex)
-      for ((key, value) <- map.iterator) {
+      memo += obj -> tableIndex
+      for ((key: AnyRef, value: AnyRef) <- map) {
         if (key != null && !key.isInstanceOf[BoxedUnit]) {
           pushValue(key, memo)
           val keyIndex = lua.getTop

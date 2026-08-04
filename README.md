@@ -1,8 +1,5 @@
 ![Welcome to OpenComputers](assets/misc/banner_new.png)
 
-> [!NOTE]
-> My GitHub account is currently suspended, so I use codeburg to temporarily host this repository.
-
 > [!IMPORTANT]
 > This is a Community Edition and fork of OpenComputers. Not an official Project.
 > 
@@ -101,22 +98,22 @@ In the case you wish to use Eclipse rather than IntelliJ IDEA, the process is mo
 
 
 
-[api]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/java/li/cil/oc/api
+[api]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/java/li/cil/oc/api
 [code conventions]: https://ocdoc.cil.li/lua_conventions
 [dev-jar]: https://ci.cil.li/view/OpenComputers/job/OpenComputers-MC1.7.10/
 [forums]: https://oc.cil.li/
 [github-actions]: https://github.com/akki697222/OpenComputers/actions
 [irc]: http://webchat.esper.net/?channels=#oc
-[issues]: https://github.com/akki697222/OpenComputers-CE/issues?state=open
-[localizations]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/resources/assets/opencomputers/lang
-[loot]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/resources/assets/opencomputers/loot
-[manpages]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/resources/assets/opencomputers/loot/OpenOS/usr/man
-[manual]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/resources/assets/opencomputers/doc
+[issues]: https://codeberg.org/akki/OpenComputers-CE/issues
+[localizations]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/lang
+[loot]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/loot
+[manpages]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/loot/OpenOS/usr/man
+[manual]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/doc
 [mcf]: http://www.minecraftforum.net/topic/2201440-opencomputers-v122/
-[pack.mcmeta]: https://github.com/akki697222/OpenComputers-CE/blob/dev-MC1.20/src/main/resources/pack.mcmeta
-[releases]: https://github.com/akki697222/OpenComputers-CE/releases
-[robot names]: https://github.com/akki697222/OpenComputers-CE/blob/dev-MC1.20/src/main/resources/assets/opencomputers/robot.names
+[pack.mcmeta]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/pack.mcmeta
+[releases]: https://codeberg.org/akki/OpenComputers-CE/releases
+[robot names]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/robot.names
 [wiki]: https://ocdoc.cil.li/
-[integration]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/scala/li/cil/oc/integration
-[ingame manual]: https://github.com/akki697222/OpenComputers-CE/tree/dev-MC1.20/src/main/resources/assets/opencomputers/doc
+[integration]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/scala/li/cil/oc/integration
+[ingame manual]: https://codeberg.org/akki/OpenComputers-CE/src/branch/dev-MC1.20/src/main/resources/assets/opencomputers/doc
 [idea_1.7.10]: https://ocdoc.cil.li/tutorial:debug_1.7.10

@@ -2,7 +2,7 @@
   "computer_running": {
     "category": "block",
     "sounds": [
-      {"name": "opencomputers:computer_running", "stream": true}
+      {"name": "opencomputers:computer_running", "stream": true, "attenuation_distance": 16}
     ]
   },
   "floppy_access": {
@@ -38,6 +38,11 @@
       {"name": "opencomputers:hdd_access5", "preload": true},
       {"name": "opencomputers:hdd_access6", "preload": true},
       {"name": "opencomputers:hdd_access7", "preload": true}
+    ]
+  },
+  "dummy": {
+    "sounds": [
+      {"name": "opencomputers:dummy", "stream": true}
     ]
   }
 }

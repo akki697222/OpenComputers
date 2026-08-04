@@ -1,5 +1,6 @@
 package li.cil.oc.common
 
+import li.cil.oc.api.audio.AudioReceiver
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.chunk.{ChunkAccess, LevelChunk}
@@ -22,10 +23,7 @@ import li.cil.oc.api.network.Environment
 import li.cil.oc.api.network.SidedComponent
 import li.cil.oc.api.network.SidedEnvironment
 import li.cil.oc.client.renderer.PetRenderer
-import li.cil.oc.common.capabilities.CapabilityColored
-import li.cil.oc.common.capabilities.CapabilityEnvironment
-import li.cil.oc.common.capabilities.CapabilitySidedComponent
-import li.cil.oc.common.capabilities.CapabilitySidedEnvironment
+import li.cil.oc.common.capabilities._
 import li.cil.oc.common.component.TerminalServer
 import li.cil.oc.common.item.data.MicrocontrollerData
 import li.cil.oc.common.item.data.RobotData
@@ -178,6 +176,14 @@ object EventHandler {
       case tileEntity: BlockEntity with Colored =>
         val provider = new CapabilityColored.Provider(tileEntity)
         event.addCapability(CapabilityColored.ProviderColored, provider)
+        event.addListener(() => provider.invalidate())
+      case _ =>
+    }
+
+    event.getObject match {
+      case tileEntity: BlockEntity with AudioReceiver =>
+        val provider = new CapabilityAudioReceiver.Provider(tileEntity)
+        event.addCapability(CapabilityAudioReceiver.ProviderAudioReceiver, provider)
         event.addListener(() => provider.invalidate())
       case _ =>
     }

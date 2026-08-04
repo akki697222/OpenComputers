@@ -1,11 +1,13 @@
 package li.cil.oc.server
 
 import com.google.common.cache.{Cache, CacheBuilder}
+import li.cil.oc.api.audio.{AudioHost, AudioReceiver}
 import li.cil.oc.{Settings, api}
 import li.cil.oc.api.event.{FileSystemAccessEvent, NetworkActivityEvent}
 import li.cil.oc.api.network.EnvironmentHost
 import li.cil.oc.api.network.Node
 import li.cil.oc.common._
+import li.cil.oc.common.audio.Instruction
 import li.cil.oc.common.nanomachines.ControllerImpl
 import li.cil.oc.common.blockentity.Waypoint
 import li.cil.oc.common.blockentity.traits._
@@ -30,64 +32,87 @@ import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.world.level.Level
 import net.minecraft.sounds.SoundSource
 
+import scala.jdk.CollectionConverters._
+
 object PacketSender {
-  def sendAudioStart(host: EnvironmentHost, sessionId: Int, channel: Int, sampleRate: Int, channels: Int, format: Int, loop: Boolean, pos: BlockPosition): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioStart)
-    pb.writeInt(sessionId)
-    pb.writeInt(channel)
-    pb.writeInt(sampleRate)
-    pb.writeInt(channels)
-    pb.writeInt(format)
-    pb.writeBoolean(loop)
-    pb.writeBlockPosCoords(pos)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
+  def sendSoundCardData(host: AudioHost, address: String, volume: Byte, receivers: java.util.Set[AudioReceiver], instructions: java.util.Queue[Instruction]): Unit = {
+    val pb = new CompressedPacketBuilder(PacketType.SoundCardData)
+    val pos = host.position()
+    pb.writeInt(host.getId)
+    pb.writeUTF(address)
+    pb.writeInt(instructions.size)
+    for (inst <- instructions.asScala) {
+      inst match {
+        case Instruction.Open(channel) =>
+          pb.writeByte(0)
+          pb.writeByte(channel)
+        case Instruction.Close(channel) =>
+          pb.writeByte(1)
+          pb.writeByte(channel)
+        case Instruction.SetWave(channel, wave) =>
+          pb.writeByte(2)
+          pb.writeByte(channel)
+          pb.writeInt(wave.ordinal())
+        case Instruction.Delay(delay) =>
+          pb.writeByte(3)
+          pb.writeInt(delay)
+        case Instruction.SetFM(channel, modulatorIndex, index) =>
+          pb.writeByte(4)
+          pb.writeByte(channel)
+          pb.writeInt(modulatorIndex)
+          pb.writeFloat(index)
+        case Instruction.ResetFM(channel) =>
+          pb.writeByte(5)
+          pb.writeByte(channel)
+        case Instruction.SetAM(channel, modulatorIndex) =>
+          pb.writeByte(6)
+          pb.writeByte(channel)
+          pb.writeInt(modulatorIndex)
+        case Instruction.ResetAM(channel) =>
+          pb.writeByte(7)
+          pb.writeByte(channel)
+        case Instruction.SetADSR(channel, attack, decay, attenuation, release) =>
+          pb.writeByte(8)
+          pb.writeByte(channel)
+          pb.writeInt(attack)
+          pb.writeInt(decay)
+          pb.writeFloat(attenuation)
+          pb.writeInt(release)
+        case Instruction.ResetEnvelope(channel) =>
+          pb.writeByte(9)
+          pb.writeByte(channel)
+        case Instruction.SetVolume(channel, volume) =>
+          pb.writeByte(10)
+          pb.writeByte(channel)
+          pb.writeFloat(volume)
+        case Instruction.SetFrequency(channel, frequency) =>
+          pb.writeByte(11)
+          pb.writeByte(channel)
+          pb.writeFloat(frequency)
+        case Instruction.SetWhiteNoise(channel) =>
+          pb.writeByte(12)
+          pb.writeByte(channel)
+        case Instruction.SetLFSR(channel, initial, mask) =>
+          pb.writeByte(13)
+          pb.writeByte(channel)
+          pb.writeInt(initial)
+          pb.writeInt(mask)
+      }
+    }
+    pb.writeByte(volume)
+    pb.writeInt(receivers.size())
+    for (receiver <- receivers.asScala) {
+      pb.writeUTF(if (receiver.level() != null) receiver.level().dimension().toString else "")
+      val pos = receiver.position()
+      pb.writeFloat(pos.x.toFloat)
+      pb.writeFloat(pos.y.toFloat)
+      pb.writeFloat(pos.z.toFloat)
+      pb.writeShort(receiver.distance().toShort)
+      pb.writeUTF(receiver.address())
+    }
+    pb.sendToAllPlayers()
   }
 
-  def sendAudioChunk(host: EnvironmentHost, sessionId: Int, data: Array[Byte]): Unit = {
-    val pb = new CompressedPacketBuilder(PacketType.AudioChunk)
-    pb.writeInt(sessionId)
-    pb.writeInt(data.length)
-    pb.write(data)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioPlay(host: EnvironmentHost, sessionId: Int): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioPlay)
-    pb.writeInt(sessionId)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioPause(host: EnvironmentHost, sessionId: Int): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioPause)
-    pb.writeInt(sessionId)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioResume(host: EnvironmentHost, sessionId: Int): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioResume)
-    pb.writeInt(sessionId)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioStop(host: EnvironmentHost, sessionId: Int): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioStop)
-    pb.writeInt(sessionId)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioClose(host: EnvironmentHost, sessionId: Int): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioClose)
-    pb.writeInt(sessionId)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-
-  def sendAudioSetLoop(host: EnvironmentHost, sessionId: Int, loop: Boolean): Unit = {
-    val pb = new SimplePacketBuilder(PacketType.AudioSetLoop)
-    pb.writeInt(sessionId)
-    pb.writeBoolean(loop)
-    pb.sendToPlayersNearHost(host, Option(Settings.get.maxNetworkClientSoundPacketDistance))
-  }
-  
   def sendAdapterState(t: blockentity.Adapter): Unit = {
     val pb = new SimplePacketBuilder(PacketType.AdapterState)
 

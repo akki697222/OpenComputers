@@ -193,11 +193,12 @@ object SaveHandler {
       val bos = new io.ByteArrayOutputStream
       val buffer = new Array[Byte](8 * 1024)
       var read = 0
-      while ({ read = bis.read(buffer); read >= 0 }) {
+      do {
+        read = bis.read(buffer)
         if (read > 0) {
           bos.write(buffer, 0, read)
         }
-      }
+      } while (read >= 0)
       bis.close()
       bos.toByteArray
     }

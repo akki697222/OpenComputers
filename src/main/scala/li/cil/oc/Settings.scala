@@ -515,10 +515,12 @@ class Settings(val config: Config) {
   val httpUserAgent = config.getString("internet.httpUserAgent")
 
   // >= 1.9.0
-  val audioCardChunkSize: Int = config.getInt("audio.chunkSize") max 0 // 2048
-  val audioCardBufferLimit: Int = config.getInt("audio.bufferLimit") max 0 // 8 MiB (8 * 1024 * 1024)
-  val audioCardSampleRate: Int = config.getInt("audio.sampleRate") min 48000 max 0 // 48000
-  val audioCardFormat: Int = config.getInt("audio.format") // 1
+  val audioSampleRate: Int = config.getInt("audio.sampleRate") max 0 // 44100
+  val audioChannelCount: Int = config.getInt("audio.channelCount") min 65535 max 1 // 8
+  val audioMaxDelay: Int = config.getInt("audio.maxDelay") max 0 // 5000
+  val audioQueueSize: Int = config.getInt("audio.queueSize") max 0 // 1024
+  val audioEnergyCost: Double = config.getDouble("audio.energyCost") max 0 // 1.0
+  val audioRadius: Double = config.getDouble("audio.radius") max 0 // 24
 }
 
 object Settings {
@@ -619,6 +621,10 @@ object Settings {
     // Upgrading to version 1.8.0, changed meaning of limitFlightHeight value,
     VersionRange.createFromVersionSpec("[0.0, 1.8.0)") -> Array(
       "computer.robot.limitFlightHeight"
+    ),
+    // Upgrading to version 1.9.1, sound card reworks.
+    VersionRange.createFromVersionSpec("[0.0, 1.9.1)") -> Array(
+      "audio"
     )
   )
   private val fileringRulesPatchVersion = VersionRange.createFromVersionSpec("[0.0, 1.8.3)")

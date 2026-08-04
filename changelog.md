@@ -1,11 +1,9 @@
 ## Fixes/improvements
-
-* [#3621] Fix `os.time()` being off by one hour
-* [#3682] Add error handling to the `flash` OpenOS program
-* [#3764] Fix left and right names being swapped in the Rack GUI
-* [#3779] Fix `os.sleep(0)` causing `too long without yielding` (Ocawesome101)
-* (1.12) [#3774] Fix Jukebox driver (kebufu)
+* Added: Fully ported sound card from computronics.
+* Fixed: [#1] Type mismatch error when calling peripheral methods with Optional parameters.
+* Fixed: [#3] Fan can be heared in distance
+  * computer running.ogg is stereo, but attenuation requires monorail audio to work correctly.
 
 ## List of contributors
 
-asie, kebufu, Ocawesome101
+akki, creepy_hauz

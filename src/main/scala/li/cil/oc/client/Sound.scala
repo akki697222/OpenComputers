@@ -11,6 +11,7 @@ import com.google.common.base.Charsets
 import li.cil.oc.OpenComputers
 import li.cil.oc.Settings
 import net.minecraft.client.Minecraft
+import net.minecraft.client.resources.sounds.SoundInstance.Attenuation
 import net.minecraft.resources.ResourceLocation
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.event.TickEvent.ClientTickEvent
@@ -143,8 +144,9 @@ object Sound {
 
     var stopped = false
     volume = subVolume * Settings.get.soundVolume
-    relative = BlockEntity != null
+    //relative = BlockEntity != null
     looping = true
+    attenuation = Attenuation.LINEAR
     updatePosition()
 
     def updatePosition(): Unit = {

@@ -25,6 +25,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.item.Item
+import net.minecraftforge.client.event.sound.PlayStreamingSourceEvent
 import net.minecraftforge.client.event.{EntityRenderersEvent, RegisterKeyMappingsEvent}
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.eventbus.api.SubscribeEvent

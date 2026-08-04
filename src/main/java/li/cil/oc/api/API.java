@@ -1,13 +1,7 @@
 package li.cil.oc.api;
 
 import com.typesafe.config.Config;
-import li.cil.oc.api.detail.DriverAPI;
-import li.cil.oc.api.detail.FileSystemAPI;
-import li.cil.oc.api.detail.ItemAPI;
-import li.cil.oc.api.detail.MachineAPI;
-import li.cil.oc.api.detail.ManualAPI;
-import li.cil.oc.api.detail.NanomachinesAPI;
-import li.cil.oc.api.detail.NetworkAPI;
+import li.cil.oc.api.detail.*;
 
 /**
  * Central reference for the API.
@@ -45,6 +39,7 @@ public final class API {
     public static ManualAPI manual = null;
     public static NanomachinesAPI nanomachines = null;
     public static NetworkAPI network = null;
+    public static AudioAPI audio = null;
 
     // ----------------------------------------------------------------------- //
 

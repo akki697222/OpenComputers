@@ -48,7 +48,7 @@ object Proxy {
     OpenComputers.ID + ":serverRack" -> Constants.BlockName.Rack,
     OpenComputers.ID + ":wlanCard" -> Constants.ItemName.WirelessNetworkCardTier2
   )
-  
+
   @SubscribeEvent
   def onMissingMappings(e: MissingMappingsEvent): Unit = {
     e.getMappings(ForgeRegistries.Keys.BLOCKS, OpenComputers.ID).asScala.foreach { missing =>
@@ -92,6 +92,7 @@ class Proxy {
     api.API.machine = machine.Machine
     api.API.nanomachines = nanomachines.Nanomachines
     api.API.network = network.Network
+    api.API.audio = audio.Audio
 
     api.API.config = Settings.get.config
 
@@ -109,7 +110,7 @@ class Proxy {
     if (LuaStateFactory.includeLuaJ) {
       api.Machine.add(classOf[LuaJLuaArchitecture])
     }
-    
+
     api.Machine.LuaArchitecture =
       if (Settings.get.forceLuaJ) classOf[LuaJLuaArchitecture]
       else api.Machine.architectures.asScala.head
