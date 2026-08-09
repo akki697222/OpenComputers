@@ -84,7 +84,7 @@ trait LevelAware {
 
   def closestEntity[Type <: Entity](clazz: Class[Type], side: Direction) = {
     val blockPos = position.offset(side)
-    val candidates = world.getEntitiesOfClass(clazz, blockPos.bounds, null)
+    val candidates = world.getEntitiesOfClass(clazz, blockPos.bounds, (_: Entity) => true)
     if (!candidates.isEmpty) Some(candidates.minBy(e => fakePlayer.distanceToSqr(e))) else None
   }
 
@@ -99,12 +99,12 @@ trait LevelAware {
         if (state.isAir()) {
           (false, "air")
         }
-        else if (block.isInstanceOf[LiquidBlock] || block.isInstanceOf[IFluidBlock]) {
+        else if (!state.getFluidState.isEmpty) {
           val event = new BlockEvent.BreakEvent(world, blockPos.toBlockPos, state, fakePlayer)
           MinecraftForge.EVENT_BUS.post(event)
           (event.isCanceled, "liquid")
         }
-        else if (block.isReplaceable(blockPos)) {
+        else if (state.canBeReplaced()) {
           val event = new BlockEvent.BreakEvent(world, blockPos.toBlockPos, state, fakePlayer)
           MinecraftForge.EVENT_BUS.post(event)
           (event.isCanceled, "replaceable")

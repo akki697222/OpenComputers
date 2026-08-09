@@ -51,7 +51,7 @@ trait LevelTankAnalytics extends LevelAware with SideRestricted {
   def getTankCount(context: Context, args: Arguments): Array[AnyRef] = {
     val facing = checkSideForAction(args, 0)
     FluidUtils.fluidHandlerAt(position.offset(facing), facing.getOpposite) match {
-      case Some(handler) if handler.getTanks > 0 => result(handler.getTanks)
+      case Some(handler) => result(handler.getTanks)
       case _ => result((), "no tank")
     }
   }
