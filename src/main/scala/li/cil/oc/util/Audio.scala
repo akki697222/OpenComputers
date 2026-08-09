@@ -26,7 +26,6 @@ import java.util.concurrent.Executor
   * Tones that have finished playing are disposed automatically in the
   * tick handler.
   */
-//@TODO rewrite this to use Audio API
 object Audio {
   private def sampleRate = Settings.get.beepSampleRate
 
