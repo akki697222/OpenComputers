@@ -51,6 +51,7 @@ private[markdown] class LinkSegment(parent: Segment, text: String, val url: Stri
     } catch {
       case _: MalformedURLException =>
         Minecraft.getInstance.player.sendSystemMessage(Localization.Chat.WarningLink("Malformed URL"))
+        return
     }
     Util.getPlatform.openUrl(url)
   }

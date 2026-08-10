@@ -76,7 +76,7 @@ abstract class UpgradeSign extends AbstractManagedEnvironment with DeviceInfo {
 
         MinecraftForge.EVENT_BUS.post(new SignChangeEvent.Post(sign, lines))
 
-        result(getAllMessages(sign).mkString("\n"))
+        result(getAllMessages(sign).map(_.getString).mkString("\n"))
       case _ => result((), "no sign")
     }
   }
