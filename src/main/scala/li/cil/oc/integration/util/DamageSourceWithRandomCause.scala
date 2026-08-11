@@ -1,6 +1,7 @@
 package li.cil.oc.integration.util
 
 import net.minecraft.core.registries.Registries
+import net.minecraft.locale.Language
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.entity.LivingEntity
@@ -18,7 +19,7 @@ class DamageSourceWithRandomCause(val key: ResourceKey[DamageType], val numCause
     val format = s"death.attack.$msgId.$randomIndex"
     val withCauseFormat = s"$format.player"
 
-    if (damager != null) {
+    if (damager != null && Language.getInstance.has(withCauseFormat)) {
       Component.translatable(withCauseFormat, damagee.getDisplayName, damager.getDisplayName)
     } else {
       Component.translatable(format, damagee.getDisplayName)

@@ -49,7 +49,7 @@ object DriverRecordPlayer extends DriverSidedBlockEntity {
 
     @Callback(doc = "function() -- Stop playing the record currently in the jukebox.")
     def stop(context: Context, args: Arguments): Array[AnyRef] = {
-      tileEntity.getLevel.levelEvent(1010, tileEntity.getBlockPos, 0)
+      tileEntity.getLevel.levelEvent(1011, tileEntity.getBlockPos, 0)
       null
     }
   }
