@@ -20,9 +20,6 @@
     }
   },
   "result": {
-    "item": "opencomputers:floppy",
-    "nbt": {
-      "oc:color": 8
-    }
+    "item": "opencomputers:floppy"
   }
 }
