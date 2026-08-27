@@ -833,7 +833,10 @@ object PacketHandler extends CommonPacketHandler {
         val sound = p.readUTF()
         val category = SoundSource.values()(p.readByte())
         val range = p.readFloat()
-        world.playSound(p.player, x, y, z, SoundEvent.createVariableRangeEvent(ResourceLocation.tryParse(sound)), category, range / 15 + 0.5F, 1.0F)
+        val soundId = ResourceLocation.tryParse(sound)
+        if (soundId != null) {
+          world.playSound(p.player, x, y, z, SoundEvent.createVariableRangeEvent(soundId), category, range / 15 + 0.5F, 1.0F)
+        }
       case _ => // Invalid packet.
     }
   }

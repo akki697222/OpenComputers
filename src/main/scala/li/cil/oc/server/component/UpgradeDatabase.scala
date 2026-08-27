@@ -52,7 +52,7 @@ class UpgradeDatabase(val data: Container) extends AbstractManagedEnvironment wi
   @Callback(doc = "function(slot:number):string -- Computes a hash value for the item stack in the specified slot.")
   def computeHash(context: Context, args: Arguments): Array[AnyRef] = {
     data.getItem(args.checkSlot(data, 0)) match {
-      case stack: ItemStack =>
+      case stack if !stack.isEmpty =>
         val hash = Hashing.sha256().hashBytes(ItemUtils.saveStack(stack))
         result(hash.toString)
       case _ => null
@@ -98,7 +98,7 @@ class UpgradeDatabase(val data: Container) extends AbstractManagedEnvironment wi
 
   private def indexOf(needle: String, offset: Int = 0): Int = {
     for (slot <- 0 until data.getContainerSize) data.getItem(slot) match {
-      case stack: ItemStack =>
+      case stack if !stack.isEmpty =>
         val hash = Hashing.sha256().hashBytes(ItemUtils.saveStack(stack))
         if (hash.toString == needle) return slot + offset
       case _ =>
