@@ -19,6 +19,7 @@ import li.cil.oc.util.ExtendedNBT._
 import li.cil.oc.util.StackOption
 import li.cil.oc.util.StackOption._
 import net.minecraftforge.common.ForgeHooks
+import net.minecraft.world.item.crafting.RecipeType
 
 import scala.collection.convert.ImplicitConversionsToJava._
 import net.minecraft.world.item.ItemStack
@@ -52,7 +53,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     val count = args.optInteger(0, 64)
     val stack = host.mainInventory.getItem(host.selectedSlot)
     if (stack.isEmpty) return result((), "selected slot is empty")
-    if (ForgeHooks.getBurnTime(stack, null) <= 0) {
+    if (ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) <= 0) {
       return result((), "selected slot does not contain fuel")
     }
     val container: ItemStack = stack.getCraftingRemainingItem
@@ -166,7 +167,7 @@ class UpgradeGenerator(val host: EnvironmentHost with internal.Agent) extends Ab
     super.update()
     if (remainingTicks <= 0 && inventory.isDefined) {
       val stack = inventory.get
-      remainingTicks = ForgeHooks.getBurnTime(stack, null)
+      remainingTicks = ForgeHooks.getBurnTime(stack, RecipeType.SMELTING)
       if (remainingTicks > 0) {
         updateClient()
         stack.shrink(1)
