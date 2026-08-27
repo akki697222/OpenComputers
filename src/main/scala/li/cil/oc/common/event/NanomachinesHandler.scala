@@ -36,7 +36,7 @@ object NanomachinesHandler {
 
     @SubscribeEvent
     def onRenderGameOverlay(e: RenderGuiOverlayEvent.Post): Unit = {
-      if (e.getOverlay.id() == VanillaGuiOverlay.DEBUG_TEXT.id()) {
+      if (e.getOverlay.id() == VanillaGuiOverlay.HOTBAR.id()) {
         val mc = Minecraft.getInstance
         api.Nanomachines.getController(mc.player) match {
           case controller: Controller =>

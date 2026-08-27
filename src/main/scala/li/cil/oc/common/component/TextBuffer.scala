@@ -217,7 +217,7 @@ class TextBuffer(val host: EnvironmentHost) extends AbstractManagedEnvironment w
   def setPrecise(computer: Context, args: Arguments): Array[AnyRef] = {
     // Available for T3 screens only... easiest way to check for us is to
     // base it off of the maximum color depth.
-    if (maxDepth == Settings.screenDepthsByTier(Tier.Four)) {
+    if (maxDepth == Settings.screenDepthsByTier(Tier.Three)) {
       val oldValue = precisionMode
       precisionMode = args.checkBoolean(0)
       result(oldValue)

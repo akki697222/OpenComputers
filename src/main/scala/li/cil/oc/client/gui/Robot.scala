@@ -32,6 +32,8 @@ class Robot(state: menu.Robot, playerInventory: Inventory, name: Component)
   extends DynamicGuiContainer(state, playerInventory, name)
   with traits.InputBuffer with ContainerEventHandler {
 
+  def robot: li.cil.oc.common.blockentity.Robot = inventoryContainer.otherInventory.asInstanceOf[li.cil.oc.common.blockentity.Robot]
+
   override def containerTick(): Unit = {
     super.containerTick()
   }

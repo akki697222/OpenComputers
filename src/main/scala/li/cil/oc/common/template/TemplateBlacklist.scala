@@ -44,6 +44,8 @@ object TemplateBlacklist {
   }
 
   def filter(stack: ItemStack): Boolean = {
-    !TheBlacklist.exists(listItem => ItemStack.isSameItem(listItem, stack))
+    !TheBlacklist.exists(listItem =>
+      ItemStack.isSameItem(listItem, stack) &&
+        (!listItem.isDamageableItem || listItem.getDamageValue == stack.getDamageValue))
   }
 }
