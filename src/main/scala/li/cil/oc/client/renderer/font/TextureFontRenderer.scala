@@ -27,6 +27,8 @@ abstract class TextureFontRenderer {
     stack.pushPose()
     stack.scale(0.5f, 0.5f, 1)
 
+    RenderSystem.depthMask(false)
+
     var quadBuilder: VertexConsumer = null
     for (y <- 0 until (viewportHeight min buffer.height)) {
       val color = buffer.color(y)
@@ -69,6 +71,7 @@ abstract class TextureFontRenderer {
         }
       }
     }
+    RenderSystem.depthMask(true)
     stack.popPose()
   }
 

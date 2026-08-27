@@ -75,7 +75,7 @@ object DynamicFontRenderer {
     private val texture = new DynamicTexture(size, size, false)
     private val name = "oc_font_cache_" + System.nanoTime()
     private val location = Minecraft.getInstance.getTextureManager.register(name, texture)
-    private val rt = RenderTypes.createFontTex(name, location, Settings.get.textAntiAlias)
+    private val rt = RenderTypes.createFontTex(name, location, Settings.get.textLinearFiltering)
 
     private val cellWidth = owner.charWidth + 2
     private val cellHeight = owner.charHeight + 2
