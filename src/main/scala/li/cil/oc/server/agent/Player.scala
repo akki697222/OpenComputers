@@ -26,7 +26,9 @@ import net.minecraft.world.inventory.InventoryMenu
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.context.UseOnContext
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.trading.MerchantOffers
+import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraftforge.common.ForgeMod
+import net.minecraft.world.item.trading.{Merchant, MerchantOffers}
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket
 import net.minecraft.world.effect.MobEffectInstance
@@ -78,9 +80,9 @@ object Player {
   def determineUUID(playerUUID: Option[UUID] = None): UUID = {
     val format = Settings.get.uuidFormat
     val randomUUID = UUID.randomUUID()
-    try UUID.fromString(format.
-      replace("$random$", randomUUID.toString).
-      replace("$player$", playerUUID.getOrElse(randomUUID).toString)) catch {
+    try UUID.fromString(format
+      .replaceAllLiterally("$random$", randomUUID.toString)
+      .replaceAllLiterally("$player$", playerUUID.getOrElse(randomUUID).toString)) catch {
       case t: Throwable =>
         OpenComputers.log.warn("Failed determining robot UUID, check your config's `uuidFormat` entry!", t)
         randomUUID
@@ -97,8 +99,8 @@ object Player {
     val yaw = Math.toDegrees(-Math.atan2(direction.x, direction.z)).toFloat
     val pitch = Math.toDegrees(-Math.atan2(direction.y, Math.sqrt((direction.x * direction.x) + (direction.z * direction.z)))).toFloat * 0.99f
     player.setPos(player.agent.xPosition, player.agent.yPosition, player.agent.zPosition)
-    player.setYRot(pitch % 360f)
-    player.setXRot(yaw % 360f)
+    player.setYRot(yaw % 360f)
+    player.setXRot(pitch % 360f)
     player.xRotO = player.getXRot
     player.yRotO = player.getYRot
   }
@@ -181,6 +183,8 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
     } catch {
       case _: Exception =>
     }
+
+    Option(getAttribute(ForgeMod.BLOCK_REACH.get())).foreach(_.setBaseValue(1.0D))
   }
 
   var facing, side = Direction.SOUTH
@@ -191,7 +195,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
 
   def closestEntity[Type <: Entity](clazz: Class[Type], side: Direction = facing): Option[Entity] = {
     val bounds = BlockPosition(agent).offset(side).bounds
-    val candidates = level.getEntitiesOfClass(clazz, bounds, null)
+    val candidates = level.getEntitiesOfClass(clazz, bounds, (entity: Entity) => entity != this)
     if (candidates.isEmpty) return None
     Some(candidates.asScala.minBy(e => distanceToSqr(e)))
   }
@@ -201,11 +205,11 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
   }
 
   def entitiesInBlock[Type <: Entity](clazz: Class[Type], blockPos: BlockPosition): util.List[Type] = {
-    level.getEntitiesOfClass(clazz, blockPos.bounds, null)
+    level.getEntitiesOfClass(clazz, blockPos.bounds, (entity: Entity) => entity != this)
   }
 
   private def adjacentItems: util.List[ItemEntity] = {
-    level.getEntitiesOfClass(classOf[ItemEntity], BlockPosition(agent).bounds.inflate(2, 2, 2), null)
+    level.getEntitiesOfClass(classOf[ItemEntity], BlockPosition(agent).bounds.inflate(2, 2, 2), (entity: Entity) => entity != this)
   }
 
   private def collectDroppedItems(itemsBefore: Iterable[ItemEntity]): Unit = {
@@ -278,7 +282,7 @@ class Player(val agent: internal.Agent) extends FakePlayer(agent.getEnvironmentL
       val canActivate = !state.isAir() && Settings.get.allowActivateBlocks
       val shouldActivate = canActivate && (!isCrouching || (item == null || item.doesSneakBypassUse(stack, level, pos, this)))
       val result =
-        if (shouldActivate && state.use(level, this, InteractionHand.OFF_HAND, new BlockHitResult(new Vec3(hitX, hitY, hitZ), side, pos, false)).consumesAction)
+        if (shouldActivate && state.use(level, this, InteractionHand.OFF_HAND, new BlockHitResult(traceEndPos, side, pos, false)).consumesAction)
           ActivationType.BlockActivated
         else if (duration <= Double.MinPositiveValue && isItemUseAllowed(stack) && tryPlaceBlockWhileHandlingFunnySpecialCases(stack, pos, side, hitX, hitY, hitZ))
           ActivationType.ItemPlaced
